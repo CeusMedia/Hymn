@@ -1,0 +1,17 @@
+{
+    "name": "ceus-media/hymn",
+    "description": "Console tool for installing Hydrogen applications.",
+    "require": {
+        "php": ">=5.3.0"
+    },
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Christian Würker",
+            "email": "christian.wuerker@ceusmedia.de",
+            "homepage": "http://ceusmedia.de",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev"
+}
