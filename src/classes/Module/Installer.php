@@ -42,8 +42,7 @@ class Hymn_Module_Installer{
 	public function copyFiles( $module ){
 		$pathSource	= $module->path;
 		$pathTarget	= $this->config->application->uri;
-		$configApp	= $this->config->application->config;
-		$theme		= isset( $this->config->layout->theme ) ? $this->config->layout->theme : 'custom';
+		$theme		= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
 		$copy		= array();
 		foreach( $module->files as $fileType => $files ){
 			foreach( $files as $file ){
@@ -58,27 +57,27 @@ class Hymn_Module_Installer{
 						$copy[$pathSource.$path]	= $pathTarget.$path;
 						break;
 					case 'locales':
-						$path	= isset( $configApp->pathLocales ) ? $configApp->pathLocales : "locales/";
+						$path	= $this->config->paths->locales;
 						$source	= $pathSource.'locales/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
 						$copy[$source]	= $target;
 						break;
 					case 'scripts':
-						$path	= isset( $configApp->pathScripts ) ? $configApp->pathScripts : "javascripts/";
+						$path	= $this->config->paths->scripts;
 						$source	= $pathSource.'js/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
 						$copy[$source]	= $target;
 						break;
 					case 'styles':
-						$path	= isset( $configApp->pathThemes ) ? $configApp->pathThemes : "themes/";
+						$path	= $this->config->paths->themes;
 						$source	= $pathSource.'css/'.$file->file;
 						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
 						$copy[$source]	= $target;
 						break;
 					case 'images':
-						$path	= isset( $configApp->pathImages ) ? $configApp->pathImages : "images/";
+						$path	= $this->config->paths->images;
 						if( !empty( $file->source) && $file->source === "theme" ){
-							$path	= isset( $configApp->pathThemes ) ? $configApp->pathThemes : "themes/";
+							$path	= $this->config->paths->themes;
 							$path	= $path.$theme."/img/";
 						}
 						$source	= $pathSource.'img/'.$file->file;
