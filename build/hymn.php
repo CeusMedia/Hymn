@@ -8,6 +8,7 @@ require_once 'phar://hymn.phar/Command/Interface.php';
 require_once 'phar://hymn.phar/Command/Configure.php';
 require_once 'phar://hymn.phar/Command/Create.php';
 require_once 'phar://hymn.phar/Command/DatabaseDump.php';
+require_once 'phar://hymn.phar/Command/DatabaseLoad.php';
 require_once 'phar://hymn.phar/Command/DatabaseTest.php';
 require_once 'phar://hymn.phar/Command/Default.php';
 require_once 'phar://hymn.phar/Command/Help.php';
