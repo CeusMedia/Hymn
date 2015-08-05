@@ -6,11 +6,14 @@ class Hymn_Command_DatabaseDump extends Hymn_Command_Abstract implements Hymn_Co
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$username	= $this->client->getConfig()->database->username;
-		$password	= $this->client->getConfig()->database->password;
-		$name		= $this->client->getConfig()->database->name;
-		$path		= !empty( $arguments[1] ) ? $arguments[1] : '.';
+		$path		= !empty( $arguments[1] ) ? $arguments[1] : 'config/sql/';
 		$path		= rtrim( $path, "/" )."/";
+		if( !file_exists( $path ) )
+			$path	= "./";
+
+		$username	= $this->client->getDatabaseConfiguration( 'username' );
+		$password	= $this->client->getDatabaseConfiguration( 'password' );
+		$name		= $this->client->getDatabaseConfiguration( 'name' );
 		$fileName	= $path."dump_".date( "Y-m-d_H:i:s" ).".sql";
 		$command	= "mysqldump -u%s -p%s %s > %s";
 		$command	= sprintf( $command, $username, $password, $name, $fileName );
