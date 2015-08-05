@@ -42,9 +42,10 @@ class Hymn_Command_DatabaseLoad extends Hymn_Command_Abstract implements Hymn_Co
 					continue;
 				if( !preg_match( "/^dump_.[0-9:_-]+\.sql$/", $entry->getFilename() ) )
 					continue;
-				$list[]	= $entry->getFilename();
+				$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
+				$list[$key]	= $entry->getFilename();
 			}
-			rsort( $list );
+			krsort( $list );
 			if( $list ){
 				return $path.array_shift( $list );
 			}
