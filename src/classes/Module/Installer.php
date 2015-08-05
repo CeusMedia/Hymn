@@ -43,6 +43,7 @@ class Hymn_Module_Installer{
 		$pathSource	= $module->path;
 		$pathTarget	= $this->config->application->uri;
 		$configApp	= $this->config->application->config;
+		$theme		= isset( $this->config->layout->theme ) ? $this->config->layout->theme : 'custom';
 		$copy		= array();
 		foreach( $module->files as $fileType => $files ){
 			foreach( $files as $file ){
@@ -69,14 +70,12 @@ class Hymn_Module_Installer{
 						$copy[$source]	= $target;
 						break;
 					case 'styles':
-						$theme	= "custom";
 						$path	= isset( $configApp->pathThemes ) ? $configApp->pathThemes : "themes/";
 						$source	= $pathSource.'css/'.$file->file;
 						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
 						$copy[$source]	= $target;
 						break;
 					case 'images':
-						$theme	= "custom";
 						$path	= isset( $configApp->pathImages ) ? $configApp->pathImages : "images/";
 						if( !empty( $file->source) && $file->source === "theme" ){
 							$path	= isset( $configApp->pathThemes ) ? $configApp->pathThemes : "themes/";

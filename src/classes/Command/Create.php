@@ -23,8 +23,8 @@ class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_
 			'driver'	=> Hymn_Client::getInput( "- PDO Driver:", "mysql" ),
 			'host'		=> Hymn_Client::getInput( "- Host:", "localhost" ),
 			'port'		=> Hymn_Client::getInput( "- Port:", "3306" ),
-			'user'		=> Hymn_Client::getInput( "- Username:" ),
-			'name'		=> Hymn_Client::getInput( "- Password:" ),
+			'username'	=> Hymn_Client::getInput( "- Username:" ),
+			'password'	=> Hymn_Client::getInput( "- Password:" ),
 			'name'		=> Hymn_Client::getInput( "- Name:" ),
 			'prefix'	=> Hymn_Client::getInput( "- Table Prefix:" ),
 		);

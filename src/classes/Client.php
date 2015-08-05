@@ -160,8 +160,10 @@ class Hymn_Client{
 			$this->dba		= $this->config->database;
 		}
 		else if( $usesDatabaseModule ){
-			$config		= new ADT_List_Dictionary( $this->config->modules->Resource_Database->config );
-			$this->dba	= (object) $config->getAll( 'access.' );
+			$config		= array();
+			foreach( $this->config->modules->Resource_Database->config as $key => $value )
+				$config[preg_replace("/^access\./", "", $key)]	= $value;
+			$this->dba	= (object) $config;
 		}
 
 		if( empty( $this->dba ) ){
