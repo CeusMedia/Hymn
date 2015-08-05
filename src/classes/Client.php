@@ -49,7 +49,7 @@ class Hymn_Client{
 			if( !class_exists( $className ) )
 				throw new InvalidArgumentException( 'Invalid action: '.$argument );
 		}
-		self::out( "Command Class: ".$className );
+//		self::out( "Command Class: ".$className );
 		try{
 			$object			= new $className( $this );
 			$object->run( $arguments );

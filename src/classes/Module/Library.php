@@ -85,15 +85,15 @@ class Hymn_Module_Library{
 
 	static public function listModules( $path = "" ){
 		$list	= array();
-		$index	= new Folder_RecursiveRegexFilter( $path, "/module.xml$/", TRUE, FALSE );
+
+		$iterator	= new RecursiveDirectoryIterator( $path );
+		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 		foreach( $index as $entry ){
-			if( $entry->isFile() ){
-				$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
-//				$module	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $entry->getPathname(), $key );
-				$module	= self::readModule( $path, $key );
-//print_m( $module->id ); die;
-				$list[$key]	= $module;
-			}
+			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
+				continue;
+			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
+			$module	= self::readModule( $path, $key );
+			$list[$key]	= $module;
 		}
 		return $list;
 	}
@@ -116,7 +116,7 @@ class Hymn_Module_Library{
 		$filename	= $path.$pathname.'module.xml';
 		if( !file_exists( $filename ) )
 			throw new Exception( 'Module "'.$id.'" not found in '.$pathname );
-		$module		= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filename, $id );
+		$module		= Hymn_Module_Reader::load( $filename, $id );
 		$module->absolutePath	= realpath( $pathname )."/";
 		$module->pathname		= $pathname;
 		$module->path			= $path.$pathname;
@@ -127,6 +127,6 @@ class Hymn_Module_Library{
 		$filename	= $path.'config/modules/'.$id.'.xml';
 		if( !file_exists( $filename ) )
 			throw new Exception( 'Module "'.$id.'" not installed in '.$path );
-		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filename, $id );
+		return Hymn_Module_Reader::load( $filename, $id );
 	}
 }
