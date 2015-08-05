@@ -134,22 +134,38 @@ class Hymn_Client{
 	protected function readConfig( $filename = ".hymn"){
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$config	= json_decode( file_get_contents( $filename ) );
-		if( is_null( $config ) )
+		$this->config	= json_decode( file_get_contents( $filename ) );
+		if( is_null( $this->config ) )
 			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
-		if( is_string( $config->sources ) ){
-			if( !file_exists( $config->sources ) )
-				throw new RuntimeException( 'Sources file "'.$config->sources.'" is missing' );
-			$sources	= json_decode( file_get_contents( $config->sources ) );
+		if( is_string( $this->config->sources ) ){
+			if( !file_exists( $this->config->sources ) )
+				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is missing' );
+			$sources	= json_decode( file_get_contents( $this->config->sources ) );
 			if( is_null( $sources ) )
-				throw new RuntimeException( 'Sources file "'.$config->sources.'" is not valid JSON' );
-			$config->sources = $sources;
+				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is not valid JSON' );
+			$this->config->sources = $sources;
 		}
+		$this->config->paths	= (object) array();
 		foreach( self::$pathDefaults as $pathKey => $pathValue )
-			if( !isset( $config->{"path.".$pathKey} ) )
-				$config->{"path.".$pathKey}	= $pathValue;
-		$this->config	= $config;
-//	print_r( $this->config );die;
+			if( !isset( $this->config->paths->{$pathKey} ) )
+				$this->config->paths->{$pathKey}	= $pathValue;
+
+		if( file_exists( 'config/config.ini' ) ){
+			$data	= parse_ini_file( 'config/config.ini' );
+			foreach( $data as $key => $value ){
+				if( preg_match( "/^path\./", $key ) ){
+					$key	= preg_replace( "/^path\./", "", $key );
+					$key	= ucwords( str_replace( ".", " ", $key ) );
+					$key	= str_replace( " ", "", lcfirst( $key ) );
+					$this->config->paths->{$key}	= $value;
+				}
+				else{
+					$key	= ucwords( str_replace( ".", " ", $key ) );
+					$key	= str_replace( " ", "", lcfirst( $key ) );
+					$this->config->{$key}	= $value;
+				}
+			}
+		}
 	}
 
 	public function setupDatabaseConnection( $force = FALSE ){
@@ -196,11 +212,10 @@ class Hymn_Client{
 		}
 		$dsn			= $this->dba->driver.":host=".$this->dba->host.";port=".$this->dba->port.";dbname=".$this->dba->name;
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
-		if( $usesDatabaseModule ){
-			$config	= $this->config->modules->Resource_Database->config;
-			foreach( $this->dba as $key => $value ){
-				$config->{"access.".$key}		= $value;
-			}
+		if( isset( $this->config->modules->Resource_Database ) ){
+			$this->config->modules->Resource_Database->config	= (object) array();
+			foreach( $this->dba as $key => $value )
+				$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 		}
 	}
 }
