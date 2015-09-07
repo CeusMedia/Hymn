@@ -11,6 +11,8 @@ class Hymn_Client{
 
 	protected $dba;
 
+	static public $fileName	= ".hymn";
+
 	static public $pathDefaults	= array(
 		'images'		=> 'images/',
 		'locales'		=> 'locales/',
@@ -19,8 +21,10 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
+	static public $version	= "0.7";
+
 	public function __construct( $arguments ){
-		self::out( "Hymn Console Client" );
+//		self::out( "Hymn Console Client" );
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 		try{
@@ -77,14 +81,21 @@ class Hymn_Client{
 			throw new InvalidArgumentException( 'Invalid database access property key "'.$key.'"' );
 	}
 
-	static public function getInput( $message, $default = NULL ){
+	static public function getInput( $message, $default = NULL, $options = array(), $break = TRUE ){
 		if( strlen( trim( $default ) ) )
 			$message	.= " [".$default."]";
-		Hymn_Client::out( $message." ", FALSE );
-		$handle	= fopen( "php://stdin","r" );
-		$line		= trim( fgets( $handle ) );
-		if( !strlen( $line ) && $default )
-			$line	= $default;
+		if( is_array( $options ) && count( $options ) )
+			$message	.= " (".implode( "|", $options ).")";
+		if( !$break )
+			$message	.= ": ";
+		do{
+			Hymn_Client::out( $message." ", $break );
+			$handle	= fopen( "php://stdin","r" );
+			$line		= trim( fgets( $handle ) );
+			if( !strlen( $line ) && $default )
+				$line	= $default;
+		}
+		while( $options && !in_array( $line, $options ) );
 		return $line;
 	}
 
@@ -127,11 +138,14 @@ class Hymn_Client{
 //			throw new RuntimeException( 'Missing cmFrameworks in "'.$this->config->library->cmFrameworks.'"' );
 	}
 
-	static public function out( $message = NULL ){
-		print( $message.PHP_EOL );
+	static public function out( $message = NULL, $newLine = TRUE ){
+		print( $message );
+		if( $newLine )
+			print( PHP_EOL );
 	}
 
-	protected function readConfig( $filename = ".hymn"){
+	protected function readConfig( $filename = NULL ){
+		$filename	= $filename ? $filename : self::$fileName;
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );
 		$this->config	= json_decode( file_get_contents( $filename ) );

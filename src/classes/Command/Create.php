@@ -34,7 +34,7 @@ class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_
 			'user'	=> Hymn_Client::getInput( "- System User:", get_current_user() ),
 			'group'	=> Hymn_Client::getInput( "- System Group:", "www-data" ),
 		);
-		file_put_contents( ".hymn", json_encode( $data, JSON_PRETTY_PRINT ) );
-		Hymn_Client::out( "Configuration file .hymn has been created." );
+		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
+		Hymn_Client::out( "Configuration file ".Hymn_Client::$fileName." has been created." );
 	}
 }
