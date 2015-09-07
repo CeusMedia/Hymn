@@ -1,22 +1,15 @@
 <?php
-require_once 'phar://hymn.phar/Client.php';
-require_once 'phar://hymn.phar/Module/Library.php';
-require_once 'phar://hymn.phar/Module/Installer.php';
-require_once 'phar://hymn.phar/Module/Reader.php';
-require_once 'phar://hymn.phar/Command/Abstract.php';
-require_once 'phar://hymn.phar/Command/Interface.php';
-require_once 'phar://hymn.phar/Command/Configure.php';
-require_once 'phar://hymn.phar/Command/Create.php';
-require_once 'phar://hymn.phar/Command/DatabaseDump.php';
-require_once 'phar://hymn.phar/Command/DatabaseLoad.php';
-require_once 'phar://hymn.phar/Command/DatabaseTest.php';
-require_once 'phar://hymn.phar/Command/Default.php';
-require_once 'phar://hymn.phar/Command/Help.php';
-require_once 'phar://hymn.phar/Command/Info.php';
-require_once 'phar://hymn.phar/Command/Sources.php';
-require_once 'phar://hymn.phar/Command/ModulesRequired.php';
-require_once 'phar://hymn.phar/Command/ModulesInstalled.php';
-require_once 'phar://hymn.phar/Command/ModulesAvailable.php';
-require_once 'phar://hymn.phar/Command/Install.php';
+$path			= 'phar://hymn.phar/';
+$directories	= array(
+	'',
+	'Module/',
+	'Command/',
+);
+require_once $path.'Command/Interface.php';
+require_once $path.'Command/Abstract.php';
+foreach( $directories as $directory )
+	foreach( new DirectoryIterator( $path.$directory ) as $entry )
+		if( $entry->isFile() && preg_match( "/\.php$/", $entry->getFilename() ) )
+			require_once $directory.$entry->getFilename();
 new Hymn_Client( array_slice( $argv, 1 ) );
 ?>
