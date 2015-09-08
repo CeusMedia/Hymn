@@ -89,7 +89,7 @@ class Hymn_Client{
 		if( !$break )
 			$message	.= ": ";
 		do{
-			Hymn_Client::out( $message." ", $break );
+			Hymn_Client::out( $message, $break );
 			$handle	= fopen( "php://stdin","r" );
 			$line		= trim( fgets( $handle ) );
 			if( !strlen( $line ) && $default )
