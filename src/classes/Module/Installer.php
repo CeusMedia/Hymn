@@ -103,7 +103,7 @@ class Hymn_Module_Installer{
 					$this->install( $neededModule, $moduleInstallType );
 				}
 			}
-			Hymn_Client::out( "- Installing module ".$module->id, FALSE );
+			Hymn_Client::out( "- Installing module ".$module->id );
 			$this->copyFiles( $module, $installType );
 			$this->configure( $module );
 			$this->runModuleInstallSql( $module );
