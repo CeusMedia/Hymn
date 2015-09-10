@@ -226,11 +226,11 @@ class Hymn_Client{
 		}
 		$dsn			= $this->dba->driver.":host=".$this->dba->host.";port=".$this->dba->port.";dbname=".$this->dba->name;
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
-		if( isset( $this->config->modules->Resource_Database ) ){
-			$this->config->modules->Resource_Database->config	= (object) array();
-			foreach( $this->dba as $key => $value )
-				$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
-		}
+		if( !isset( $this->config->modules->Resource_Database ) )
+			$this->config->modules->Resource_Database	= (object) array();
+		$this->config->modules->Resource_Database->config	= (object) array();
+		foreach( $this->dba as $key => $value )
+			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 	}
 }
 ?>
