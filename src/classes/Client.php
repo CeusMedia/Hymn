@@ -31,7 +31,7 @@ class Hymn_Client{
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
 			$action	= isset( $arguments[0] ) ? $arguments[0] : NULL;
-			if( !in_array( $action, array( 'help', 'create' ) ) ){
+			if( !in_array( $action, array( 'help', 'create', 'version' ) ) ){
 				$this->readConfig();
 				$this->loadLibraries();
 //				$this->setupDatabaseConnection();
@@ -89,7 +89,7 @@ class Hymn_Client{
 		if( !$break )
 			$message	.= ": ";
 		do{
-			Hymn_Client::out( $message." ", $break );
+			Hymn_Client::out( $message, $break );
 			$handle	= fopen( "php://stdin","r" );
 			$line		= trim( fgets( $handle ) );
 			if( !strlen( $line ) && $default )
