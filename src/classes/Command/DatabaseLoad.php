@@ -36,6 +36,7 @@ class Hymn_Command_DatabaseLoad extends Hymn_Command_Abstract implements Hymn_Co
 	protected function getLatestDump(){
 		$path	= "config/sql/";
 		if( file_exists( $path ) ){
+			$list	= array();
 			$index	= new DirectoryIterator( $path );
 			foreach( $index as $entry ){
 				if( $entry->isDir() || $entry->isDot() )
