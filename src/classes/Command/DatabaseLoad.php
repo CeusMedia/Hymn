@@ -8,7 +8,7 @@ class Hymn_Command_DatabaseLoad extends Hymn_Command_Abstract implements Hymn_Co
 
 		$fileName		= !empty( $arguments[1] ) ? $arguments[1] : $this->getLatestDump();
 		if( !( $fileName && file_exists( $fileName ) ) )
-			Hymn_Client::out( "Error: No valid database file found" );
+			return Hymn_Client::out( "No loadable database file found." );
 
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
