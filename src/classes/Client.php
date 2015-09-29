@@ -116,8 +116,8 @@ class Hymn_Client{
 		return $config;
 	}
 
-	public function getModuleInstallType( $moduleId ){
-		$type	= "copy";
+	public function getModuleInstallType( $moduleId, $defaultInstallType = "copy" ){
+		$type	= $defaultInstallType;
 		if( isset( $this->config->modules->{"@installType"} ) )
 			$type	= $this->config->modules->{"@installType"};
 		if( isset( $this->config->modules->$moduleId ) )
