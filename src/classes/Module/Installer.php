@@ -6,11 +6,13 @@ class Hymn_Module_Installer{
 	protected $library;
 //	protected $dbc;
 	protected $modulesInstalled	= array();
+	protected $quiet;
 
-	public function __construct( $client, $library ){
+	public function __construct( $client, $library, $quiet = FALSE ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
+		$this->quiet	= $quiet;
 //		$this->dbc		= $this->setupDatabaseConnection();
 //		$this->modulesInstalled	= array();
 	}
@@ -33,7 +35,7 @@ class Hymn_Module_Installer{
 				if( isset( $config->{$node['name']} ) ){
 					$dom = dom_import_simplexml( $node );
 					$dom->nodeValue = $config->{$node['name']};
-					if( $verbose )
+					if( $verbose && !$this->quiet )
 						Hymn_Client::out( "    … configured ".$node['name'] );
 				}
 			}
@@ -115,7 +117,7 @@ class Hymn_Module_Installer{
 					}
 					if( !@symlink( $source, $target ) )
 						throw new Exception( 'Link of source file '.$source.' is not creatable.' );
-					if( $verbose )
+					if( $verbose && !$this->quiet )
 						Hymn_Client::out( '  … linked file '.$source );
 				}
 				catch( Exception $e ){
@@ -132,7 +134,7 @@ class Hymn_Module_Installer{
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !@copy( $source, $target ) )
 						throw new Exception( 'Source file '.$source.' could not been copied' );
-					if( $verbose )
+					if( $verbose && !$this->quiet )
 						Hymn_Client::out( '  … copied file '.$source );
 				}
 				catch( Exception $e ){
@@ -152,7 +154,8 @@ class Hymn_Module_Installer{
 					$this->install( $neededModule, $moduleInstallType, $verbose );
 				}
 			}
-			Hymn_Client::out( "- Installing module ".$module->id );
+			if( !$this->quiet )
+				Hymn_Client::out( "- Installing module ".$module->id );
 			$this->copyFiles( $module, $installType, $verbose );
 			$this->configure( $module, $verbose );
 			$this->runModuleInstallSql( $module, $verbose );
@@ -220,7 +223,7 @@ class Hymn_Module_Installer{
 				}
 			}
 			foreach( $scripts as $script ){
-				if( $verbose )
+				if( $verbose && !$this->quiet )
 					Hymn_Client::out( "    … apply database script on ".$sql->event." at version ".$sql->version );
 				$this->executeSql( $script );
 			}
