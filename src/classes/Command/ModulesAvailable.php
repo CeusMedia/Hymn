@@ -7,7 +7,7 @@ class Hymn_Command_ModulesAvailable extends Hymn_Command_Abstract implements Hym
 		foreach( $config->sources as $sourceId => $source )
 			$library->addShelf( $sourceId, $source->path );
 
-		Hymn_Client::out();
+//		Hymn_Client::out();
 		if( !empty( $arguments[1] ) ){
 			$modules	= $library->getModules( $arguments[1] );
 			Hymn_Client::out( count( $modules )." modules available in module source '".$arguments[1]."':" );

@@ -2,7 +2,7 @@
 class Hymn_Command_DatabaseDump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run( $arguments = array() ){
-		Hymn_Client::out();
+//		Hymn_Client::out();
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 

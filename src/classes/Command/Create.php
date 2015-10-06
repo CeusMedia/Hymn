@@ -3,7 +3,7 @@ class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_
 
 	public function run( $arguments = array() ){
 		$data	= array();
-		Hymn_Client::out();
+//		Hymn_Client::out();
 		Hymn_Client::out( "Please enter application information:" );
 		$data['application']	= (object) array(
 			'title'		=> Hymn_Client::getInput( "- Application title", "My Hydrogen App", NULL, FALSE ),

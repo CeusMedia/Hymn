@@ -7,7 +7,7 @@ class Hymn_Command_Sources extends Hymn_Command_Abstract implements Hymn_Command
 		$sources	= (array) $config->sources;
 		foreach( $sources as $sourceId => $source )
 			$library->addShelf( $sourceId, $source->path );
-		Hymn_Client::out();
+//		Hymn_Client::out();
 		Hymn_Client::out( count( $sources )." module sources:" );
 		foreach( $library->getShelves() as $shelf )
 			Hymn_Client::out( "- ".$shelf->id." -> ".$shelf->path );
