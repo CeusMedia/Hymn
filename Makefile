@@ -17,3 +17,7 @@ install-link: uninstall create-phar
 
 uninstall:
 	@sudo rm -f /usr/local/bin/hymn
+
+
+test-syntax:
+	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l

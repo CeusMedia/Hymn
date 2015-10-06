@@ -75,49 +75,6 @@ class Hymn_Module_Graph{
 		return $modules;																			//  return list of modules by installation order
 	}
 
-	public function renderGraphFile( $targetFile = NULL, $verbose = FALSE, $type = 'needs' ){						//  @todo	make indepentent from need/support
-		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations( $verbose );
-		$nodes	= array();
-		$edges	= array();
-		foreach( $this->nodes as $id => $node ){
-			$style	= "";
-			$label	= $node->module->title;
-/*			switch( $node->status ){
-				case 4:
-					$style	= ' color="#7F7F00" fillcolor="#FFFFCF"';
-					break;
-				case 2:
-					$style	= ' color="#007F00" fillcolor="#CFFFCF"';
-					break;
-				case 0:
-					$style	= ' color="#7F0000" fillcolor="#FFCFCF"';
-					break;
-
-			}
-*//*			if( count( $nodes ) ){
-			}
-			else
-				$style	= ' fillcolor="#EFEFEF"';
-*/			$nodes[]	= $node->module->id.' [label="'.$label.'" fontsize=8 shape=box color=black style=filled'.$style.'];';
-			foreach( $node->out as $out )
-				$edges[]	= $node->module->id.' -> '.$out->module->id.' []';
-		}
-		$options	= "\n\t".'rankdir="LR"';
-		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
-		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
-		$graph		= "digraph {".$options.$nodes.$edges."\n}";
-		$this->status	= self::STATUS_PRODUCED;
-		if( !$this->quiet && $verbose )
-			Hymn_Client::out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
-		if( $targetFile ){
-			file_put_contents( $targetFile, $graph );
-			if( !$this->quiet )
-				Hymn_Client::out( "Saved graph file to ".$targetFile."." );
-		}
-		return $graph;
-	}
-
 	protected function realizeRelations( $verbose = FALSE ){
 		/*  calculate maximum relation depth  */
 		$depth	= 0;
@@ -136,8 +93,37 @@ class Hymn_Module_Graph{
 			Hymn_Client::out( "Found ".count( $nodes )." modules and ".count( $edges )." relations." );
 	}
 
+	public function renderGraphFile( $targetFile = NULL, $verbose = FALSE, $type = 'needs' ){						//  @todo	make indepentent from need/support
+		if( $this->status < self::STATUS_LINKED )
+			$this->realizeRelations( $verbose );
+		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
+		$nodes	= array();
+		$edges	= array();
+		foreach( $this->nodes as $id => $node ){
+			$label		= 'label="'.$node->module->title.'"';
+			$nodes[]	= $node->module->id.' ['.$label.' '.$nodeStyle.'];';
+			foreach( $node->out as $out )
+				$edges[]	= $node->module->id.' -> '.$out->module->id.' []';
+		}
+		$options	= "\n\t".'rankdir="LR"';
+		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
+		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
+		$graph		= "digraph {".$options.$nodes.$edges."\n}";
+		$this->status	= self::STATUS_PRODUCED;
+		if( !$this->quiet && $verbose )
+			Hymn_Client::out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
+		if( $targetFile ){
+			file_put_contents( $targetFile, $graph );
+			if( !$this->quiet )
+				Hymn_Client::out( "Saved graph file to ".$targetFile."." );
+		}
+		return $graph;
+	}
+
 	public function renderGraphImage( $graph = NULL, $targetFile = NULL, $verbose = FALSE ){
+		Hymn_Client::out( "Checking graphviz: ", FALSE );
 		Hymn_Test::checkShellCommand( "graphviz" );
+		Hymn_Client::out( "OK" );
 		try{
 			if( !$graph )
 				$graph		= $this->renderGraphFile( NULL, $verbose );
@@ -146,7 +132,7 @@ class Hymn_Module_Graph{
 
 			if( $targetFile ){
 				@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
-				if( !$this->quiet && $verbose )
+				if( !$this->quiet )
 					Hymn_Client::out( 'Graph image saved to '.$targetFile.'.' );
 			}
 			else{
