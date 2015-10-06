@@ -56,6 +56,11 @@ class Hymn_Module_Graph{
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 
+		/*  calculate maximum relation depth  */
+		$depth	= 0;
+		foreach( $this->nodes as $id => $node )
+			$depth	= max( $depth, $node->level );
+
 		/*  generate sortable order key by level, outgoing and ingoing module links and collect in list  */
 		$list	= array();
 		foreach( $this->nodes as $id => $node ){
@@ -76,11 +81,6 @@ class Hymn_Module_Graph{
 	}
 
 	protected function realizeRelations( $verbose = FALSE ){
-		/*  calculate maximum relation depth  */
-		$depth	= 0;
-		foreach( $this->nodes as $id => $node )
-			$depth	= max( $depth, $node->level );
-
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
 			foreach( $node->module->relations->needs as $neededModuleId ){							//  iterate all needed modules of node
