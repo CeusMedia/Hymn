@@ -48,7 +48,7 @@ class Hymn_Module_Installer{
 		$pathTarget		= $this->config->application->uri;
 		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
 		$copy			= array();
-		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib' );
+		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
 			foreach( $files as $file ){
 				switch( $fileType ){
