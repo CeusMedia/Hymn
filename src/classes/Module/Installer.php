@@ -4,7 +4,7 @@ class Hymn_Module_Installer{
 	protected $client;
 	protected $config;
 	protected $library;
-//	protected $dbc;
+	protected $dbc;
 	protected $modulesInstalled	= array();
 	protected $quiet;
 
@@ -13,7 +13,7 @@ class Hymn_Module_Installer{
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
 		$this->quiet	= $quiet;
-//		$this->dbc		= $this->setupDatabaseConnection();
+		$this->dbc		= $client->setupDatabaseConnection();
 //		$this->modulesInstalled	= array();
 	}
 
