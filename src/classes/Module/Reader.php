@@ -116,7 +116,8 @@ class Hymn_Module_Reader{
 		foreach( $xml->config as $pair ){
 			$key		= self::getAttribute( $pair, 'name' );
 			$type		= self::getAttribute( $pair, 'type', 'string' );
-			$values		= preg_split( "/\s*,\s*/", self::getAttribute( $pair, 'values', '' ) );
+			$values		= self::getAttribute( $pair, 'values', '' );
+			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
 			$mandatory	= self::getAttribute( $pair, 'mandatory', FALSE );
 			$protected	= self::getAttribute( $pair, 'protected', FALSE );
 			$title		= self::getAttribute( $pair, 'title' );

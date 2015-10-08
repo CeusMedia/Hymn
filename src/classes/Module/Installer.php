@@ -17,6 +17,17 @@ class Hymn_Module_Installer{
 //		$this->modulesInstalled	= array();
 	}
 
+	/**
+	 *	Configures an installed module by several steps:
+	 *	1. set version attribtes: install type, source and date
+	 *	2. look for mandatory but empty config pairs in original module
+	 *	3. get value for these missing pairs from console if also not set in hymn file
+	 *	4. combine values from hymn file and console input and apply to module file
+	 *	@access		public
+	 *	@param		object		$module			Data object of module to install
+	 *	@param		boolean		$verbose		Flag: be verbose
+	 *	@return		void
+	 */
 	public function configure( $module, $verbose = FALSE ){
 		$source	= $module->path.'module.xml';
 		$target	= $this->config->application->uri.'config/modules/'.$module->id.'.xml';
@@ -29,18 +40,33 @@ class Hymn_Module_Installer{
 		$xml->version->addAttribute( 'install-source', $module->sourceId );
 		$xml->version->addAttribute( 'install-date', date( "c" ) );
 
-		if( isset( $this->config->modules->{$module->id}->config ) ){
-			$config	= $this->config->modules->{$module->id}->config;
-			foreach( $xml->config as $nr => $node ){
-				if( isset( $config->{$node['name']} ) ){
-					$dom = dom_import_simplexml( $node );
-					$dom->nodeValue = $config->{$node['name']};
-					if( $verbose && !$this->quiet )
-						Hymn_Client::out( "    … configured ".$node['name'] );
+		$config	= (object) array();																	//  prepare empty hymn module config
+		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
+			$config	= $this->config->modules->{$module->id}->config;								//  get module config from hymn file
+
+		foreach( $xml->config as $nr => $node ){													//  iterate original module config pairs
+			$key	= (string) $node['name'];														//  shortcut config pair key
+			if( $module->config[$key]->mandatory == "yes" ){										//  config pair is mandatory
+				if( $module->config[$key]->type !== "boolean" ){									//  ... and not of type boolean
+					if( !strlen( trim( $module->config[$key]->value ) ) ){							//  ... and has no value
+						if( !isset( $config->{$key} ) ){											//  ... and is not set in hymn file
+							$message	= "  … configure '".$key."'";								//  render console input label
+							$values		= $module->config[$key]->values;							//  get suggested values if set
+
+							$value		= Hymn_Client::getInput( $message, NULL, $values, FALSE );	//  get new value from console
+							$config->{$key}	= $value;
+						}
+					}
 				}
 			}
+			if( isset( $config->{$key} ) ){															//  a config value has been set
+				$dom = dom_import_simplexml( $node );												//  import DOM node of module file
+				$dom->nodeValue = $config->{$key};													//  set new value on DOM node
+				if( $verbose && !$this->quiet )														//  verbose mode is on
+					Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
+			}
 		}
-		$xml->saveXml( $target );
+		$xml->saveXml( $target );																	//  save changed DOM to module file
 	}
 
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
@@ -98,8 +124,8 @@ class Hymn_Module_Installer{
 		}
 		foreach( $copy as $source => $target ){
 			@mkdir( dirname( $target ), 0770, TRUE );
-			$pathNameIn = realpath( $source );
-			$pathOut    = dirname( $target );
+			$pathNameIn	= realpath( $source );
+			$pathOut	= dirname( $target );
 			if( $installType === "link" ){
 				try{
 					if( !$pathNameIn )
