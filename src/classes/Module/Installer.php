@@ -170,6 +170,38 @@ class Hymn_Module_Installer{
 		}
 	}
 
+	protected function executeSql( $sql ){
+		$dbc		= $this->client->getDatabase();
+		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+		$lines		= explode( "\n", trim( $sql ) );
+		$statements = array();
+		$buffer		= array();
+		while( count( $lines ) ){
+			$line = array_shift( $lines );
+			if( !trim( $line ) )
+				continue;
+			$buffer[]	= str_replace( "<%?prefix%>", $prefix, trim( $line ) );
+			if( preg_match( '/;$/', trim( $line ) ) ){
+				$statements[]	= join( "\n", $buffer );
+				$buffer			= array();
+			}
+			if( !count( $lines ) && $buffer )
+				$statements[]	= join( "\n", $buffer ).';';
+		}
+		$errors	= 0;
+		foreach( $statements as $statement ){
+			try{
+				$result	= $dbc->exec( $statement );
+				if( $result	=== FALSE )
+					throw new RuntimeException( 'SQL execution failed for: '.$statement );
+			}
+			catch( Exception $e ){
+				$errors	+= 1;
+				error_log( date( "Y-m-d H:i:s" ).' '.$e->getMessage()."\n", 3, 'hymn.db.error.log' );
+			}
+		}
+	}
+
 	public function install( $module, $installType = "link", $verbose = FALSE ){
 		try{
 			foreach( $module->relations->needs as $neededModuleId ){
@@ -190,31 +222,6 @@ class Hymn_Module_Installer{
 		}
 		catch( Exception $e ){
 			throw new RuntimeException( 'Installation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
-		}
-	}
-
-	protected function executeSql( $sql ){
-		$dbc		= $this->client->getDatabase();
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-		$lines		= explode( "\n", trim( $sql ) );
-		$statements = array();
-		$buffer		= array();
-		while( count( $lines ) ){
-			$line = array_shift( $lines );
-			if( !trim( $line ) )
-				continue;
-			$buffer[]	= str_replace( "<%?prefix%>", $prefix, trim( $line ) );
-			if( preg_match( '/;$/', trim( $line ) ) ){
-				$statements[]	= join( "\n", $buffer );
-				$buffer			= array();
-			}
-			if( !count( $lines ) && $buffer )
-				$statements[]	= join( "\n", $buffer ).';';
-		}
-		foreach( $statements as $statement ){
-			$result	= $dbc->exec( $statement );
-			if( $result	=== FALSE )
-				throw new RuntimeException( 'SQL execution failed for: '.$statement );
 		}
 	}
 
