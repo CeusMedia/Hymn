@@ -24,7 +24,6 @@ class Hymn_Client{
 	static public $version	= "0.7";
 
 	public function __construct( $arguments ){
-//		self::out( "Hymn Console Client" );
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 		try{
@@ -37,7 +36,7 @@ class Hymn_Client{
 //				$this->setupDatabaseConnection();
 			}
 			$this->dispatch( $arguments );
-			self::out();
+//			self::out();
 		}
 		catch( Exception $e ){
 			self::out( "Error: ".$e->getMessage() );
@@ -227,7 +226,9 @@ class Hymn_Client{
 			$this->dba->prefix		= Hymn_Client::getInput( "Table Prefix:" );
 		}
 		$dsn			= $this->dba->driver.":host=".$this->dba->host.";port=".$this->dba->port.";dbname=".$this->dba->name;
+
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
+		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		if( !isset( $this->config->modules->Resource_Database ) )
 			$this->config->modules->Resource_Database	= (object) array();
 		$this->config->modules->Resource_Database->config	= (object) array();
