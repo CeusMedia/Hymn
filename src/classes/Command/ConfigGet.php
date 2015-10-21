@@ -1,10 +1,7 @@
 <?php
-class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_ConfigGet extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run( $arguments = array() ){
-		Hymn_Client::out();
-		Hymn_Client::out( "Deprecated: Please use 'hymn config-set' or 'hymn config-get' instead!" );
-		Hymn_Client::out();
 		array_shift( $arguments );
 		$filename	= Hymn_Client::$fileName;
 		if( !file_exists( $filename ) )
@@ -36,20 +33,6 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 		}
 		else
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
-		if( isset( $arguments[1] ) ){
-			$value	= $arguments[1];
-			if( $current === $value )
-				throw new RuntimeException( 'No change made' );
-			if( count( $parts ) === 3 )
-				$config->{$parts[0]}->{$parts[1]}->{$parts[2]}	= $value;
-			else if( count( $parts ) === 2 )
-				$config->{$parts[0]}->{$parts[1]}	= $value;
-			file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
-//			Hymn_Client::out( "Saved." );
-		}
-		else{
-			Hymn_Client::out( $current );
-//			print "Current value: ".$current . PHP_EOL;
-		}
+		Hymn_Client::out( $current );
 	}
 }
