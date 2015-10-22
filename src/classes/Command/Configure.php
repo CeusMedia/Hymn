@@ -1,11 +1,11 @@
 <?php
 class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run( $arguments = array() ){
+	public function run(){
 		Hymn_Client::out();
 		Hymn_Client::out( "Deprecated: Please use 'hymn config-set' or 'hymn config-get' instead!" );
 		Hymn_Client::out();
-		array_shift( $arguments );
+
 		$filename	= Hymn_Client::$fileName;
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );
@@ -13,10 +13,12 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 		if( is_null( $config ) )
 			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
 
-		if( !isset( $arguments[0] ) )
-			throw new InvalidArgumentsException( 'Missing first argument "key" is missing' );
+		$key	= $this->client->arguments->getArgument( 0 );
+		$value	= $this->client->arguments->getArgument( 1 );
 
-		$key	= $arguments[0];
+		if( !strlen( trim( $key ) ) )
+			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
+
 		$parts	= explode( ".", $key );
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
@@ -36,8 +38,7 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 		}
 		else
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
-		if( isset( $arguments[1] ) ){
-			$value	= $arguments[1];
+		if( strlen( trim( $value ) ) ){
 			if( $current === $value )
 				throw new RuntimeException( 'No change made' );
 			if( count( $parts ) === 3 )

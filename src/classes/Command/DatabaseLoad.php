@@ -1,20 +1,19 @@
 <?php
 class Hymn_Command_DatabaseLoad extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run( $arguments = array() ){
-//		Hymn_Client::out();
+	public function run(){
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$fileName		= !empty( $arguments[1] ) ? $arguments[1] : $this->getLatestDump();
+		$fileName		= $this->client->arguments->getArgument( 0 );
+		$fileName		= $fileName ? $fileName : $this->getLatestDump();
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
 
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
 		$name		= $this->client->getDatabaseConfiguration( 'name' );
-		$path		= !empty( $arguments[1] ) ? $arguments[1] : '.';
-		$path		= rtrim( $path, "/" )."/";
+		$path		= "config/sql/";
 		$command	= "mysql -u%s -p%s %s < %s";
 		$command	= sprintf( $command, $username, $password, $name, $fileName );
 		exec( $command );

@@ -2,29 +2,22 @@
 class Hymn_Command_Graph extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected $installType	= "link";
-	protected $force		= FALSE;
-	protected $verbose		= FALSE;
-	protected $quiet		= FALSE;
 
-	public function run( $arguments = array() ){
+	public function run(){
 		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
 			return Hymn_Client::out( "Configuration folder is either not existing or not writable" );
-		foreach( $arguments as $argument ){
-			if( $argument == "-v" || $argument == "--verbose" )
-				$this->verbose	= TRUE;
-			else if( $argument == "-f" || $argument == "--force" )
-				$this->force		= TRUE;
-			else if( $argument == "-q" || $argument == "--quiet" )
-				$this->quiet		= TRUE;
-		}
 
-		if( !$this->quiet && $this->verbose )
+		$force		= $this->client->arguments->getOption( 'force' );
+		$verbose	= $this->client->arguments->getOption( 'verbose' );
+		$quiet		= $this->client->arguments->getOption( 'quiet' );
+
+		if( !$quiet && $verbose )
 			Hymn_Client::out( "Loading all needed modules into graph…" );
 		$config		= $this->client->getConfig();
 		$library	= new Hymn_Module_Library();
 		foreach( $config->sources as $sourceId => $source )
 			$library->addShelf( $sourceId, $source->path );
-		$relation	= new Hymn_Module_Graph( $this->client, $library, $this->quiet );
+		$relation	= new Hymn_Module_Graph( $this->client, $library, $quiet );
 		foreach( $config->modules as $moduleId => $module ){
 			if( preg_match( "/^@/", $moduleId ) )
 				continue;
@@ -37,12 +30,12 @@ class Hymn_Command_Graph extends Hymn_Command_Abstract implements Hymn_Command_I
 
 		$targetFileGraph	= "config/modules.graph";
 		$targetFileImage	= "config/modules.graph.png";
-		$graph	= $relation->renderGraphFile( $targetFileGraph, $this->verbose );
-//		if( !$this->quiet )
+		$graph	= $relation->renderGraphFile( $targetFileGraph, $verbose );
+//		if( !$quiet )
 //			Hymn_Client::out( "Saved graph file to ".$targetFileGraph."." );
 
-		$image	= $relation->renderGraphImage( $graph, $targetFileImage, $this->verbose );
-//		if( !$this->quiet )
+		$image	= $relation->renderGraphImage( $graph, $targetFileImage, $verbose );
+//		if( !$quiet )
 //			Hymn_Client::out( "Saved graph image to ".$targetFileImage."." );
 	}
 }

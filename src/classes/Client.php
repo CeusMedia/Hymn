@@ -3,13 +3,15 @@ class Hymn_Client{
 
 	protected $application;
 
+	public $arguments;
+
 	protected $config;
 
-	protected $instance;
+	protected $dba;
 
 	protected $dbc;
 
-	protected $dba;
+	protected $instance;
 
 	static public $fileName	= ".hymn";
 
@@ -21,21 +23,25 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.7";
+	static public $version	= "0.8";
 
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
+
+		$this->arguments	= new Hymn_Arguments( $arguments );
+		self::$fileName		= $this->arguments->getOption( 'file' );
+
 		try{
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
-			$action	= isset( $arguments[0] ) ? $arguments[0] : NULL;
+			$action	= $this->arguments->getArgument();
 			if( !in_array( $action, array( 'help', 'create', 'version' ) ) ){
 				$this->readConfig();
 				$this->loadLibraries();
 //				$this->setupDatabaseConnection();
 			}
-			$this->dispatch( $arguments );
+			$this->dispatch();
 //			self::out();
 		}
 		catch( Exception $e ){
@@ -43,19 +49,20 @@ class Hymn_Client{
 		}
 	}
 
-	protected function dispatch( $arguments ){
-		$argument		= @array_shift( @array_values( $arguments ) );
+	protected function dispatch(){
+		$action		= $this->arguments->getArgument( 0 );
 		$className	= "Hymn_Command_Default";
-		if( strlen( $argument ) ){
-			$command		= ucwords( preg_replace( "/-+/", " ", $argument ) );
+		if( strlen( $action ) ){
+			$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
 			$className	= "Hymn_Command_".preg_replace( "/ +/", "", $command );
 			if( !class_exists( $className ) )
-				throw new InvalidArgumentException( 'Invalid action: '.$argument );
+				throw new InvalidArgumentException( 'Invalid action: '.$action );
 		}
 //		self::out( "Command Class: ".$className );
 		try{
-			$object			= new $className( $this );
-			$object->run( $arguments );
+			$this->arguments->removeArgument( 0 );
+			$object		= new $className( $this );
+			$object->run( $this->arguments );
 		}
 		catch( Exception $e ){
 			Hymn_Client::out( $e->getMessage() );

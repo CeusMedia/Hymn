@@ -1,8 +1,7 @@
 <?php
 class Hymn_Command_ConfigGet extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run( $arguments = array() ){
-		array_shift( $arguments );
+	public function run(){
 		$filename	= Hymn_Client::$fileName;
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );
@@ -10,10 +9,10 @@ class Hymn_Command_ConfigGet extends Hymn_Command_Abstract implements Hymn_Comma
 		if( is_null( $config ) )
 			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
 
-		if( !isset( $arguments[0] ) )
-			throw new InvalidArgumentsException( 'Missing first argument "key" is missing' );
+		$key	= $this->client->arguments->getArgument( 0 );
+		if( !strlen( trim( $key ) ) )
+			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 
-		$key	= $arguments[0];
 		$parts	= explode( ".", $key );
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )

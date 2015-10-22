@@ -6,15 +6,10 @@ class Hymn_Command_Install extends Hymn_Command_Abstract implements Hymn_Command
 	protected $verbose		= FALSE;
 	protected $quiet		= FALSE;
 
-	public function run( $arguments = array() ){
-		foreach( $arguments as $argument ){
-			if( $argument == "-v" || $argument == "--verbose" )
-				$this->verbose	= TRUE;
-			else if( $argument == "-f" || $argument == "--force" )
-				$this->force		= TRUE;
-			else if( $argument == "-q" || $argument == "--quiet" )
-				$this->quiet		= TRUE;
-		}
+	public function run(){
+		$this->force	= $this->client->arguments->getOption( 'force' );
+		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
+		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
 
 		$config		= $this->client->getConfig();
 		$library	= new Hymn_Module_Library();

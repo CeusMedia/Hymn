@@ -1,22 +1,14 @@
 <?php
 class Hymn_Command_DatabaseClear extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run( $arguments = array() ){
-//		Hymn_Client::out();
+	public function run(){
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$force		= FALSE;
-		$verbose	= FALSE;
-		$quiet		= FALSE;
-		foreach( $arguments as $argument ){
-			if( $argument == "-v" || $argument == "--verbose" )
-				$verbose	= TRUE;
-			else if( $argument == "-f" || $argument == "--force" )
-				$force		= TRUE;
-			else if( $argument == "-q" || $argument == "--quiet" )
-				$quiet		= TRUE;
-		}
+		$force		= $this->client->arguments->getOption( 'force' );
+		$verbose	= $this->client->arguments->getOption( 'verbose' );
+		$quiet		= $this->client->arguments->getOption( 'quiet' );
+
 		$dbc	= $this->client->getDatabase();
 		$result	= $dbc->query( "SHOW TABLES" );
 		$tables	= $result->fetchAll();

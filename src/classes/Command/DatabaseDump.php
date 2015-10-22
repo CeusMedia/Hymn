@@ -1,12 +1,12 @@
 <?php
 class Hymn_Command_DatabaseDump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run( $arguments = array() ){
-//		Hymn_Client::out();
+	public function run(){
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$path		= !empty( $arguments[1] ) ? $arguments[1] : 'config/sql/';
+		$path		= $this->client->arguments->getArgument( 0 );
+		$path		= $path ? $path : 'config/sql/';
 		$path		= rtrim( $path, "/" )."/";
 		if( !file_exists( $path ) )
 			$path	= "./";
