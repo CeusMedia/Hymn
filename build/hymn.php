@@ -1,15 +1,8 @@
 <?php
-$path			= 'phar://hymn.phar/';
-$directories	= array(
-	'',
-	'Module/',
-	'Command/',
-);
-require_once $path.'Command/Interface.php';
-require_once $path.'Command/Abstract.php';
-foreach( $directories as $directory )
-	foreach( new DirectoryIterator( $path.$directory ) as $entry )
-		if( $entry->isFile() && preg_match( "/\.php$/", $entry->getFilename() ) )
-			require_once $directory.$entry->getFilename();
-new Hymn_Client( array_slice( $argv, 1 ) );
+require_once 'phar://hymn.phar/Loader.php';										//  laod class loader
+require_once 'phar://hymn.phar/Command/Interface.php';							//  preload command interface
+require_once 'phar://hymn.phar/Command/Abstract.php';							//  preload abtract command class
+
+new Hymn_Loader();																//  load hymn classes
+new Hymn_Client( array_slice( $argv, 1 ) );										//  start hymn client
 ?>

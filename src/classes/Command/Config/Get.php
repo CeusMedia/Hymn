@@ -1,5 +1,5 @@
 <?php
-class Hymn_Command_ConfigGet extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
 		$filename	= Hymn_Client::$fileName;

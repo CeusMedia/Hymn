@@ -1,5 +1,5 @@
 <?php
-class Hymn_Command_DatabaseLoad extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )

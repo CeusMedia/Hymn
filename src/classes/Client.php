@@ -54,7 +54,7 @@ class Hymn_Client{
 		$className	= "Hymn_Command_Default";
 		if( strlen( $action ) ){
 			$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
-			$className	= "Hymn_Command_".preg_replace( "/ +/", "", $command );
+			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
 			if( !class_exists( $className ) )
 				throw new InvalidArgumentException( 'Invalid action: '.$action );
 		}

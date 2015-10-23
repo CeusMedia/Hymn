@@ -1,5 +1,5 @@
 <?php
-class Hymn_Command_ModulesAvailable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
 		$config		= $this->client->getConfig();
