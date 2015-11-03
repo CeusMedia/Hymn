@@ -5,10 +5,17 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$fileName		= $this->client->arguments->getArgument( 0 );
-		$fileName		= $fileName ? $fileName : $this->getLatestDump();
+		$pathName		= $this->client->arguments->getArgument( 0 );
+		if( $pathName && file_exists( $pathName ) ){
+			$fileName	= $pathName;
+			if( is_dir( $pathName ) )
+				$fileName	= $this->getLatestDump( $pathName );
+		}
+		else
+			$fileName		= $this->getLatestDump();
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
+
 
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
@@ -16,8 +23,11 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		$path		= "config/sql/";
 		$command	= "mysql -u%s -p%s %s < %s";
 		$command	= sprintf( $command, $username, $password, $name, $fileName );
+
+		$fileSize	= Hymn_Tool_FileSize::get( $fileName );
+		Hymn_Client::out( "Importing ".$fileName." (".$fileSize.") ..." );
 		exec( $command );
-		return Hymn_Client::out( "Database loaded from ".$fileName );
+//		return Hymn_Client::out( "Database loaded from ".$fileName );
 	}
 
 	static public function test( $client ){
@@ -32,8 +42,8 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		return FALSE;
 	}
 
-	protected function getLatestDump(){
-		$path	= "config/sql/";
+	protected function getLatestDump( $path = NULL ){
+		$path	= $path ? $path : "config/sql/";
 		if( file_exists( $path ) ){
 			$list	= array();
 			$index	= new DirectoryIterator( $path );
