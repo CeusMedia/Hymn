@@ -12,6 +12,9 @@ install: uninstall create-phar
 
 install-link: uninstall create-phar
 	@echo "Installing hymn symlink to /usr/local/bin"
+	@$(MAKE) -s link
+
+link:
 	@sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn
 
 
