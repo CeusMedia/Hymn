@@ -8,7 +8,7 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 		Hymn_Client::out( "- help                         Show this help screen" );
 		Hymn_Client::out( "- info                         List application configuration" );
 		Hymn_Client::out( "- sources                      List registered library shelves" );
-		Hymn_Client::out( "- install                      Install modules of application" );
+		Hymn_Client::out( "- install [MODULE]             Install modules of application or one specific" );
 		Hymn_Client::out( "- config-dump                  Save current module settings into Hymn file" );
 		Hymn_Client::out( "- config-get KEY               Get setting from Hymn file" );
 		Hymn_Client::out( "- config-set KEY [VALUE]       Enter and save setting in Hymn file" );

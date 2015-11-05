@@ -4,12 +4,17 @@ class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_
 	public function run(){
 		$data	= array();
 		Hymn_Client::out( "Please enter application information:" );
+
+		$title		= Hymn_Client::getInput( "- Application title", "My Project", NULL, FALSE );
+		$uri		= Hymn_Client::getInput( "- Folder Path", getcwd().'/', NULL, FALSE );
+		$protocol	= Hymn_Client::getInput( "- HTTP Protocol", "http://", NULL, FALSE );
+		$host		= Hymn_Client::getInput( "- HTTP Host", "example.com", NULL, FALSE );
+		$path		= Hymn_Client::getInput( "- HTTP Path", "/", NULL, FALSE );
+
 		$data['application']	= (object) array(
-			'title'		=> Hymn_Client::getInput( "- Application title", "My Hydrogen App", NULL, FALSE ),
-			'protocol'	=> Hymn_Client::getInput( "- HTTP Protocol", "http://", NULL, FALSE ),
-			'host'		=> Hymn_Client::getInput( "- HTTP Host", "localhost", NULL, FALSE ),
-			'path'		=> Hymn_Client::getInput( "- HTTP Path", "myApp", NULL, FALSE ),
-			'uri'		=> Hymn_Client::getInput( " -Local Path", "/var/www/myApp/", NULL, FALSE ),
+			'title'		=> $title,
+			'url'		=> $protocol.$host."/".ltrim( $path, "/"),
+			'uri'		=> $uri,
 		);
 
 		$data['library']	= (object) array();
@@ -22,9 +27,9 @@ class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_
 			'driver'	=> Hymn_Client::getInput( "- PDO Driver", "mysql", NULL, FALSE ),
 			'host'		=> Hymn_Client::getInput( "- Host", "localhost", NULL, FALSE ),
 			'port'		=> Hymn_Client::getInput( "- Port", "3306", NULL, FALSE ),
-			'username'	=> Hymn_Client::getInput( "- Username", NULL, NULL, FALSE ),
-			'password'	=> Hymn_Client::getInput( "- Password", NULL, NULL, FALSE ),
-			'name'		=> Hymn_Client::getInput( "- Name", NULL, NULL, FALSE ),
+			'username'	=> Hymn_Client::getInput( "- Username", "my_db_user", NULL, FALSE ),
+			'password'	=> Hymn_Client::getInput( "- Password", "my_db_password", NULL, FALSE ),
+			'name'		=> Hymn_Client::getInput( "- Name", "my_db_name", NULL, FALSE ),
 			'prefix'	=> Hymn_Client::getInput( "- Table Prefix", NULL, NULL, FALSE ),
 		);
 		Hymn_Client::out( "" );

@@ -16,21 +16,38 @@ class Hymn_Command_Install extends Hymn_Command_Abstract implements Hymn_Command
 		foreach( $config->sources as $sourceId => $source )
 			$library->addShelf( $sourceId, $source->path );
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
-		foreach( $config->modules as $moduleId => $module ){
-			if( preg_match( "/^@/", $moduleId ) )
-				continue;
-			if( !isset( $module->active ) || $module->active ){
-				$module			= $library->getModule( $moduleId );
+
+		$moduleId	= $this->client->arguments->getArgument();
+		if( $moduleId ){
+			$module			= $library->getModule( $moduleId );
+			if( $module ){
 				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
 				$relation->addModule( $module, $installType );
+			}
+		}
+		else{
+			foreach( $config->modules as $moduleId => $module ){
+				if( preg_match( "/^@/", $moduleId ) )
+					continue;
+				if( !isset( $module->active ) || $module->active ){
+					$module			= $library->getModule( $moduleId );
+					$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
+					$relation->addModule( $module, $installType );
+				}
 			}
 		}
 
 		$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
 		$modules	= $relation->getOrder();
 		foreach( $modules as $moduleId => $module ){
-			$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
-			$installer->install( $module, $installType, $this->verbose );
+			$installed	= $library->listInstalledModules( $config->application->uri );
+			if( array_key_exists( $module->id, $installed ) )
+				Hymn_Client::out( "Module '".$module->id."' is already installed" );
+			else{
+				Hymn_Client::out( "Installing module '".$module->id."' ..." );
+				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
+				$installer->install( $module, $installType, $this->verbose );
+			}
 		}
 
 /*		foreach( $config->modules as $moduleId => $module ){

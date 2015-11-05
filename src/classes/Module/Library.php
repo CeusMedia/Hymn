@@ -83,6 +83,11 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
+	static public function isInstalledModule( $pathApp = "", $moduleId ){
+		$list	= self::listInstalledModules( $pathApp );
+		return array_key_exists( $moduleId, $list );
+	}
+
 	static public function listModules( $path = "" ){
 		$list	= array();
 
@@ -98,16 +103,20 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
-	static public function listInstalledModules( $path = "" ){
+	static public function listInstalledModules( $pathApp = "" ){
 		$list	= array();
-		if( file_exists( $path.'/config/modules/' ) ){
-			$index	= new Folder_RegexFilter( $path.'/config/modules/', "/.xml$/", TRUE, FALSE );
+		if( file_exists( $pathApp.'/config/modules/' ) ){
+			$iterator	= new RecursiveDirectoryIterator( $pathApp.'/config/modules/' );
+			$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 			foreach( $index as $entry ){
+				if( !$entry->isFile() || !preg_match( "/\.xml$/", $entry->getFilename() ) )
+					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-				$module	= self::readInstalledModule( $path, $key );
+				$module	= self::readInstalledModule( $pathApp, $key );
 				$list[$key]	= $module;
 			}
 		}
+		ksort( $list );
 		return $list;
 	}
 

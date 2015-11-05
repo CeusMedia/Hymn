@@ -204,14 +204,14 @@ class Hymn_Module_Installer{
 
 	public function install( $module, $installType = "link", $verbose = FALSE ){
 		try{
-			foreach( $module->relations->needs as $neededModuleId ){
+/*			foreach( $module->relations->needs as $neededModuleId ){
 				if( !in_array( $neededModuleId, $this->modulesInstalled ) ){
 					$neededModule		= $this->library->getModule( $neededModuleId );
 					$moduleInstallType	= $this->client->getModuleInstallType( $neededModuleId, $installType );
 	//				$moduleConfig	= $this->client->getModuleConfiguration( $neededModuleId );
 					$this->install( $neededModule, $moduleInstallType, $verbose );
 				}
-			}
+			}*/
 			if( !$this->quiet )
 				Hymn_Client::out( "- Installing module ".$module->id );
 			$this->copyFiles( $module, $installType, $verbose );
