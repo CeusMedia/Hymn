@@ -21,6 +21,10 @@ class Hymn_Module_Reader{
 	}
 
 	static public function load( $fileName, $id ){
+		$validator	= new Hymn_Tool_XmlValidator();
+		if( !$validator->validateFile( $fileName ) )
+			throw new RuntimeException( 'XML file of module "'.$id.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
+
 		$xml	= new SimpleXMLElement( file_get_contents( $fileName ) );
 		$obj	= new stdClass();
 		$obj->id					= $id;

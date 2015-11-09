@@ -9,10 +9,9 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 		Hymn_Client::out( "- info                         List application configuration" );
 		Hymn_Client::out( "- sources                      List registered library shelves" );
 		Hymn_Client::out( "- install [MODULE]             Install modules of application or one specific" );
-		Hymn_Client::out( "- config-dump                  Save current module settings into Hymn file" );
+		Hymn_Client::out( "- config-dump                  Export current module settings into Hymn file" );
 		Hymn_Client::out( "- config-get KEY               Get setting from Hymn file" );
 		Hymn_Client::out( "- config-set KEY [VALUE]       Enter and save setting in Hymn file" );
-		Hymn_Client::out( "- configuration-dump           Export module settings to Hymn file." );
 		Hymn_Client::out( "- modules-available [SHELF]    List modules available in library shelve(s)" );
 		Hymn_Client::out( "- modules-required             List modules required for application" );
 		Hymn_Client::out( "- modules-installed            List modules installed within application" );
