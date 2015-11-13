@@ -196,8 +196,8 @@ class Hymn_Module_Installer{
 					throw new RuntimeException( 'SQL execution failed for: '.$statement );
 			}
 			catch( Exception $e ){
-				$errors	+= 1;
 				error_log( date( "Y-m-d H:i:s" ).' '.$e->getMessage()."\n", 3, 'hymn.db.error.log' );
+				throw new RuntimeException( 'SQL error - see hymn.db.error.log' );
 			}
 		}
 	}
@@ -243,15 +243,17 @@ class Hymn_Module_Installer{
 					}
 				}
 			}
-			foreach( $module->sql as $sql ){
-				if( $sql->type === $driver || $sql->type == "*" ){
-					if( $sql->event == "update" && trim( $sql->sql ) ){
-						if( isset( $event->version ) ){
-							if( $event->version <= $version )
-								continue;
-							$version	= $sql->version = $event->version;
+			if( $version !== "final" && $version < $module->versionAvailable ){
+				foreach( $module->sql as $sql ){
+					if( $sql->type === $driver || $sql->type == "*" ){
+						if( $sql->event == "update" && trim( $sql->sql ) ){
+							if( isset( $event->version ) ){
+								if( version_compare( $version, $event->version ) > 0 ){
+									$version	= $sql->version = $event->version;
+									$scripts[]	= trim( $sql->sql );
+								}
+							}
 						}
-						$scripts[]	= trim( $sql->sql );
 					}
 				}
 			}
