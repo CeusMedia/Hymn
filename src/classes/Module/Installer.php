@@ -225,43 +225,52 @@ class Hymn_Module_Installer{
 		}
 	}
 
+	/**
+	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	@access		public
+	 *	@param 		object 		$module		Module object
+	 *	@param 		boolean 	$verbose	Flag: be verbose
+	 *	@return		void
+	 */
 	public function runModuleInstallSql( $module, $verbose ){
 		if( !$this->client->getDatabase() )
 			$this->client->setupDatabaseConnection( TRUE );
 		$driver	= $this->client->getDatabaseConfiguration( 'driver' );
 		if( !$driver )
 			throw new RuntimeException( 'Cannot install SQL of module "'.$module->id.'": No database connection available' );
-		if( isset( $module->sql ) ){
-			$version	= 0;
-			$scripts	= array();
-			foreach( $module->sql as $sql ){
-				if( $sql->type === $driver || $sql->type == "*" ){
-					if( $sql->event == "install" && trim( $sql->sql ) ){
-						if( isset( $sql->version ) )
-							$version	= $sql->version;
-						$scripts[]	= $sql;
-						break;
+
+		if( isset( $module->sql ) ){																//  module has SQL scripts
+			$version	= 0;																		//  init reached version
+			$scripts	= array();																	//  prepare empty list for collected scripts
+			foreach( $module->sql as $sql ){														//  first run: install
+				if( $version !== "final" && $version < $module->version ){							//  reached version is not final
+					if( $sql->type === $driver || $sql->type == "*" ){								//  database driver is matching or general
+						if( $sql->event == "install" && trim( $sql->sql ) ){						//  is an install script
+							if( isset( $sql->version ) )											//  script version is set
+								$version	= $sql->version;										//  set reached version to script version
+							$scripts[]	= $sql;														//  append script for execution
+						}
 					}
 				}
 			}
-			if( $version !== "final" && $version < $module->versionAvailable ){
-				foreach( $module->sql as $sql ){
-					if( $sql->type === $driver || $sql->type == "*" ){
-						if( $sql->event == "update" && trim( $sql->sql ) ){
-							if( isset( $sql->version ) ){
-								if( version_compare( $version, $sql->version ) > 0 ){
-									$version	= $sql->version;
-									$scripts[]	= $sql;
+			foreach( $module->sql as $sql ){														//  second run: update
+				if( $version !== "final" && $version < $module->version ){							//  reached version is not final
+					if( $sql->type === $driver || $sql->type == "*" ){								//  database driver is matching or general
+						if( $sql->event == "update" && trim( $sql->sql ) ){							//  is an update script
+							if( isset( $sql->version ) ){											//  script version is set
+								if( version_compare( $version, $sql->version ) > 0 ){				//  script version is greater than reached version
+									$version	= $sql->version;									//  set reached version to script version
+									$scripts[]	= $sql;												//  append script for execution
 								}
 							}
 						}
 					}
 				}
 			}
-			foreach( $scripts as $script ){
-				if( $verbose && !$this->quiet )
+			foreach( $scripts as $script ){															//  iterate collected scripts
+				if( $verbose && !$this->quiet )														//  be verbose
 					Hymn_Client::out( "    … apply database script on ".$script->event." at version ".$script->version );
-				$this->executeSql( $script->sql );
+				$this->executeSql( $script->sql );													//  execute collected SQL script
 			}
 		}
 	}

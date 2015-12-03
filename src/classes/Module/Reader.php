@@ -158,7 +158,7 @@ class Hymn_Module_Reader{
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
-				if( $event == "update" )
+				if( in_array( $event, array( 'install', 'update' ) ) )
 					$key	= $event.":".$version.'@'.$type;
 				$obj->sql[$key] = (object) array(
 					'event'		=> $event,
