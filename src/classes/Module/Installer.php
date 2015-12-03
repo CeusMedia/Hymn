@@ -240,6 +240,7 @@ class Hymn_Module_Installer{
 						if( isset( $sql->version ) )
 							$version	= $sql->version;
 						$scripts[]	= $sql;
+						break;
 					}
 				}
 			}
