@@ -237,9 +237,9 @@ class Hymn_Module_Installer{
 			foreach( $module->sql as $sql ){
 				if( $sql->type === $driver || $sql->type == "*" ){
 					if( $sql->event == "install" && trim( $sql->sql ) ){
-						if( isset( $event->version ) )
-							$version	= $sql->version = $event->version;
-						$scripts[]	= trim( $sql->sql );
+						if( isset( $sql->version ) )
+							$version	= $sql->version;
+						$scripts[]	= $sql;
 					}
 				}
 			}
@@ -247,10 +247,10 @@ class Hymn_Module_Installer{
 				foreach( $module->sql as $sql ){
 					if( $sql->type === $driver || $sql->type == "*" ){
 						if( $sql->event == "update" && trim( $sql->sql ) ){
-							if( isset( $event->version ) ){
-								if( version_compare( $version, $event->version ) > 0 ){
-									$version	= $sql->version = $event->version;
-									$scripts[]	= trim( $sql->sql );
+							if( isset( $sql->version ) ){
+								if( version_compare( $version, $sql->version ) > 0 ){
+									$version	= $sql->version;
+									$scripts[]	= $sql;
 								}
 							}
 						}
@@ -259,8 +259,8 @@ class Hymn_Module_Installer{
 			}
 			foreach( $scripts as $script ){
 				if( $verbose && !$this->quiet )
-					Hymn_Client::out( "    … apply database script on ".$sql->event." at version ".$sql->version );
-				$this->executeSql( $script );
+					Hymn_Client::out( "    … apply database script on ".$script->event." at version ".$script->version );
+				$this->executeSql( $script->sql );
 			}
 		}
 	}
