@@ -5,7 +5,6 @@ class Hymn_Module_Installer{
 	protected $config;
 	protected $library;
 	protected $dbc;
-	protected $modulesInstalled	= array();
 	protected $quiet;
 
 	public function __construct( $client, $library, $quiet = FALSE ){
@@ -14,7 +13,6 @@ class Hymn_Module_Installer{
 		$this->library	= $library;
 		$this->quiet	= $quiet;
 		$this->dbc		= $client->setupDatabaseConnection();
-//		$this->modulesInstalled	= array();
 	}
 
 	/**
@@ -69,29 +67,29 @@ class Hymn_Module_Installer{
 		$xml->saveXml( $target );																	//  save changed DOM to module file
 	}
 
-	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
+	protected function prepareModuleFileMap( $module ){
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
 		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
-		$copy			= array();
+		$map			= array();
 		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
 			foreach( $files as $file ){
 				switch( $fileType ){
 					case 'files':
 						$path	= $file->file;
-						$copy[$pathSource.$path]	= $pathTarget.$path;
+						$map[$pathSource.$path]	= $pathTarget.$path;
 						break;
 					case 'classes':
 					case 'templates':
 						$path	= $fileType.'/'.$file->file;
-						$copy[$pathSource.$path]	= $pathTarget.$path;
+						$map[$pathSource.$path]	= $pathTarget.$path;
 						break;
 					case 'locales':
 						$path	= $this->config->paths->locales;
 						$source	= $pathSource.'locales/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
-						$copy[$source]	= $target;
+						$map[$source]	= $target;
 						break;
 					case 'scripts':
 						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
@@ -99,7 +97,7 @@ class Hymn_Module_Installer{
 						$path	= $this->config->paths->scripts;
 						$source	= $pathSource.'js/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
-						$copy[$source]	= $target;
+						$map[$source]	= $target;
 						break;
 					case 'styles':
 						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
@@ -107,7 +105,7 @@ class Hymn_Module_Installer{
 						$path	= $this->config->paths->themes;
 						$source	= $pathSource.'css/'.$file->file;
 						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
-						$copy[$source]	= $target;
+						$map[$source]	= $target;
 						break;
 					case 'images':
 						$path	= $this->config->paths->images;
@@ -117,12 +115,31 @@ class Hymn_Module_Installer{
 						}
 						$source	= $pathSource.'img/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
-						$copy[$source]	= $target;
+						$map[$source]	= $target;
 						break;
 				}
 			}
 		}
-		foreach( $copy as $source => $target ){
+		return $map;
+	}
+
+	public function removeFiles( $module, $verbose = FALSE ){
+		$fileMap	= $this->prepareModuleFileMap( $module );
+		foreach( $fileMap as $source => $target ){
+			$pathOut	= dirname( $target );
+			if( !is_readable( $target ) )
+				throw new Exception( 'Target file '.$target.' is not readable' );
+			if( !is_writable( $target ) )
+				throw new Exception( 'Target file '.$target.' is not removable' );
+//			@unlink( $target );
+			if( $verbose && !$this->quiet )
+				Hymn_Client::out( '  … removed file '.$target );
+		}
+	}
+
+	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
+		$fileMap	= $this->prepareModuleFileMap( $module );
+		foreach( $fileMap as $source => $target ){
 			@mkdir( dirname( $target ), 0770, TRUE );
 			$pathNameIn	= realpath( $source );
 			$pathOut	= dirname( $target );
@@ -204,26 +221,31 @@ class Hymn_Module_Installer{
 
 	public function install( $module, $installType = "link", $verbose = FALSE ){
 		try{
-/*			foreach( $module->relations->needs as $neededModuleId ){
-				if( !in_array( $neededModuleId, $this->modulesInstalled ) ){
-					$neededModule		= $this->library->getModule( $neededModuleId );
-					$moduleInstallType	= $this->client->getModuleInstallType( $neededModuleId, $installType );
-	//				$moduleConfig	= $this->client->getModuleConfiguration( $neededModuleId );
-					$this->install( $neededModule, $moduleInstallType, $verbose );
-				}
-			}*/
 			if( !$this->quiet )
 				Hymn_Client::out( "- Installing module ".$module->id );
 			$this->copyFiles( $module, $installType, $verbose );
 			$this->configure( $module, $verbose );
 			$this->runModuleInstallSql( $module, $verbose );
-			$this->modulesInstalled[]	= $module->id;
 			return TRUE;
 		}
 		catch( Exception $e ){
 			throw new RuntimeException( 'Installation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
 		}
 	}
+
+	public function uninstall( $module, $verbose = FALSE ){
+		try{
+			if( !$this->quiet )
+				Hymn_Client::out( "- Uninstalling module ".$module->id );
+			$this->removeFiles( $module, $verbose );
+			$this->runModuleUninstallSql( $module, $verbose );
+			return TRUE;
+		}
+		catch( Exception $e ){
+			throw new RuntimeException( 'Uninstallation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
+		}
+	}
+
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
@@ -233,13 +255,14 @@ class Hymn_Module_Installer{
 	 *	@return		void
 	 */
 	public function runModuleInstallSql( $module, $verbose ){
-		if( !$this->client->getDatabase() )
-			$this->client->setupDatabaseConnection( TRUE );
-		$driver	= $this->client->getDatabaseConfiguration( 'driver' );
-		if( !$driver )
-			throw new RuntimeException( 'Cannot install SQL of module "'.$module->id.'": No database connection available' );
-
-		if( isset( $module->sql ) ){																//  module has SQL scripts
+		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
+			if( !$this->client->getDatabase() )														//  database connection is not established yet
+				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection
+			$driver	= $this->client->getDatabaseConfiguration( 'driver' );							//  get database driver
+			if( !$driver ){																			//  no database driver set
+				$msg	= 'Cannot install SQL of module "%s": No database connection available';
+				throw new RuntimeException( sprintf( $msg, $module->id ) );
+			}
 			$version	= 0;																		//  init reached version
 			$scripts	= array();																	//  prepare empty list for collected scripts
 			foreach( $module->sql as $sql ){														//  first run: install
@@ -268,9 +291,42 @@ class Hymn_Module_Installer{
 				}
 			}
 			foreach( $scripts as $script ){															//  iterate collected scripts
-				if( $verbose && !$this->quiet )														//  be verbose
-					Hymn_Client::out( "    … apply database script on ".$script->event." at version ".$script->version );
+				if( $verbose && !$this->quiet ){													//  be verbose
+					$msg	= "    … apply database script on %s at version %s";
+					Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+				}
 				$this->executeSql( $script->sql );													//  execute collected SQL script
+			}
+		}
+	}
+
+	/**
+	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	@access		public
+	 *	@param 		object 		$module		Module object
+	 *	@param 		boolean 	$verbose	Flag: be verbose
+	 *	@return		void
+	 */
+	public function runModuleUninstallSql( $module, $verbose ){
+		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
+			if( !$this->client->getDatabase() )														//  database connection is not established yet
+				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection
+			$driver	= $this->client->getDatabaseConfiguration( 'driver' );							//  get database driver
+			if( !$driver ){																			//  no database driver set
+				$msg	= 'Cannot install SQL of module "%s": No database connection available';
+				throw new RuntimeException( sprintf( $msg, $module->id ) );
+			}
+			foreach( $module->sql as $sql ){														//  iterate SQL scripts
+				if( $sql->type === $driver || $sql->type == "*" ){									//  database driver is matching or general
+					if( $sql->event == "uninstall" && trim( $sql->sql ) ){							//  is an uninstall script
+						if( $verbose && !$this->quiet ){											//  be verbose
+							$msg	= "    … apply database script on %s at version %s";
+							Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+						}
+						$this->executeSql( $script->sql );											//  execute collected SQL script
+						break;
+					}
+				}
 			}
 		}
 	}
