@@ -65,6 +65,7 @@ class Hymn_Module_Installer{
 			}
 		}
 		$xml->saveXml( $target );																	//  save changed DOM to module file
+		@unlink( $this->config->application->uri.'config/modules.cache.serial' );					//  remove modules cache file
 	}
 
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
@@ -337,7 +338,9 @@ class Hymn_Module_Installer{
 		try{
 			if( !$this->quiet )
 				Hymn_Client::out( "- Uninstalling module ".$module->id );
-			$this->removeFiles( $module, $verbose );
+			$this->removeFiles( $module, $verbose );												//  remove module files
+			@unlink( $this->config->application->uri.'config/modules/'.$module->id );				//  remove module configuration file
+			@unlink( $this->config->application->uri.'config/modules.cache.serial' );				//  remove modules cache file
 			$this->runModuleUninstallSql( $module, $verbose );
 			return TRUE;
 		}
