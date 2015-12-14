@@ -67,76 +67,6 @@ class Hymn_Module_Installer{
 		$xml->saveXml( $target );																	//  save changed DOM to module file
 	}
 
-	protected function prepareModuleFileMap( $module ){
-		$pathSource		= $module->path;
-		$pathTarget		= $this->config->application->uri;
-		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
-		$map			= array();
-		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
-		foreach( $module->files as $fileType => $files ){
-			foreach( $files as $file ){
-				switch( $fileType ){
-					case 'files':
-						$path	= $file->file;
-						$map[$pathSource.$path]	= $pathTarget.$path;
-						break;
-					case 'classes':
-					case 'templates':
-						$path	= $fileType.'/'.$file->file;
-						$map[$pathSource.$path]	= $pathTarget.$path;
-						break;
-					case 'locales':
-						$path	= $this->config->paths->locales;
-						$source	= $pathSource.'locales/'.$file->file;
-						$target	= $pathTarget.$path.$file->file;
-						$map[$source]	= $target;
-						break;
-					case 'scripts':
-						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
-							continue;
-						$path	= $this->config->paths->scripts;
-						$source	= $pathSource.'js/'.$file->file;
-						$target	= $pathTarget.$path.$file->file;
-						$map[$source]	= $target;
-						break;
-					case 'styles':
-						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
-							continue;
-						$path	= $this->config->paths->themes;
-						$source	= $pathSource.'css/'.$file->file;
-						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
-						$map[$source]	= $target;
-						break;
-					case 'images':
-						$path	= $this->config->paths->images;
-						if( !empty( $file->source) && $file->source === "theme" ){
-							$path	= $this->config->paths->themes;
-							$path	= $path.$theme."/img/";
-						}
-						$source	= $pathSource.'img/'.$file->file;
-						$target	= $pathTarget.$path.$file->file;
-						$map[$source]	= $target;
-						break;
-				}
-			}
-		}
-		return $map;
-	}
-
-	public function removeFiles( $module, $verbose = FALSE ){
-		$fileMap	= $this->prepareModuleFileMap( $module );
-		foreach( $fileMap as $source => $target ){
-			$pathOut	= dirname( $target );
-			if( !is_readable( $target ) )
-				throw new Exception( 'Target file '.$target.' is not readable' );
-			if( !is_writable( $target ) )
-				throw new Exception( 'Target file '.$target.' is not removable' );
-//			@unlink( $target );
-			if( $verbose && !$this->quiet )
-				Hymn_Client::out( '  … removed file '.$target );
-		}
-	}
-
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );
 		foreach( $fileMap as $source => $target ){
@@ -229,32 +159,104 @@ class Hymn_Module_Installer{
 			return TRUE;
 		}
 		catch( Exception $e ){
-			throw new RuntimeException( 'Installation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
+			$msg	= 'Installation of module "%s" failed: %s';
+			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}
-
-	public function uninstall( $module, $verbose = FALSE ){
-		try{
-			if( !$this->quiet )
-				Hymn_Client::out( "- Uninstalling module ".$module->id );
-			$this->removeFiles( $module, $verbose );
-			$this->runModuleUninstallSql( $module, $verbose );
-			return TRUE;
-		}
-		catch( Exception $e ){
-			throw new RuntimeException( 'Uninstallation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
-		}
-	}
-
 
 	/**
-	 *	Reads module SQL scripts and executes install and update scripts.
-	 *	@access		public
+	 *	Enlist all module files onto a map of source and target files.
+	 *	@access		protected
+	 *	@param 		object 		$module		Module object
+	 *	@return		array
+	 */
+	protected function prepareModuleFileMap( $module ){
+		$pathSource		= $module->path;
+		$pathTarget		= $this->config->application->uri;
+		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
+		$map			= array();
+		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
+		foreach( $module->files as $fileType => $files ){
+			foreach( $files as $file ){
+				switch( $fileType ){
+					case 'files':
+						$path	= $file->file;
+						$map[$pathSource.$path]	= $pathTarget.$path;
+						break;
+					case 'classes':
+					case 'templates':
+						$path	= $fileType.'/'.$file->file;
+						$map[$pathSource.$path]	= $pathTarget.$path;
+						break;
+					case 'locales':
+						$path	= $this->config->paths->locales;
+						$source	= $pathSource.'locales/'.$file->file;
+						$target	= $pathTarget.$path.$file->file;
+						$map[$source]	= $target;
+						break;
+					case 'scripts':
+						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
+							continue;
+						$path	= $this->config->paths->scripts;
+						$source	= $pathSource.'js/'.$file->file;
+						$target	= $pathTarget.$path.$file->file;
+						$map[$source]	= $target;
+						break;
+					case 'styles':
+						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
+							continue;
+						$path	= $this->config->paths->themes;
+						$source	= $pathSource.'css/'.$file->file;
+						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
+						$map[$source]	= $target;
+						break;
+					case 'images':
+						$path	= $this->config->paths->images;
+						if( !empty( $file->source) && $file->source === "theme" ){
+							$path	= $this->config->paths->themes;
+							$path	= $path.$theme."/img/";
+						}
+						$source	= $pathSource.'img/'.$file->file;
+						$target	= $pathTarget.$path.$file->file;
+						$map[$source]	= $target;
+						break;
+				}
+			}
+		}
+		return $map;
+	}
+
+	/**
+	 *	Removed installed files of module.
+	 *	@access		protected
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
+	 *	@throws		RuntimeException		if target file is not readable
+	 *	@throws		RuntimeException		if target file is not writable
 	 */
-	public function runModuleInstallSql( $module, $verbose ){
+	protected function removeFiles( $module, $verbose = FALSE ){
+		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
+		foreach( $fileMap as $source => $target ){													//  iterate file list
+			if( !is_readable( $target ) )															//  if installed file is not readable
+				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
+			if( !is_writable( $target ) )															//  if installed file is not writable
+				throw new RuntimeException( 'Target file '.$target.' is not removable' );			//  throw exception
+			@unlink( $target );																		//  remove installed file
+			if( $verbose && !$this->quiet )															//  be verbose
+				Hymn_Client::out( '  … removed file '.$target );									//  print note about removed file
+		}
+	}
+
+	/**
+	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	@access		protected
+	 *	@param 		object 		$module		Module object
+	 *	@param 		boolean 	$verbose	Flag: be verbose
+	 *	@return		void
+	 *	@throws		RuntimeException		if target file is not readable
+	 */
+	protected function runModuleInstallSql( $module, $verbose ){
 		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
 			if( !$this->client->getDatabase() )														//  database connection is not established yet
 				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection
@@ -302,12 +304,12 @@ class Hymn_Module_Installer{
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
-	 *	@access		public
+	 *	@access		protected
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
 	 */
-	public function runModuleUninstallSql( $module, $verbose ){
+	protected function runModuleUninstallSql( $module, $verbose ){
 		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
 			if( !$this->client->getDatabase() )														//  database connection is not established yet
 				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection
@@ -328,6 +330,19 @@ class Hymn_Module_Installer{
 					}
 				}
 			}
+		}
+	}
+
+	public function uninstall( $module, $verbose = FALSE ){
+		try{
+			if( !$this->quiet )
+				Hymn_Client::out( "- Uninstalling module ".$module->id );
+			$this->removeFiles( $module, $verbose );
+			$this->runModuleUninstallSql( $module, $verbose );
+			return TRUE;
+		}
+		catch( Exception $e ){
+			throw new RuntimeException( 'Uninstallation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
 		}
 	}
 }
