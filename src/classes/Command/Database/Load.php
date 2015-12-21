@@ -16,18 +16,31 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
 
-
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
 		$name		= $this->client->getDatabaseConfiguration( 'name' );
-		$path		= "config/sql/";
-		$command	= "mysql -u%s -p%s %s < %s";
-		$command	= sprintf( $command, $username, $password, $name, $fileName );
+		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 
-		$fileSize	= Hymn_Tool_FileSize::get( $fileName );
-		Hymn_Client::out( "Importing ".$fileName." (".$fileSize.") ..." );
-		exec( $command );
-//		return Hymn_Client::out( "Database loaded from ".$fileName );
+		$tempName	= $fileName.".tmp";
+		try{
+			if( ( $content = @file_get_contents( $fileName ) ) === FALSE )
+				throw new RuntimeException( 'Missing read access to SQL script' );
+			$content	= str_replace( "<%?prefix%>", $prefix, $content );
+			if( @file_put_contents( $tempName, $content ) === FALSE )
+				throw new RuntimeException( 'Missing write access to SQL scripts path' );
+
+			$command	= "mysql -u%s -p%s %s < %s";
+			$command	= sprintf( $command, $username, $password, $name, $tempName );
+
+			$fileSize	= Hymn_Tool_FileSize::get( $fileName );
+			Hymn_Client::out( "Importing ".$fileName." (".$fileSize.") ..." );
+			exec( $command );
+			unlink( $tempName );
+//			return Hymn_Client::out( "Database loaded from ".$fileName );
+		}
+		catch( Exception $e ){
+			Hymn_Client::out( "Importing ".$fileName." failed: ".$e->getMessage() );
+		}
 	}
 
 	static public function test( $client ){
