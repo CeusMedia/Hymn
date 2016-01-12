@@ -339,7 +339,7 @@ class Hymn_Module_Installer{
 			if( !$this->quiet )
 				Hymn_Client::out( "- Uninstalling module ".$module->id );
 			$this->removeFiles( $module, $verbose );												//  remove module files
-			@unlink( $this->config->application->uri.'config/modules/'.$module->id );				//  remove module configuration file
+			@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );		//  remove module configuration file
 			@unlink( $this->config->application->uri.'config/modules.cache.serial' );				//  remove modules cache file
 			$this->runModuleUninstallSql( $module, $verbose );
 			return TRUE;
