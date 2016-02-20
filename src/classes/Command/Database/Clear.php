@@ -8,9 +8,10 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		$force		= $this->client->arguments->getOption( 'force' );
 		$verbose	= $this->client->arguments->getOption( 'verbose' );
 		$quiet		= $this->client->arguments->getOption( 'quiet' );
+		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 
 		$dbc	= $this->client->getDatabase();
-		$result	= $dbc->query( "SHOW TABLES" );
+		$result	= $dbc->query( "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" ) );
 		$tables	= $result->fetchAll();
 		if( !$tables ){
 			if( !$quiet )

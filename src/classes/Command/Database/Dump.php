@@ -11,16 +11,40 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( !file_exists( $path ) )
 			$path	= "./";
 
+		$dbc		= $this->client->getDatabase();
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
 		$name		= $this->client->getDatabaseConfiguration( 'name' );
+		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+
+		$tables		= array();
+		if( $prefix )
+			foreach( $dbc->query( "SHOW TABLES LIKE '".$prefix."%'" ) as $table )
+				$tables[]	= $table[0];
+		$tables	= join( ' ', $tables );
+
 		$fileName	= $path."dump_".date( "Y-m-d_H:i:s" ).".sql";
-		$command	= "mysqldump -u%s -p%s %s > %s";
-		$command	= sprintf( $command, $username, $password, $name, $fileName );
+		$command	= "mysqldump -u%s -p%s %s %s > %s";
+		$command	= sprintf( $command, $username, $password, $name, $tables, $fileName );
 		if( $path )
 			exec( "mkdir -p ".$path );
 		exec( $command );
+
+		/*  --  REPLACE PREFIX  --  */
+		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@";		//  build regular expression
+		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
+		$contents	= explode( "\n", file_get_contents( $fileName ) );								//  read raw dump file
+		foreach( $contents as $nr => $content )														//  iterate lines
+			$contents[$nr] = preg_replace_callback( $regExp, $callback, $content );					//  replace prefix by placeholder
+		file_put_contents( $fileName, implode( "\n", $contents ) );									//  save final dump file
+
 		return Hymn_Client::out( "Database dumped to ".$fileName );
+	}
+
+	protected function _callbackReplacePrefix( $matches ){
+		if( $matches[1] === 'for table' )
+			return $matches[1].$matches[2].$matches[4].$matches[5];
+		return $matches[1].$matches[2].'<%prefix?%>'.$matches[4].$matches[5];
 	}
 
 	static public function test( $client ){
