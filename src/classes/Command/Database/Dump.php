@@ -44,7 +44,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	protected function _callbackReplacePrefix( $matches ){
 		if( $matches[1] === 'for table' )
 			return $matches[1].$matches[2].$matches[4].$matches[5];
-		return $matches[1].$matches[2].'<%prefix?%>'.$matches[4].$matches[5];
+		return $matches[1].$matches[2].'<%?prefix%>'.$matches[4].$matches[5];
 	}
 
 	static public function test( $client ){
