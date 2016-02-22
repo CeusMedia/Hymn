@@ -23,7 +23,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.8.2";
+	static public $version	= "0.8.3";
 
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
