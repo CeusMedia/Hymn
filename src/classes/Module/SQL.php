@@ -46,13 +46,13 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
-	 *	@access		protected
+	 *	@access		public
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
 	 *	@throws		RuntimeException		if target file is not readable
 	 */
-	protected function runModuleInstallSql( $module, $verbose ){
+	public function runModuleInstallSql( $module, $verbose ){
 		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
 			if( !$this->client->getDatabase() )														//  database connection is not established yet
 				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection
@@ -100,12 +100,12 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
-	 *	@access		protected
+	 *	@access		public
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
 	 */
-	protected function runModuleUninstallSql( $module, $verbose ){
+	public function runModuleUninstallSql( $module, $verbose ){
 		if( isset( $module->sql ) && count( $module->sql ) ){										//  module has SQL scripts
 			if( !$this->client->getDatabase() )														//  database connection is not established yet
 				$this->client->setupDatabaseConnection( TRUE );										//  setup database connection

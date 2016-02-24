@@ -127,14 +127,14 @@ class Hymn_Module_Files{
 
 	/**
 	 *	Removed installed files of module.
-	 *	@access		protected
+	 *	@access		public
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
 	 *	@throws		RuntimeException		if target file is not readable
 	 *	@throws		RuntimeException		if target file is not writable
 	 */
-	protected function removeFiles( $module, $verbose = FALSE ){
+	public function removeFiles( $module, $verbose = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( $fileMap as $source => $target ){													//  iterate file list
 			if( !is_readable( $target ) )															//  if installed file is not readable
