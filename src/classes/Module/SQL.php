@@ -13,7 +13,7 @@ class Hymn_Module_SQL{
 
 	protected function executeSql( $sql ){
 		$dbc		= $this->client->setupDatabaseConnection();
-//		$dbc		= $this->client->getDatabase();
+		$dbc		= $this->client->getDatabase();
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
 		$statements = array();
@@ -121,7 +121,7 @@ class Hymn_Module_SQL{
 							$msg	= "    … apply database script on %s at version %s";
 							Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
 						}
-						$this->executeSql( $script->sql );											//  execute collected SQL script
+						$this->executeSql( $sql->sql );												//  execute collected SQL script
 						break;
 					}
 				}
