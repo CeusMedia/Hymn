@@ -23,7 +23,7 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !$moduleId )
 			Hymn_Client::out( "No module id given" );
 		else if( !$isInstalled )
-			Hymn_Client::out( "Module '".$module->id."' is not installed" );
+			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
 		else{
 			$module		= $listInstalled[$moduleId];
 			$neededBy	= array();

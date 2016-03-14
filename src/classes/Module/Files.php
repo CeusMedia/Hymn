@@ -3,16 +3,29 @@ class Hymn_Module_Files{
 
 	protected $client;
 	protected $config;
-	protected $dbc;
 	protected $quiet;
 
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		object		$client		Hymn client instance
+	 *	@param		boolean		$quiet		Flag: be quiet and ignore verbosity
+	 */
 	public function __construct( $client, $quiet = FALSE ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->quiet	= $quiet;
-		$this->dbc		= $client->setupDatabaseConnection();
 	}
 
+	/**
+	 *	Tries to link or copy all module files into application.
+	 *	@access		public
+	 *	@param 		object 		$module			Module object
+	 *	@param		string		$installType	One of {link, copy}
+	 *	@param		boolean		$verbose		Flag: be verbose during processing
+	 *	@return		void
+	 *	@throws		Exception	if any file manipulation action goes wrong
+	 */
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );
 		foreach( $fileMap as $source => $target ){
@@ -127,14 +140,14 @@ class Hymn_Module_Files{
 
 	/**
 	 *	Removed installed files of module.
-	 *	@access		protected
+	 *	@access		public
 	 *	@param 		object 		$module		Module object
 	 *	@param 		boolean 	$verbose	Flag: be verbose
 	 *	@return		void
 	 *	@throws		RuntimeException		if target file is not readable
 	 *	@throws		RuntimeException		if target file is not writable
 	 */
-	protected function removeFiles( $module, $verbose = FALSE ){
+	public function removeFiles( $module, $verbose = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( $fileMap as $source => $target ){													//  iterate file list
 			if( !is_readable( $target ) )															//  if installed file is not readable
