@@ -72,7 +72,7 @@ class Hymn_Module_SQL{
 
 			if( !$scripts ){
 				foreach( $module->sql as $sql ){													//  first run: install
-					if( $version < $module->version ){												//  reached version is not final
+					if( version_compare( $version, $module->version, "<" ) ){						//  reached version is not final
 						if( $sql->type === $driver || $sql->type == "*" ){							//  database driver is matching or general
 							if( $sql->event == "install" && trim( $sql->sql ) ){					//  is an install script
 								if( isset( $sql->version ) )										//  script version is set
@@ -83,11 +83,11 @@ class Hymn_Module_SQL{
 					}
 				}
 				foreach( $module->sql as $sql ){													//  second run: update
-					if( $version < $module->version ){												//  reached version is not final
+					if( version_compare( $version, $module->version, "<" ) ){						//  reached version is not final
 						if( $sql->type === $driver || $sql->type == "*" ){							//  database driver is matching or general
 							if( $sql->event == "update" && trim( $sql->sql ) ){						//  is an update script
 								if( isset( $sql->version ) ){										//  script version is set
-									if( version_compare( $version, $sql->version ) > 0 ){			//  script version is greater than reached version
+									if( version_compare( $version, $sql->version, "<" ) ){			//  script version is greater than reached version
 										$version	= $sql->version;								//  set reached version to script version
 										$scripts[]	= $sql;											//  append script for execution
 									}
@@ -135,7 +135,7 @@ class Hymn_Module_SQL{
 
 			if( !$scripts ){
 				foreach( $module->sql as $sql ){													//  iterate SQL scripts
-					if( $version < $module->version ){												//  reached version is not final
+					if( version_compare( $version, $module->version, "<" ) ){						//  reached version is not final
 						if( $sql->type === $driver || $sql->type == "*" ){							//  database driver is matching or general
 							if( $sql->event == "uninstall" && trim( $sql->sql ) ){					//  is an uninstall script
 								$scripts[]	= $sql;													//  append script for execution
