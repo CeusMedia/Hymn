@@ -3,16 +3,29 @@ class Hymn_Module_Files{
 
 	protected $client;
 	protected $config;
-	protected $dbc;
 	protected $quiet;
 
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		object		$client		Hymn client instance
+	 *	@param		boolean		$quiet		Flag: be quiet and ignore verbosity
+	 */
 	public function __construct( $client, $quiet = FALSE ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->quiet	= $quiet;
-		$this->dbc		= $client->setupDatabaseConnection();
 	}
 
+	/**
+	 *	Tries to link or copy all module files into application.
+	 *	@access		public
+	 *	@param 		object 		$module			Module object
+	 *	@param		string		$installType	One of {link, copy}
+	 *	@param		boolean		$verbose		Flag: be verbose during processing
+	 *	@return		void
+	 *	@throws		Exception	if any file manipulation action goes wrong
+	 */
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );
 		foreach( $fileMap as $source => $target ){
