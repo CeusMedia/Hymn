@@ -74,8 +74,8 @@ class Hymn_Module_Installer{
 
 	public function install( $module, $installType = "link", $verbose = FALSE ){
 		try{
-			if( !$this->quiet )
-				Hymn_Client::out( "- Installing module ".$module->id );
+//			if( !$this->quiet )
+//				Hymn_Client::out( "- Installing module ".$module->id );
 			$this->files->copyFiles( $module, $installType, $verbose );								//  copy module files
 			$this->configure( $module, $verbose );													//  configure module
 			$this->sql->runModuleInstallSql( $module, $verbose );									//  run SQL scripts
@@ -89,8 +89,8 @@ class Hymn_Module_Installer{
 
 	public function uninstall( $module, $verbose = FALSE ){
 		try{
-			if( !$this->quiet )
-				Hymn_Client::out( "- Uninstalling module ".$module->id );
+//			if( !$this->quiet )
+//				Hymn_Client::out( "- Uninstalling module ".$module->id );
 			$this->files->removeFiles( $module, $verbose );											//  remove module files
 			@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );		//  remove module configuration file
 			@unlink( $this->config->application->uri.'config/modules.cache.serial' );				//  remove modules cache file
