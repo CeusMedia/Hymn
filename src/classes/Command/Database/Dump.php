@@ -5,11 +5,13 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$path		= $this->client->arguments->getArgument( 0 );
-		$path		= $path ? $path : 'config/sql/';
-		$path		= rtrim( $path, "/" )."/";
-		if( !file_exists( $path ) )
-			$path	= "./";
+		$fileName	= $this->client->arguments->getArgument( 0 );
+		if( !preg_match( "/[a-z0-9]/i", $fileName ) )												//  arguments has not valid value
+			$fileName	= 'config/sql/';															//  set default path
+		if( substr( $fileName, -1 ) == "/" )														//  given argument is a path
+			$fileName	= $fileName."dump_".date( "Y-m-d_H:i:s" ).".sql";							//  generate stamped file name
+		if( dirname( $fileName) )																	//  path is not existing
+			exec( "mkdir -p ".dirname( $fileName ) );												//  create path
 
 		$dbc		= $this->client->getDatabase();
 		$username	= $this->client->getDatabaseConfiguration( 'username' );
@@ -23,11 +25,8 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 				$tables[]	= $table[0];
 		$tables	= join( ' ', $tables );
 
-		$fileName	= $path."dump_".date( "Y-m-d_H:i:s" ).".sql";
 		$command	= "mysqldump -u%s -p%s %s %s > %s";
 		$command	= sprintf( $command, $username, $password, $name, $tables, $fileName );
-		if( $path )
-			exec( "mkdir -p ".$path );
 		exec( $command );
 
 		/*  --  REPLACE PREFIX  --  */
