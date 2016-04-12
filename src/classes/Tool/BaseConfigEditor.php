@@ -17,8 +17,6 @@ class Hymn_Tool_BaseConfigEditor{
 	protected $properties			= array();
 	/**	@var		array			$renamed				Renamed Properties */
 	protected $renamed				= array();
-	/**	@var		array			$sections				List of collected Sections */
-	protected $sections				= array();
 	/**	@var		boolean			$reservedWords			Flag: use reserved words */
 	protected $reservedWords		= TRUE;
 	/**	@var		string			$signDisabled			Sign( string) of disabled Properties */
@@ -29,8 +27,6 @@ class Hymn_Tool_BaseConfigEditor{
 	protected $patternProperty		= '/^(;|[a-z0-9-])+([a-z0-9#.:@\/\\|_-]*[ |\t]*=)/i';
 	/**	@var		string			$patternDescription		Pattern( regex) of Descriptions */
 	protected $patternDescription	= '/^[;|#|:|\/|=]{1,2}/';
-	/**	@var		string			$patternSection			Pattern( regex) of Sections */
-	protected $patternSection		= '/^\s*\[([a-z0-9_=.,:;#@-]+)\]\s*$/i';
 	/**	@var		string			$patternLineComment		Pattern( regex) of Line Comments */
 	protected $patternLineComment	= '/([\t| ]+([\/]{2}|[;])+[\t| ]*)/';
 
@@ -51,39 +47,33 @@ class Hymn_Tool_BaseConfigEditor{
 	/**
 	 *	Activates a Property.
 	 *	@access		public
-	 *	@param		string		$section		Section of Property
 	 *	@param		string		$key			Key of  Property
 	 *	@return		bool
 	 */
-	public function activateProperty( $section, $key ){
-		$this->checkSection( $section );
-		if( !$this->hasProperty( $section, $key ) )
-			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing in section "'.$section.'"' );
-		if( $this->isActiveProperty( $key, $section ) )
+	public function activateProperty( $key ){
+		if( !$this->hasProperty( $key ) )
+			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing' );
+		if( $this->isActiveProperty( $key ) )
 			throw new LogicException( 'Key "'.$key.'" is already active' );
-		unset( $this->disabled[$section][array_search( $key, $this->disabled[$section] )] );
+		unset( $this->disabled[array_search( $key, $this->disabled )] );
 		return is_int( $this->write() );
 	}
 
 	/**
 	 *	Adds a new Property with Comment.
 	 *	@access		public
-	 *	@param		string		$section		Section to add Property to
 	 *	@param		string		$key			Key of new Property
 	 *	@param		string		$value			Value of new Property
 	 *	@param		string		$comment		Comment of new Property
 	 *	@param		bool		$state			Activity state of new Property
 	 *	@return		bool
 	 */
-	public function addProperty( $section, $key, $value, $comment = '', $state = TRUE ){
-		if( !in_array( $section, $this->sections ) )
-			$this->addSection( $section );
+	public function addProperty( $key, $value, $comment = '', $state = TRUE ){
 		$key = ( $state ? "" : $this->signDisabled ).$key;
 		$this->added[] = array(
 			"key"		=> $key,
 			"value"		=> $value,
 			"comment"	=> $comment,
-			"section"	=> $section,
 		);
 		return is_int( $this->write() );
 	}
@@ -125,38 +115,30 @@ class Hymn_Tool_BaseConfigEditor{
 			throw new RuntimeException( 'File "'.$fileName.'" is not writable' );
 	}
 
-	protected function checkSection( $section ){
-		if( !$this->hasSection( $section ) )
-			throw new InvalidArgumentException( 'Section "'.$section.'" is not existing' );
-	}
-
 	/**
 	 *	Deactivates a Property.
 	 *	@access		public
-	 *	@param		string		$section		Section of Property
 	 *	@param		string		$key			Key of  Property
 	 *	@return		bool
 	 */
-	public function deactivateProperty( $section, $key ){
-		if( !$this->hasProperty( $section, $key ) )
-			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing in section "'.$section.'"' );
-		if( !$this->isActiveProperty( $section, $key ) )
+	public function deactivateProperty( $key ){
+		if( !$this->hasProperty( $key ) )
+			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing' );
+		if( !$this->isActiveProperty( $key ) )
 			throw new LogicException( 'Key "'.$key.'" is already inactive' );
-		$this->disabled[$section][] = $key;
+		$this->disabled[] = $key;
 		return is_int( $this->write() );
 	}
 
 	/**
 	 *	Returns the Comment of a Property.
 	 *	@access		public
-	 *	@param		string		$section		Section of Property
 	 *	@param		string		$key			Key of Property
 	 *	@return		string
 	 */
-	public function getComment( $section, $key ){
-		$this->checkSection( $section );
-		if( !empty( $this->comments[$section][$key] ) )
-			return $this->comments[$section][$key];
+	public function getComment( $key ){
+		if( !empty( $this->comments[$key] ) )
+			return $this->comments[$key];
 		return NULL;
 	}
 
@@ -168,62 +150,41 @@ class Hymn_Tool_BaseConfigEditor{
 	 */
 	public function getCommentedProperties( $activeOnly = TRUE ){
 		$list = array();
-		foreach( $this->sections as $section ){
-			foreach( $this->properties[$section] as $key => $value ){
-				if( $activeOnly && !$this->isActiveProperty( $key, $section ) )
-					continue;
-				$property = array(
-					"key"		=>	$key,
-					"value"		=>	$value,
-					"comment"	=>	$this->getComment( $key, $section ),
-					"active"	=> 	(bool) $this->isActiveProperty( $key, $section )
-					);
-				$list[$section][] = $property;
-			}
+		foreach( $this->properties as $key => $value ){
+			if( $activeOnly && !$this->isActiveProperty( $key ) )
+				continue;
+			$property = array(
+				"key"		=>	$key,
+				"value"		=>	$value,
+				"comment"	=>	$this->getComment( $key ),
+				"active"	=> 	(bool) $this->isActiveProperty( $key )
+				);
+			$list[] = $property;
 		}
 		return $list;
 	}
 
 	/**
-	 *	Returns all Comments or all Comments of a Section.
+	 *	Returns all Comments.
 	 *	@access		public
-	 *	@param		string		$section		Key of Section
 	 *	@return		array
 	 */
-	public function getComments( $section = NULL ){
-		if( $section ){
-			$this->checkSection( $section );
-			return $this->comments[$section];
-		}
+	public function getComments(){
 		return $this->comments;
 	}
 
 	/**
 	 *	Returns an Array with all or active only Properties.
 	 *	@access		public
-	 *	@param		string		$section		Only Section with given Section Name
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		array
 	 */
-	public function getProperties( $section = NULL, $activeOnly = TRUE ){
-		$properties = array();
-		if( $section ){
-			$this->checkSection( $section );
-			foreach( $this->properties[$section]  as $key => $value ){
-				if( $activeOnly && !$this->isActiveProperty( $key, $section ) )
-					continue;
-				$properties[$key] = $value;
-			}
-		}
-		else{
-			foreach( $this->sections as $section){
-				$properties[$section]	= array();
-				foreach( $this->properties[$section] as $key => $value ){
-					if( $activeOnly && !$this->isActiveProperty( $key, $section ) )
-						continue;
-					$properties[$section][$key] = $value;
-				}
-			}
+	public function getProperties( $activeOnly = TRUE ){
+		$properties	= array();
+		foreach( $this->properties as $key => $value ){
+			if( $activeOnly && !$this->isActiveProperty( $key ) )
+				continue;
+			$properties[$key] = $value;
 		}
 		return $properties;
 	}
@@ -231,16 +192,14 @@ class Hymn_Tool_BaseConfigEditor{
 	/**
 	 *	Returns the Value of a Property by its Key.
 	 *	@access		public
-	 *	@param		string		$section		Key of Section
 	 *	@param		string		$key			Key of Property
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		string
 	 */
-	public function getProperty( $section, $key, $activeOnly = TRUE ){
-		$this->checkSection( $section );
-		if( $activeOnly && !$this->isActiveProperty( $key, $section ) )
+	public function getProperty( $key, $activeOnly = TRUE ){
+		if( $activeOnly && !$this->isActiveProperty( $key ) )
 			throw new InvalidArgumentException( 'Property "'.$key.'" is not set or inactive' );
-		return $this->properties[$section][$key];
+		return $this->properties[$key];
 	}
 
 	/**
@@ -251,61 +210,41 @@ class Hymn_Tool_BaseConfigEditor{
 	 */
 	public function getPropertyList( $activeOnly = TRUE ){
 		$properties = array();
-		foreach( $this->sections as $sectionName ){
-			foreach( $this->properties[$sectionName]  as $key => $value ){
-				if( $activeOnly && !$this->isActiveProperty( $sectionName, $key ) )
-					continue;
-				$properties[$sectionName][] = $key;
-			}
+		foreach( $this->properties as $key => $value ){
+			if( $activeOnly && !$this->isActiveProperty( $key ) )
+				continue;
+			$properties[] = $key;
 		}
 		return $properties;
 	}
 
 	/**
-	 *	Returns an array of all Section Keys.
-	 *	@access		public
-	 *	@return		array
-	 */
-	public function getSections(){
-		return $this->sections;
-	}
-
-	/**
 	 *	Indicates wheter a Property is existing.
 	 *	@access		public
-	 *	@param		string		$section	Key of Section
 	 *	@param		string		$key		Key of Property
+	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		bool
 	 */
-	public function hasProperty( $section, $key ){
-		$this->checkSection( $section );
-		return isset( $this->properties[$section][$key] );
+	public function hasProperty( $key, $activeOnly = TRUE ){
+		if( $activeOnly )
+			return isset( $this->properties[$key] );
+		if( $this->hasProperty( $key, TRUE ) )
+			return TRUE;
+		return isset( $this->disabled[$key] );
 	}
-
-	/**
-	 *	Indicates wheter a Property is existing.
-	 *	@access		public
-	 *	@param		string		$section	Key of Section
-	 *	@return		bool
-	 */
-	public function hasSection( $section ){
-		return in_array( $section, $this->sections );
-	}
-
 
 	/**
 	 *	Indicates wheter a Property is active.
 	 *	@access		public
-	 *	@param		string		$sections	Key of Section
 	 *	@param		string		$key		Key of Property
 	 *	@return		bool
 	 */
-	public function isActiveProperty( $section, $key ){
-		if( isset( $this->disabled[$section] ) )
-			if( is_array( $this->disabled[$section] ) )
-				if( in_array( $key, $this->disabled[$section] ) )
+	public function isActiveProperty( $key ){
+		if( isset( $this->disabled ) )
+			if( is_array( $this->disabled ) )
+				if( in_array( $key, $this->disabled ) )
 					return FALSE;
-		return $this->hasProperty( $section, $key );
+		return $this->hasProperty( $key );
 	}
 
 	/**
@@ -318,7 +257,6 @@ class Hymn_Tool_BaseConfigEditor{
 		$this->disabled		= array();
 		$this->lines		= array();
 		$this->properties	= array();
-		$this->sections		= array();
 		$this->lines		= array();
 		$this->comments		= array();
 		$commentOpen		= 0;
@@ -333,21 +271,14 @@ class Hymn_Tool_BaseConfigEditor{
 			if( $commentOpen )
 				continue;
 
-			if( preg_match( $this->patternSection, $line ) ){
-				$currentSection		= preg_replace( $this->patternSection, '\\1', $line );
-				$this->sections[]	= $currentSection;
-				$this->disabled[$currentSection]	= array();
-				$this->properties[$currentSection]	= array();
-				$this->comments[$currentSection]	= array();
-			}
-			else if( preg_match( $this->patternProperty, $line ) ){
+			if( preg_match( $this->patternProperty, $line ) ){
 				$pos	= strpos( $line, "=" );
 				$key	= trim( substr( $line, 0, $pos ) );
 				$value	= trim( substr( $line, ++$pos ) );
 
 				if( preg_match( $this->patternDisabled, $key ) ){
 					$key = preg_replace( $this->patternDisabled, "", $key );
-					$this->disabled[$currentSection][] = $key;
+					$this->disabled[] = $key;
 				}
 
 				//  --  EXTRACT COMMENT  --  //
@@ -355,7 +286,7 @@ class Hymn_Tool_BaseConfigEditor{
 					$newValue		= preg_split( $this->patternLineComment, $value, 2 );
 					$value			= trim( $newValue[0] );
 					$inlineComment	= trim( $newValue[1] );
-					$this->comments[$currentSection][$key] = $inlineComment;
+					$this->comments[$key] = $inlineComment;
 				}
 
 				//  --  CONVERT PROTECTED VALUES  --  //
@@ -369,7 +300,7 @@ class Hymn_Tool_BaseConfigEditor{
 				}
 				if( preg_match( '@^".*"$@', $value ) )
 					$value	= substr( stripslashes( $value ), 1, -1 );
-				$this->properties[$currentSection][$key] = $value;
+				$this->properties[$key] = $value;
 			}
 		}
 	}
@@ -377,18 +308,15 @@ class Hymn_Tool_BaseConfigEditor{
 	/**
 	 *	Sets the Comment of a Property.
 	 *	@access		public
-	 *	@param		string		$section		Key of Section
 	 *	@param		string		$key			Key of Property
 	 *	@param		string		$value			Value of Property
 	 *	@return		bool
 	 */
-	public function setProperty( $section, $key, $value ){
-		if( !in_array( $section, $this->sections ) )
-			$this->addSection( $section );
-		if( $this->hasProperty( $section, $key ) )
-			$this->properties[$section][$key] = $value;
+	public function setProperty( $key, $value ){
+		if( $this->hasProperty( $key ) )
+			$this->properties[$key] = $value;
 		else
-			$this->addProperty( $section, $key, $value, FALSE, TRUE,  );
+			$this->addProperty( $key, $value, FALSE, TRUE );
 		return is_int( $this->write() );
 	}
 
@@ -398,57 +326,32 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@return		int			Number of written bytes
 	 */
 	protected function write(){
-!!		$file		= new FS_File_Writer( $this->fileName );
 		$newLines	= array();
-		$currentSection	= "";
 		foreach( $this->lines as $line ){
-			if( preg_match( $this->patternSection, $line ) ){
-				$lastSection = $currentSection;
-#				$newAdded = array();
-				if( $lastSection ){
-					foreach( $this->added as $nr => $property ){
-						if( $property['section'] == $lastSection ){
-							if( !trim( $newLines[count($newLines)-1] ) )
-								array_pop( $newLines );
-							$newLines[]	= $this->buildLine( $property['key'], $property['value'], $property['comment'] );
-							$newLines[]	= "";
-							unset( $this->added[$nr] );
-						}
-#						else $newAdded[] = $property;
-					}
-				}
-				$currentSection =  substr( trim( $line ), 1, -1 );
-				if( !in_array( $currentSection, $this->sections ) )
-					continue;
-			}
-			else if( preg_match( $this->patternProperty, $line ) ){
+			if( preg_match( $this->patternProperty, $line ) ){
 				$pos		= strpos( $line, "=" );
 				$key		= trim( substr( $line, 0, $pos ) );
 				$pureKey	= preg_replace( $this->patternDisabled, "", $key );
 				$parts		= explode(  "//", trim( substr( $line, $pos+1 ) ) );
 				if( count( $parts ) > 1 )
 					$comment = trim( $parts[1] );
-				if( in_array( $currentSection, $this->sections ) ){
-					if( isset( $this->deleted[$currentSection] ) && in_array( $pureKey, $this->deleted[$currentSection] ) )
-						unset( $line );
-					else if( isset( $this->renamed[$currentSection] ) && in_array( $pureKey, array_keys( $this->renamed[$currentSection] ) ) ){
-						$newKey	= $key	= $this->renamed[$currentSection][$pureKey];
-						if( !$this->isActiveProperty( $newKey, $currentSection) )
-							$key = $this->signDisabled.$key;
-						$comment	= isset( $this->comments[$currentSection][$newKey] ) ? $this->comments[$currentSection][$newKey] : "";
-						$line = $this->buildLine( $key, $this->properties[$currentSection][$newKey], $comment );
-					}
-					else{
-						if( $this->isActiveProperty( $pureKey, $currentSection ) && preg_match( $this->patternDisabled, $key ) )
-							$key = substr( $key, 1 );
-						else if( !$this->isActiveProperty( $pureKey, $currentSection ) && !preg_match( $this->patternDisabled, $key ) )
-							$key = $this->signDisabled.$key;
-						$comment	= isset( $this->comments[$currentSection][$pureKey] ) ? $this->comments[$currentSection][$pureKey] : "";
-						$line = $this->buildLine( $key, $this->properties[$currentSection][$pureKey], $comment );
-					}
-				}
-				else
+				if( in_array( $pureKey, $this->deleted ) )
 					unset( $line );
+				else if( in_array( $pureKey, array_keys( $this->renamed ) ) ){
+					$newKey	= $key	= $this->renamed[$pureKey];
+					if( !$this->isActiveProperty( $newKey ) )
+						$key = $this->signDisabled.$key;
+					$comment	= isset( $this->comments[$newKey] ) ? $this->comments[$newKey] : "";
+					$line = $this->buildLine( $key, $this->properties[$newKey], $comment );
+				}
+				else{
+					if( $this->isActiveProperty( $pureKey ) && preg_match( $this->patternDisabled, $key ) )
+						$key = substr( $key, 1 );
+					else if( !$this->isActiveProperty( $pureKey ) && !preg_match( $this->patternDisabled, $key ) )
+						$key = $this->signDisabled.$key;
+					$comment	= isset( $this->comments[$pureKey] ) ? $this->comments[$pureKey] : "";
+					$line = $this->buildLine( $key, $this->properties[$pureKey], $comment );
+				}
 			}
 			if( isset( $line ) )
 				$newLines[] = $line;

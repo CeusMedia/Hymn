@@ -1,5 +1,5 @@
 <?php
-class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Config_Base_Disable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
 		$key	= $this->client->arguments->getArgument( 0 );
@@ -9,8 +9,9 @@ class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn
 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
-		$current	= $editor->getProperty( $key );
-		Hymn_Client::out( $current );
+		if( !$editor->isActiveProperty( $key ) )
+			throw new InvalidArgumentException( 'Base config key "'.$key.'" already is disabled' );
+		$editor->deactivateProperty( $key );
 		clearstatcache();
 	}
 }
