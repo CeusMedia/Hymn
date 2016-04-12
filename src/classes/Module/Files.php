@@ -54,6 +54,7 @@ class Hymn_Module_Files{
 				}
 				catch( Exception $e ){
 					Hymn_Client::out( 'Link Error: '.$e->getMessage().'.' );
+					return FALSE;
 				}
 			}
 			else{
@@ -71,9 +72,11 @@ class Hymn_Module_Files{
 				}
 				catch( Exception $e ){
 					Hymn_Client::out( 'Copy Error: '.$e->getMessage().'.' );
+					return FALSE;
 				}
 			}
 		}
+		return TRUE;
 	}
 
 	/**
