@@ -24,6 +24,12 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 		Hymn_Client::out( "- config-get KEY               Get setting from Hymn file" );
 		Hymn_Client::out( "- config-set KEY [VALUE]       Enter and save setting in Hymn file" );
 		Hymn_Client::out( "" );
+		Hymn_Client::out( "-- base configuration --" );
+		Hymn_Client::out( "- config-base-disable KEY      Disable an enabled setting in config.ini" );
+		Hymn_Client::out( "- config-base-enable KEY       Enable a disabled setting in config.ini" );
+		Hymn_Client::out( "- config-base-get KEY          Read setting from config.ini" );
+		Hymn_Client::out( "- config-base-set KEY VALUE    Save setting in config.ini" );
+		Hymn_Client::out( "" );
 		Hymn_Client::out( "-- database --" );
 		Hymn_Client::out( "- database-clear [-f|-v|-q]    Drop database tables (force, verbose, quiet)" );
 		Hymn_Client::out( "- database-config              Enter and save database connection details" );
