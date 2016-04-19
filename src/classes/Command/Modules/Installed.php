@@ -8,7 +8,7 @@ class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hy
 		ksort( $modules );
 		Hymn_Client::out( count( $modules )." modules installed:" );
 		foreach( $modules as $module ){
-			Hymn_Client::out( "- ".$module->id );
+			Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
 		}
 	}
 }
