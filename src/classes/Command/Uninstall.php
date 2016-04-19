@@ -7,9 +7,13 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 	protected $quiet		= FALSE;
 
 	public function run(){
+		$this->dry		= $this->client->arguments->getOption( 'dry' );
 		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
 		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
+		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
+
+		if( $this->dry )
+			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
 		$library	= new Hymn_Module_Library();
@@ -38,39 +42,8 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 			else{
 				$module->path	= 'not_relevant/';
 				$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
-				$installer->uninstall( $module, $this->verbose );
+				$installer->uninstall( $module, $this->verbose, $dry );
 			}
 		}
-/*
-		if( $module ){
-			Hymn_Client::out( "Installing module '".$module->id."' ..." );
-			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-			$installer->install( $module, $installType, $this->verbose );
-		}
-
-		$modules	= $relation->getOrder();
-		foreach( $modules as $module ){
-			$listInstalled	= $library->listInstalledModules( $config->application->uri );
-			$isInstalled	= array_key_exists( $module->id, $listInstalled );
-			$isCalledModule	= $moduleId && $moduleId == $module->id;
-			$isForced		= $this->force && ( $isCalledModule || !$moduleId );
-			if( $isInstalled && !$isForced )
-				Hymn_Client::out( "Module '".$module->id."' is already installed" );
-			else{
-				Hymn_Client::out( "Installing module '".$module->id."' ..." );
-				$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-				$installer->install( $module, $installType, $this->verbose );
-			}
-		}
-*/
-/*		foreach( $config->modules as $moduleId => $module ){
-			if( preg_match( "/^@/", $moduleId ) )
-				continue;
-			if( !isset( $module->active ) || $module->active ){
-				$module			= $library->getModule( $moduleId );
-				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
-				$installer->install( $module, $installType, $this->verbose );
-			}
-		}*/
 	}
 }
