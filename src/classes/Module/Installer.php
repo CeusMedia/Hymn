@@ -28,13 +28,19 @@ class Hymn_Module_Installer{
 	 *	@access		public
 	 *	@param		object		$module			Data object of module to install
 	 *	@param		boolean		$verbose		Flag: be verbose
+	 *	@param		boolean		$dry			Flag: dry run move - simulation only
 	 *	@return		void
 	 */
-	public function configure( $module, $verbose = FALSE ){
+	public function configure( $module, $verbose = FALSE, $dry = FALSE ){
 		$source	= $module->path.'module.xml';
 		$target	= $this->config->application->uri.'config/modules/'.$module->id.'.xml';
-		@mkdir( dirname( $target ), 0770, TRUE );
-		@copy( $source, $target );
+		if( !$dry ){
+			@mkdir( dirname( $target ), 0770, TRUE );
+			@copy( $source, $target );
+		}
+		else {
+			$target	= $source;
+		}
 
 		$xml	= file_get_contents( $target );
 		$xml	= new SimpleXMLElement( $xml );
@@ -68,54 +74,75 @@ class Hymn_Module_Installer{
 					Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
 			}
 		}
-		$xml->saveXml( $target );																	//  save changed DOM to module file
-		@unlink( $this->config->application->uri.'config/modules.cache.serial' );					//  remove modules cache file
+		if( !$dry ){
+			$xml->saveXml( $target );																//  save changed DOM to module file
+			@unlink( $this->config->application->uri.'config/modules.cache.serial' );			 	//  remove modules cache file
+		}
 	}
 
-	public function install( $module, $installType = "link", $verbose = FALSE ){
+	public function install( $module, $installType = "link", $verbose = FALSE, $dry = FALSE ){
 		try{
-//			if( !$this->quiet )
-//				Hymn_Client::out( "- Installing module ".$module->id );
-			$this->files->copyFiles( $module, $installType, $verbose );								//  copy module files
-			$this->configure( $module, $verbose );													//  configure module
-			$this->sql->runModuleInstallSql( $module, $verbose );									//  run SQL scripts
+			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
+			$this->configure( $module, $verbose, $dry );											//  configure module
+			$this->sql->runModuleInstallSql( $module, $verbose, $dry );								//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){
-			$msg	= 'Installation of module "%s" failed: %s';
+			$msg	= "Installation of module \"%s\" failed.\n%s";
 			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}
 
-	public function uninstall( $module, $verbose = FALSE ){
+	public function uninstall( $module, $verbose = FALSE, $dry = FALSE ){
 		try{
-//			if( !$this->quiet )
-//				Hymn_Client::out( "- Uninstalling module ".$module->id );
-			$this->files->removeFiles( $module, $verbose );											//  remove module files
-			@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );		//  remove module configuration file
-			@unlink( $this->config->application->uri.'config/modules.cache.serial' );				//  remove modules cache file
-			$this->sql->runModuleUninstallSql( $module, $verbose );									//  run SQL scripts
+			$appUri				= $this->client->getConfig()->application->uri;
+			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
+			$localModule->path	= $appUri;
+			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
+			if( !$dry ){																			//  not a dry run
+				@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );	//  remove module configuration file
+				@unlink( $this->config->application->uri.'config/modules.cache.serial' );			//  remove modules cache file
+			}
+			$this->sql->runModuleUninstallSql( $localModule, $verbose, $dry );						//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){
-			throw new RuntimeException( 'Uninstallation of module "'.$module->id.'" failed: '.$e->getMessage(), 0, $e );
+			$message	= "Uninstallation of module \"%s\" failed.\ņ%s";
+			$message	= sprintf( $message, $localModule->id, $e->getMessage() );
+			throw new RuntimeException( $message, 0, $e );
 		}
 	}
 
-	public function update( $module, $verbose = FALSE ){
+	public function update( $module, $installType, $verbose = FALSE, $dry = FALSE ){
 		try{
-			if( !$this->quiet )
-				Hymn_Client::out( "- Updating module ".$module->id );
-			$this->files->removeFiles( $module, $verbose );											//  remove module files
-			@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );		//  remove module configuration file
-			@unlink( $this->config->application->uri.'config/modules.cache.serial' );				//  remove modules cache file
-			$this->files->copyFiles( $module, $installType, $verbose );								//  copy module files
-			$this->configure( $module, $verbose );													//  configure module
-			$this->sql->runModuleUpdateSql( $module, $verbose );									//  run SQL scripts
+			$appUri				= $this->client->getConfig()->application->uri;
+			$localModules		= $this->library->listInstalledModules( $appUri );
+			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
+			$localModule->path	= $appUri;
+
+			//  check relations for new modules !
+			//  @todo call "full module install" (do not know HOW right now) instead of exception
+			foreach( $module->relations->needs as $relation ){
+				if( !array_key_exists( $relation, $localModules ) ){
+					throw new RuntimeException( 'Please install module "'.$relation.'" first!' );
+				}
+			}
+			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
+			$this->sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
+			$this->files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
+
+			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
+			if( !$dry ){
+				@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );	//  remove module configuration file
+				@unlink( $this->config->application->uri.'config/modules.cache.serial' );			//  remove modules cache file
+			}
+			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
+			$this->configure( $module, $verbose, $dry );											//  configure module
+			$this->sql->runModuleUpdateSql( $localModule, $module, $verbose, $dry );				//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){
-			$msg	= 'Update of module "%s" failed: %s';
+			$msg	= "Update of module \"%s\" failed.\n%s";
 			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}
