@@ -19,7 +19,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 			$modules	= $library->getModules();
 			Hymn_Client::out( count( $modules )." modules available:" );
 			foreach( $modules as $moduleId => $module )
-				Hymn_Client::out( "- ".$module->id );
+				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
 		}
 	}
 }
