@@ -1,6 +1,10 @@
 <?php
 class Hymn_Module_Library{
 
+	static protected $listModulesAvailable	= NULL;
+	static protected $listModulesInstalled	= NULL;
+	static protected $useCache		= FALSE;
+
 	protected $modules		= array();
 	protected $shelves		= array();
 
@@ -25,7 +29,7 @@ class Hymn_Module_Library{
 		ksort( $this->modules );
 	}
 
-	public function getModule( $id, $shelfId = NULL ){
+	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
 		if( $shelfId ){
 			if( !in_array( $shelfId, array_keys( $this->shelves ) ) )
 				throw new Exception( 'Invalid shelf ID: '.$shelfId );
@@ -39,7 +43,9 @@ class Hymn_Module_Library{
 					if( $module->id === $id )
 						return $module;
 		}
-		throw new Exception( 'Invalid module ID: '.$id );
+		if( $strict )
+			throw new Exception( 'Invalid module ID: '.$id );
+		return NULL;
 	}
 
 	public function getModules( $shelfId = NULL ){
@@ -89,8 +95,10 @@ class Hymn_Module_Library{
 	}
 
 	static public function listModules( $path = "" ){
-		$list	= array();
+		if( self::$useCache && self::$listModulesAvailable !== NULL )
+			return self::$listModulesAvailable;
 
+		$list	= array();
 		$iterator	= new RecursiveDirectoryIterator( $path );
 		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 		foreach( $index as $entry ){
@@ -100,10 +108,13 @@ class Hymn_Module_Library{
 			$module	= self::readModule( $path, $key );
 			$list[$key]	= $module;
 		}
+		self::$listModulesAvailable	= $list;
 		return $list;
 	}
 
 	static public function listInstalledModules( $pathApp = "" ){
+		if( self::$useCache && self::$listModulesInstalled !== NULL )
+			return self::$listModulesInstalled;
 		$list	= array();
 		if( file_exists( $pathApp.'/config/modules/' ) ){
 			$iterator	= new RecursiveDirectoryIterator( $pathApp.'/config/modules/' );
@@ -117,6 +128,7 @@ class Hymn_Module_Library{
 			}
 		}
 		ksort( $list );
+		self::$listModulesInstalled	= $list;
 		return $list;
 	}
 
