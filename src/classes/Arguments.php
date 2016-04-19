@@ -4,13 +4,18 @@ class Hymn_Arguments{
 	protected $arguments	= array();
 
 	protected $options	= array(
-		'force'		=> array(
-			'pattern'	=> '/^-f|--force$/',
+		'dry'		=> array(
+			'pattern'	=> '/^-d|--dry/',
 			'resolve'	=> TRUE,
 			'value'		=> NULL,
 		),
-		'verbose'	=> array(
-			'pattern'	=> '/^-v|--verbose$/',
+		'file'		=> array(
+			'pattern'	=> '/^--file=(\S+)$/',
+			'resolve'	=> '\\1',
+			'value'		=> '.hymn',
+		),
+		'force'		=> array(
+			'pattern'	=> '/^-f|--force$/',
 			'resolve'	=> TRUE,
 			'value'		=> NULL,
 		),
@@ -19,10 +24,10 @@ class Hymn_Arguments{
 			'resolve'	=> TRUE,
 			'value'		=> NULL,
 		),
-		'file'		=> array(
-			'pattern'	=> '/^--file=(\S+)$/',
-			'resolve'	=> '\\1',
-			'value'		=> '.hymn',
+		'verbose'	=> array(
+			'pattern'	=> '/^-v|--verbose$/',
+			'resolve'	=> TRUE,
+			'value'		=> NULL,
 		)
 	);
 
