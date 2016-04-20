@@ -53,7 +53,7 @@ class Hymn_Command_Install extends Hymn_Command_Abstract implements Hymn_Command
 			else{
 				Hymn_Client::out( "Installing module '".$module->id."' ..." );
 				$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-				$installer->install( $module, $installType, $this->verbose, $dry );
+				$installer->install( $module, $installType, $this->verbose, $this->dry );
 			}
 		}
 

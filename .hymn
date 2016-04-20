@@ -1,0 +1,42 @@
+{
+    "application": {
+        "title": "My Hydrogen App",
+        "protocol": "http:\/\/",
+        "host": "localhost",
+        "path": "myApp",
+        "uri": "\/var\/www\/MyApp2\/"
+    },
+    "library": {
+
+    },
+    "sources": {
+        "Local_CM_Public": {
+            "active": true,
+            "title": "Local copy of public module library maintained by Ceus Media",
+            "type": "folder",
+            "path": "\/var\/www\/lib\/cmFrameworks\/trunk\/modules\/Hydrogen\/"
+        },
+        "Local_CM_Protected": {
+            "active": true,
+            "type": "folder",
+            "title": "Local copy of protected modules provided by Ceus Media",
+            "path": "\/var\/www\/lib\/modules\/"
+        }
+    },
+    "modules": {
+
+    },
+    "database": {
+        "driver": "mysql",
+        "host": "localhost",
+        "port": "3306",
+        "username": "",
+        "password": "",
+        "name": "",
+        "prefix": ""
+    },
+    "system": {
+        "user": "kriss",
+        "group": "www-data"
+    }
+}
