@@ -42,7 +42,7 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 			else{
 				$module->path	= 'not_relevant/';
 				$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
-				$installer->uninstall( $module, $this->verbose, $dry );
+				$installer->uninstall( $module, $this->verbose, $this->dry );
 			}
 		}
 	}
