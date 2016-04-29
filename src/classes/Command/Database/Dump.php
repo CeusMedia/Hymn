@@ -30,7 +30,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		exec( $command );
 
 		/*  --  REPLACE PREFIX  --  */
-		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@";		//  build regular expression
+		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@U";		//  build regular expression
 		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
 		$contents	= explode( "\n", file_get_contents( $fileName ) );								//  read raw dump file
 		foreach( $contents as $nr => $content )														//  iterate lines
