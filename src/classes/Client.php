@@ -25,11 +25,42 @@ class Hymn_Client{
 
 	static public $version	= "0.8.3";
 
+
+	protected $baseArgumentOptions	= array(
+		'dry'		=> array(
+			'pattern'	=> '/^-d|--dry/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'file'		=> array(
+			'pattern'	=> '/^--file=(\S+)$/',
+			'resolve'	=> '\\1',
+			'default'	=> '.hymn',
+		),
+		'force'		=> array(
+			'pattern'	=> '/^-f|--force$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'quiet'		=> array(
+			'pattern'	=> '/^-q|--quiet$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'verbose'	=> array(
+			'pattern'	=> '/^-v|--verbose$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		)
+	);
+
+
+
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		$this->arguments	= new Hymn_Arguments( $arguments );
+		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
 		try{
@@ -144,8 +175,11 @@ class Hymn_Client{
 //			throw new RuntimeException( 'Missing cmFrameworks in "'.$this->config->library->cmFrameworks.'"' );
 	}
 
-	static public function out( $message = NULL, $newLine = TRUE ){
-		print( $message );
+	static public function out( $messages = NULL, $newLine = TRUE ){
+		if( !is_array( $messages ) )
+			$messages	= array( $messages );
+		foreach( $messages as $message )
+			print( $message );
 		if( $newLine )
 			print( PHP_EOL );
 	}
