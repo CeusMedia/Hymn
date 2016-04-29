@@ -1,0 +1,42 @@
+
+Commands:
+----------
+1. information
+- help                         Show this help screen
+- info                         List application configuration
+- sources                      List registered library shelves
+- modules-available [SHELF]    List modules available in library shelve(s)
+- modules-required             List modules required for application
+- modules-installed            List modules installed within application
+- modules-updatable            List modules with available updates
+
+2. Module Management
+- install [-dqv] [MODULE]      Install modules (or one specific)
+- uninstall [-dfqv] MODULE     Uninstall one specific installed module
+- update [-dqv] [MODULE]       Updated installed modules (or one specific)
+
+3. Module Configuration
+- config-dump                  Export current module settings into Hymn file
+- config-get KEY               Get setting from Hymn file
+- config-set KEY [VALUE]       Enter and save setting in Hymn file
+
+4. Base Configuration
+- config-base-disable KEY      Disable an enabled setting in config.ini
+- config-base-enable KEY       Enable a disabled setting in config.ini
+- config-base-get KEY          Read setting from config.ini
+- config-base-set KEY VALUE    Save setting in config.ini
+
+5. Database
+- database-clear [-fqv]        Drop database tables (force, verbose, quiet)
+- database-config              Enter and save database connection details
+- database-dump [PATH]         Export database to SQL file
+- database-load [PATH|FILE]    Import (specific or latest) SQL file
+- database-test                Test database connection
+
+Options:
+---------
+-d | --dry                     Actions are simulated only
+-f | --force                   Continue actions on error or warnings
+-q | --quiet                   Avoid any output
+-v | --verbose                 Be verbose about taken steps
+--file=[.hymn]                 Alternative path of Hymn file

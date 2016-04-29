@@ -1,21 +1,29 @@
 <?php
-$p = new Phar(
-    __DIR__.'/../hymn.phar',
-    FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME,
-    'hymn.phar'
+$rootPath		= dirname( __DIR__ );
+$pharFileName	= 'hymn.phar';
+$pharFilePath	= $rootPath.'/'.$pharFileName;
+$mainFileName	= 'hymn.php';
+
+
+$archive		= new Phar(
+	$pharFilePath,
+	FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME,
+	$pharFileName
 );
-$p->startBuffering();
-$p->setStub('#!/usr/bin/env php
+$archive->startBuffering();
+$archive->setStub( '#!/usr/bin/env php
 <?php
 try {
-    Phar::mapPhar("hymn.phar");
-    include "phar://hymn.phar/hymn.php";
+	Phar::mapPhar("'.$pharFileName.'");
+	include "phar://'.$pharFileName.'/'.$mainFileName.'";
 } catch (PharException $e) {
-    echo $e->getMessage();
-    die("Cannot initialize Phar");
+	echo $e->getMessage();
+	die("Cannot initialize Phar");
 }
-__HALT_COMPILER(); ?>');
-$p['hymn.php'] = file_get_contents(__DIR__.'/hymn.php');
-$p->buildFromDirectory(__DIR__.'/../src/classes/', '$(.*)\.php$');
-$p->stopBuffering();
+__HALT_COMPILER(); ?>' );
+$archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFileName ) );
+$archive->addFile( $rootPath.'/src/locales/en/help/default.txt', 'locales/en/help/default.txt' );
+$archive->addFile( $rootPath.'/src/locales/en/help/reflect-options.txt', 'locales/en/help/reflect-options.txt' );
+$archive->buildFromDirectory( $rootPath.'/src/classes/', '$(.*)\.php$' );
+$archive->stopBuffering();
 ?>

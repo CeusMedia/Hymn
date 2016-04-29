@@ -27,7 +27,7 @@ class Hymn_Test {
 			if( $entry->isDot() )
 				continue;
 			if( $entry->isDir() && $recursive )
-				self::checkPhpClasses( $entry->getPathname(), $verbose, $level + 1 );
+				self::checkPhpClasses( $entry->getPathname(), $recursive, $verbose, $level + 1 );
 			else if( $entry->isFile() ){
 				if( !preg_match( "/\.php/", $entry->getFilename() ) )
 					continue;
@@ -37,11 +37,11 @@ class Hymn_Test {
 				$code		= 0;
 				$results	= array();
 				$command	= "php -l ".$entry->getPathname()/*." >/dev/null"*/." 2>&1";
-				exec( $command, $results, $code );
+				@exec( $command, $results, $code );
 				if( $code !== 0 ){
 					$valid		= FALSE;
 					$message	= "Invalid PHP code has been found in ".$entry->getPathname().".";
-					$message	= isset( $results[2] ) ? $results[2]."." : $message;
+					$message	= isset( $results[0] ) ? $results[0]."." : $message;
 					Hymn_Client::out( $message );
 				}
 			}
