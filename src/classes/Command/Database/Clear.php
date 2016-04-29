@@ -2,7 +2,7 @@
 class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
-		if( !Hymn_Command_DatabaseTest::test( $this->client ) )
+		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
 		$force		= $this->client->arguments->getOption( 'force' );
