@@ -1,4 +1,40 @@
 <?php
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Command
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Command
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
 class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected $installType	= "link";
@@ -7,9 +43,13 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 	protected $quiet		= FALSE;
 
 	public function run(){
+		$this->dry		= $this->client->arguments->getOption( 'dry' );
 		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
 		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
+		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
+
+		if( $this->dry )
+			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
 		$library	= new Hymn_Module_Library();
@@ -23,7 +63,7 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !$moduleId )
 			Hymn_Client::out( "No module id given" );
 		else if( !$isInstalled )
-			Hymn_Client::out( "Module '".$module->id."' is not installed" );
+			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
 		else{
 			$module		= $listInstalled[$moduleId];
 			$neededBy	= array();
@@ -38,39 +78,8 @@ class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Comma
 			else{
 				$module->path	= 'not_relevant/';
 				$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
-				$installer->uninstall( $module, $this->verbose );
+				$installer->uninstall( $module, $this->verbose, $this->dry );
 			}
 		}
-/*
-		if( $module ){
-			Hymn_Client::out( "Installing module '".$module->id."' ..." );
-			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-			$installer->install( $module, $installType, $this->verbose );
-		}
-
-		$modules	= $relation->getOrder();
-		foreach( $modules as $module ){
-			$listInstalled	= $library->listInstalledModules( $config->application->uri );
-			$isInstalled	= array_key_exists( $module->id, $listInstalled );
-			$isCalledModule	= $moduleId && $moduleId == $module->id;
-			$isForced		= $this->force && ( $isCalledModule || !$moduleId );
-			if( $isInstalled && !$isForced )
-				Hymn_Client::out( "Module '".$module->id."' is already installed" );
-			else{
-				Hymn_Client::out( "Installing module '".$module->id."' ..." );
-				$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-				$installer->install( $module, $installType, $this->verbose );
-			}
-		}
-*/
-/*		foreach( $config->modules as $moduleId => $module ){
-			if( preg_match( "/^@/", $moduleId ) )
-				continue;
-			if( !isset( $module->active ) || $module->active ){
-				$module			= $library->getModule( $moduleId );
-				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
-				$installer->install( $module, $installType, $this->verbose );
-			}
-		}*/
 	}
 }

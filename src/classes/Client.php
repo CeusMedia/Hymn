@@ -1,4 +1,40 @@
 <?php
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
 class Hymn_Client{
 
 	protected $application;
@@ -23,13 +59,44 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.8.1";
+	static public $version	= "0.8.3";
+
+
+	protected $baseArgumentOptions	= array(
+		'dry'		=> array(
+			'pattern'	=> '/^-d|--dry/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'file'		=> array(
+			'pattern'	=> '/^--file=(\S+)$/',
+			'resolve'	=> '\\1',
+			'default'	=> '.hymn',
+		),
+		'force'		=> array(
+			'pattern'	=> '/^-f|--force$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'quiet'		=> array(
+			'pattern'	=> '/^-q|--quiet$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
+		'verbose'	=> array(
+			'pattern'	=> '/^-v|--verbose$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		)
+	);
+
+
 
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		$this->arguments	= new Hymn_Arguments( $arguments );
+		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
 		try{
@@ -144,8 +211,11 @@ class Hymn_Client{
 //			throw new RuntimeException( 'Missing cmFrameworks in "'.$this->config->library->cmFrameworks.'"' );
 	}
 
-	static public function out( $message = NULL, $newLine = TRUE ){
-		print( $message );
+	static public function out( $messages = NULL, $newLine = TRUE ){
+		if( !is_array( $messages ) )
+			$messages	= array( $messages );
+		foreach( $messages as $message )
+			print( $message );
 		if( $newLine )
 			print( PHP_EOL );
 	}

@@ -1,4 +1,40 @@
 <?php
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
 class Hymn_Test {
 
 	static protected $shellCommands	= array(
@@ -27,7 +63,7 @@ class Hymn_Test {
 			if( $entry->isDot() )
 				continue;
 			if( $entry->isDir() && $recursive )
-				self::checkPhpClasses( $entry->getPathname(), $verbose, $level + 1 );
+				self::checkPhpClasses( $entry->getPathname(), $recursive, $verbose, $level + 1 );
 			else if( $entry->isFile() ){
 				if( !preg_match( "/\.php/", $entry->getFilename() ) )
 					continue;
@@ -37,11 +73,11 @@ class Hymn_Test {
 				$code		= 0;
 				$results	= array();
 				$command	= "php -l ".$entry->getPathname()/*." >/dev/null"*/." 2>&1";
-				exec( $command, $results, $code );
+				@exec( $command, $results, $code );
 				if( $code !== 0 ){
 					$valid		= FALSE;
 					$message	= "Invalid PHP code has been found in ".$entry->getPathname().".";
-					$message	= isset( $results[2] ) ? $results[2]."." : $message;
+					$message	= isset( $results[0] ) ? $results[0]."." : $message;
 					Hymn_Client::out( $message );
 				}
 			}

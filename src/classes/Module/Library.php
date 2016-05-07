@@ -1,5 +1,45 @@
 <?php
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Module
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Module
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
 class Hymn_Module_Library{
+
+	static protected $listModulesAvailable	= NULL;
+	static protected $listModulesInstalled	= NULL;
+	static protected $useCache		= FALSE;
 
 	protected $modules		= array();
 	protected $shelves		= array();
@@ -25,7 +65,7 @@ class Hymn_Module_Library{
 		ksort( $this->modules );
 	}
 
-	public function getModule( $id, $shelfId = NULL ){
+	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
 		if( $shelfId ){
 			if( !in_array( $shelfId, array_keys( $this->shelves ) ) )
 				throw new Exception( 'Invalid shelf ID: '.$shelfId );
@@ -39,7 +79,9 @@ class Hymn_Module_Library{
 					if( $module->id === $id )
 						return $module;
 		}
-		throw new Exception( 'Invalid module ID: '.$id );
+		if( $strict )
+			throw new Exception( 'Invalid module ID: '.$id );
+		return NULL;
 	}
 
 	public function getModules( $shelfId = NULL ){
@@ -89,8 +131,10 @@ class Hymn_Module_Library{
 	}
 
 	static public function listModules( $path = "" ){
-		$list	= array();
+		if( self::$useCache && self::$listModulesAvailable !== NULL )
+			return self::$listModulesAvailable;
 
+		$list	= array();
 		$iterator	= new RecursiveDirectoryIterator( $path );
 		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 		foreach( $index as $entry ){
@@ -100,10 +144,13 @@ class Hymn_Module_Library{
 			$module	= self::readModule( $path, $key );
 			$list[$key]	= $module;
 		}
+		self::$listModulesAvailable	= $list;
 		return $list;
 	}
 
 	static public function listInstalledModules( $pathApp = "" ){
+		if( self::$useCache && self::$listModulesInstalled !== NULL )
+			return self::$listModulesInstalled;
 		$list	= array();
 		if( file_exists( $pathApp.'/config/modules/' ) ){
 			$iterator	= new RecursiveDirectoryIterator( $pathApp.'/config/modules/' );
@@ -117,6 +164,7 @@ class Hymn_Module_Library{
 			}
 		}
 		ksort( $list );
+		self::$listModulesInstalled	= $list;
 		return $list;
 	}
 

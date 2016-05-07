@@ -1,25 +1,60 @@
 <?php
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Command
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Command
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2016 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
 class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
+
+		$action		= $this->client->arguments->getArgument( 0 );
+		$className	= "Hymn_Command_Default";
+		if( strlen( $action ) ){
+			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );
+			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
+			if( !class_exists( $className ) )
+				throw new InvalidArgumentException( 'Invalid action: '.$action );
+			$class	= new ReflectionClass( $className );
+			$object	= $class->newInstanceArgs( array( $this->client ) );
+			call_user_func( array( $object, 'help' ) );
+			return;
+		}
+
 		$config		= $this->client->getConfig();
-		Hymn_Client::out();
-		Hymn_Client::out( "Commands:" );
-		Hymn_Client::out( "- help                         Show this help screen" );
-		Hymn_Client::out( "- info                         List application configuration" );
-		Hymn_Client::out( "- sources                      List registered library shelves" );
-		Hymn_Client::out( "- install [MODULE]             Install modules of application or one specific" );
-		Hymn_Client::out( "- config-dump                  Export current module settings into Hymn file" );
-		Hymn_Client::out( "- config-get KEY               Get setting from Hymn file" );
-		Hymn_Client::out( "- config-set KEY [VALUE]       Enter and save setting in Hymn file" );
-		Hymn_Client::out( "- modules-available [SHELF]    List modules available in library shelve(s)" );
-		Hymn_Client::out( "- modules-required             List modules required for application" );
-		Hymn_Client::out( "- modules-installed            List modules installed within application" );
-		Hymn_Client::out( "- database-clear [-f|-v|-q]    Drop database tables (force, verbose, quiet)" );
-		Hymn_Client::out( "- database-config              Enter and save database connection details" );
-		Hymn_Client::out( "- database-dump [PATH]         Export database to SQL file" );
-		Hymn_Client::out( "- database-load [PATH|FILE]    Import (specific or latest) SQL file into database" );
-		Hymn_Client::out( "- database-test                Test database connection" );
-//		Hymn_Client::out( "- " );
+		$lines		= file( "phar://hymn.phar/locales/en/help/default.txt" );
+		Hymn_Client::out( $lines );
+		return;
   }
 }

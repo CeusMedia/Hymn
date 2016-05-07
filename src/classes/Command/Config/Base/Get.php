@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Config.Base
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,25 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Config.Base
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-interface Hymn_Command_Interface{
+class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	public function run();
+	public function run(){
+		$key	= $this->client->arguments->getArgument( 0 );
+		if( !strlen( trim( $key ) ) )
+			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
+		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
+
+		if( !$editor->hasProperty( $key, FALSE ) )
+			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
+		$current	= $editor->getProperty( $key );
+		Hymn_Client::out( $current );
+		clearstatcache();
+	}
 }
