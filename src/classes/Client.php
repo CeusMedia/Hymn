@@ -59,7 +59,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.8.3";
+	static public $version	= "0.8.4";
 
 
 	protected $baseArgumentOptions	= array(
@@ -92,10 +92,13 @@ class Hymn_Client{
 			'pattern'	=> '/^-v|--verbose$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
+		),
+		'version'	=> array(
+			'pattern'	=> '/^--version/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
 		)
 	);
-
-
 
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
@@ -110,6 +113,10 @@ class Hymn_Client{
 			$action	= $this->arguments->getArgument();
 			if( $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, "help" );
+				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+			}
+			else if( $this->arguments->getOption( 'version' ) ){
+				array_unshift( $arguments, "version" );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			if( !in_array( $action, array( 'help', 'create', 'version' ) ) ){
