@@ -118,6 +118,10 @@ class Hymn_Arguments{
 		}
 	}
 
+	public function setArgument( $nr = 0, $value ){
+		$this->arguments[$nr]	= $value;
+	}
+
 	public function unregisterOption( $key ){
 		if( !isset( $this->options[$key] ) )
 			throw new RangeException( 'Option "'.$key.'" is not registered' );

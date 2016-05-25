@@ -52,7 +52,7 @@ abstract class Hymn_Command_Abstract{
 			Hymn_Client::out();
 			Hymn_Client::out( "But YOU can improve this situation :-)" );
 			Hymn_Client::out( "- get more information on: https://ceusmedia.de/" );
-			Hymn_Client::out( "- make a fork or patch on: https://github.com/CeusMedia/" );
+			Hymn_Client::out( "- make a fork or patch on: https://github.com/CeusMedia/Hymn" );
 			Hymn_Client::out();
 		}
 	}

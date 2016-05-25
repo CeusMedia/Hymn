@@ -45,7 +45,7 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );
 			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
 			if( !class_exists( $className ) )
-				throw new InvalidArgumentException( 'Invalid action: '.$action );
+				throw new InvalidArgumentException( 'Command "'.$action.'" is not existing' );
 			$class	= new ReflectionClass( $className );
 			$object	= $class->newInstanceArgs( array( $this->client ) );
 			call_user_func( array( $object, 'help' ) );

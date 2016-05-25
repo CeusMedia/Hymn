@@ -78,6 +78,11 @@ class Hymn_Client{
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
 		),
+		'help'		=> array(
+			'pattern'	=> '/^-h|--help/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+		),
 		'quiet'		=> array(
 			'pattern'	=> '/^-q|--quiet$/',
 			'resolve'	=> TRUE,
@@ -103,6 +108,10 @@ class Hymn_Client{
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
 			$action	= $this->arguments->getArgument();
+			if( $this->arguments->getOption( 'help' ) ){
+				array_unshift( $arguments, "help" );
+				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+			}
 			if( !in_array( $action, array( 'help', 'create', 'version' ) ) ){
 				$this->readConfig();
 				$this->loadLibraries();
