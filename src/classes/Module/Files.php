@@ -194,14 +194,14 @@ class Hymn_Module_Files{
 							case 'scripts-lib':
 								continue;
 							case 'common':
-								$path	= $this->config->paths->themes.'common/';
+								$path	= $this->config->paths->themes.'common/img/';
 								break;
 							case 'primer':
-								$path	= $this->config->paths->themes.$layoutPrimer.'/';
+								$path	= $this->config->paths->themes.$layoutPrimer.'/img/';
 								break;
 							case 'theme':
 								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
-								$path	= $this->config->paths->themes.$theme.'/';
+								$path	= $this->config->paths->themes.$theme.'/img/';
 								break;
 							case 'images':
 							default:
