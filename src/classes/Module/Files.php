@@ -124,6 +124,7 @@ class Hymn_Module_Files{
 	 *	@access		protected
 	 *	@param 		object 		$module		Module object
 	 *	@return		array
+	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
 	protected function prepareModuleFileMap( $module ){
 		$pathSource		= $module->path;
@@ -175,10 +176,9 @@ class Hymn_Module_Files{
 								break;
 							case 'theme':
 							default:
-								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $layoutTheme;
+								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
 								break;
 						}
-
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) )
 							mkdir( $path, 0777, TRUE );
@@ -187,30 +187,30 @@ class Hymn_Module_Files{
 						break;
 					case 'images':
 						$source	= $pathSource.'img/'.$file->file;
-						$path	= $pathTarget.$this->config->paths->images;
-						$target	= $path.$file->file;
 						if( !isset( $file->source ) )
-							$file->source	= 'theme';
+							$file->source	= 'images';
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
 								continue;
 							case 'common':
-								$theme	= "common";
+								$path	= $this->config->paths->themes.'common/';
 								break;
 							case 'primer':
-								$theme	= $layoutPrimer;
+								$path	= $this->config->paths->themes.$layoutPrimer.'/';
 								break;
 							case 'theme':
+								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
+								$path	= $this->config->paths->themes.$theme.'/';
+								break;
+							case 'images':
 							default:
-								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $layoutTheme;
+								$path	= $this->config->paths->images;
 								break;
 						}
-						$path	= $pathTarget.$this->config->paths->themes.$theme;
-						if( !file_exists( $path ) )
-							mkdir( $path, 0777, TRUE );
-						$target	= $path.'/img/'.$file->file;
-						$map[$source]	= $target;
+						if( !file_exists( $pathTarget.$path ) )
+							mkdir( $pathTarget.$path, 0777, TRUE );
+						$map[$source]	= $pathTarget.$path.$file->file;
 						break;
 				}
 			}
