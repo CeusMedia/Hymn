@@ -128,7 +128,7 @@ class Hymn_Module_Files{
 	protected function prepareModuleFileMap( $module ){
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
-		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
+		$baseTheme		= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
 		$map			= array();
 		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
@@ -160,19 +160,24 @@ class Hymn_Module_Files{
 					case 'styles':
 						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
 							continue;
-						$path	= $this->config->paths->themes;
+						$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
+						$path	= $pathTarget.$this->config->paths->themes.$theme;
+						if( !file_exists( $path ) )
+							mkdir( $path, 0777, TRUE );
 						$source	= $pathSource.'css/'.$file->file;
-						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
-						$map[$source]	= $target;
+						$map[$source]	= $path.'/css/'.$file->file;
 						break;
 					case 'images':
-						$path	= $this->config->paths->images;
-						if( !empty( $file->source) && $file->source === "theme" ){
-							$path	= $this->config->paths->themes;
-							$path	= $path.$theme."/img/";
-						}
 						$source	= $pathSource.'img/'.$file->file;
-						$target	= $pathTarget.$path.$file->file;
+						$path	= $pathTarget.$this->config->paths->images;
+						$target	= $path.$file->file;
+						if( isset( $file->source ) && $file->source === "theme" ){
+							$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
+							$path	= $pathTarget.$this->config->paths->themes.$theme;
+							if( !file_exists( $path ) )
+								mkdir( $path, 0777, TRUE );
+							$target	= $path.'/img/'.$file->file;
+						}
 						$map[$source]	= $target;
 						break;
 				}
