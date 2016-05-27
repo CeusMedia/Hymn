@@ -203,7 +203,7 @@ class Hymn_Module_Files{
 								break;
 							case 'theme':
 							default:
-								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
+								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $layoutTheme;
 								break;
 						}
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
