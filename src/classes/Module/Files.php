@@ -128,7 +128,8 @@ class Hymn_Module_Files{
 	protected function prepareModuleFileMap( $module ){
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
-		$baseTheme		= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
+		$layoutTheme	= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'common';
+		$layoutPrimer	= isset( $this->config->layoutPrimer ) ? $this->config->layoutPrimer : 'primer';
 		$map			= array();
 		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
@@ -158,9 +159,26 @@ class Hymn_Module_Files{
 						$map[$source]	= $target;
 						break;
 					case 'styles':
-						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
+						if( !isset( $file->source ) )
+							$file->source	= 'theme';
+						if( in_array( $file->source, $skipSources ) )
 							continue;
-						$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
+						switch( $file->source ){
+							case 'styles-lib':
+							case 'scripts-lib':
+								continue;
+							case 'common':
+								$theme	= "common";
+								break;
+							case 'primer':
+								$theme	= $layoutPrimer;
+								break;
+							case 'theme':
+							default:
+								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $layoutTheme;
+								break;
+						}
+
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) )
 							mkdir( $path, 0777, TRUE );
@@ -171,13 +189,27 @@ class Hymn_Module_Files{
 						$source	= $pathSource.'img/'.$file->file;
 						$path	= $pathTarget.$this->config->paths->images;
 						$target	= $path.$file->file;
-						if( isset( $file->source ) && $file->source === "theme" ){
-							$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
-							$path	= $pathTarget.$this->config->paths->themes.$theme;
-							if( !file_exists( $path ) )
-								mkdir( $path, 0777, TRUE );
-							$target	= $path.'/img/'.$file->file;
+						if( !isset( $file->source ) )
+							$file->source	= 'theme';
+						switch( $file->source ){
+							case 'styles-lib':
+							case 'scripts-lib':
+								continue;
+							case 'common':
+								$theme	= "common";
+								break;
+							case 'primer':
+								$theme	= $layoutPrimer;
+								break;
+							case 'theme':
+							default:
+								$theme	= isset( $file->theme ) && $file->theme ? $file->theme : $baseTheme;
+								break;
 						}
+						$path	= $pathTarget.$this->config->paths->themes.$theme;
+						if( !file_exists( $path ) )
+							mkdir( $path, 0777, TRUE );
+						$target	= $path.'/img/'.$file->file;
 						$map[$source]	= $target;
 						break;
 				}
