@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Self
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,18 +28,47 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Self
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+
+	protected function downloadFile( $url, $file ){
+		$file	= $file ? $file : basename( $file );
+		$fp1	= fopen( $url, "rb" );
+		if( !$fp1 )
+			throw new Exception( "Failed to open stream to URL" );
+		$fp2 = fopen( $file, "wb" );
+		while( !feof( $fp1 ) )
+			fwrite( $fp2, fread( $fp1, 1024 ) );
+		fclose( $fp1 );
+		fclose( $fp2 );
+	}
+
+	protected function getHymnFilePath(){
+		exec( "whereis hymn", $a, $b );
+		if( is_array( $a ) && count( $a ) ){
+			foreach( $a as $item ){
+				if( preg_match( '/^hymn: (.+)$/', $item ) ){
+					return preg_replace( '/^hymn: /', '', $item );
+				}
+			}
+		}
+		return NULL;
+	}
 
 	public function run(){
-		Hymn_Client::out( Hymn_Client::$version );
-//		Hymn_Client::out( "Working in: " . getCwd() );
-//		Hymn_Client::out( "Hymn Path: " . __DIR__ );
+		$urlHymn	= "https://github.com/CeusMedia/Hymn/raw/master/hymn.phar";
+		$pathFile	= $this->getHymnFilePath();
+		if( !$pathFile )
+			throw new Exception( "Hymn not found" );
+		Hymn_Client::out( "Download: ".$urlHymn );
+		$this->downloadFile( $urlHymn, $pathFile );
+		Hymn_Client::out( "Saved to: ".$pathFile );
+		passthru( "hymn version" );
 	}
 }
