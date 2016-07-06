@@ -74,6 +74,14 @@ class Hymn_Arguments{
 		return $options;
 	}
 
+	public function hasOption( $key, $hasValue = NULL ){
+		if( !isset( $this->options[$key] ) )
+			return FALSE;
+		if( $hasValue && !strlen( $this->options[$key]['value'] ) )
+			return FALSE;
+		return TRUE;
+	}
+
 	public function parse( $arguments = NULL ){
 		$arguments	= is_null( $arguments ) ? $this->arguments : $arguments;
 		$list	= array();

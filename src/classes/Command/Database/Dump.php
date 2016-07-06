@@ -37,11 +37,14 @@
  */
 class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	protected $prefixPlaceholder		= '<%?prefix%>';
+
 	public function run(){
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$fileName	= $this->client->arguments->getArgument( 0 );
+		$arguments	= $this->client->arguments;
+		$fileName	= $arguments->getArgument( 0 );
 		if( !preg_match( "/[a-z0-9]/i", $fileName ) )												//  arguments has not valid value
 			$fileName	= 'config/sql/';															//  set default path
 		if( substr( $fileName, -1 ) == "/" )														//  given argument is a path
@@ -54,6 +57,9 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$password	= $this->client->getDatabaseConfiguration( 'password' );
 		$name		= $this->client->getDatabaseConfiguration( 'name' );
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+
+		if( $this->prefix	= $arguments->hasOption( 'prefix' ) )
+			$this->prefixPlaceholder	= $arguments->getOption( 'prefix' );
 
 		$tables		= array();
 		if( $prefix )
@@ -79,7 +85,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	protected function _callbackReplacePrefix( $matches ){
 		if( $matches[1] === 'for table' )
 			return $matches[1].$matches[2].$matches[4].$matches[5];
-		return $matches[1].$matches[2].'<%?prefix%>'.$matches[4].$matches[5];
+		return $matches[1].$matches[2].$this->prefixPlaceholder.$matches[4].$matches[5];
 	}
 
 	static public function test( $client ){
