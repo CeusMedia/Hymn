@@ -124,11 +124,13 @@ class Hymn_Module_Files{
 	 *	@access		protected
 	 *	@param 		object 		$module		Module object
 	 *	@return		array
+	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
 	protected function prepareModuleFileMap( $module ){
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
-		$theme			= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'custom';
+		$layoutTheme	= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'common';
+		$layoutPrimer	= isset( $this->config->layoutPrimer ) ? $this->config->layoutPrimer : 'primer';
 		$map			= array();
 		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
@@ -158,22 +160,57 @@ class Hymn_Module_Files{
 						$map[$source]	= $target;
 						break;
 					case 'styles':
-						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
+						if( !isset( $file->source ) )
+							$file->source	= 'theme';
+						if( in_array( $file->source, $skipSources ) )
 							continue;
-						$path	= $this->config->paths->themes;
+						switch( $file->source ){
+							case 'styles-lib':
+							case 'scripts-lib':
+								continue;
+							case 'common':
+								$theme	= "common";
+								break;
+							case 'primer':
+								$theme	= $layoutPrimer;
+								break;
+							case 'theme':
+							default:
+								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
+								break;
+						}
+						$path	= $pathTarget.$this->config->paths->themes.$theme;
+						if( !file_exists( $path ) )
+							mkdir( $path, 0777, TRUE );
 						$source	= $pathSource.'css/'.$file->file;
-						$target	= $pathTarget.$path.$theme.'/css/'.$file->file;
-						$map[$source]	= $target;
+						$map[$source]	= $path.'/css/'.$file->file;
 						break;
 					case 'images':
-						$path	= $this->config->paths->images;
-						if( !empty( $file->source) && $file->source === "theme" ){
-							$path	= $this->config->paths->themes;
-							$path	= $path.$theme."/img/";
-						}
 						$source	= $pathSource.'img/'.$file->file;
-						$target	= $pathTarget.$path.$file->file;
-						$map[$source]	= $target;
+						if( !isset( $file->source ) )
+							$file->source	= 'images';
+						switch( $file->source ){
+							case 'styles-lib':
+							case 'scripts-lib':
+								continue;
+							case 'common':
+								$path	= $this->config->paths->themes.'common/img/';
+								break;
+							case 'primer':
+								$path	= $this->config->paths->themes.$layoutPrimer.'/img/';
+								break;
+							case 'theme':
+								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
+								$path	= $this->config->paths->themes.$theme.'/img/';
+								break;
+							case 'images':
+							default:
+								$path	= $this->config->paths->images;
+								break;
+						}
+						if( !file_exists( $pathTarget.$path ) )
+							mkdir( $pathTarget.$path, 0777, TRUE );
+						$map[$source]	= $pathTarget.$path.$file->file;
 						break;
 				}
 			}

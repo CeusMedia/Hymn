@@ -43,12 +43,14 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 
 		$pathName		= $this->client->arguments->getArgument( 0 );
 		if( $pathName && file_exists( $pathName ) ){
-			$fileName	= $pathName;
 			if( is_dir( $pathName ) )
-				$fileName	= $this->getLatestDump( $pathName );
+				$fileName	= $this->getLatestDump( $pathName, TRUE );
+			else{
+				$fileName	= $pathName;
+			}
 		}
 		else
-			$fileName		= $this->getLatestDump();
+			$fileName		= $this->getLatestDump( NULL, TRUE );
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
 
@@ -91,8 +93,10 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		return FALSE;
 	}
 
-	protected function getLatestDump( $path = NULL ){
+	protected function getLatestDump( $path = NULL, $verbose = FALSE ){
 		$path	= $path ? $path : "config/sql/";
+		if( $verbose )
+			Hymn_Client::out( "Scanning folder ".$path."..." );
 		if( file_exists( $path ) ){
 			$list	= array();
 			$index	= new DirectoryIterator( $path );

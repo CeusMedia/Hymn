@@ -74,6 +74,7 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@return		void
 	 */
 	public function __construct( $fileName, $reservedWords = TRUE ){
+		$this->createFileIfNotExists( $fileName );
 		$this->checkFile( $fileName );
 		$this->fileName				= $fileName;
 		$this->reservedWords		= $reservedWords;
@@ -149,6 +150,13 @@ class Hymn_Tool_BaseConfigEditor{
 			throw new RuntimeException( 'File "'.$fileName.'" is not readable' );
 		if( !is_writable( $fileName ) )
 			throw new RuntimeException( 'File "'.$fileName.'" is not writable' );
+	}
+
+	protected function createFileIfNotExists( $fileName ){
+		if( !is_string( $fileName ) )
+			throw new InvalidArgumentException( 'File name must a string' );
+		if( !file_exists( $fileName ) )
+			touch( $fileName );
 	}
 
 	/**
