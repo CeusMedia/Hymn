@@ -41,8 +41,10 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 	public function run(){
 		$config		= $this->client->getConfig();
 		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source )
-			$library->addShelf( $sourceId, $source->path );
+		foreach( $config->sources as $sourceId => $source ){
+			$active	= !isset( $source->active ) || $source->active;
+			$library->addShelf( $sourceId, $source->path, $active );
+		}
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$modules		= array();																	//  prepare list of modules to update

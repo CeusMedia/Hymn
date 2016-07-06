@@ -47,20 +47,23 @@ class Hymn_Module_Library{
 	public function __construct(){
 	}
 
-	public function addShelf( $id, $path ){
+	public function addShelf( $id, $path, $active = TRUE ){
 		if( in_array( $id, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Shelf already set by ID: '.$id );
 		$this->shelves[$id]	= (object) array(
-			'id'			=> $id,
+			'id'		=> $id,
 			'path'		=> $path,
+			'active'	=> $active,
 		);
 		ksort( $this->shelves );
 		$this->modules[$id]	= array();
-		foreach( self::listModules( $path ) as $module ){
-			$module->sourceId	= $id;
-			$module->sourcePath	= $path;
-			$this->modules[$id][$module->id] = $module;
-			ksort( $this->modules[$id] );
+		if( $active ){
+			foreach( self::listModules( $path ) as $module ){
+				$module->sourceId	= $id;
+				$module->sourcePath	= $path;
+				$this->modules[$id][$module->id] = $module;
+				ksort( $this->modules[$id] );
+			}
 		}
 		ksort( $this->modules );
 	}

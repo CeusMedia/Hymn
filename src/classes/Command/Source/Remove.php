@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Modules
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,35 +28,32 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Modules
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
-		$config		= $this->client->getConfig();
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path, $active );
-		}
-		$shelfId	= $this->client->arguments->getArgument( 0 );
+		$config	= $this->client->getConfig();
 
-		if( $shelfId ){
-			$modules	= $library->getModules( $shelfId );
-			Hymn_Client::out( count( $modules )." modules available in module source '".$shelfId."':" );
-			foreach( $modules as $moduleId => $module )
-				Hymn_Client::out( "- ".$module->id );
+		$key	= $this->client->arguments->getArgument( 0 );
+
+		if( !isset( $config->sources ) )
+			$config->sources	= (object) array();
+
+		if( !isset( $config->sources->{$key} ) ){
+			Hymn_Client::out( 'Source with ID "'.$key.'" is not registered.' );
+			return;
 		}
-		else{
-			$modules	= $library->getModules();
-			Hymn_Client::out( count( $modules )." modules available:" );
-			foreach( $modules as $moduleId => $module )
-				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
-		}
+		unset( $config->sources->{$key} );
+
+		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+		$json->sources	= $config->sources;
+		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 	}
 }
+?>
