@@ -28,39 +28,34 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config,Module
+ *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
 		$filename	= Hymn_Client::$fileName;
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$config	= json_decode( file_get_contents( $filename ) );
-		if( is_null( $config ) )
-			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
+		$config = json_decode( file_get_contents( $filename ) );
 
-		$key	= $this->client->arguments->getArgument( 0 );
-		if( !strlen( trim( $key ) ) )
-			throw new InvalidArgumentException( 'First argument "key" is missing' );
+		$module	= $this->client->arguments->getArgument( 0 );
+		$module	= str_replace( ":", "_", $module );
+		if( !strlen( trim( $module ) ) )
+			throw new InvalidArgumentException( 'First argument "module" is missing' );
 
-		$parts	= explode( ".", $key );
-		$module	= array_shift( $parts );
-		if( !$parts )
-			throw new InvalidArgumentException( 'Invalid key - must be of syntax "Module_Name.(section.)key"' );
-		$configKey	= join( ".", $parts );
+		//  @todo check if module exists. But this would disable adding module before adding sources.
 
-		if( !isset( $config->modules->{$module} ) || !isset( $config->modules->{$module}->config ) )
-			throw new InvalidArgumentException( 'No configuration for module "'.$module.'" set' );
-		if( !isset( $config->modules->{$module}->config->{$configKey} ) )
-			throw new InvalidArgumentException( 'No configuration value for key "'.$configKey.'" in module "'.$module.'" set' );
+        if( isset( $config->modules->{$module} ) )
+            throw new InvalidArgumentException( 'Module "'.$module.'" is already registered' );
 
-		$current	= $config->modules->{$module}->config->{$configKey};
-		Hymn_Client::out( $current );
+		if( isset( $config->modules->{$module} ) )
+			return;
+
+		$config->modules->{$module}	= (object) array();
+		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
+		clearstatcache();
 	}
 }

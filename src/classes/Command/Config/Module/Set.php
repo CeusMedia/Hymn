@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config
+ *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,7 +28,7 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config
+ *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -39,15 +39,15 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 	public function run(){
 		$filename	= Hymn_Client::$fileName;
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$config	= json_decode( file_get_contents( $filename ) );
-		if( is_null( $config ) )
-			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
+#		if( !file_exists( $filename ) )
+#			throw new RuntimeException( 'File "'.$filename.'" is missing' );
+#		$config	= json_decode( file_get_contents( $filename ) );
+#		if( is_null( $config ) )
+#			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
 
 		$key	= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
-			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
+			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
 		$key	= $this->client->arguments->getArgument( 0 );
 		$value	= $this->client->arguments->getArgument( 1 );

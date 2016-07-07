@@ -59,7 +59,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.8.7";
+	static public $version	= "0.8.8";
 
 
 	protected $baseArgumentOptions	= array(
