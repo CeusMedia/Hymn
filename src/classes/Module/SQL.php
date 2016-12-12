@@ -41,7 +41,7 @@ class Hymn_Module_SQL{
 //	protected $config;
 	protected $quiet;
 
-	public function __construct( $client, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, $quiet = FALSE ){
 		$this->client	= $client;
 //		$this->config	= $this->client->getConfig();
 		$this->quiet	= $quiet;

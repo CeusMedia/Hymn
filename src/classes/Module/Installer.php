@@ -45,7 +45,7 @@ class Hymn_Module_Installer{
 	protected $files;
 	protected $sql;
 
-	public function __construct( $client, $library, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
@@ -71,7 +71,7 @@ class Hymn_Module_Installer{
 		$source	= $module->path.'module.xml';
 		$target	= $this->config->application->uri.'config/modules/'.$module->id.'.xml';
 		if( !$dry ){
-			@mkdir( dirname( $target ), 0770, TRUE );
+			Hymn_Module_Files::createPath( dirname( $target ) );
 			@copy( $source, $target );
 		}
 		else {
@@ -79,7 +79,7 @@ class Hymn_Module_Installer{
 		}
 
 		$xml	= file_get_contents( $target );
-		$xml	= new SimpleXMLElement( $xml );
+		$xml	= new Hymn_Tool_XmlElement( $xml );
 		$xml->version->addAttribute( 'install-type',  1 );
 		$xml->version->addAttribute( 'install-source', $module->sourceId );
 		$xml->version->addAttribute( 'install-date', date( "c" ) );

@@ -44,10 +44,10 @@ class Hymn_Module_Files{
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		object		$client		Hymn client instance
-	 *	@param		boolean		$quiet		Flag: be quiet and ignore verbosity
+	 *	@param		Hymn_Client		$client		Hymn client instance
+	 *	@param		boolean			$quiet		Flag: be quiet and ignore verbosity
 	 */
-	public function __construct( $client, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, $quiet = FALSE ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->quiet	= $quiet;
@@ -66,7 +66,7 @@ class Hymn_Module_Files{
 	public function copyFiles( $module, $installType = "link", $verbose = FALSE, $dry = FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );
 		foreach( $fileMap as $source => $target ){
-			@mkdir( dirname( $target ), 0770, TRUE );
+			self::createPath( dirname( $target ) );
 			$pathNameIn	= realpath( $source );
 			$pathOut	= dirname( $target );
 			if( $installType === "link" ){
@@ -117,6 +117,23 @@ class Hymn_Module_Files{
 			}
 		}
 		return TRUE;
+	}
+
+	/**
+	 *	Creates a path.
+	 *	A nested path will be created recursively.
+	 *	No error messages will be shown but the return value indicates the result.
+	 *	@static
+	 *	@access		public
+	 *	@param		string		$path		Path to create
+	 *	@return		bool
+	 */
+	static public function createPath( $path ){
+		if( file_exists( $path ) )
+			return NULL;
+		if( @mkdir( $path, 0777, TRUE ) )
+			return TRUE;
+		return FALSE;
 	}
 
 	/**
@@ -181,7 +198,7 @@ class Hymn_Module_Files{
 						}
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) )
-							mkdir( $path, 0777, TRUE );
+							self::createPath( $path );
 						$source	= $pathSource.'css/'.$file->file;
 						$map[$source]	= $path.'/css/'.$file->file;
 						break;
@@ -209,7 +226,7 @@ class Hymn_Module_Files{
 								break;
 						}
 						if( !file_exists( $pathTarget.$path ) )
-							mkdir( $pathTarget.$path, 0777, TRUE );
+							self::createPath( $pathTarget.$path );
 						$map[$source]	= $pathTarget.$path.$file->file;
 						break;
 				}
