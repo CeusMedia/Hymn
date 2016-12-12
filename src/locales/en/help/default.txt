@@ -6,7 +6,7 @@ Commands:
 - info                           Show project configuration from Hymn file
 - sources                        List registered library shelves
 - source-add                     Add module source of modules to Hymn file
-- source-remove KEY              Remove module source from Hymn file 
+- source-remove KEY              Remove module source from Hymn file
 - source-enable                  ... to be implemented ...
 - source-disable                 ... to be implemented ...
 
@@ -31,6 +31,7 @@ Commands:
 - graph                          Render module relations graph
 
 5. Instance Module Management
+- info MODULE                    Show information about module
 - install [-dqv] [MODULE]        Install modules (or one specific)
 - uninstall [-dfqv] MODULE       Uninstall one specific installed module
 - update [-dqv] [MODULE]         Updated installed modules (or one specific)

@@ -69,7 +69,7 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 		}
 
 		foreach( $outdatedModules as $update ){
-			$message	= "- %s (%s -> %s) ...";
+			$message	= "- %s: %s -> %s";
 			$message	= sprintf( $message, $update->id, $update->installed, $update->available );
 			Hymn_Client::out( $message );
 		}

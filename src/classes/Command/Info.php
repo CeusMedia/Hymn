@@ -39,11 +39,47 @@ class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_In
 
 	public function run(){
 		$config		= $this->client->getConfig();
-		Hymn_Client::out( "Application Settings:" );
-		foreach( $config->application as $key => $value ){
-			if( is_object( $value ) )
-				$value	= json_encode( $value, JSON_PRETTY_PRINT );
-			Hymn_Client::out( "- ".$key." => ".$value );
+
+		$moduleId	= $this->client->arguments->getArgument( 0 );
+//		$shelfId	= $this->client->arguments->getArgument( 1 );
+
+		if( $moduleId ){
+			$library	= new Hymn_Module_Library();
+			foreach( $config->sources as $sourceId => $source ){
+				$active	= !isset( $source->active ) || $source->active;
+				$library->addShelf( $sourceId, $source->path, $active );
+			}
+			$modulesAvailable	= $library->getModules();
+			$modulesInstalled	= $library->listInstalledModules( $config->application->uri );		//  get list of installed modules
+			foreach( $modulesAvailable as $availableModule ){
+				if( $moduleId !== $availableModule->id )
+					continue;
+				Hymn_Client::out( 'Module: '.$availableModule->title );
+				if( $availableModule->description )
+					Hymn_Client::out( $availableModule->description );
+				Hymn_Client::out( 'Category: '.$availableModule->category );
+				Hymn_Client::out( 'Source: '.$availableModule->sourceId );
+				Hymn_Client::out( 'Version: '.$availableModule->version );
+				if( array_key_exists( $moduleId, $modulesInstalled ) ){
+					$installedModule	= $modulesInstalled[$moduleId];
+					Hymn_Client::out( 'Installed: '.$installedModule->version );
+					if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
+						$message	= 'Update available: %s -> %s';
+						$message	= sprintf( $message, $installedModule->version, $availableModule->version );
+						Hymn_Client::out( $message );
+					}
+				}
+				return;
+			}
+			Hymn_Client::out( 'Module '.$moduleId.' not available.' );
+		}
+		else{
+			Hymn_Client::out( "Application Settings:" );
+			foreach( $config->application as $key => $value ){
+				if( is_object( $value ) )
+					$value	= json_encode( $value, JSON_PRETTY_PRINT );
+				Hymn_Client::out( "- ".$key." => ".$value );
+			}
 		}
 	}
 }
