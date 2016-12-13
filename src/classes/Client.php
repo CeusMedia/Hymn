@@ -293,6 +293,8 @@ class Hymn_Client{
 	public function setupDatabaseConnection( $force = FALSE ){
 		if( $this->dbc )
 			return;
+		if( $this->isLiveCopy )
+			return;
 //		$this->dbc			= NULL;
 		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
 		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
