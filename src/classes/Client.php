@@ -293,8 +293,6 @@ class Hymn_Client{
 	public function setupDatabaseConnection( $force = FALSE ){
 		if( $this->dbc )
 			return;
-		if( $this->isLiveCopy )
-			return;
 //		$this->dbc			= NULL;
 		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
 		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
@@ -336,8 +334,13 @@ class Hymn_Client{
 		while( is_null( $this->dba->prefix ) ){
 			$this->dba->prefix		= Hymn_Client::getInput( "Table Prefix:" );
 		}
-		$dsn			= $this->dba->driver.":host=".$this->dba->host.";port=".$this->dba->port.";dbname=".$this->dba->name;
-
+		if( $this->isLiveCopy )
+			return;
+		$dsn			= $this->dba->driver.':'.implode( ";", array(
+			"host=".$this->dba->host,
+			"port=".$this->dba->port,
+			"dbname=".$this->dba->name,
+		) );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		if( !isset( $this->config->modules->Resource_Database ) )
