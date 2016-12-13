@@ -334,8 +334,19 @@ class Hymn_Client{
 		while( is_null( $this->dba->prefix ) ){
 			$this->dba->prefix		= Hymn_Client::getInput( "Table Prefix:" );
 		}
+
+		if( !isset( $this->config->modules->Resource_Database ) )
+			$this->config->modules->Resource_Database	= (object) array();
+		$this->config->modules->Resource_Database->config	= (object) array();
+		foreach( $this->dba as $key => $value )
+			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
+
 		if( $this->isLiveCopy )
 			return;
+
+		if( strtolower( $this->dba->driver ) !== "mysql" )
+			throw new OutOfRangeException( 'PDO driver "'.$this->dba->driver .'" is not supported at the moment' );
+
 		$dsn			= $this->dba->driver.':'.implode( ";", array(
 			"host=".$this->dba->host,
 			"port=".$this->dba->port,
@@ -343,11 +354,6 @@ class Hymn_Client{
 		) );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		if( !isset( $this->config->modules->Resource_Database ) )
-			$this->config->modules->Resource_Database	= (object) array();
-		$this->config->modules->Resource_Database->config	= (object) array();
-		foreach( $this->dba as $key => $value )
-			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 	}
 }
 ?>
