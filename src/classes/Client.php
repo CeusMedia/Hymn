@@ -211,9 +211,11 @@ class Hymn_Client{
 
 	public function getModuleInstallType( $moduleId, $defaultInstallType = "copy" ){
 		$type	= $defaultInstallType;
-		if( isset( $this->config->modules->{"@installType"} ) )
-			$type	= $this->config->modules->{"@installType"};
-		if( isset( $this->config->modules->$moduleId ) )
+		if( isset( $this->config->application->{"installType"} ) )
+			$type	= $this->config->application->{"installType"};
+		else if( isset( $this->config->modules->{"@installType"} ) )								//  @deprecated: use application->type instead
+			$type	= $this->config->modules->{"@installType"};										//  @todo to be removed in 1.0
+		else if( isset( $this->config->modules->$moduleId ) )
 			if( isset( $this->config->modules->$moduleId->{"installType"} ) )
 				$type	= $this->config->modules->$moduleId->{"installType"};
 		return $type;

@@ -44,6 +44,7 @@ class Hymn_Module_Installer{
 	protected $quiet;
 	protected $files;
 	protected $sql;
+	protected $isLiveCopy	= FALSE;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
 		$this->client	= $client;
@@ -53,6 +54,10 @@ class Hymn_Module_Installer{
 		$this->dbc		= $client->setupDatabaseConnection();
 		$this->files	= new Hymn_Module_Files( $client, $quiet );
 		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
+
+		$this->app		= $this->config->application;												//  shortcut to application config
+		if( isset( $this->app->mode ) && isset( $this->app->type ) )								//  installation type and mode are set
+			$this->isLiveCopy = $this->app->mode === "live" && $this->app->type === "copy";			//  this installation is a build for a live copy
 	}
 
 	/**
@@ -69,7 +74,7 @@ class Hymn_Module_Installer{
 	 */
 	public function configure( $module, $verbose = FALSE, $dry = FALSE ){
 		$source	= $module->path.'module.xml';
-		$target	= $this->config->application->uri.'config/modules/'.$module->id.'.xml';
+		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
 		if( !$dry ){
 			Hymn_Module_Files::createPath( dirname( $target ) );
 			@copy( $source, $target );
@@ -80,9 +85,10 @@ class Hymn_Module_Installer{
 
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XmlElement( $xml );
-		$xml->version->addAttribute( 'install-type',  1 );
-		$xml->version->addAttribute( 'install-source', $module->sourceId );
-		$xml->version->addAttribute( 'install-date', date( "c" ) );
+		$type	= isset( $this->app->type ) ? $this->app->type : 1;
+		$xml->version->setAttribute( 'install-type', $type );
+		$xml->version->setAttribute( 'install-source', $module->sourceId );
+		$xml->version->setAttribute( 'install-date', date( "c" ) );
 
 		$config	= (object) array();																	//  prepare empty hymn module config
 		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
@@ -112,7 +118,7 @@ class Hymn_Module_Installer{
 		}
 		if( !$dry ){
 			$xml->saveXml( $target );																//  save changed DOM to module file
-			@unlink( $this->config->application->uri.'config/modules.cache.serial' );			 	//  remove modules cache file
+			@unlink( $this->app->uri.'config/modules.cache.serial' );							 	//  remove modules cache file
 		}
 	}
 
@@ -120,7 +126,7 @@ class Hymn_Module_Installer{
 		try{
 			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
 			$this->configure( $module, $verbose, $dry );											//  configure module
-			$this->sql->runModuleInstallSql( $module, $verbose, $dry );								//  run SQL scripts
+			$this->sql->runModuleInstallSql( $module, $verbose, $dry || $this->isLiveCopy );		//  run SQL scripts, not for live copy builds
 			return TRUE;
 		}
 		catch( Exception $e ){
@@ -136,8 +142,8 @@ class Hymn_Module_Installer{
 			$localModule->path	= $appUri;
 			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
 			if( !$dry ){																			//  not a dry run
-				@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );	//  remove module configuration file
-				@unlink( $this->config->application->uri.'config/modules.cache.serial' );			//  remove modules cache file
+				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
+				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
 			}
 			$this->sql->runModuleUninstallSql( $localModule, $verbose, $dry );						//  run SQL scripts
 			return TRUE;
@@ -169,8 +175,8 @@ class Hymn_Module_Installer{
 
 			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
 			if( !$dry ){
-				@unlink( $this->config->application->uri.'config/modules/'.$module->id.'.xml' );	//  remove module configuration file
-				@unlink( $this->config->application->uri.'config/modules.cache.serial' );			//  remove modules cache file
+				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
+				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
 			}
 			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
 			$this->configure( $module, $verbose, $dry );											//  configure module
