@@ -245,6 +245,8 @@ class Hymn_Client{
 	}
 
 	protected function readConfig( $filename = NULL ){
+		if( $this->config )
+			return;
 		$filename	= $filename ? $filename : self::$fileName;
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );
@@ -284,8 +286,8 @@ class Hymn_Client{
 		$app	= $this->config->application;
 		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
 			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
-		if( $this->isLiveCopy )
-			self::out( "This is a live copy build. Most hymn functions are not available." );
+#		if( $this->isLiveCopy )
+#			self::out( "This is a live copy build. Most hymn functions are not available." );
 	}
 
 	public function setupDatabaseConnection( $force = FALSE ){
