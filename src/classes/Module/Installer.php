@@ -54,10 +54,10 @@ class Hymn_Module_Installer{
 		$this->dbc		= $client->setupDatabaseConnection();
 		$this->files	= new Hymn_Module_Files( $client, $quiet );
 		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
-
 		$this->app		= $this->config->application;												//  shortcut to application config
-		if( isset( $this->app->mode ) && isset( $this->app->type ) )								//  installation type and mode are set
-			$this->isLiveCopy = $this->app->mode === "live" && $this->app->type === "copy";			//  this installation is a build for a live copy
+
+		if( $app = $this->app && isset( $app->installMode ) && isset( $app->installType ) )			//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
 	}
 
 	/**
@@ -137,7 +137,7 @@ class Hymn_Module_Installer{
 
 	public function uninstall( $module, $verbose = FALSE, $dry = FALSE ){
 		try{
-			$appUri				= $this->client->getConfig()->application->uri;
+			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
 			$localModule->path	= $appUri;
 			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
@@ -157,7 +157,7 @@ class Hymn_Module_Installer{
 
 	public function update( $module, $installType, $verbose = FALSE, $dry = FALSE ){
 		try{
-			$appUri				= $this->client->getConfig()->application->uri;
+			$appUri				= $this->app->uri;
 			$localModules		= $this->library->listInstalledModules( $appUri );
 			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
 			$localModule->path	= $appUri;
