@@ -49,6 +49,8 @@ class Hymn_Client{
 
 	protected $instance;
 
+	protected $isLiveCopy	= FALSE;
+
 	static public $fileName	= ".hymn";
 
 	static public $pathDefaults	= array(
@@ -278,6 +280,12 @@ class Hymn_Client{
 				}
 			}
 		}
+
+		$app	= $this->config->application;
+		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
+		if( $this->isLiveCopy )
+			self::out( "This is a live copy build. Most hymn functions are not available." );
 	}
 
 	public function setupDatabaseConnection( $force = FALSE ){
