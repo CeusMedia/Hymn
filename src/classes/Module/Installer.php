@@ -142,7 +142,7 @@ class Hymn_Module_Installer{
 			return TRUE;
 		}
 		catch( Exception $e ){
-			$msg	= "Installation of module \"%s\" failed.\n%s";
+			$msg	= "Installation of module '%s' failed.\n%s";
 			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}
@@ -161,7 +161,7 @@ class Hymn_Module_Installer{
 			return TRUE;
 		}
 		catch( Exception $e ){
-			$message	= "Uninstallation of module \"%s\" failed.\ņ%s";
+			$message	= "Uninstallation of module '%s' failed.\ņ%s";
 			$message	= sprintf( $message, $localModule->id, $e->getMessage() );
 			throw new RuntimeException( $message, 0, $e );
 		}
@@ -178,7 +178,7 @@ class Hymn_Module_Installer{
 			//  @todo call "full module install" (do not know HOW right now) instead of exception
 			foreach( $module->relations->needs as $relation ){
 				if( !array_key_exists( $relation, $localModules ) ){
-					throw new RuntimeException( 'Please install module "'.$relation.'" first!' );
+					throw new RuntimeException( "Please install module '".$relation."' first!" );
 				}
 			}
 			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
@@ -196,7 +196,7 @@ class Hymn_Module_Installer{
 			return TRUE;
 		}
 		catch( Exception $e ){
-			$msg	= "Update of module \"%s\" failed.\n%s";
+			$msg	= "Update of module '%s' failed.\n%s";
 			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}

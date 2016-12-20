@@ -33,8 +33,9 @@ Console tool for installing Hydrogen applications.
 
 	- info MODULE                    Show information about module
 	- modules-available [SHELF]      List modules available in library shelve(s)
-	- modules-required               List modules required for application
 	- modules-installed              List modules installed within application
+	- modules-required               List modules required for application
+	- modules-search                 List modules found by name part
 	- modules-updatable              List modules with available updates
 
 ### 5. Project Module Management
