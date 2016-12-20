@@ -61,7 +61,15 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.0a";
+	static public $version	= "0.9.0b2";
+
+	static protected $commandWithoutConfig	= array(
+		'default',
+		'help',
+		'create',																					//  @deprecated
+		'init',
+		'version',
+	);
 
 	protected $baseArgumentOptions	= array(
 		'dry'		=> array(
@@ -125,11 +133,6 @@ class Hymn_Client{
 				array_unshift( $arguments, "version" );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
-			if( !in_array( $action, array( 'help', 'create', 'version' ) ) ){
-				$this->readConfig();
-				$this->loadLibraries();
-//				$this->setupDatabaseConnection();
-			}
 			$this->dispatch();
 //			self::out();
 		}
@@ -139,17 +142,40 @@ class Hymn_Client{
 	}
 
 	protected function dispatch(){
-		$action		= $this->arguments->getArgument( 0 );
-		$className	= "Hymn_Command_Default";
-		if( strlen( $action ) ){
-			$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
-			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
-			if( !class_exists( $className ) )
-				throw new InvalidArgumentException( 'Invalid action: '.$action );
+		$action			= "default";
+		$className		= "Hymn_Command_Default";
+		$calledAction	= $this->arguments->getArgument( 0 );
+		if( $calledAction ){
+			try{
+				$className	= $this->disolveCommandClass( $calledAction );
+			}
+			catch( Exception $e ){
+				Hymn_Client::out( "Error: ".$e->getMessage() );
+				Hymn_Client::out( "" );
+			}
 		}
+		$this->arguments->removeArgument( 0 );
+		if( !in_array( $action, self::$commandWithoutConfig ) ){
+			$this->readConfig();
+			$this->loadLibraries();
+			$this->setupDatabaseConnection();
+		}
+		$this->executeCommandClass( $className );
+	}
+
+	protected function disolveCommandClass( $action ){
+		if( !strlen( trim( $action ) ) )
+			throw new InvalidArgumentException( 'No valid action given' );
+		$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
+		$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
+		if( !class_exists( $className ) )
+			throw new InvalidArgumentException( 'Invalid action: '.$action );
+		return $className;
+	}
+
+	protected function executeCommandClass( $className ){
 //		self::out( "Command Class: ".$className );
 		try{
-			$this->arguments->removeArgument( 0 );
 			$object		= new $className( $this );
 			$object->run( $this->arguments );
 		}

@@ -38,9 +38,11 @@
 class Hymn_Command_Default extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
-		Hymn_Client::out( "Arguments:" );
-		print_r( $this->client->arguments->getArguments() );
-		Hymn_Client::out( "Options:" );
-		print_r( $this->client->arguments->getOptions() );
+		Hymn_Client::out( "" );
+		Hymn_Client::out( "This is Hymn - the swiss army knife for Hydrogen applications." );
+		Hymn_Client::out( "Use it to create and install an application or manage its modules." );
+		Hymn_Client::out( "" );
+		Hymn_Client::out( "Please see 'hymn help' for usage information!" );
+		Hymn_Client::out( "" );
 	}
 }
