@@ -34,10 +34,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
+ *	@deprecated		use command 'init' instead
  */
 class Hymn_Command_Create extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
+		Hymn_Client::out( "" );
+		Hymn_Client::out( "WARNING: Command 'create' is deprecated. Please use command 'init' instead!" );
+		Hymn_Client::out( "" );
 		$data	= array();
 		Hymn_Client::out( "Please enter application information:" );
 
