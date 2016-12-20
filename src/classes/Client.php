@@ -39,38 +39,6 @@ class Hymn_Client{
 
 	protected $application;
 
-	public $arguments;
-
-	protected $config;
-
-	protected $dba;
-
-	protected $dbc;
-
-	protected $instance;
-
-	protected $isLiveCopy	= FALSE;
-
-	static public $fileName	= ".hymn";
-
-	static public $pathDefaults	= array(
-		'images'		=> 'images/',
-		'locales'		=> 'locales/',
-		'scripts'		=> 'scripts/',
-		'templates'		=> 'templates/',
-		'themes'		=> 'themes/',
-	);
-
-	static public $version	= "0.9.0b2";
-
-	static protected $commandWithoutConfig	= array(
-		'default',
-		'help',
-		'create',																					//  @deprecated
-		'init',
-		'version',
-	);
-
 	protected $baseArgumentOptions	= array(
 		'dry'		=> array(
 			'pattern'	=> '/^-d|--dry/',
@@ -114,6 +82,38 @@ class Hymn_Client{
 		)
 	);
 
+	static public $fileName	= ".hymn";
+
+	static protected $commandWithoutConfig	= array(
+		'default',
+		'help',
+		'create',																					//  @deprecated
+		'init',
+		'version',
+	);
+
+	static public $pathDefaults	= array(
+		'images'		=> 'images/',
+		'locales'		=> 'locales/',
+		'scripts'		=> 'scripts/',
+		'templates'		=> 'templates/',
+		'themes'		=> 'themes/',
+	);
+
+	static public $version	= "0.9.0b2";
+
+	public $arguments;
+
+	protected $config;
+
+	protected $dba;
+
+	protected $dbc;
+
+	protected $instance;
+
+	protected $isLiveCopy	= FALSE;
+
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
@@ -145,7 +145,7 @@ class Hymn_Client{
 		$action			= "default";
 		$className		= "Hymn_Command_Default";
 		$calledAction	= $this->arguments->getArgument( 0 );
-		if( $calledAction ){
+		if( strlen( trim( $calledAction ) ) ){
 			try{
 				$className	= $this->disolveCommandClass( $calledAction );
 			}
@@ -185,6 +185,8 @@ class Hymn_Client{
 	}
 
 	public function getConfig(){
+		if( !$this->config )
+			$this->readConfig();
 		return $this->config;
 	}
 
@@ -269,15 +271,14 @@ class Hymn_Client{
 			print( PHP_EOL );
 	}
 
-	protected function readConfig( $filename = NULL ){
+	protected function readConfig(){
 		if( $this->config )
 			return;
-		$filename	= $filename ? $filename : self::$fileName;
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$this->config	= json_decode( file_get_contents( $filename ) );
+		if( !file_exists( self::$fileName ) )
+			throw new RuntimeException( 'File "'.self::$fileName.'" is missing' );
+		$this->config	= json_decode( file_get_contents( self::$fileName ) );
 		if( is_null( $this->config ) )
-			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
+			throw new RuntimeException( 'Configuration file "'.self::$fileName.'" is not valid JSON' );
 		if( is_string( $this->config->sources ) ){
 			if( !file_exists( $this->config->sources ) )
 				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is missing' );

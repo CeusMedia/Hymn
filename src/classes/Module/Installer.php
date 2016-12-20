@@ -56,8 +56,20 @@ class Hymn_Module_Installer{
 		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
 		$this->app		= $this->config->application;												//  shortcut to application config
 
-		if( $app = $this->app && isset( $app->installMode ) && isset( $app->installType ) )			//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
+		if( isset( $this->app->installMode ) )
+			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
+		if( isset( $this->app->installType ) )
+			Hymn_Client::out( "Install Type: ".$this->app->installType );
+
+		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
+			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
+				$this->isLiveCopy	= TRUE;
+		if( $this->isLiveCopy ){
+			Hymn_Client::out( "" );
+			Hymn_Client::out( "ATTENTION: This build is a live installation in copy mode." );
+			Hymn_Client::out( "There is not uplink to commit file changes to source repository." );
+			Hymn_Client::out( "" );
+		}
 	}
 
 	/**

@@ -38,8 +38,10 @@
 class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
-		$config		= $this->client->getConfig();
+		if( !file_exists( Hymn_Client::$fileName ) )
+			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
+		$config		= $this->client->getConfig();
 		$moduleId	= $this->client->arguments->getArgument( 0 );
 //		$shelfId	= $this->client->arguments->getArgument( 1 );
 
