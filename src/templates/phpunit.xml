@@ -1,0 +1,22 @@
+<phpunit bootstrap="test/bootstrap.php" colors="true">
+  <testsuites>
+    <testsuite name="%appKey%">
+      <directory>%pathSource%</directory>
+    </testsuite>
+  </testsuites>
+  <filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+      <directory suffix=".php">src</directory>
+    </whitelist>
+  </filter>
+  <logging>
+    <log type="coverage-html" target="%pathTarget%/Coverage" lowUpperBound="35" highLowerBound="70"/>
+    <log type="coverage-clover" target="%pathTarget%/coverage.clover.xml"/>
+    <log type="coverage-php" target="%pathTarget%/coverage.php.serialized"/>
+    <log type="json" target="%pathTarget%/logfile.json"/>
+    <log type="tap" target="%pathTarget%/logfile.tap"/>
+    <log type="junit" target="%pathTarget%/logfile.xml" logIncompleteSkipped="false"/>
+    <log type="testdox-html" target="%pathTarget%/testdox.html"/>
+    <log type="testdox-text" target="%pathTarget%/testdox.txt"/>
+</logging>
+</phpunit>

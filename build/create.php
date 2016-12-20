@@ -23,6 +23,9 @@ __HALT_COMPILER(); ?>' );
 $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFileName ) );
 $archive->addFile( $rootPath.'/src/locales/en/help/default.txt', 'locales/en/help/default.txt' );
 $archive->addFile( $rootPath.'/src/locales/en/help/reflect-options.txt', 'locales/en/help/reflect-options.txt' );
+$archive->addFile( $rootPath.'/src/templates/Makefile', 'templates/Makefile' );
+$archive->addFile( $rootPath.'/src/templates/phpunit.xml', 'templates/phpunit.xml' );
+$archive->addFile( $rootPath.'/src/templates/test_bootstrap.php', 'templates/test_bootstrap.php' );
 
 shell_exec( "cp -r ".$rootPath."/src/classes ".$rootPath."/build/" );
 $directory	= new RecursiveDirectoryIterator( $rootPath."/build/classes", RecursiveDirectoryIterator::SKIP_DOTS );
