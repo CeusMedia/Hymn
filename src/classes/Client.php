@@ -168,7 +168,7 @@ class Hymn_Client{
 		$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
 		$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
 		if( !class_exists( $className ) )
-			throw new InvalidArgumentException( 'Invalid action: '.$action );
+			throw new InvalidArgumentException( sprintf( "Invalid action '%s'.", $action ) );
 		return $className;
 	}
 
@@ -237,6 +237,13 @@ class Hymn_Client{
 		}
 		return $config;
 	}
+
+/*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = "dev" ){
+		$mode	= $defaultInstallMode;
+		if( isset( $this->config->application->{"installMode"} ) )
+			$mode	= $this->config->application->{"installMode"};
+		return $mode;
+	}*/
 
 	public function getModuleInstallType( $moduleId, $defaultInstallType = "copy" ){
 		$type	= $defaultInstallType;

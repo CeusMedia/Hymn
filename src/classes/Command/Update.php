@@ -39,6 +39,7 @@
 class Hymn_Command_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected $installType	= "link";
+	protected $installMode	= "dev";
 	protected $dry			= FALSE;
 	protected $force		= FALSE;
 	protected $quiet		= FALSE;
@@ -56,6 +57,11 @@ class Hymn_Command_Update extends Hymn_Command_Abstract implements Hymn_Command_
 //		$start		= microtime( TRUE );
 
 		$config		= $this->client->getConfig();
+		if( isset( $config->application->installType ) )
+			$this->installType	= $config->application->installType;
+		if( isset( $config->application->installMode ) )
+			$this->installMode	= $config->application->installMode;
+
 		$library	= new Hymn_Module_Library();
 		foreach( $config->sources as $sourceId => $source ){
 			$active	= !isset( $source->active ) || $source->active;
@@ -96,10 +102,17 @@ class Hymn_Command_Update extends Hymn_Command_Abstract implements Hymn_Command_
 		foreach( $outdatedModules as $update ){
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
+//			$installMode	= $this->client->getModuleInstallMode( $module->id, $this->installMode );
 /*			$relation->addModule( $module, $installType );
 */
-			$message	= "Updating module '%s' (%s -> %s) ...";
-			$message	= sprintf( $message, $module->id, $update->installed, $update->available );
+			$message	= "Updating module '%s' from %s to %s as %s ...";
+			$message	= sprintf(
+				$message,
+				$module->id,
+				$update->installed,
+				$update->available,
+				$installType
+			);
 			Hymn_Client::out( $message );
 			$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
 			$installer->update( $module, $installType, $this->verbose, $this->dry );
