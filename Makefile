@@ -2,6 +2,7 @@ export PWD	:= $(shell pwd)
 
 create-phar:
 	@echo "Creating hymn.phar"
+	@test -f hymn.phar && rm hymn.phar || true
 	@php build/create.php
 	@chmod +x hymn.phar
 

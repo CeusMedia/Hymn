@@ -151,7 +151,6 @@ class Hymn_Client{
 			}
 			catch( Exception $e ){
 				Hymn_Client::out( "Error: ".$e->getMessage() );
-				Hymn_Client::out( "" );
 			}
 		}
 		$this->arguments->removeArgument( 0 );
