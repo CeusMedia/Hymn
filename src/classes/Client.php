@@ -240,6 +240,7 @@ class Hymn_Client{
 	/**
 	 *	@deprecated		this method seems to be NOT used
 	 *	@todo			remove or move to abstract command if needed
+	 *	@todo			to be removed in v0.9.1
 	 */
 	public function getModuleConfiguration( $moduleId, $key = NULL, $force = FALSE ){
 		if( !isset( $this->config->modules->{$moduleId} ) ){

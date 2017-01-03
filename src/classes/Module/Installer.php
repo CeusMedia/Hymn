@@ -177,10 +177,9 @@ class Hymn_Module_Installer{
 			$localModule->path	= $appUri;
 
 			//  check relations for new modules !
-			//  @todo call "full module install" (do not know HOW right now) instead of exception
 			foreach( $module->relations->needs as $relation ){
 				if( !array_key_exists( $relation, $localModules ) ){
-					throw new RuntimeException( "Please install module '".$relation."' first!" );
+					$this->install( $relation, $installType, $verbose, $dry );
 				}
 			}
 			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
