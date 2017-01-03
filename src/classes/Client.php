@@ -129,8 +129,8 @@ class Hymn_Client{
 		try{
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
-			$action	= $this->arguments->getArgument( 0 );
-			if( $this->arguments->getOption( 'help' ) ){
+			$action	= $this->arguments->getArgument();
+			if( !$action && $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, "help" );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
@@ -302,7 +302,7 @@ class Hymn_Client{
 		if( $this->config && !$forceReload )
 			return;
 		if( !file_exists( self::$fileName ) )
-			throw new RuntimeException( 'File "'.self::$fileName.'" is missing' );
+			throw new RuntimeException( "File '".self::$fileName."' is missing. Please use command 'init'" );
 		$this->config	= json_decode( file_get_contents( self::$fileName ) );
 		if( is_null( $this->config ) )
 			throw new RuntimeException( 'Configuration file "'.self::$fileName.'" is not valid JSON' );

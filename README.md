@@ -9,7 +9,7 @@ Console tool for installing Hydrogen applications.
 
 ## Commands:
 
-### A. For creating and extending an App's Hymn config file, you execute these commands:
+### A. For creating and extending a project Hymn config file, you execute these commands:
 
 #### 1. Project Creation and Source Management
 
@@ -20,7 +20,7 @@ Console tool for installing Hydrogen applications.
 	- source-enable                  ... to be implemented ...
 	- source-disable                 ... to be implemented ...
 
-#### 2. Setup Configuration and Information
+#### 2. Project Setup and Information
 
 	- info                           Show project configuration from Hymn file
 	- config-get KEY                 Get setting from Hymn file
@@ -28,7 +28,7 @@ Console tool for installing Hydrogen applications.
 	- database-config                Enter and save database connection details
 	- database-test                  Test database connection
 
-#### 3. Setup Module Management
+#### 3. Project Module Management
 
 	- config-module-add              Add a module to Hymn file
 	- config-module-remove           Remove a module from Hymn file
@@ -37,7 +37,7 @@ Console tool for installing Hydrogen applications.
 	- config-module-dump             Export current module settings into Hymn file
 
 
-#### 4. Module Information
+#### 4. Project Module Information
 
 	- info MODULE                    Show information about module
 	- modules-available [SHELF]      List modules available in library shelve(s)
@@ -46,29 +46,16 @@ Console tool for installing Hydrogen applications.
 	- modules-search                 List modules found by name part
 	- modules-updatable              List modules with available updates
 
-#### 5. Project Base Configuration
-
-	- config-base-disable KEY        Disable an enabled setting in config.ini
-	- config-base-enable KEY         Enable a disabled setting in config.ini
-	- config-base-get KEY            Read setting from config.ini
-	- config-base-set KEY VALUE      Save setting in config.ini
-
-#### 6. Project Database Management
-
-	- database-clear [-fqv]          Drop database tables (force, verbose, quiet)
-	- database-dump [PATH]           Export database to SQL file
-	- database-load [PATH|FILE]      Import (specific or latest) SQL file
-
-#### 7. Self Management
-
-	- help                           Show this help screen
-	- version                        Show current hymn version
-	- self-update                    Replace global hymn installation by latest download
-	- reflect-options                Show parsable arguments and options
-
 ### B. Having a valid Hymn config file, you execute these commands:
 
-#### 1. Project Module Management
+#### 1. App Base Configuration Management
+
+	- config-base-get KEY            Read setting from config.ini
+	- config-base-set KEY VALUE      Save setting in config.ini
+	- config-base-disable KEY        Disable an enabled setting in config.ini
+	- config-base-enable KEY         Enable a disabled setting in config.ini
+
+#### 2. App Instance & Module Management
 
 	- app-graph                      Render module relations graph
 	- app-sources                    List installed library sources
@@ -80,6 +67,21 @@ Console tool for installing Hydrogen applications.
 	- app-config-set                 (not implemented yet)
 	- app-config-module-get          (not implemented yet)
 	- app-config-module-set          (not implemented yet)
+
+#### 3. App Database Management
+
+	- database-clear [-fqv]          Drop database tables (force, verbose, quiet)
+	- database-dump [PATH]           Export database to SQL file
+	- database-load [PATH|FILE]      Import (specific or latest) SQL file
+
+### C. Additional Functions
+
+#### 1. Self Management
+
+	- help                           Show this help screen
+	- version                        Show current hymn version
+	- self-update                    Replace global hymn installation by latest download
+	- reflect-options                Show parsable arguments and options
 
 ## Options:
 

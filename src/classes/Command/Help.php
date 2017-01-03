@@ -33,7 +33,6 @@
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
  */
 class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
@@ -45,18 +44,17 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	public function run(){
 		$action		= $this->client->arguments->getArgument( 0 );									//  get first argument as action
 		$className	= "Hymn_Command_Default";														//  @todo remove this line since it is not used anymore
-		if( strlen( $action ) ){																	//
-			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );							//
-			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );					//
-			if( !class_exists( $className ) )														//
-				throw new InvalidArgumentException( 'Command "'.$action.'" is not existing' );		//
-			$class	= new ReflectionClass( $className );											//
-			$object	= $class->newInstanceArgs( array( $this->client ) );							//
-			call_user_func( array( $object, 'help' ) );												//
-			return;									//
+		if( strlen( $action ) ){																	//  a help topic has been given (by first argument after 'help')
+			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );							//  resolve folder and classes from command
+			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );					//  build possible command class name
+			if( !class_exists( $className ) )														//  built command class it not existing
+				throw new InvalidArgumentException( "Command '".$action."' is not existing" );		//  quit with exception
+			$class	= new ReflectionClass( $className );											//  otherwise reflect command class
+			$object	= $class->newInstanceArgs( array( $this->client ) );							//  invoke command class
+			call_user_func( array( $object, 'help' ) );												//  call public custom public help method of command class
+			return;																					//  return here to avoid fallback
 		}
-		$config		= $this->client->getConfig();													//
-		$lines		= file( "phar://hymn.phar/locales/en/help/default.txt" );						//
-		Hymn_Client::out( $lines );																	//
+		$lines		= file( "phar://hymn.phar/locales/en/help/default.txt" );						//  point to default help text file
+		Hymn_Client::out( $lines );																	//	print default help text
 	}
 }
