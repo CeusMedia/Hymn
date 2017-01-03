@@ -36,8 +36,69 @@
  */
 abstract class Hymn_Command_Abstract{
 
+	protected $library	= NULL;
+
 	public function __construct( Hymn_Client $client ){
 		$this->client = $client;
+	}
+
+	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
+		return Hymn_Client::getInput( $message, $type, $default, $options, $break );
+	}
+
+	/**
+	 *	Return all available modules in library as map by module ID.
+	 *	Reduce all available modules in library (from all source) to map by module ID.
+	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
+	 *	@access		protected
+	 *	@param		...			$config		...
+	 *	@param		...			$shelfId	...
+	 *	@return		array					Map of modules by ID
+	 *	@todo		find a better solution!
+	 */
+	protected function getAvailableModulesMap( $config, $shelfId = NULL ){
+		$library	= $this->getLibrary( $config );													//  try to load sources into a library
+		$moduleMap	= array();																		//  prepare empty list of available modules
+		foreach( $library->getModules( $shelfId ) as $module )										//  iterate available modules in library
+			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
+		return $moduleMap;																			//  return map of modules by ID
+	}
+
+	/**
+	 *	Returns library of available modules in found sources.
+	 *	Note: Several sources are stored as shelfes, so same module IDs are allowed.
+	 *	Loads library sources on first call, returns already loaded library on second call.
+	 *	Reloading library is possible with flag 'forceReload'.
+	 *	@access		protected
+	 *	@param		...			$config			Hymn configuration
+	 *	@param		boolean		$forceReload	Flag: reload library (optional, not default)
+	 *	@return		Hymn_Module_Library			Library of available modules in found sources
+	 */
+	protected function getLibrary( $config, $forceReload = FALSE ){
+		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
+			$this->library	= new Hymn_Module_Library();											//  create new module library
+			if( !isset( $config->sources ) || empty( $config->sources ) ){
+				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
+				Hymn_Client::out( sprintf( $msg, $sourceId ) );										//  output warning
+				return $this->library;																//  return empty library
+			}
+			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
+				if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
+					$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
+					Hymn_Client::out( sprintf( $msg, $sourceId ) );									//  output warning
+				}
+				else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
+					$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
+					Hymn_Client::out( sprintf( $msg, $sourceId ) );									//  output warning
+				}
+				else{
+					$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
+					$type	= isset( $source->type ) ? $source->type : 'folder';					//  set default source type is not defined
+					$this->library->addShelf( $sourceId, $source->path, $type, $active );			//  add source as shelf in library
+				}
+			}
+		}
+		return $this->library;																		//  return loaded library
 	}
 
 	public function help(){

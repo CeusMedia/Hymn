@@ -55,12 +55,28 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
 
-		if( !isset( $config->modules->{$module} ) || !isset( $config->modules->{$module}->config ) )
-			throw new InvalidArgumentException( 'No configuration for module "'.$module.'" set' );
-		if( !isset( $config->modules->{$module}->config->{$configKey} ) )
-			throw new InvalidArgumentException( 'No configuration value for key "'.$configKey.'" in module "'.$module.'" set' );
+		$availableModules	= $this->getAvailableModulesMap( $config );
 
-		$current	= $config->modules->{$module}->config->{$configKey};
-		Hymn_Client::out( $current );
+		if( !isset( $config->modules->{$module} ) && !isset( $availableModules[$module] ) )
+			throw new InvalidArgumentException( 'Module "'.$module.'" not installed and not configured' );
+
+		//  ATTENTION: In this view the ACTUAL value is taken from Hymn CONFIG file and seconded by module installation, only.
+		$settings	= (object) array(																//  identified values of config key
+			'configured'	=> NULL,																//  value from Hymn config file
+			'installed'		=> NULL,																//  value from installed module config
+			'actual'		=> NULL,																//  actual value, configuration over installation
+		);
+		if( isset( $availableModules[$module]->config[$configKey] ) )								//  config key is set in installed module
+			$settings->installed	= $availableModules[$module]->config[$configKey]->value;		//  note installed value
+		if( isset( $config->modules->{$module}->config->{$configKey} ) )							//  config key is set in Hymn config file
+			$settings->configured	= $config->modules->{$module}->config->{$configKey};			//  note valued configured in Hymn file
+		if( is_null( $settings->configured ) && is_null( $settings->installed ) ){					//  module key value is not set
+			$msg	= 'No configuration value for key "%2$s" in module "%1$s" set';					//  exception message
+			throw new InvalidArgumentException( sprintf( $msg, $module, $configKey ) );				//  throw exception
+		}
+		$settings->actual	= $settings->installed;													//  take possible value from installation
+		if( !is_null( $settings->configured ) )														//  module value is configured by Hymn file
+			$settings->actual	= $settings->configured;											//  take possible value from Hymn file
+		Hymn_Client::out( $settings->actual, FALSE );												//  return actual value
 	}
 }

@@ -73,7 +73,13 @@ class Hymn_Command_Config_Set extends Hymn_Command_Abstract implements Hymn_Comm
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
 
 		if( !strlen( trim( $value ) ) )
-			$value	= trim( Hymn_Client::getInput( "Value for '".$key."'", $current, array(), FALSE ) );
+			$value	= trim( Hymn_Client::getInput(
+				"Value for '".$key."'",
+				'string',
+				$current,
+				array(),
+				FALSE																				//  no break = inline question
+			) );
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 

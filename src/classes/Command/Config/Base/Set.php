@@ -49,7 +49,13 @@ class Hymn_Command_Config_Base_Set extends Hymn_Command_Abstract implements Hymn
 		$current	= $editor->getProperty( $key, FALSE );
 
 		if( !strlen( trim( $value ) ) )
-			$value	= trim( Hymn_Client::getInput( "Value for '".$key."'", $current, array(), FALSE ) );
+			$value	= trim( Hymn_Client::getInput(
+				"Value for '".$key."'",
+				'string',
+				$current,
+				array(),
+				FALSE																				//  no break = inline question
+			) );
 
 		$editor->setProperty( $key, $value );
 		clearstatcache();

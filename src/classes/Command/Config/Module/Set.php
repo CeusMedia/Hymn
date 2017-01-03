@@ -39,41 +39,59 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 	public function run(){
 		$filename	= Hymn_Client::$fileName;
-#		if( !file_exists( $filename ) )
-#			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-#		$config	= json_decode( file_get_contents( $filename ) );
-#		if( is_null( $config ) )
-#			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
+		if( !file_exists( $filename ) )
+			throw new RuntimeException( 'File "'.$filename.'" is missing' );
+		$config	= json_decode( file_get_contents( $filename ) );
+		if( is_null( $config ) )
+			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
 
 		$key	= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
-
-		$key	= $this->client->arguments->getArgument( 0 );
-		$value	= $this->client->arguments->getArgument( 1 );
-
-		$parts	= explode( ".", $key );
-		$module	= array_shift( $parts );
+		$parts		= explode( ".", $key );
+		$moduleId	= array_shift( $parts );
 		if( !$parts )
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
+		$value	= $this->client->arguments->getArgument( 1 );
 
-		if( !isset( $config->modules->{$module} ) )
-			$config->modules->{$module}	= (object) array();
-		if( !isset( $config->modules->{$module}->config ) )
-			$config->modules->{$module}->config	= (object) array();
-		if( !isset( $config->modules->{$module}->config->{$configKey} ) )
-			$config->modules->{$module}->config->{$configKey}	= NULL;
+		$availableModules	= $this->getAvailableModulesMap( $config );
 
-		$current	= $config->modules->{$module}->config->{$configKey};
+		if( !isset( $config->modules->{$moduleId} ) )
+			$config->modules->{$moduleId}	= (object) array();
+		if( !isset( $config->modules->{$moduleId}->config ) )
+			$config->modules->{$moduleId}->config	= (object) array();
+		if( !isset( $config->modules->{$moduleId}->config->{$configKey} ) )
+			$config->modules->{$moduleId}->config->{$configKey}	= NULL;
+
+		$current	= $config->modules->{$moduleId}->config->{$configKey};
+
+		$configType		= 'string';
+		$configDefault	= NULL;
+		$configValues	= array();
+		if( array_key_exists( $moduleId, $availableModules ) ){
+			$moduleConfig	= $availableModules[$moduleId]->config;
+			if( isset( $moduleConfig[$configKey] ) ){
+				$configType 	= $moduleConfig[$configKey]->type;
+				$configDefault	= $moduleConfig[$configKey]->value;
+				$configValues	= $moduleConfig[$configKey]->values;
+			}
+		}
+
 		if( !strlen( trim( $value ) ) )
-			$value	= trim( Hymn_Client::getInput( 'Value for "'.$module.':'.$configKey.'"', $current, array(), FALSE ) );
+			$value	= trim( Hymn_Client::getInput(
+				'Value for "'.$module.':'.$configKey.'"',
+				$configType,
+				$configDefault,
+				$configValues,
+				FALSE																				//  no break = inline question
+			) );
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 
-//		if( $current === $value )
-//			throw new RuntimeException( 'No change made' );
-		$config->modules->{$module}->config->{$configKey}	= $value;
+		if( $current === $value )
+			throw new RuntimeException( 'No change made' );
+		$config->modules->{$moduleId}->config->{$configKey}	= $value;
 		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
 		clearstatcache();
 	}

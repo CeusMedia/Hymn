@@ -39,23 +39,49 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 
 	public function run(){
 		$filename	= Hymn_Client::$fileName;
-		$config = json_decode( file_get_contents( $filename ) );
+		$config		= json_decode( file_get_contents( $filename ) );
 
-		$module	= $this->client->arguments->getArgument( 0 );
-		$module	= str_replace( ":", "_", $module );
-		if( !strlen( trim( $module ) ) )
+		$moduleName	= $this->client->arguments->getArgument( 0 );
+		if( !strlen( trim( $moduleName ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
+		$moduleId	= str_replace( ":", "_", $moduleName );
 
-		//  @todo check if module exists. But this would disable adding module before adding sources.
+		if( isset( $config->modules->{$moduleId} ) )
+			throw new RuntimeException( 'Module "'.$moduleId.'" is already registered' );
 
-        if( isset( $config->modules->{$module} ) )
-            throw new InvalidArgumentException( 'Module "'.$module.'" is already registered' );
+		$availableModules	= $this->getAvailableModulesMap( $config );
 
-		if( isset( $config->modules->{$module} ) )
-			return;
+		if( !array_key_exists( $moduleId, $availableModules ) )
+			throw new RuntimeException( sprintf( 'Module "%s" is not available', $moduleId ) );
 
-		$config->modules->{$module}	= (object) array();
+		$module			= $availableModules[$moduleId];
+		$moduleObject	= (object) array();
+		$msg			= 'Adding module "%s" (%s) from source "%s"';
+		Hymn_Client::out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
+		$moduleConfigValues	= array();
+		foreach( $module->config as $moduleConfig ){
+			$defaultValue	= $moduleConfig->value;
+			$actualValue	= trim( Hymn_Client::getInput(
+				sprintf( 'Value for "%s:%s"', $module->id, $moduleConfig->key ),
+				$moduleConfig->type,
+				$moduleConfig->value,
+				$moduleConfig->values,
+				FALSE																				//  no break = inline question
+			) );
+			if( in_array( $moduleConfig->type, array( 'bool', 'boolean' ) ) ){
+				$actualValue	= $actualValue ? 'yes' : 'no';
+				$defaultValue	= 'no';
+				if( in_array( $moduleConfig->value, array( 'yes', '1' ) ) )
+					$defaultValue	= 'yes';
+			}
+			if( $actualValue !== $defaultValue )
+				$moduleConfigValues[$moduleConfig->key]	= $actualValue;
+		}
+		if( count( $moduleConfigValues ) )
+			$moduleObject->config	= $moduleConfigValues;
+		$config->modules->{$module->id}	= $moduleObject;
 		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
 		clearstatcache();
+		Hymn_Client::out( "Saved updated hymn file." );
 	}
 }

@@ -94,7 +94,7 @@ class Hymn_Command_Configure_Database extends Hymn_Command_Abstract implements H
 			foreach( $questions as $question ){														//  iterate questions
 				$default	= $dba->{$question->key};												//  shortcut default
 				$options	= isset( $question->options ) ? $question->options : array();			//  realize options
-				$input		= Hymn_Client::getInput( $question->label, $default, $options, FALSE );	//  ask for value
+				$input		= Hymn_Client::getInput( $question->label, 'string', $default, $options, FALSE );	//  ask for value
 				$dba->{$question->key}	= $input;													//  assign given value
 			}
 			$dsn	= $dba->driver.":host=".$dba->host.";port=".$dba->port.";dbname=".$dba->name;	//  render PDO DSN

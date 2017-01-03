@@ -37,60 +37,59 @@
  */
 class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
-	protected function ask( $message, $default = NULL, $options = array(), $break = TRUE ){
-		return Hymn_Client::getInput( $message, $default, $options, $break );
-	}
-
 	public function run(){
 		$data	= array();
 		Hymn_Client::out( "Please enter application information:" );
-
-		$title		= $this->ask( "- Application title", "My Project", NULL, FALSE );
-		$uri		= $this->ask( "- Installation Path", getcwd().'/', NULL, FALSE );
-		$protocol	= $this->ask( "- HTTP Protocol", "http://", NULL, FALSE );
-		$host		= $this->ask( "- HTTP Host", "example.com", NULL, FALSE );
-		$path		= $this->ask( "- HTTP Path", "/", NULL, FALSE );
+		$title		= $this->ask( "- Application title", 'string', "My Project", NULL, FALSE );
+		$uri		= $this->ask( "- Installation Path", 'string', getcwd().'/', NULL, FALSE );
+		$protocol	= $this->ask( "- HTTP Protocol", 'string', "http://", NULL, FALSE );
+		$host		= $this->ask( "- HTTP Host", 'string', "example.com", NULL, FALSE );
+		$path		= $this->ask( "- HTTP Path", 'string', "/", NULL, FALSE );
+		$type		= $this->ask( "- Installation Type", 'string', "link", array( 'copy', 'link' ), FALSE );
+		$mode		= $this->ask( "- Installation Mode", 'string', "dev", array( 'dev', 'live', 'test' ), FALSE );
 
 		$data['application']	= (object) array(
 			'title'		=> $title,
 			'url'		=> $protocol.$host."/".ltrim( $path, "/"),
 			'uri'		=> $uri,
+			'installType'	=> $type,
+			'installMode'	=> $mode,
 		);
 
-		$data['library']	= (object) array();
+//		$data['library']	= (object) array();
 		$data['sources']	= (object) array();
 		$data['modules']	= (object) array();
 
 		Hymn_Client::out( "" );
 		Hymn_Client::out( "Please enter system information:" );
 		$data['system']		= (object) array(
-			'user'	=> $this->ask( "- System User", get_current_user(), NULL, FALSE ),
-			'group'	=> $this->ask( "- System Group", "www-data", NULL, FALSE ),
+			'user'	=> $this->ask( "- System User", 'string', get_current_user(), NULL, FALSE ),
+			'group'	=> $this->ask( "- System Group", 'string', "www-data", NULL, FALSE ),
 		);
-		$appKey	= $this->ask( "- Application Key Name", "MyCompany/MyApp", NULL, FALSE );
+		$appKey	= $this->ask( "- Application Key Name", 'string', "MyCompany/MyApp", NULL, FALSE );
 		Hymn_Client::out( "" );
-		$initDatabase	= $this->ask( "Configure database?", "y", array( "Y", "n" ), FALSE );
+		$initDatabase	= $this->ask( "Configure database?", 'boolean', "yes", NULL, FALSE );
 		if( $initDatabase ){
 			Hymn_Client::out( "Please enter database information:" );
 			$data['database']	= (object) array(
-				'driver'	=> $this->ask( "- PDO Driver", "mysql", NULL, FALSE ),
-				'host'		=> $this->ask( "- Host", "localhost", NULL, FALSE ),
-				'port'		=> $this->ask( "- Port", "3306", NULL, FALSE ),
-				'username'	=> $this->ask( "- Username", NULL, NULL, FALSE ),
-				'password'	=> $this->ask( "- Password", NULL, NULL, FALSE ),
-				'name'		=> $this->ask( "- Database Name", NULL, NULL, FALSE ),
-				'prefix'	=> $this->ask( "- Table Prefix", "", NULL, FALSE ),
+				'driver'	=> $this->ask( "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE ),
+				'host'		=> $this->ask( "- Host", 'string', "localhost", NULL, FALSE ),
+				'port'		=> $this->ask( "- Port", 'string', "3306", NULL, FALSE ),
+				'username'	=> $this->ask( "- Username", 'string', NULL, NULL, FALSE ),
+				'password'	=> $this->ask( "- Password", 'string', NULL, NULL, FALSE ),
+				'name'		=> $this->ask( "- Database Name", 'string', NULL, NULL, FALSE ),
+				'prefix'	=> $this->ask( "- Table Prefix", 'string', "", NULL, FALSE ),
 			);
 		}
 		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
 		Hymn_Client::out( "Configuration file ".Hymn_Client::$fileName." has been created." );
 		Hymn_Client::out( "" );
-		$initPhpunit	= $this->ask( "Configure PHPUnit?", "y", array( "Y", "n" ), FALSE );
+		$initPhpunit	= $this->ask( "Configure PHPUnit?", 'boolean', "yes", NULL, FALSE );
 		if( $initPhpunit ){
-			$pathSource	= $this->ask( "- Folder with test classes", "test", NULL, FALSE );
-			$pathTarget	= $this->ask( "- Path for test results", "doc/Test", NULL, FALSE );
+			$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
+			$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
 			$pathSource	= rtrim( trim( $pathSource ), '/' );
-			$bootstrap	= $this->ask( "- Bootstrap file", "bootstrap.php", NULL, FALSE );
+			$bootstrap	= $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE );
 			$pathPhar	= "phar://hymn.phar/";
 			Hymn_Module_Files::createPath( $pathSource );
 			copy( $pathPhar."templates/test_bootstrap.php", $pathSource.'/bootstrap.php' );
@@ -104,14 +103,14 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			Hymn_Client::out( "Empty bootstrap file for PHPUnit test classes has been created." );
 		}
 		Hymn_Client::out( "" );
-		if( $this->ask( "Configure composer?", "y", array( "Y", "n" ), FALSE ) ){
+		if( $this->ask( "Configure composer?", 'boolean', "yes", NULL, FALSE ) ){
 			$command	= "composer --name %s --author %";
 			$command	= sprintf( $command, $appKey, '' );
 			exec( $command );
 			Hymn_Client::out( "Composer file has been created." );
 		}
 		Hymn_Client::out( "" );
-		if( $this->ask( "Create make file?", "y", array( "Y", "n" ), FALSE ) ){
+		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
 			copy( $pathPhar."templates/Makefile", 'Makefile' );
 			Hymn_Client::out( "Make file has been created." );
 		}

@@ -84,6 +84,8 @@ class Hymn_Client{
 
 	static public $fileName	= ".hymn";
 
+	static public $outputMethod	= "print";
+
 	static protected $commandWithoutConfig	= array(
 		'default',
 		'help',
@@ -118,6 +120,9 @@ class Hymn_Client{
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
+		if( self::$outputMethod !== "print" )
+			ob_start();
+
 		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
@@ -134,10 +139,15 @@ class Hymn_Client{
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			$this->dispatch();
-//			self::out();
+			if( self::$outputMethod !== "print" )
+				return ob_get_clean();
+			exit( 0 );
 		}
 		catch( Exception $e ){
-			self::out( "Error: ".$e->getMessage() );
+			Hymn_Client::out( "Error: ".$e->getMessage()."." );
+			if( self::$outputMethod !== "print" )
+				return ob_get_clean();
+			exit( 1 );
 		}
 	}
 
@@ -145,18 +155,12 @@ class Hymn_Client{
 		$action			= "default";
 		$className		= "Hymn_Command_Default";
 		$calledAction	= $this->arguments->getArgument( 0 );
-		if( strlen( trim( $calledAction ) ) ){
-			try{
-				$className	= $this->disolveCommandClass( $calledAction );
-			}
-			catch( Exception $e ){
-				Hymn_Client::out( "Error: ".$e->getMessage() );
-			}
-		}
+		if( strlen( trim( $calledAction ) ) )
+			$className	= $this->disolveCommandClass( $calledAction );
 		$this->arguments->removeArgument( 0 );
 		if( !in_array( $action, self::$commandWithoutConfig ) ){
 			$this->readConfig();
-			$this->loadLibraries();
+//			$this->loadLibraries();																	//  disabled in v0.9 @deprecated in v1.0
 			$this->setupDatabaseConnection();
 		}
 		$this->executeCommandClass( $className );
@@ -168,20 +172,13 @@ class Hymn_Client{
 		$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
 		$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
 		if( !class_exists( $className ) )
-			throw new InvalidArgumentException( sprintf( "Invalid action '%s'.", $action ) );
+			throw new InvalidArgumentException( sprintf( "Invalid action '%s'", $action ) );
 		return $className;
 	}
 
 	protected function executeCommandClass( $className ){
-//		self::out( "Command Class: ".$className );
-		try{
-			$object		= new $className( $this );
-			$object->run( $this->arguments );
-		}
-		catch( Exception $e ){
-			Hymn_Client::out( $e->getMessage() );
-			exit;
-		}
+		$object		= new $className( $this );
+		$object->run( $this->arguments );
 	}
 
 	public function getConfig(){
@@ -203,8 +200,21 @@ class Hymn_Client{
 			throw new InvalidArgumentException( 'Invalid database access property key "'.$key.'"' );
 	}
 
-	static public function getInput( $message, $default = NULL, $options = array(), $break = TRUE ){
-		if( strlen( trim( $default ) ) )
+	static public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+		$typeIsBoolean	= in_array( $type, array( 'bool', 'boolean' ) );
+		$typeIsInteger	= in_array( $type, array( 'int', 'integer' ) );
+		$typeIsNumber	= in_array( $type, array( 'float', 'double', 'decimal' ) );
+		if( $typeIsBoolean ){
+			if( in_array( strtolower( $default ), array( 'y', 'yes', '1' ) ) ){
+				$options	= array( 'y', 'n' );
+				$default	= 'yes';
+			}
+			else {
+				$options	= array( 'y', 'n' );
+				$default	= 'no';
+			}
+		}
+		if( /*!$typeIsBoolean && */strlen( trim( $default ) ) )
 			$message	.= " [".$default."]";
 		if( is_array( $options ) && count( $options ) )
 			$message	.= " (".implode( "|", $options ).")";
@@ -213,16 +223,26 @@ class Hymn_Client{
 		do{
 			Hymn_Client::out( $message, $break );
 			$handle	= fopen( "php://stdin","r" );
-			$line		= trim( fgets( $handle ) );
-			if( !strlen( $line ) && $default )
-				$line	= $default;
+			$input	= trim( fgets( $handle ) );
+			if( !strlen( $input ) && $default )
+				$input	= $default;
 		}
-		while( $options && !in_array( $line, $options ) );
-		return $line;
+		while( $options && is_null( $default ) && !in_array( $input, $options ) );
+		if( $typeIsBoolean )
+			$input	= in_array( $input, array( 'y', 'yes', '1' ) ) ? TRUE : FALSE;
+		if( $typeIsInteger )
+			$input	= (int) $input;
+		if( $typeIsNumber )
+			$input	= (float) $input;
+		return $input;
 	}
 
+	/**
+	 *	@deprecated		this method seems to be NOT used
+	 *	@todo			remove or move to abstract command if needed
+	 */
 	public function getModuleConfiguration( $moduleId, $key = NULL, $force = FALSE ){
-		if( !isset( $this->config->modules->$moduleId ) ){
+		if( !isset( $this->config->modules->{$moduleId} ) ){
 			if( $force )
 				throw new RuntimeException( 'Configuration of module "'.$moduleId.'" is needed but missing' );
 			return (object) array();
@@ -257,16 +277,15 @@ class Hymn_Client{
 		return $type;
 	}
 
+	/**
+	 *	@deprecated		disabled in v0.9
+	 *	@todo			remove in v0.9.1
+	 */
 	protected function loadLibraries(){
 		foreach( $this->config->library as $library ){
 			if( !@include_once $library.'autoload.php5' )
 				throw new RuntimeException( 'Missing cmClasses in "'.$this->config->library->cmClasses.'"' );
-
 		}
-//		if( !@include_once $this->config->library->cmClasses.'autoload.php5' )
-//			throw new RuntimeException( 'Missing cmClasses in "'.$this->config->library->cmClasses.'"' );
-//		if( !@include_once $this->config->library->cmFrameworks.'autoload.php5' )
-//			throw new RuntimeException( 'Missing cmFrameworks in "'.$this->config->library->cmFrameworks.'"' );
 	}
 
 	static public function out( $messages = NULL, $newLine = TRUE ){
@@ -278,8 +297,8 @@ class Hymn_Client{
 			print( PHP_EOL );
 	}
 
-	protected function readConfig(){
-		if( $this->config )
+	protected function readConfig( $forceReload = FALSE ){
+		if( $this->config && !$forceReload )
 			return;
 		if( !file_exists( self::$fileName ) )
 			throw new RuntimeException( 'File "'.self::$fileName.'" is missing' );
@@ -323,8 +342,8 @@ class Hymn_Client{
 #			self::out( "This is a live copy build. Most hymn functions are not available." );
 	}
 
-	public function setupDatabaseConnection( $force = FALSE ){
-		if( $this->dbc )
+	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
+		if( $this->dbc && !$forceReset )
 			return;
 //		$this->dbc			= NULL;
 		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
@@ -374,10 +393,10 @@ class Hymn_Client{
 		foreach( $this->dba as $key => $value )
 			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 
-		if( $this->isLiveCopy )
-			return;
+		if( $this->isLiveCopy )																		//  this run is a build for a live copy
+			return;																					//  so target database is NOT available in this environment
 
-		if( strtolower( $this->dba->driver ) !== "mysql" )
+		if( strtolower( $this->dba->driver ) !== "mysql" )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
 			throw new OutOfRangeException( 'PDO driver "'.$this->dba->driver .'" is not supported at the moment' );
 
 		$dsn			= $this->dba->driver.':'.implode( ";", array(
