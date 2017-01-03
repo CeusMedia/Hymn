@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Alias for command 'app-sources' to handle deprecation until v1.0.
  *
  *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Alias for command 'app-sources' to handle deprecation until v1.0.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
@@ -33,20 +33,13 @@
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@deprecated		use command 'app-sources' instead
+ *	@todo   		to be removed in v1.0
  */
-class Hymn_Command_Sources extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Sources extends Hymn_Command_App_Sources{
 
 	public function run(){
-		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
-		$shelves	= $library->getShelves();
-		Hymn_Client::out( count( $shelves )." installed module source(s) detected:" );
-		foreach( $shelves as $shelf ){
-			Hymn_Client::out( '* '.$shelf->id);
-			Hymn_Client::out( '  - Active: '.( $shelf->active ? 'yes' : 'no' ) );
-			Hymn_Client::out( '  - Type: '.$shelf->type );
-			Hymn_Client::out( '  - Path: '.$shelf->path );
-		}
+		Hymn_Client::out( "DEPRECATED: Please use command 'app-sources' instead!" );
+		parent::run();
 	}
 }

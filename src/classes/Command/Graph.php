@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Alias for command 'app-graph' to handle deprecation until v1.0.
  *
  *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Alias for command 'app-graph' to handle deprecation until v1.0.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
@@ -33,43 +33,13 @@
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@deprecated		use command 'app-graph' instead
+ *	@todo   		to be removed in v1.0
  */
-class Hymn_Command_Graph extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
-	protected $installType	= "link";
+class Hymn_Command_Graph extends Hymn_Command_App_Graph{
 
 	public function run(){
-		$config		= $this->client->getConfig();
-		$force		= $this->client->arguments->getOption( 'force' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-
-		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
-			return Hymn_Client::out( "Configuration folder is either not existing or not writable" );
-		if( !$quiet && $verbose )
-			Hymn_Client::out( "Loading all needed modules into graph…" );
-
-		$library	= $this->getLibrary( $config );
-		$relation	= new Hymn_Module_Graph( $this->client, $library, $quiet );
-		foreach( $config->modules as $moduleId => $module ){
-			if( preg_match( "/^@/", $moduleId ) )
-				continue;
-			if( !isset( $module->active ) || $module->active ){
-				$module			= $library->getModule( $moduleId );
-				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
-				$relation->addModule( $module, $installType );
-			}
-		}
-
-		$targetFileGraph	= "config/modules.graph";
-		$targetFileImage	= "config/modules.graph.png";
-		$graph	= $relation->renderGraphFile( $targetFileGraph, $verbose );
-//		if( !$quiet )
-//			Hymn_Client::out( "Saved graph file to ".$targetFileGraph."." );
-
-		$image	= $relation->renderGraphImage( $graph, $targetFileImage, $verbose );
-//		if( !$quiet )
-//			Hymn_Client::out( "Saved graph image to ".$targetFileImage."." );
+		Hymn_Client::out( "DEPRECATED: Please use command 'app-graph' instead!" );
+		parent::run();
 	}
 }

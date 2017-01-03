@@ -41,7 +41,7 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 
 	public function run(){
 		Hymn_Client::out();
-		Hymn_Client::out( "Deprecated: Please use 'hymn config-set' or 'hymn config-get' instead!" );
+		Hymn_Client::out( "DEPRECATED: Please use commands 'config-set' or 'config-get' instead!" );
 		Hymn_Client::out();
 
 		$filename	= Hymn_Client::$fileName;

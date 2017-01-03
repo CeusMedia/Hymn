@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Alias for command 'app-uninstall' to handle deprecation until v1.0.
  *
  *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Alias for command 'app-uninstall' to handle deprecation until v1.0.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
@@ -33,51 +33,13 @@
  *	@copyright		2014-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@deprecated		use command 'app-uninstall' instead
+ *	@todo   		to be removed in v1.0
  */
-class Hymn_Command_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
-	protected $installType	= "link";
-	protected $force		= FALSE;
-	protected $verbose		= FALSE;
-	protected $quiet		= FALSE;
+class Hymn_Command_Uninstall extends Hymn_Command_App_Uninstall{
 
 	public function run(){
-		$this->dry		= $this->client->arguments->getOption( 'dry' );
-		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
-
-		if( $this->dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
-
-		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
-		$relation	= new Hymn_Module_Graph( $this->client, $library );
-
-		$moduleId		= trim( $this->client->arguments->getArgument() );
-		$listInstalled	= $library->listInstalledModules( $config->application->uri );
-		$isInstalled	= array_key_exists( $moduleId, $listInstalled );
-		if( !$moduleId )
-			Hymn_Client::out( "No module id given" );
-		else if( !$isInstalled )
-			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
-		else{
-			$module		= $listInstalled[$moduleId];
-			$neededBy	= array();
-			foreach( $listInstalled as $installedModuleId => $installedModule )
-				if( in_array( $moduleId, $installedModule->relations->needs ) )
-					$neededBy[]	= $installedModuleId;
-			if( $neededBy && !$this->force ) {
-				$list	= implode( ', ', $neededBy );
-				$msg	= "Module '%s' is needed by %d other modules (%s)";
-				Hymn_Client::out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
-			}
-			else{
-				$module->path	= 'not_relevant/';
-				$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
-				$installer->uninstall( $module, $this->verbose, $this->dry );
-			}
-		}
+		Hymn_Client::out( "DEPRECATED: Please use command 'app-uninstall' instead!" );
+		parent::run();
 	}
 }

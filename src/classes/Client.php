@@ -129,7 +129,7 @@ class Hymn_Client{
 		try{
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
-			$action	= $this->arguments->getArgument();
+			$action	= $this->arguments->getArgument( 0 );
 			if( $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, "help" );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
