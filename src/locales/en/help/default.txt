@@ -2,6 +2,12 @@
 Commands:
 ----------
 
+Keywords:
+- Project = Blueprint for an App installation configured by Hymn file
+- App     = Set if installed modules, built or installed by project configuration
+- Source  = Shelf within the library of available modules
+
+
 A. For creating and extending an App's Hymn config file, you execute these commands:
 
 A1. Project Creation and Source Management
@@ -55,7 +61,7 @@ B. Having a valid Hymn config file, you execute these commands:
 
 B1. App Instance & Module Management
 - app-graph                      Render module relations graph (see config/modules.graph.png)
-- app-sources                    List registered library shelves
+- app-sources                    List installed library sources
 - app-install [-dqv] [MODULE]    Install modules (or one specific)
 - app-uninstall [-dfqv] MODULE   Uninstall one specific installed module
 - app-update [-dqv] [MODULE]     Updated installed modules (or one specific)
