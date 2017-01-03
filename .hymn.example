@@ -1,29 +1,23 @@
 {
 	"application": {
-		"title": "My App",
-		"protocol": "http://",
-		"host": "localhost",
-		"path": "/path_to_app/",
-		"uri": "/var/www/path_to_app/",
-		"config": {
-		}
-	},
-	"library": {
-		"cmClasses": "/path/to/CeusMedia/Commn/",
-		"cmFrameworks": "/path/to/CeusMedia/HydrogenFrameworks/"
+		"title": "My Example Project",
+		"url": "http://example.org/myProjectPath/",
+		"uri": "/var/www/myProjectPath/"
+		"installMove": "dev",
+		"installType": "link"
 	},
 	"sources": {
 		"Local_CM_Public": {
 			"active": true,
 			"title": "Local copy of public module library maintained by Ceus Media",
 			"type": "folder",
-			"path": "/var/www/lib/cmFrameworks/trunk/modules/Hydrogen/"
+			"path": ""
 		},
 		"Local_CM_Protected": {
 			"active": true,
 			"type": "folder",
 			"title": "Local copy of protected modules provided by Ceus Media",
-			"path": "/var/www/lib/modules/"
+			"path": ""
 		}
 	},
 	"modules": {

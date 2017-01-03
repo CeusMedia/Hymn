@@ -1,10 +1,19 @@
 export PWD	:= $(shell pwd)
 
+create: create-phar
+
 create-phar:
-	@echo "Creating hymn.phar"
+	@echo "Creating hymn.phar @ Production"
 	@test -f hymn.phar && rm hymn.phar || true
 	@php build/create.php
 	@chmod +x hymn.phar
+
+create-phar-dev:
+	@echo "Creating hymn.phar @ Development"
+	@test -f hymn.phar && rm hymn.phar || true
+	@php build/create.php dev
+	@chmod +x hymn.phar
+
 
 install: uninstall create-phar
 	@echo "Installing hymn to /usr/local/bin"
