@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,13 +30,18 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
 class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
 		$data	= array();
 		Hymn_Client::out( "Please enter application information:" );
@@ -109,14 +114,14 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			exec( $command );
 			Hymn_Client::out( "Composer file has been created." );
 		}
-		Hymn_Client::out( "" );
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
 			copy( $pathPhar."templates/Makefile", 'Makefile' );
 			Hymn_Client::out( "Make file has been created." );
 		}
-		Hymn_Client::out( "" );
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		Hymn_Client::out( "Done." );
 		Hymn_Client::out( "Now you can execute commands like install module sources using 'hymn source-add'." );
-		Hymn_Client::out( "" );
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
 	}
 }

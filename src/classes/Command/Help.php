@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,31 +30,33 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
 class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
-
-		$action		= $this->client->arguments->getArgument( 0 );
-		$className	= "Hymn_Command_Default";
-		if( strlen( $action ) ){
-			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );
-			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
-			if( !class_exists( $className ) )
-				throw new InvalidArgumentException( 'Command "'.$action.'" is not existing' );
-			$class	= new ReflectionClass( $className );
-			$object	= $class->newInstanceArgs( array( $this->client ) );
-			call_user_func( array( $object, 'help' ) );
-			return;
+		$action		= $this->client->arguments->getArgument( 0 );									//  get first argument as action
+		$className	= "Hymn_Command_Default";														//  @todo remove this line since it is not used anymore
+		if( strlen( $action ) ){																	//
+			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );							//
+			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );					//
+			if( !class_exists( $className ) )														//
+				throw new InvalidArgumentException( 'Command "'.$action.'" is not existing' );		//
+			$class	= new ReflectionClass( $className );											//
+			$object	= $class->newInstanceArgs( array( $this->client ) );							//
+			call_user_func( array( $object, 'help' ) );												//
+			return;									//
 		}
-
-		$config		= $this->client->getConfig();
-		$lines		= file( "phar://hymn.phar/locales/en/help/default.txt" );
-		Hymn_Client::out( $lines );
-		return;
-  }
+		$config		= $this->client->getConfig();													//
+		$lines		= file( "phar://hymn.phar/locales/en/help/default.txt" );						//
+		Hymn_Client::out( $lines );																	//
+	}
 }

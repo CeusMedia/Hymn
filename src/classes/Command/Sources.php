@@ -2,7 +2,7 @@
 /**
  *	Alias for command 'app-sources' to handle deprecation until v1.0.
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@deprecated		use command 'app-sources' instead
@@ -38,8 +38,15 @@
  */
 class Hymn_Command_Sources extends Hymn_Command_App_Sources{
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
-		Hymn_Client::out( "DEPRECATED: Please use command 'app-sources' instead!" );
-		parent::run();
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		Hymn_Client::out( "DEPRECATED: Please use command 'app-sources' instead!" );				//  output deprecation notice
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		parent::run();																				//  run newer command
 	}
 }

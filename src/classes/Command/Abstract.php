@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -108,13 +108,21 @@ abstract class Hymn_Command_Abstract{
 		if( file_exists( $fileName ) )
 			Hymn_Client::out( file( $fileName ) );
 		else{
-			Hymn_Client::out();
+			Hymn_Client::out( "" );																	//  print empty line as optical separator
 			Hymn_Client::out( "Outch! Help on this topic is not available yet. I am sorry :-/" );
-			Hymn_Client::out();
+			Hymn_Client::out( "" );																	//  print empty line as optical separator
 			Hymn_Client::out( "But YOU can improve this situation :-)" );
 			Hymn_Client::out( "- get more information on: https://ceusmedia.de/" );
 			Hymn_Client::out( "- make a fork or patch on: https://github.com/CeusMedia/Hymn" );
-			Hymn_Client::out();
+			Hymn_Client::out( "" );																	//  print empty line as optical separator
 		}
 	}
+
+	/**
+	 *	This method is automatically called by client dispatcher.
+	 *	Commands need to implement this method.
+	 *	@access		public
+	 *	@return		void
+	 */
+	abstract function run();
 }

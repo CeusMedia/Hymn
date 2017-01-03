@@ -39,6 +39,11 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 
 	protected $installType	= "link";
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
 		$config		= $this->client->getConfig();
 		$force		= $this->client->arguments->getOption( 'force' );

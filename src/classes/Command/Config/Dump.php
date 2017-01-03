@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,16 +30,20 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
 class Hymn_Command_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
 		$fileName	= Hymn_Client::$fileName;
-//		Hymn_Client::out();
 		if( !file_exists( "config/modules" ) )
 			return Hymn_Client::out( "No modules installed" );
 
@@ -52,7 +56,6 @@ class Hymn_Command_Config_Dump extends Hymn_Command_Abstract implements Hymn_Com
 				continue;
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
-//			Hymn_Client::out( $id );
 			if( $module->config ){
 				$list[$id]	= array( 'config' => (object) array() );
 				foreach( $module->config as $pair )

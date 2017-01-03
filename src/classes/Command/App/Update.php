@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2016 Christian Würker
+ *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -45,6 +45,11 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	protected $quiet		= FALSE;
 	protected $verbose		= FALSE;
 
+	/**
+	 *	Execute this command.
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function run(){
 		$this->dry		= $this->client->arguments->getOption( 'dry' );
 		$this->force	= $this->client->arguments->getOption( 'force' );
