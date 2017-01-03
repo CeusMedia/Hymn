@@ -38,21 +38,15 @@
 class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	public function run(){
-		$filename	= Hymn_Client::$fileName;
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$config	= json_decode( file_get_contents( $filename ) );
-		if( is_null( $config ) )
-			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
-
-		$key	= $this->client->arguments->getArgument( 0 );
+		$config		= $this->client->getConfig();
+		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
 		$parts	= explode( ".", $key );
 		$module	= array_shift( $parts );
 		if( !$parts )
-			throw new InvalidArgumentException( 'Invalid key - must be of syntax "Module_Name.(section.)key"' );
+			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
 
 		$availableModules	= $this->getAvailableModulesMap( $config );

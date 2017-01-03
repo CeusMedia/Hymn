@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  *	@deprecated		use config-get and config-set instead
- *	@todo			remove
+ *	@todo			remove in v0.9.1
  */
 class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 

@@ -44,7 +44,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 		if( !isset( $config->sources ) )
 			$config->sources	= (object) array();
 
-		Hymn_Client::out( sprintf( "Found %d source(s):", count( $config->sources ) ) );
+		Hymn_Client::out( sprintf( "Found %d source(s):", count( (array) $config->sources ) ) );
 		foreach( $config->sources as $sourceId => $source ){
 			$status		= 'not defined';
 			if( isset( $source->path ) && strlen( trim ( $source->path ) ) )
@@ -58,18 +58,6 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 			Hymn_Client::out( "  - Type: ".$source->type );
 			Hymn_Client::out( "  - Path: ".$source->path );
 		}
-/*
-		$relativePathApp	= realpath( $app->uri );
-		$library			= $this->getLibrary( $config );
-		$shelves			= $library->getShelves();
-		Hymn_Client::out( sprintf( "Found %d source(s):", count( $shelves ) ) );
-		foreach( $library->getShelves() as $shelfId => $shelf ){
-			Hymn_Client::out( "* ".$shelfId.":" );
-			Hymn_Client::out( "  - Type: ".$shelf->type );
-			Hymn_Client::out( "  - Path: ".$shelf->path );
-			Hymn_Client::out( "  - Status: ".( $shelf->active ? 'active' : 'disabled' ) );
-		}
-		*/
 	}
 }
 ?>
