@@ -112,11 +112,13 @@ class Hymn_Module_Installer{
 				if( $module->config[$key]->type !== "boolean" ){									//  ... and not of type boolean
 					if( !strlen( trim( $module->config[$key]->value ) ) ){							//  ... and has no value
 						if( !isset( $config->{$key} ) ){											//  ... and is not set in hymn file
-							$message	= "  … configure '".$key."'";								//  render console input label
-							$values		= $module->config[$key]->values;							//  get suggested values if set
-
-							$value		= Hymn_Client::getInput( $message, NULL, $values, FALSE );	//  get new value from console
-							$config->{$key}	= $value;
+							$config->{$key}	= Hymn_Client::getInput(								//  get new value from console
+								"  … configure '".$key."'",											//  render console input label
+								$module->config[$key]->type,
+								NULL,
+								$module->config[$key]->values,										//  get suggested values if set
+								FALSE																//  no break = inline question
+							);
 						}
 					}
 				}

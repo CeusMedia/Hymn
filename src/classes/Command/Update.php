@@ -62,11 +62,7 @@ class Hymn_Command_Update extends Hymn_Command_Abstract implements Hymn_Command_
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path, $active );
-		}
+		$library	= $this->getLibrary( $config );
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$modules		= array();																	//  prepare list of modules to update

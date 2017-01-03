@@ -86,7 +86,7 @@ class Hymn_Module_Files{
 								@unlink( $target );
 						}
 						if( !@symlink( $source, $target ) )
-							throw new Exception( 'Link of source file '.$source.' is not creatable.' );
+							throw new Exception( 'Link of source file '.$source.' is not creatable' );
 					}
 					if( $verbose && !$this->quiet )
 						Hymn_Client::out( '  … linked file '.$source );
@@ -112,7 +112,7 @@ class Hymn_Module_Files{
 						Hymn_Client::out( '  … copied file '.$source );
 //				}
 //				catch( Exception $e ){
-//					throw new Exception( 'Copy Error: '.$e->getMessage().'.' );
+//					throw new Exception( 'Copy Error: '.$e->getMessage() );
 //				}
 			}
 		}

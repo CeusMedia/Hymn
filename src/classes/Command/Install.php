@@ -52,11 +52,7 @@ class Hymn_Command_Install extends Hymn_Command_Abstract implements Hymn_Command
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path, $active );
-		}
+		$library	= $this->getLibrary( $config );
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleId	= trim( $this->client->arguments->getArgument() );
@@ -95,7 +91,7 @@ class Hymn_Command_Install extends Hymn_Command_Abstract implements Hymn_Command
 				$message	= sprintf(
 					$message,
 					$module->id,
-					$update->installed,
+					$module->versionAvailable,
 					$installType
 				);
 				Hymn_Client::out( $message );

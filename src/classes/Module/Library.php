@@ -114,9 +114,8 @@ class Hymn_Module_Library{
 		if( !in_array( $id, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Invalid shelf ID: '.$id );
 		$shelf	= $this->shelves[$id];
-		if( $withModules ){
-			$shelf->modules	= $this->modules[$id];
-		}
+		if( !$withModules )
+			unset( $shelf->modules );
 		return $shelf;
 	}
 

@@ -40,21 +40,17 @@ class Hymn_Command_Graph extends Hymn_Command_Abstract implements Hymn_Command_I
 	protected $installType	= "link";
 
 	public function run(){
-		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
-			return Hymn_Client::out( "Configuration folder is either not existing or not writable" );
-
+		$config		= $this->client->getConfig();
 		$force		= $this->client->arguments->getOption( 'force' );
 		$verbose	= $this->client->arguments->getOption( 'verbose' );
 		$quiet		= $this->client->arguments->getOption( 'quiet' );
 
+		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
+			return Hymn_Client::out( "Configuration folder is either not existing or not writable" );
 		if( !$quiet && $verbose )
 			Hymn_Client::out( "Loading all needed modules into graph…" );
-		$config		= $this->client->getConfig();
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path/*, $active*/ );
-		}
+
+		$library	= $this->getLibrary( $config );
 		$relation	= new Hymn_Module_Graph( $this->client, $library, $quiet );
 		foreach( $config->modules as $moduleId => $module ){
 			if( preg_match( "/^@/", $moduleId ) )

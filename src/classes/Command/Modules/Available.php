@@ -39,11 +39,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 
 	public function run(){
 		$config		= $this->client->getConfig();
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path, $active );
-		}
+		$library	= $this->getLibrary( $config );
 		$shelfId	= $this->client->arguments->getArgument( 0 );
 
 		if( $shelfId ){

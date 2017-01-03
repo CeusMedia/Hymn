@@ -73,9 +73,13 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$connectable	= FALSE;
 		do{
 			foreach( $questions as $question ){														//  iterate questions
-				$default	= $data->{$question->key};												//  shortcut default value
-				$options	= isset( $question->options ) ? $question->options : array();			//  realize options
-				$input		= Hymn_Client::getInput( $question->label, $default, $options, FALSE );	//  ask for value
+				$input		= Hymn_Client::getInput(												//  ask for value
+					$question->label,
+					'string',
+					$data->{$question->key},														//  shortcut default value
+					isset( $question->options ) ? $question->options : array(),						//  realize options
+					FALSE																			//  no break = inline question
+				);
 				$data->{$question->key}	= $input;													//  assign given value
 			}
 			if( isset( $config->sources->{$data->key} ) )

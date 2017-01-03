@@ -39,31 +39,35 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 
 	public function run(){
 		$config		= $this->client->getConfig();
-		$library	= new Hymn_Module_Library();
-		foreach( $config->sources as $sourceId => $source ){
-			$active	= !isset( $source->active ) || $source->active;
-			$library->addShelf( $sourceId, $source->path, $active );
-		}
-		$term	= $this->client->arguments->getArgument( 0 );
+		$term		= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->client->arguments->getArgument( 1 );
 
+		$msgTotal		= '%d module(s) found in all module sources:';
+		$msgEntry		= '- %s (%s)';
+		$foundModules	= array();
+
 		if( $shelfId ){
-			$modules	= $library->getModules( $shelfId );
-			foreach( $modules as $moduleId => $module )
-				if( !preg_match( "/".preg_quote( $term )."/", $module->id ) )
-					unset( $modules[$moduleId] );
-			Hymn_Client::out( count( $modules )." module(s) found in module source '".$shelfId."':" );
-			foreach( $modules as $moduleId => $module )
-				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
+			$msgTotal	= '%d module(s) found in module source "%s":';
+			$msgEntry	= '- %s (%s)';
+			$availableModules	= $this->getAvailableModulesMap( $config, $shelfId );
+			foreach( $availableModules as $moduleId => $module ){
+				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
+					$foundModules[$moduleId]	= $module;
+				}
+			}
 		}
 		else{
-			$modules	= $library->getModules();
-			foreach( $modules as $moduleId => $module )
-				if( !preg_match( "/".preg_quote( $term )."/", $module->id ) )
-					unset( $modules[$moduleId] );
-			Hymn_Client::out( count( $modules )." module(s) found:" );
-			foreach( $modules as $moduleId => $module )
-				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
+			$availableModules	= $this->getAvailableModulesMap( $config );
+			foreach( $availableModules as $moduleId => $module ){
+				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
+					$foundModules[$moduleId]	= $module;
+				}
+			}
+		}
+		Hymn_Client::out( sprintf( $msgTotal, count( $foundModules ), $shelfId ) );
+		foreach( $foundModules as $moduleId => $module ){
+			$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
+			Hymn_Client::out( $msg );
 		}
 	}
 }
