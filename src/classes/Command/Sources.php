@@ -39,13 +39,14 @@ class Hymn_Command_Sources extends Hymn_Command_Abstract implements Hymn_Command
 
 	public function run(){
 		$config		= $this->client->getConfig();
-		$sources	= (array) $config->sources;
 		$library	= $this->getLibrary( $config );
-
-		Hymn_Client::out( count( $sources )." module sources:" );
-		foreach( $library->getShelves() as $shelf ){
-			$status	= $shelf->active ? '+' : '-';
-			Hymn_Client::out( "- [".$status."] ".$shelf->id." -> ".$shelf->path );
+		$shelves	= $library->getShelves();
+		Hymn_Client::out( count( $shelves )." installed module source(s) detected:" );
+		foreach( $shelves as $shelf ){
+			Hymn_Client::out( '* '.$shelf->id);
+			Hymn_Client::out( '  - Active: '.( $shelf->active ? 'yes' : 'no' ) );
+			Hymn_Client::out( '  - Type: '.$shelf->type );
+			Hymn_Client::out( '  - Path: '.$shelf->path );
 		}
 	}
 }
