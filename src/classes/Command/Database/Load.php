@@ -46,6 +46,8 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
+		$dry			= $this->client->arguments->getOption( 'dry' );
+		$verbose		= $this->client->arguments->getOption( 'verbose' );
 		$pathName		= $this->client->arguments->getArgument( 0 );
 		if( $pathName && file_exists( $pathName ) ){
 			if( is_dir( $pathName ) )
@@ -59,23 +61,46 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
 
-		$username	= $this->client->getDatabaseConfiguration( 'username' );
-		$password	= $this->client->getDatabaseConfiguration( 'password' );
-		$name		= $this->client->getDatabaseConfiguration( 'name' );
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-
-		$tempName	= $fileName.".tmp";
 		try{
 			if( ( $content = @file_get_contents( $fileName ) ) === FALSE )
 				throw new RuntimeException( 'Missing read access to SQL script' );
-			$content	= str_replace( "<%?prefix%>", $prefix, $content );
-			if( @file_put_contents( $tempName, $content ) === FALSE )
+
+			$host		= $this->client->getDatabaseConfiguration( 'host' );						//  get server host from config
+			$port		= $this->client->getDatabaseConfiguration( 'port' );						//  get server port from config
+			$username	= $this->client->getDatabaseConfiguration( 'username' );					//  get username from config
+			$password	= $this->client->getDatabaseConfiguration( 'password' );					//  get password from config
+			$name		= $this->client->getDatabaseConfiguration( 'name' );						//  get database name from config
+			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );						//  get table prefix from config
+			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
+
+			$content	= str_replace( "<%?prefix%>", $prefix, $content );							//  replace table prefix placeholder
+
+			//  @todo	user PHP temp file functions to avoid write access problems in app root folder
+			$tempName	= $fileName.".tmp";
+ 			if( @file_put_contents( $tempName, $content ) === FALSE )								//  try to save manipulated script as temp file
 				throw new RuntimeException( 'Missing write access to SQL scripts path' );
 
-			$command	= "mysql -u%s -p%s %s < %s";
-			$command	= sprintf( $command, $username, $password, $name, $tempName );
+			$command	= call_user_func_array( "sprintf", array(									//  call sprintf with arguments list
+				"mysql -h%s -P%s -u%s -p%s %s < %s",												//  command to replace within
+				escapeshellarg( $host ),															//  configured host as escaped shell arg
+				escapeshellarg( $port ),															//  configured port as escaped shell arg
+				escapeshellarg( $username ),														//  configured username as escaped shell arg
+				escapeshellarg( $password ),														//  configured pasword as escaped shell arg
+				escapeshellarg( $name ),															//  configured database name as escaped shell arg
+				escapeshellarg( $tempName ),														//  temp file name as escaped shell arg
+			) );
 
-			$fileSize	= Hymn_Tool_FileSize::get( $fileName );
+			if( $verbose ){
+				Hymn_Client::out( "Import file:  ".$fileName );
+				Hymn_Client::out( "File size:    ".$fileSize );
+				Hymn_Client::out( "DB Server:    ".$host."@".$port );
+				Hymn_Client::out( "Database:     ".$name );
+				Hymn_Client::out( "Table prefix: ".( $prefix ? $prefix : "- (none)" ) );
+				Hymn_Client::out( "Access as:    ".$username );
+			}
+			if( $dry )
+				return Hymn_Client::out( "Database setup okay - import itself not simulated." );
+
 			Hymn_Client::out( "Importing ".$fileName." (".$fileSize.") ..." );
 			exec( $command );
 			unlink( $tempName );

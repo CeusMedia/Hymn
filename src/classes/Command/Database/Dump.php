@@ -48,7 +48,13 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
+		$dry		= $this->client->arguments->getOption( 'dry' );
+		$verbose	= $this->client->arguments->getOption( 'verbose' );
+
+
+		$dbc		= $this->client->getDatabase();
 		$arguments	= $this->client->arguments;
+
 		$fileName	= $arguments->getArgument( 0 );
 		if( !preg_match( "/[a-z0-9]/i", $fileName ) )												//  arguments has not valid value
 			$fileName	= 'config/sql/';															//  set default path
@@ -57,24 +63,52 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( dirname( $fileName) )																	//  path is not existing
 			exec( "mkdir -p ".dirname( $fileName ) );												//  create path
 
-		$dbc		= $this->client->getDatabase();
-		$username	= $this->client->getDatabaseConfiguration( 'username' );
-		$password	= $this->client->getDatabaseConfiguration( 'password' );
-		$name		= $this->client->getDatabaseConfiguration( 'name' );
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-
 		if( $this->prefix	= $arguments->hasOption( 'prefix' ) )
 			$this->prefixPlaceholder	= $arguments->getOption( 'prefix' );
 
-		$tables		= array();
-		if( $prefix )
-			foreach( $dbc->query( "SHOW TABLES LIKE '".$prefix."%'" ) as $table )
-				$tables[]	= $table[0];
-		$tables	= join( ' ', $tables );
+		$tables		= '';																			//  no table selection by default
+		if( $prefix ){																				//  prefix has been set
+			$tables		= array();																	//  prepare list of tables matching prefix
+			foreach( $dbc->query( "SHOW TABLES LIKE '".$prefix."%'" ) as $table )					//  iterate found tables with prefix
+				$tables[]	= escapeshellarg( $table[0] );											//  collect table as escaped shell arg
+			$tables	= join( ' ', $tables );															//  reduce tables list to tables arg
+		}
 
-		$command	= "mysqldump -u%s -p%s %s %s > %s";
-		$command	= sprintf( $command, $username, $password, $name, $tables, $fileName );
-		exec( $command );
+		$host		= $this->client->getDatabaseConfiguration( 'host' );							//  get host name from config
+		$port		= $this->client->getDatabaseConfiguration( 'port' );							//  get port from config
+		$username	= $this->client->getDatabaseConfiguration( 'username' );						//  get username from config
+		$password	= $this->client->getDatabaseConfiguration( 'password' );						//  get password from config
+		$name		= $this->client->getDatabaseConfiguration( 'name' );							//  get database name from config
+
+		$command	= call_user_func_array( "sprintf", array(										//  call sprintf with arguments list
+			"mysqldump -h%s -P%s -u%s -p%s %s %s > %s",												//  command to replace within
+			escapeshellarg( $host ),																//  configured host name as escaped shell arg
+			escapeshellarg( $port ),																//  configured port as escaped shell arg
+			escapeshellarg( $username ),															//  configured username as escaped shell arg
+			escapeshellarg( $password ),															//  configured password as escaped shell arg
+			escapeshellarg( $name ),																//  configured database name as escaped shell arg
+			$tables,																				//  collected found tables
+			escapeshellarg( $fileName ),															//  dump output filename
+		) );
+
+		if( $verbose ){
+			Hymn_Client::out( "DB Server:    ".$host."@".$port );
+			Hymn_Client::out( "Database:     ".$name );
+			Hymn_Client::out( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
+			Hymn_Client::out( "Access as:    ".$username );
+		}
+
+		$resultCode		= 0;
+		$resultOutput	= array();
+
+		exec( $command, $resultOutput, $resultCode );
+		if( $resultCode !== 0 )
+			return Hymn_Client::out( "Database dump failed." );
+		if( $dry ){
+			unlink( $fileName );
+			return Hymn_Client::out( "Simulated database dump has been successful." );
+		}
 
 		/*  --  REPLACE PREFIX  --  */
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@U";		//  build regular expression
