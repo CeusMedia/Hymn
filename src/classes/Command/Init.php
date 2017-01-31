@@ -44,6 +44,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	 */
 	public function run(){
 		$data	= array();
+
+		/*  --  CREATE HYMN FILE  --  */
 		Hymn_Client::out( "Please enter application information:" );
 		$title		= $this->ask( "- Application title", 'string', "My Project", NULL, FALSE );
 		$uri		= $this->ask( "- Installation Path", 'string', getcwd().'/', NULL, FALSE );
@@ -87,8 +89,10 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			);
 		}
 		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
-		Hymn_Client::out( "Configuration file ".Hymn_Client::$fileName." has been created." );
+		Hymn_Client::out( "Hymn configuration file ".Hymn_Client::$fileName." has been created." );
 		Hymn_Client::out( "" );
+
+		/*  --  CREATE PHPUNIT FILE  --  */
 		$initPhpunit	= $this->ask( "Configure PHPUnit?", 'boolean', "yes", NULL, FALSE );
 		if( $initPhpunit ){
 			$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
@@ -97,7 +101,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			$bootstrap	= $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE );
 			$pathPhar	= "phar://hymn.phar/";
 			Hymn_Module_Files::createPath( $pathSource );
-			copy( $pathPhar."templates/test_bootstrap.php", $pathSource.'/bootstrap.php' );
+			copy( $pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
 			copy( $pathPhar."templates/phpunit.xml", 'phpunit.xml' );
 			$content	= file_get_contents( 'phpunit.xml' );
 			$content	= str_replace( "%appKey%", $appKey, $content );
@@ -108,6 +112,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			Hymn_Client::out( "Empty bootstrap file for PHPUnit test classes has been created." );
 		}
 		Hymn_Client::out( "" );
+
+		/*  --  CREATE COMPOSER FILE  --  */
 		if( $this->ask( "Configure composer?", 'boolean', "yes", NULL, FALSE ) ){
 			$command	= "composer --name %s --author %";
 			$command	= sprintf( $command, $appKey, '' );
@@ -115,11 +121,23 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			Hymn_Client::out( "Composer file has been created." );
 		}
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
+
+		/*  --  CREATE MAKE FILE  --  */
 		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
 			copy( $pathPhar."templates/Makefile", 'Makefile' );
 			Hymn_Client::out( "Make file has been created." );
 		}
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
+
+		/*  --  CREATE APP BASE CONFIG FILE  --  */
+		if( $this->ask( "Create base config file?", 'boolean', "yes", NULL, FALSE ) ){
+			mkdir( 'config' );
+			copy( $pathPhar."templates/config/config.ini", 'config/config.ini' );
+			copy( $pathPhar."templates/config/.htaccess", 'config/.htaccess' );
+			Hymn_Client::out( "Make file has been created." );
+		}
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
+
 		Hymn_Client::out( "Done." );
 		Hymn_Client::out( "Now you can execute commands like install module sources using 'hymn source-add'." );
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
