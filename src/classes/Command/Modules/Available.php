@@ -50,13 +50,13 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 		if( $shelfId ){
 			$modules	= $library->getModules( $shelfId );
 			Hymn_Client::out( count( $modules )." modules available in module source '".$shelfId."':" );
-			foreach( $modules as $moduleId => $module )
+			foreach( $modules as $module )
 				Hymn_Client::out( "- ".$module->id );
 		}
 		else{
 			$modules	= $library->getModules();
 			Hymn_Client::out( count( $modules )." modules available:" );
-			foreach( $modules as $moduleId => $module )
+			foreach( $modules as $module )
 				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
 		}
 	}

@@ -151,13 +151,14 @@ class Hymn_Module_SQL{
 				}
 			}
 		}
+		if( $dry )																					//  this is a dry run
+			return;																					//  do not execute anything
 		foreach( $scripts as $script ){																//  iterate collected scripts
 			if( $verbose && !$this->quiet ){														//  be verbose
 				$msg	= "    … apply database script on %s at version %s";
 				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
 			}
-			if( !$dry )																				//  no a dry run
-				$this->executeSql( $script->sql );													//  execute collected SQL script
+			$this->executeSql( $script->sql );														//  execute collected SQL script
 		}
 	}
 

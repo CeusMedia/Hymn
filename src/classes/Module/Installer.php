@@ -56,10 +56,10 @@ class Hymn_Module_Installer{
 		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
 		$this->app		= $this->config->application;												//  shortcut to application config
 
-		if( isset( $this->app->installMode ) )
+/*		if( isset( $this->app->installMode ) )
 			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
 		if( isset( $this->app->installType ) )
-			Hymn_Client::out( "Install Type: ".$this->app->installType );
+			Hymn_Client::out( "Install Type: ".$this->app->installType );*/
 
 		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
@@ -176,10 +176,21 @@ class Hymn_Module_Installer{
 			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
 			$localModule->path	= $appUri;
 
-			//  check relations for new modules !
-			foreach( $module->relations->needs as $relation ){
-				if( !array_key_exists( $relation, $localModules ) ){
-					$this->install( $relation, $installType, $verbose, $dry );
+			$availableModules	= $this->library->getModules();										//  get list of all available modules
+			$availableModuleMap	= array();															//  prepare map of available modules
+			foreach( $availableModules as $availableModule )										//  iterate module list
+				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
+
+			foreach( $module->relations->needs as $relation ){										//  iterate related modules
+				if( !array_key_exists( $relation, $localModules ) ){								//  related module is not installed
+					if( !array_key_exists( $relation, $availableModuleMap ) ){						//  related module is not available
+						$message	= 'Module "%s" is needed but not available.';					//  create exception message
+						throw new RuntimeException( sprintf( $message, $relation ) );				//  throw exception
+					}
+					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
+					if( !$this->quiet )																//  quiet mode is off
+						Hymn_Client::out( " - Installing needed module '".$relation."' ..." );		//  inform about installation of needed module
+					$this->install( $relatedModule, $installType, $verbose, $dry );					//  install related module
 				}
 			}
 			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
