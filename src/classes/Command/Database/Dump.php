@@ -113,10 +113,18 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		/*  --  REPLACE PREFIX  --  */
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@U";		//  build regular expression
 		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
-		$contents	= explode( "\n", file_get_contents( $fileName ) );								//  read raw dump file
-		foreach( $contents as $nr => $content )														//  iterate lines
-			$contents[$nr] = preg_replace_callback( $regExp, $callback, $content );					//  replace prefix by placeholder
-		file_put_contents( $fileName, implode( "\n", $contents ) );									//  save final dump file
+
+		rename( $fileName, $fileName."_" );															//  move dump file to source file
+		$fpIn		= fopen( $fileName."_", "r" );													//  open source file
+		$fpOut		= fopen( $fileName, "a" );														//  prepare empty target file
+		while( !feof( $fpIn ) ){																	//  read input file until end
+			$buffer	= fread( $fpIn, 4096 );															//  read 4K buffer
+			$buffer	= preg_replace_callback( $regExp, $callback, $buffer );							//  perform replace in buffer
+			fwrite( $fpOut, $buffer );																//  write buffer to target file
+		}
+		fclose( $fpOut );																			//  close target file
+		fclose( $fpIn );																			//  close source file
+		unlink( $fileName."_" );																	//  remove source file
 
 		return Hymn_Client::out( "Database dumped to ".$fileName );
 	}

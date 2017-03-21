@@ -62,7 +62,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			return Hymn_Client::out( "No loadable database file found." );
 
 		try{
-			if( ( $content = @file_get_contents( $fileName ) ) === FALSE )
+			if( !is_readable( $fileName ) )
 				throw new RuntimeException( 'Missing read access to SQL script' );
 
 			$host		= $this->client->getDatabaseConfiguration( 'host' );						//  get server host from config
@@ -72,13 +72,17 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			$name		= $this->client->getDatabaseConfiguration( 'name' );						//  get database name from config
 			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );						//  get table prefix from config
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
-
-			$content	= str_replace( "<%?prefix%>", $prefix, $content );							//  replace table prefix placeholder
-
-			//  @todo	user PHP temp file functions to avoid write access problems in app root folder
 			$tempName	= $fileName.".tmp";
- 			if( @file_put_contents( $tempName, $content ) === FALSE )								//  try to save manipulated script as temp file
-				throw new RuntimeException( 'Missing write access to SQL scripts path' );
+
+			$fpIn		= fopen( $fileName, "r" );													//  open source file
+			$fpOut		= fopen( $tempName, "a" );													//  prepare empty target file
+			while( !feof( $fpIn ) ){																//  read input file until end
+				$buffer	= fread( $fpIn, 4096 );														//  read 4K buffer
+				$buffer	= str_replace( "<%?prefix%>", $prefix, $buffer );							//  replace table prefix placeholder
+				fwrite( $fpOut, $buffer );															//  write buffer to target file
+			}
+			fclose( $fpOut );																		//  close target file
+			fclose( $fpIn );																		//  close source file
 
 			$command	= call_user_func_array( "sprintf", array(									//  call sprintf with arguments list
 				"mysql -h%s -P%s -u%s -p%s %s < %s",												//  command to replace within
