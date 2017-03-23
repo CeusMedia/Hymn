@@ -37,5 +37,7 @@ test-units:
 	@phpunit
 
 test-syntax:
-	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
+	echo "Checking syntax..."
+#	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
+	@hymn test -r src/classes && echo "Result: OK" || echo "Result: FAILED" 
 
