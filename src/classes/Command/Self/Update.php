@@ -38,15 +38,14 @@
 class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected function downloadFile( $url, $file ){
-		$file	= $file ? $file : basename( $file );
-		$fp1	= fopen( $url, "rb" );
-		if( !$fp1 )
-			throw new Exception( "Failed to open stream to URL" );
-		$fp2 = fopen( $file, "wb" );
-		while( !feof( $fp1 ) )
-			fwrite( $fp2, fread( $fp1, 1024 ) );
-		fclose( $fp1 );
-		fclose( $fp2 );
+		if( !( $fpSave = @fopen( $file, "wb" ) ) )													//  try to open target file for writing
+			throw new RuntimeException( "Permission denied to change ".$file );						//  otherwise quit with exception
+		if( !( $fpLoad = fopen( $url, "rb" ) ) )													//  try to open source URL for reading
+			throw new RuntimeException( "Failed to open stream to URL" );							//  otherwise quit with exception
+		while( !feof( $fpLoad ) )																	//  read source until end of file
+			fwrite( $fpSave, fread( $fpLoad, 4096 ) );												//  copy 4K block from source to target
+		fclose( $fpSave );																			//  close target file
+		fclose( $fpLoad );																			//  close connection to source URL
 	}
 
 	protected function getHymnFilePath(){
@@ -74,6 +73,7 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 		Hymn_Client::out( "Download: ".$urlHymn );
 		$this->downloadFile( $urlHymn, $pathFile );
 		Hymn_Client::out( "Saved to: ".$pathFile );
+		Hymn_Client::out( "Version installed: ", FALSE );
 		passthru( "hymn version" );
 	}
 }
