@@ -34,6 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
+ *	@deprecated		use command 'app-base-config-set' instead
+ *	@todo   		to be removed in v1.0
  */
 class Hymn_Command_Config_Base_Set extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
@@ -43,6 +45,9 @@ class Hymn_Command_Config_Base_Set extends Hymn_Command_Abstract implements Hymn
 	 *	@return		void
 	 */
 	public function run(){
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		Hymn_Client::out( "DEPRECATED: Please use command 'app-base-config-set' instead!" );		//  output deprecation notice
+		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		$key	= $this->client->arguments->getArgument( 0 );
 		$value	= $this->client->arguments->getArgument( 1 );
 		if( !strlen( trim( $key ) ) )

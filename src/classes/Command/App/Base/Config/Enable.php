@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config.Base
+ *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,16 +28,14 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config.Base
+ *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
- *	@deprecated		use command 'app-base-config-disable' instead
- *	@todo   		to be removed in v1.0
  */
-class Hymn_Command_Config_Base_Disable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_App_Base_Config_Enable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -45,9 +43,6 @@ class Hymn_Command_Config_Base_Disable extends Hymn_Command_Abstract implements 
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use command 'app-base-config-disable' instead!" );	//  output deprecation notice
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		$key	= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
@@ -55,9 +50,9 @@ class Hymn_Command_Config_Base_Disable extends Hymn_Command_Abstract implements 
 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
-		if( !$editor->isActiveProperty( $key ) )
-			throw new InvalidArgumentException( 'Base config key "'.$key.'" already is disabled' );
-		$editor->deactivateProperty( $key );
+		if( $editor->isActiveProperty( $key ) )
+			throw new InvalidArgumentException( 'Base config key "'.$key.'" already is enabled' );
+		$editor->activateProperty( $key );
 		clearstatcache();
 	}
 }
