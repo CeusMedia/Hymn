@@ -87,9 +87,9 @@ class Hymn_Module_Installer{
 	public function configure( $module, $verbose = FALSE, $dry = FALSE ){
 		$source	= $module->path.'module.xml';
 		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
-		if( !$dry ){
-			Hymn_Module_Files::createPath( dirname( $target ) );
-			@copy( $source, $target );
+		if( !$dry ){																				//  if not in dry mode
+			Hymn_Module_Files::createPath( dirname( $target ) );									//  create folder for module configurations in app
+			@copy( $source, $target );																//  copy module configuration into this folder
 		}
 		else {
 			$target	= $source;
@@ -105,6 +105,8 @@ class Hymn_Module_Installer{
 		$config	= (object) array();																	//  prepare empty hymn module config
 		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
 			$config	= $this->config->modules->{$module->id}->config;								//  get module config from hymn file
+
+		// @todo apply configuration of maybe before installed module version
 
 		foreach( $xml->config as $nr => $node ){													//  iterate original module config pairs
 			$key	= (string) $node['name'];														//  shortcut config pair key

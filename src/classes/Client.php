@@ -102,7 +102,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.2";
+	static public $version	= "0.9.2.2";
 
 	public $arguments;
 
@@ -160,7 +160,6 @@ class Hymn_Client{
 		$this->arguments->removeArgument( 0 );
 		if( !in_array( $action, self::$commandWithoutConfig ) ){
 			$this->readConfig();
-//			$this->loadLibraries();																	//  disabled in v0.9 @deprecated in v1.0
 			$this->setupDatabaseConnection();
 		}
 		$this->executeCommandClass( $className );
@@ -237,28 +236,6 @@ class Hymn_Client{
 		return $input;
 	}
 
-	/**
-	 *	@deprecated		this method seems to be NOT used
-	 *	@todo			remove or move to abstract command if needed
-	 *	@todo			to be removed in v0.9.1
-	 */
-	public function getModuleConfiguration( $moduleId, $key = NULL, $force = FALSE ){
-		if( !isset( $this->config->modules->{$moduleId} ) ){
-			if( $force )
-				throw new RuntimeException( 'Configuration of module "'.$moduleId.'" is needed but missing' );
-			return (object) array();
-		}
-		$config	= $this->config->modules->{$moduleId}->config;
-		if( !is_null( $key ) ){
-			if( isset( $config->{$key} ) )
-				return $config->{$key};
-			if( $force )
-				throw new RuntimeException( 'Configuration of module "'.$moduleId.'" has no property "'.$key.'"' );
-			return NULL;
-		}
-		return $config;
-	}
-
 /*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = "dev" ){
 		$mode	= $defaultInstallMode;
 		if( isset( $this->config->application->{"installMode"} ) )
@@ -276,17 +253,6 @@ class Hymn_Client{
 			if( isset( $this->config->modules->$moduleId->{"installType"} ) )
 				$type	= $this->config->modules->$moduleId->{"installType"};
 		return $type;
-	}
-
-	/**
-	 *	@deprecated		disabled in v0.9
-	 *	@todo			remove in v0.9.1
-	 */
-	protected function loadLibraries(){
-		foreach( $this->config->library as $library ){
-			if( !@include_once $library.'autoload.php5' )
-				throw new RuntimeException( 'Missing cmClasses in "'.$this->config->library->cmClasses.'"' );
-		}
 	}
 
 	static public function out( $messages = NULL, $newLine = TRUE ){
