@@ -152,7 +152,7 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
-	static public function listInstalledModules( $pathApp = "" ){
+	static public function listInstalledModules( $pathApp = "", $shelfId = NULL ){
 		if( self::$useCache && self::$listModulesInstalled !== NULL )
 			return self::$listModulesInstalled;
 		$list	= array();
@@ -164,7 +164,8 @@ class Hymn_Module_Library{
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 				$module	= self::readInstalledModule( $pathApp, $key );
-				$list[$key]	= $module;
+				if( !$shelfId || $module->installSource === $shelfId )
+					$list[$key]	= $module;
 			}
 		}
 		ksort( $list );
