@@ -48,16 +48,27 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		Hymn_Client::out( "DEPRECATED: Please use command 'app-base-config-enable' instead!" );		//  output deprecation notice
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		$key	= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument( 0 );
+		$dry		= $this->client->arguments->getOption( 'dry' );
+		$quiet		= $this->client->arguments->getOption( 'quiet' );
+		$verbose	= $this->client->arguments->getOption( 'verbose' );
+
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
-		if( $editor->isActiveProperty( $key ) )
-			throw new InvalidArgumentException( 'Base config key "'.$key.'" already is enabled' );
-		$editor->activateProperty( $key );
-		clearstatcache();
+		if( $editor->isActiveProperty( $key ) ){
+			if( !$quiet )
+				Hymn_Client::out( 'Base config key "'.$key.'" already is enabled' );
+			return;
+		}
+		if( !$dry ){
+			$editor->activateProperty( $key );
+			clearstatcache();
+		}
+		if( $verbose )
+			Hymn_Client::out( 'Base config key "'.$key.'" disabled' );
 	}
 }
