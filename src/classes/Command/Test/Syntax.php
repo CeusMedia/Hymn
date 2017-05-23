@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Test
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,14 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command
+ *	@package		CeusMedia.Hymn.Command.Test
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -43,7 +43,23 @@ class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@return		void
 	 */
 	public function run(){
-		$command	= new Hymn_Command_Test_Syntax( $this->client );
-		$command->run();
-	}
+		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE );
+		$this->client->arguments->parse();
+
+		$recursive		= $this->client->arguments->getOption( 'recursive' );
+		$quiet			= $this->client->arguments->getOption( 'quiet' );
+		$verbose		= $this->client->arguments->getOption( 'verbose' );
+
+		$path	= $this->client->arguments->getArgument( 0 );
+		if( !$path )
+			$path	= ".";
+
+		Hymn_Test::checkPhpClasses( $path, $recursive, $verbose );
+
+/*		Hymn_Test::checkPhpClasses( "./", FALSE, !FALSE );
+		if( file_exists( "classes" ) )
+			Hymn_Test::checkPhpClasses( "./classes", TRUE, !FALSE );
+		if( file_exists( "templates" ) )
+			Hymn_Test::checkPhpClasses( "./templates", TRUE, !FALSE );
+*/	}
 }
