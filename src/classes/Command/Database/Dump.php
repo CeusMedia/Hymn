@@ -65,7 +65,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 		if( $this->prefix	= $arguments->getOption( 'prefix' ) )
 			$this->prefixPlaceholder	= $arguments->getOption( 'prefix' );
-s
+
 		$tables		= '';																			//  no table selection by default
 		if( $prefix ){																				//  prefix has been set
 			$tables		= array();																	//  prepare list of tables matching prefix
