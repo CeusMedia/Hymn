@@ -118,9 +118,11 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$fpIn		= fopen( $fileName."_", "r" );													//  open source file
 		$fpOut		= fopen( $fileName, "a" );														//  prepare empty target file
 		while( !feof( $fpIn ) ){																	//  read input file until end
-			$buffer	= fread( $fpIn, 4096 );															//  read 4K buffer
-			$buffer	= preg_replace_callback( $regExp, $callback, $buffer );							//  perform replace in buffer
-			fwrite( $fpOut, $buffer );																//  write buffer to target file
+			$line	= fgets( $fpIn );																//  read line buffer
+			$line	= preg_replace_callback( $regExp, $callback, $line );							//  perform replace in buffer
+//			$buffer	= fread( $fpIn, 4096 );															//  read 4K buffer
+//			$buffer	= preg_replace_callback( $regExp, $callback, $buffer );							//  perform replace in buffer
+			fwrite( $fpOut, $line );																//  write buffer to target file
 		}
 		fclose( $fpOut );																			//  close target file
 		fclose( $fpIn );																			//  close source file
