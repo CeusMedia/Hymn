@@ -51,7 +51,6 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$dry		= $this->client->arguments->getOption( 'dry' );
 		$verbose	= $this->client->arguments->getOption( 'verbose' );
 
-
 		$dbc		= $this->client->getDatabase();
 		$arguments	= $this->client->arguments;
 
@@ -64,9 +63,9 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			exec( "mkdir -p ".dirname( $fileName ) );												//  create path
 
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-		if( $this->prefix	= $arguments->hasOption( 'prefix' ) )
+		if( $this->prefix	= $arguments->getOption( 'prefix' ) )
 			$this->prefixPlaceholder	= $arguments->getOption( 'prefix' );
-
+s
 		$tables		= '';																			//  no table selection by default
 		if( $prefix ){																				//  prefix has been set
 			$tables		= array();																	//  prepare list of tables matching prefix
