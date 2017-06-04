@@ -7,7 +7,6 @@ class Hymn_Tool_Question{
 	protected $options		= array();
 	protected $break		= TRUE;
 
-
 	public function __construct( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
 		$this->message	= $message;
 		$this->setType( $type );
@@ -58,7 +57,7 @@ class Hymn_Tool_Question{
 
 	static public function askStatic( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
 		$input	= new self( $message, $type, $default, $options, $break );
-		return $input->get();
+		return $input->ask();
 	}
 
 	public function setBreak( $break = TRUE ){
