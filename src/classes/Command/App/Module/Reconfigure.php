@@ -77,19 +77,21 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 					$installed	= $moduleInstalled->config[$configKey];
 					if( $configData->value === $installed->value )
 						continue;
-
-					Hymn_Client::out( '- Config key "'.$configKey.'" differs from source: '.$configData->value.' <-> '.$installed->value );
-					$answer		= Hymn_Tool_Decision::askStatic( "Keep custom value?" );
-					if( $answer !== "y" )
-						continue;
-					$values[$configKey]	= $configData->value;
+					if( $this->quiet )
+						$values[$configKey]	= $installed->value;
+					else{
+						Hymn_Client::out( '- Config key "'.$configKey.'" differs. Source: '.$configData->value.' | Installed: '.$installed->value );
+						$answer		= Hymn_Tool_Decision::askStatic( "Keep custom value?", NULL, NULL, FALSE );
+						if( $answer !== "y" )
+							continue;
+						$values[$configKey]	= $installed->value;
+					}
 				}
 			}
 			$target		= $config->application->uri.'config/modules/'.$moduleId.'.xml';
 			$installer	= new Hymn_Module_Installer( $this->client, $library );
 			if( !$this->dry )
 				$installer->configure( $moduleSource, $this->verbose, $this->dry );
-
 			if( $values ){
 				$xml	= file_get_contents( $target );
 				$xml	= new Hymn_Tool_XmlElement( $xml );
