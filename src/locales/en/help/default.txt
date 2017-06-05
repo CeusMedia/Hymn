@@ -29,8 +29,8 @@ A2. Project Setup and Information
 A3. Project Module Management
 - config-module-add                      Add a module to Hymn file
 - config-module-remove                   Remove a module from Hymn file
-- config-module-get KEY                  Get module setting from Hymn file
-- config-module-set KEY [VALUE]          Enter and save module setting in Hymn file
+- config-module-get MODULE.KEY           Get module setting from Hymn file
+- config-module-set MODULE.KEY [VALUE]   Enter and save module setting in Hymn file
 - config-module-dump                     Export current module settings into Hymn file
 
 A4. Project Module Information
@@ -58,8 +58,9 @@ B3. App Module Management
 - app-install [-dqv] [MODULE]            Install modules (or one specific)
 - app-uninstall [-dfqv] MODULE           Uninstall one specific installed module
 - app-update [-dqv] [MODULE]             Updated installed modules (or one specific)
-- app-module-config-get KEY              (not implemented yet)
-- app-module-config-set KEY VALUE        (not implemented yet)
+- app-reconfigure [-dqv] [MODULE]        Reinstall module configuration
+- app-module-config-get MODULE.KEY       Get config value of installed module by config key
+- app-module-config-set MODULE.KEY VALUE Set config value of installed module by config key
 
 B4. App Database Management
 - database-clear [-fqv]                  Drop database tables (force, verbose, quiet)
