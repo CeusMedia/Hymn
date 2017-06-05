@@ -106,8 +106,6 @@ class Hymn_Module_Installer{
 		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
 			$config	= $this->config->modules->{$module->id}->config;								//  get module config from hymn file
 
-		// @todo apply configuration of maybe before installed module version
-
 		foreach( $xml->config as $nr => $node ){													//  iterate original module config pairs
 			$key	= (string) $node['name'];														//  shortcut config pair key
 			if( $module->config[$key]->mandatory == "yes" ){										//  config pair is mandatory
@@ -168,50 +166,6 @@ class Hymn_Module_Installer{
 			$message	= "Uninstallation of module '%s' failed.\ņ%s";
 			$message	= sprintf( $message, $localModule->id, $e->getMessage() );
 			throw new RuntimeException( $message, 0, $e );
-		}
-	}
-
-	public function update( $module, $installType, $verbose = FALSE, $dry = FALSE ){
-		try{
-			$appUri				= $this->app->uri;
-			$localModules		= $this->library->listInstalledModules( $appUri );
-			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
-			$localModule->path	= $appUri;
-
-			$availableModules	= $this->library->getModules();										//  get list of all available modules
-			$availableModuleMap	= array();															//  prepare map of available modules
-			foreach( $availableModules as $availableModule )										//  iterate module list
-				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
-
-			foreach( $module->relations->needs as $relation ){										//  iterate related modules
-				if( !array_key_exists( $relation, $localModules ) ){								//  related module is not installed
-					if( !array_key_exists( $relation, $availableModuleMap ) ){						//  related module is not available
-						$message	= 'Module "%s" is needed but not available.';					//  create exception message
-						throw new RuntimeException( sprintf( $message, $relation ) );				//  throw exception
-					}
-					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
-					if( !$this->quiet )																//  quiet mode is off
-						Hymn_Client::out( " - Installing needed module '".$relation."' ..." );		//  inform about installation of needed module
-					$this->install( $relatedModule, $installType, $verbose, $dry );					//  install related module
-				}
-			}
-			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
-			$this->sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
-			$this->files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
-
-			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
-			if( !$dry ){
-				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
-				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
-			}
-			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
-			$this->configure( $module, $verbose, $dry );											//  configure module
-			$this->sql->runModuleUpdateSql( $localModule, $module, $verbose, $dry );				//  run SQL scripts
-			return TRUE;
-		}
-		catch( Exception $e ){
-			$msg	= "Update of module '%s' failed.\n%s";
-			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
 		}
 	}
 }
