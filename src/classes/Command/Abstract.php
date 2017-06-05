@@ -36,6 +36,7 @@
  */
 abstract class Hymn_Command_Abstract{
 
+	protected $client;
 	protected $library	= NULL;
 
 	public function __construct( Hymn_Client $client ){
@@ -74,7 +75,8 @@ abstract class Hymn_Command_Abstract{
 	 *	@param		boolean		$forceReload	Flag: reload library (optional, not default)
 	 *	@return		Hymn_Module_Library			Library of available modules in found sources
 	 */
-	protected function getLibrary( $config, $forceReload = FALSE ){
+	protected function getLibrary( $config = NULL, $forceReload = FALSE ){
+		$config	= $config ? $config : $this->client->getConfig(); 
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
 			$this->library	= new Hymn_Module_Library();											//  create new module library
 			if( !isset( $config->sources ) || empty( $config->sources ) ){

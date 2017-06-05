@@ -115,7 +115,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$installType
 			);
 			Hymn_Client::out( $message );
-			$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
+			$installer	= new Hymn_Module_Updater( $this->client, $library, $this->quiet );
 			$installer->update( $module, $installType, $this->verbose, $this->dry );
 		}
 	}

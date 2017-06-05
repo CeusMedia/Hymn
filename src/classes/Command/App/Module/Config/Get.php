@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Module
+ *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,14 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Module
+ *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -43,26 +43,21 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 	 *	@return		void
 	 */
 	public function run(){
-		$dry		= $this->client->arguments->getOption( 'dry' );
 		$quiet		= $this->client->arguments->getOption( 'quiet' );
 		$verbose	= $this->client->arguments->getOption( 'verbose' );
 
-		if( $dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
+		$key		= $this->client->arguments->getArgument( 0 );
+		if( !strlen( trim( $key ) ) )
+			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
-		$config			= $this->client->getConfig();
-		$library		= $this->getLibrary();
-		$moduleId		= trim( $this->client->arguments->getArgument() );
+		$parts		= explode( ".", $key );
+		$moduleId	= array_shift( $parts );
+		if( !$parts )
+			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
+		$configKey	= join( ".", $parts );
 
-		if( !$moduleId )
-			Hymn_Client::out( "No module id given" );
-		else if( !$library->isInstalledModule( $config->application->uri, $moduleId ) )
-			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
-		else{
-			$moduleLocal	= $library->readInstalledModule( $config->application->uri, $moduleId );
-			$moduleSource	= $library->getModule( $moduleId, $moduleLocal->installSource );
-			$installer	= new Hymn_Module_Updater( $this->client, $library, $quiet );
-			$installer->reconfigure( $moduleSource, $verbose, $dry );
-		}
+		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary(), $quiet );
+		$config			= $configurator->get( $moduleId, $configKey, $verbose );
+		Hymn_Client::out( $config->value );
 	}
 }
