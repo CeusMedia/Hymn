@@ -77,9 +77,9 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			$fpIn		= fopen( $fileName, "r" );													//  open source file
 			$fpOut		= fopen( $tempName, "a" );													//  prepare empty target file
 			while( !feof( $fpIn ) ){																//  read input file until end
-				$buffer	= fread( $fpIn, 4096 );														//  read 4K buffer
-				$buffer	= str_replace( "<%?prefix%>", $prefix, $buffer );							//  replace table prefix placeholder
-				fwrite( $fpOut, $buffer );															//  write buffer to target file
+				$line	= fgets( $fpIn );															//  read line buffer
+				$line	= str_replace( "<%?prefix%>", $prefix, $line );								//  replace table prefix placeholder
+				fwrite( $fpOut, $line );															//  write buffer to target file
 			}
 			fclose( $fpOut );																		//  close target file
 			fclose( $fpIn );																		//  close source file
