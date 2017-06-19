@@ -120,6 +120,7 @@ class Hymn_Module_Updater{
 			foreach( $availableModules as $availableModule )										//  iterate module list
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
 
+			$installer	= new Hymn_Module_Installer( $this->client, $this->library, $this->quiet );
 			foreach( $module->relations->needs as $relation ){										//  iterate related modules
 				if( !array_key_exists( $relation, $localModules ) ){								//  related module is not installed
 					if( !array_key_exists( $relation, $availableModuleMap ) ){						//  related module is not available
@@ -129,7 +130,7 @@ class Hymn_Module_Updater{
 					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
 					if( !$this->quiet )																//  quiet mode is off
 						Hymn_Client::out( " - Installing needed module '".$relation."' ..." );		//  inform about installation of needed module
-					$this->install( $relatedModule, $installType, $verbose, $dry );					//  install related module
+					$installer->install( $relatedModule, $installType, $verbose, $dry );			//  install related module
 				}
 			}
 			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
