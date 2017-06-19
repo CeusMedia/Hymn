@@ -102,7 +102,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.3";
+	static public $version	= "0.9.3.1";
 
 	public $arguments;
 
