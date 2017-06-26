@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config
+ *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,14 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Config
+ *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -47,6 +47,10 @@ class Hymn_Command_Config_Dump extends Hymn_Command_Abstract implements Hymn_Com
 		if( !file_exists( "config/modules" ) )
 			return Hymn_Client::out( "No modules installed" );
 
+		$hymnFile		= json_decode( file_get_contents( $fileName ) );
+		$knownModules	= array_keys( (array) $hymnFile->modules );
+
+
 		$index	= new DirectoryIterator( "config/modules" );
 		$list	= array();
 		foreach( $index as $entry ){
@@ -56,15 +60,15 @@ class Hymn_Command_Config_Dump extends Hymn_Command_Abstract implements Hymn_Com
 				continue;
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
-			if( $module->config ){
+			if( $module->config || in_array( $id, $knownModules ) ){
 				$list[$id]	= array( 'config' => (object) array() );
 				foreach( $module->config as $pair )
 					$list[$id]['config']->{$pair->key}	= $pair->value;
 			}
 		}
-		$json			= json_decode( file_get_contents( $fileName ) );
-		$json->modules	= $list;
-		file_put_contents( $fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		ksort( $list );
+		$hymnFile->modules	= $list;
+		file_put_contents( $fileName, json_encode( $hymnFile, JSON_PRETTY_PRINT ) );
 		return Hymn_Client::out( "Configuration dumped to ".$fileName );
 	}
 }
