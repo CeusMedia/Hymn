@@ -3,6 +3,7 @@ $path			= realpath( __DIR__.'/../src/classes' ).'/';
 $directories	= array(
 	'',
 	'Module',
+	'Command/App',
 	'Command',
 );
 
