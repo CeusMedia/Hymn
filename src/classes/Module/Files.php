@@ -75,8 +75,8 @@ class Hymn_Module_Files{
 						throw new Exception( 'Source file '.$source.' is not existing' );
 					if( !is_readable( $pathNameIn ) )
 						throw new Exception( 'Source file '.$source.' is not readable' );
-					if( !is_executable( $pathNameIn ) )
-						throw new Exception( 'Source file '.$source.' is not executable' );
+//					if( !is_executable( $pathNameIn ) )
+//						throw new Exception( 'Source file '.$source.' is not executable' );
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !$dry ){																	//  not a dry run
