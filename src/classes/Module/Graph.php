@@ -64,8 +64,11 @@ class Hymn_Module_Graph{
 	 *	@return		void
 	 */
 	public function addModule( $module, $level = 0 ){
-		if( array_key_exists( $module->id, $this->nodes ) )											//  module has been added already
-			return;																					//  exit doing nothing
+		if( array_key_exists( $module->id, $this->nodes ) ){										//  module has been added already
+			if( $this->nodes[$module->id]->level < $level )											//  this time the level is deeper
+				$this->nodes[$module->id]->level	= $level;										//  store deeper level
+			return;																					//  exit without adding relations again
+		}
 		$this->nodes[$module->id]	= (object) array(												//  add module to node list by module ID
 			'module'	=> $module,																	//  … store module data object
 			'level'		=> $level,																	//  … store load level
