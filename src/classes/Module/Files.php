@@ -248,6 +248,8 @@ class Hymn_Module_Files{
 	public function removeFiles( $module, $verbose = FALSE, $dry =  FALSE ){
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( $fileMap as $source => $target ){													//  iterate file list
+			if( !file_exists( $target ) )
+				continue;
 			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable
 				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
 			if( !is_link( $target ) && !is_writable( $target ) )									//  if installed file is a copy and not writable

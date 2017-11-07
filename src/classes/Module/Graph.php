@@ -82,6 +82,18 @@ class Hymn_Module_Graph{
 		}
 	}
 
+	protected function countModuleEdgesToRoot( $node, $level = 0 ){
+		$count	= $level;
+		if( count( $node->in ) ){
+			$ways	= array();
+			foreach( $node->in as $nr => $parent )
+				$ways[$nr]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
+			$count	= max( $ways );
+		}
+//		print( $count.' '.$node->module->id.PHP_EOL );
+		return $count;
+	}
+
 	/**
 	 *	Return list of all needed modules by installation order.
 	 *	Calculates order key by call level and needed modules.
@@ -93,28 +105,21 @@ class Hymn_Module_Graph{
 		if( $this->status < self::STATUS_CHANGED )
 			throw new Exception( 'No modules loaded' );
 		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations();
+			$this->realizeRelations( TRUE );
 
 		/*  calculate maximum relation depth  */
-		$depth	= 0;
-		foreach( $this->nodes as $id => $node )
-			$depth	= max( $depth, $node->level );
-
-		/*  generate sortable order key by level, outgoing and ingoing module links and collect in list  */
 		$list	= array();
+		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
-			$a	= array(
-				(string) ( $depth - $node->level ),													//  at first prefer modules which are deeply related
-				(string) count( $node->out ),														//  prefer modules with less outgoing links
-				(string) ( count( $this->nodes ) - count( $node->in ) )								//  prefer modules with many ingoing links
-			);
-			$list[$id]	= implode( '.', $a );
+			$edges	= $this->countModuleEdgesToRoot( $node );
+			$rand	= str_pad( rand( 0, $max ), 8, '0', STR_PAD_LEFT );
+			$list[(float) $edges.'.'.$rand]	= $id;
 		}
-		asort( $list );																				//  sort module order list
+		krsort( $list );																				//  sort module order list
 
 		/*  collect modules by installation order  */
 		$modules	= array();																		//  prepare empty module list
-		foreach( array_keys( $list ) as $id )														//  iterate module order list
+		foreach( array_values( $list ) as $id )														//  iterate module order list
 			$modules[$id]	= $this->nodes[$id]->module;											//  collect module by installation order
 		return $modules;																			//  return list of modules by installation order
 	}
@@ -129,7 +134,7 @@ class Hymn_Module_Graph{
 		}
 		$this->status	= self::STATUS_LINKED;
 		if( !$this->quiet && $verbose )
-			Hymn_Client::out( "Found ".count( $nodes )." modules and ".count( $edges )." relations." );
+			Hymn_Client::out( "Found ".count( $this->nodes )." modules." );
 	}
 
 	public function renderGraphFile( $targetFile = NULL, $verbose = FALSE, $type = 'needs' ){						//  @todo	make indepentent from need/support
