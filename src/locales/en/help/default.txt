@@ -82,5 +82,7 @@ Options:
 -f | --force               Continue actions on error or warnings
 -q | --quiet               Avoid any output
 -v | --verbose             Be verbose about taken steps
+-r | --recursive           Perform file actions recursively (used by test-syntax only)
 --file=[.hymn]             Alternative path of Hymn file
 --prefix=[<%prefix%>]      Set database table prefix in dump
+--db=[yes,no,only]         Switch to enable changes in database (default: yes)
