@@ -38,9 +38,16 @@ abstract class Hymn_Command_Abstract{
 
 	protected $client;
 	protected $library	= NULL;
+	protected $flags;
 
 	public function __construct( Hymn_Client $client ){
-		$this->client = $client;
+		$this->client	= $client;
+		$this->flags	= (object) array(
+			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+		);
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
@@ -76,7 +83,7 @@ abstract class Hymn_Command_Abstract{
 	 *	@return		Hymn_Module_Library			Library of available modules in found sources
 	 */
 	protected function getLibrary( $config = NULL, $forceReload = FALSE ){
-		$config	= $config ? $config : $this->client->getConfig(); 
+		$config	= $config ? $config : $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
 			$this->library	= new Hymn_Module_Library();											//  create new module library
 			if( !isset( $config->sources ) || empty( $config->sources ) ){

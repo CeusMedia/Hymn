@@ -89,8 +89,21 @@ class Hymn_Arguments{
 			foreach( $this->options as $key => $option ){
 				if( preg_match( $option['pattern'], $argument ) ){
 					$this->options[$key]['value']	= $option['resolve'];
-					if( is_string( $option['resolve'] ) )
-						$this->options[$key]['value']	= preg_replace( $option['pattern'], $option['resolve'], $argument );
+					if( is_string( $option['resolve'] ) ){
+						$value		= preg_replace( $option['pattern'], $option['resolve'], $argument );
+						$hasValues	= isset( $this->options[$key]['values'] );
+						if( $hasValues && count( $this->options[$key]['values'] ) ){
+							if( !in_array( $value, $this->options[$key]['values'] ) ){
+								throw new RangeException( sprintf(
+									'Invalid value "%s" for option "%s" (must be one of [%s])',
+									$value,
+									$key,
+									join( '|', $this->options[$key]['values'] )
+								) );
+							}
+						}
+						$this->options[$key]['value']	= $value;
+					}
 					unset( $arguments[$nr] );
 				}
 			}
@@ -98,11 +111,12 @@ class Hymn_Arguments{
 		$this->arguments	= array_values( $arguments );
 	}
 
-	public function registerOption( $key, $pattern, $resolve, $default = NULL ){
+	public function registerOption( $key, $pattern, $resolve, $default = NULL, $values = NULL ){
 		$this->options[$key]	= array(
 			'pattern'	=> $pattern,
 			'resolve'	=> $resolve,
 			'default'	=> $default,
+			'values'	=> $values,
 			'value'		=> $default,
 		);
 	}
@@ -115,7 +129,9 @@ class Hymn_Arguments{
 				throw new RangeException( 'Option "'.$key.'" is missing rule "resolve"' );
 			if( !isset( $rules['default']  ) )
 				$rules['default']	= NULL;
-			$this->registerOption( $key, $rules['pattern'], $rules['resolve'], $rules['default'] );
+			if( !( isset( $rules['values'] ) && count( $rules['values'] ) ) )
+				$rules['values']	= array();
+			$this->registerOption( $key, $rules['pattern'], $rules['resolve'], $rules['default'], $rules['values'] );
 		}
 	}
 

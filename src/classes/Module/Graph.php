@@ -49,10 +49,10 @@ class Hymn_Module_Graph{
 	protected $quiet	= FALSE;
 	protected $status	= self::STATUS_EMPTY;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
 		$this->library	= $library;
-		$this->quiet	= $quiet;
+		$this->quiet	= $this->client->flags & Hymn_Client::FLAG_QUIET;
 	}
 
 	/**
@@ -124,7 +124,7 @@ class Hymn_Module_Graph{
 		return $modules;																			//  return list of modules by installation order
 	}
 
-	protected function realizeRelations( $verbose = FALSE ){
+	protected function realizeRelations(){
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
 			foreach( $node->module->relations->needs as $neededModuleId ){							//  iterate all needed modules of node
@@ -133,13 +133,13 @@ class Hymn_Module_Graph{
 			}
 		}
 		$this->status	= self::STATUS_LINKED;
-		if( !$this->quiet && $verbose )
+		if( $this->client->flags & Hymn_Client::FLAG_VERBOSE && !$this->quiet )
 			Hymn_Client::out( "Found ".count( $this->nodes )." modules." );
 	}
 
-	public function renderGraphFile( $targetFile = NULL, $verbose = FALSE, $type = 'needs' ){						//  @todo	make indepentent from need/support
+	public function renderGraphFile( $targetFile = NULL, $type = 'needs' ){							//  @todo	make indepentent from need/support
 		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations( $verbose );
+			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
 		$nodes	= array();
 		$edges	= array();
@@ -154,7 +154,7 @@ class Hymn_Module_Graph{
 		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
 		$graph		= "digraph {".$options.$nodes.$edges."\n}";
 		$this->status	= self::STATUS_PRODUCED;
-		if( !$this->quiet && $verbose )
+		if( $this->client->flags & Hymn_Client::FLAG_VERBOSE && !$this->quiet )
 			Hymn_Client::out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
 		if( $targetFile ){
 			file_put_contents( $targetFile, $graph );
@@ -164,13 +164,13 @@ class Hymn_Module_Graph{
 		return $graph;
 	}
 
-	public function renderGraphImage( $graph = NULL, $targetFile = NULL, $verbose = FALSE ){
+	public function renderGraphImage( $graph = NULL, $targetFile = NULL ){
 		Hymn_Client::out( "Checking graphviz: ", FALSE );
 		Hymn_Test::checkShellCommand( "graphviz" );
 		Hymn_Client::out( "OK" );
 		try{
 			if( !$graph )
-				$graph		= $this->renderGraphFile( NULL, $verbose );
+				$graph		= $this->renderGraphFile( NULL );
 			$sourceFile	= tempnam( sys_get_temp_dir(), 'Hymn' );
 			file_put_contents( $sourceFile, $graph );												//  save temporary
 

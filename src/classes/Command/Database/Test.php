@@ -43,6 +43,8 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( self::test( $this->client ) )
 			return Hymn_Client::out( "Database can be connected." );
 		return Hymn_Client::out( "Database is NOT connected." );

@@ -43,9 +43,6 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 	 *	@return		void
 	 */
 	public function run(){
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
-
 		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
@@ -56,8 +53,8 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
 
-		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary(), $quiet );
-		$config			= $configurator->get( $moduleId, $configKey, $verbose );
+		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
+		$config			= $configurator->get( $moduleId, $configKey );
 		Hymn_Client::out( $config->value );
 	}
 }

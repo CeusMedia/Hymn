@@ -38,9 +38,6 @@
 class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected $installType	= "link";
-	protected $force		= FALSE;
-	protected $verbose		= FALSE;
-	protected $quiet		= FALSE;
 
 	/**
 	 *	Execute this command.
@@ -48,12 +45,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@return		void
 	 */
 	public function run(){
-		$this->dry		= $this->client->arguments->getOption( 'dry' );
-		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
-
-		if( $this->dry )
+		if( $this->flags->dry )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
@@ -80,7 +72,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 
-		$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
+		$installer	= new Hymn_Module_Installer( $this->client, $library );
 		$modules	= $relation->getOrder();
 		foreach( $modules as $module ){
 			$installType	= $this->client->getModuleInstallType( $module->id );
@@ -88,7 +80,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$listInstalled	= $library->listInstalledModules( $config->application->uri );
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
-			$isForced		= $this->force && ( $isCalledModule || !$moduleId );
+			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
 			if( $isInstalled && !$isForced )
 				Hymn_Client::out( "Module '".$module->id."' is already installed" );
 			else{
@@ -99,9 +91,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$module->versionAvailable,
 					$installType
 				);
-				Hymn_Client::out( $message );
+				if( !$this->flags->quiet )
+					Hymn_Client::out( $message );
 				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				$installer->install( $module, $installType, $this->verbose, $this->dry );
+				$installer->install( $module, $installType, $this->client->flags );
 			}
 		}
 

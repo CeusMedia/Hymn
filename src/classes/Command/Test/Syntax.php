@@ -45,16 +45,13 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 	public function run(){
 		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE );
 		$this->client->arguments->parse();
-
-		$recursive		= $this->client->arguments->getOption( 'recursive' );
-		$quiet			= $this->client->arguments->getOption( 'quiet' );
-		$verbose		= $this->client->arguments->getOption( 'verbose' );
+		$this->flags->recursive	= $this->client->arguments->getOption( 'recursive' );
 
 		$path	= $this->client->arguments->getArgument( 0 );
 		if( !$path )
 			$path	= ".";
 
-		Hymn_Test::checkPhpClasses( $path, $recursive, $verbose );
+		Hymn_Test::checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );
 
 /*		Hymn_Test::checkPhpClasses( "./", FALSE, !FALSE );
 		if( file_exists( "classes" ) )

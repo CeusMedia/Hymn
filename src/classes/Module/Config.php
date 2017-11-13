@@ -40,18 +40,22 @@ class Hymn_Module_Config{
 	protected $client;
 	protected $config;
 	protected $library;
-	protected $quiet;
 	protected $isLiveCopy	= FALSE;
+	protected $flags;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->quiet	= $quiet;
 		$this->app		= $this->config->application;												//  shortcut to application config
+		$this->flags	= (object) array(
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 	}
 
-	public function get( $moduleId, $configKey, $verbose = FALSE ){
+	public function get( $moduleId, $configKey ){
 		$module		= $this->library->readInstalledModule( $this->app->uri, $moduleId );
 		if( array_key_exists( $configKey, $module->config ) )
 			return $module->config[$configKey];
@@ -59,7 +63,7 @@ class Hymn_Module_Config{
 		throw new InvalidArgumentException( sprintf( $msg, $moduleId, $configKey ) );				//  throw exception
 	}
 
-	public function set( $moduleId, $configKey, $configValue, $verbose = FALSE, $dry = FALSE ){
+	public function set( $moduleId, $configKey, $configValue ){
 		$this->get( $moduleId, $configKey, FALSE );
 
 		$target	= $this->app->uri.'config/modules/'.$moduleId.'.xml';
@@ -71,10 +75,10 @@ class Hymn_Module_Config{
 				continue;
 			$dom = dom_import_simplexml( $node );													//  import DOM node of module file
 			$dom->nodeValue = $configValue;															//  set new value on DOM node
-			if( $verbose && !$this->quiet )															//  verbose mode is on
+			if( $this->flags->verbose && !$this->flags->quiet )										//  verbose mode is on
 				Hymn_Client::out( "  … configured ".$key );											//  inform about configures config pair
 		}
-		if( $dry )
+		if( $this->flags->dry )
 			return;
 		$xml->saveXml( $target );																	//  save changed DOM to module file
 		@unlink( $this->app->uri.'config/modules.cache.serial' );			 						//  remove modules cache file

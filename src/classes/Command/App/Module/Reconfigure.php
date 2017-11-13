@@ -43,11 +43,7 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 	 *	@return		void
 	 */
 	public function run(){
-		$dry		= $this->client->arguments->getOption( 'dry' );
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
-
-		if( $dry )
+		if( $this->client->flags && Hymn_Client::FLAG_DRY )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config			= $this->client->getConfig();
@@ -61,8 +57,8 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 		else{
 			$moduleLocal	= $library->readInstalledModule( $config->application->uri, $moduleId );
 			$moduleSource	= $library->getModule( $moduleId, $moduleLocal->installSource );
-			$installer	= new Hymn_Module_Updater( $this->client, $library, $quiet );
-			$installer->reconfigure( $moduleSource, $verbose, $dry );
+			$installer	= new Hymn_Module_Updater( $this->client, $library );
+			$installer->reconfigure( $moduleSource );
 		}
 	}
 }

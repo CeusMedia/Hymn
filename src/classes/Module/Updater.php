@@ -41,20 +41,23 @@ class Hymn_Module_Updater{
 	protected $config;
 	protected $library;
 	protected $dbc;
-	protected $quiet;
 	protected $files;
 	protected $sql;
 	protected $isLiveCopy	= FALSE;
+	protected $flags;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->quiet	= $quiet;
 		$this->dbc		= $client->setupDatabaseConnection();
-		$this->files	= new Hymn_Module_Files( $client, $quiet );
-		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
+		$this->files	= new Hymn_Module_Files( $client );
+		$this->sql		= new Hymn_Module_SQL( $client );
 		$this->app		= $this->config->application;												//  shortcut to application config
+		$this->flags	= (object) array(
+			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
+		);
 
 /*		if( isset( $this->app->installMode ) )
 			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
@@ -72,7 +75,7 @@ class Hymn_Module_Updater{
 		}
 	}
 
-	public function reconfigure( $module, $verbose = FALSE, $dry = FALSE ){
+	public function reconfigure( $module ){
 		$moduleInstalled	= $this->library->readInstalledModule( $this->app->uri, $module->id  );
 		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource )
@@ -86,7 +89,7 @@ class Hymn_Module_Updater{
 			$sourceValue	= $configData->value;
 			if( $sourceValue === $currentValue )
 				continue;
-			if( $this->quiet )
+			if( $this->flags->quiet )
 				$values[$configKey]	= $installed->value;
 			else{
 				Hymn_Client::out( '- Config key "'.$configKey.'" differs. Source: '.$sourceValue.' | Installed: '.$currentValue );
@@ -96,19 +99,19 @@ class Hymn_Module_Updater{
 			}
 		}
 		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
-		if( !$dry ){
-			$installer	= new Hymn_Module_Installer( $this->client, $this->library, $this->quiet );
-			$installer->configure( $moduleSource, $verbose, $dry );
+		if( !$this->flags->dry ){
+			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
+			$installer->configure( $moduleSource );
 		}
 		if( !$values )
 			return;
-		$configurator	= new Hymn_Module_Config( $this->client, $this->library, $this->quiet );
+		$configurator	= new Hymn_Module_Config( $this->client, $this->library );
 		foreach( $values as $configKey => $configValue ){
-			$configurator->set( $module->id, $configKey, $configValue, $verbose, $dry );
+			$configurator->set( $module->id, $configKey, $configValue );
 		}
 	}
 
-	public function update( $module, $installType, $verbose = FALSE, $dry = FALSE ){
+	public function update( $module, $installType ){
 		try{
 			$appUri				= $this->app->uri;
 			$localModules		= $this->library->listInstalledModules( $appUri );
@@ -120,7 +123,7 @@ class Hymn_Module_Updater{
 			foreach( $availableModules as $availableModule )										//  iterate module list
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
 
-			$installer	= new Hymn_Module_Installer( $this->client, $this->library, $this->quiet );
+			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			foreach( $module->relations->needs as $relation ){										//  iterate related modules
 				if( !array_key_exists( $relation, $localModules ) ){								//  related module is not installed
 					if( !array_key_exists( $relation, $availableModuleMap ) ){						//  related module is not available
@@ -128,23 +131,24 @@ class Hymn_Module_Updater{
 						throw new RuntimeException( sprintf( $message, $relation ) );				//  throw exception
 					}
 					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
-					if( !$this->quiet )																//  quiet mode is off
+					if( !$this->flags->quiet )																//  quiet mode is off
 						Hymn_Client::out( " - Installing needed module '".$relation."' ..." );		//  inform about installation of needed module
-					$installer->install( $relatedModule, $installType, $verbose, $dry );			//  install related module
+					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}
 			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
 			$this->sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
 			$this->files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
 
-			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
-			if( !$dry ){
+			$this->files->removeFiles( $localModule );												//  remove module files
+			if( !$this->flags->dry ){
 //				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
 				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
 			}
-			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
-			$this->reconfigure( $module, $verbose, $dry );											//  configure module
-			$this->sql->runModuleUpdateSql( $localModule, $module, $verbose, $dry );				//  run SQL scripts
+			$this->files->copyFiles( $module, $installType );										//  copy module files
+			$this->reconfigure( $module );															//  configure module
+			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
+				$this->sql->runModuleUpdateSql( $localModule, $module );							//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){

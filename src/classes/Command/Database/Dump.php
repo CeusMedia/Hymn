@@ -45,11 +45,10 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
-
-		$dry		= $this->client->arguments->getOption( 'dry' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
 
 		$dbc		= $this->client->getDatabase();
 		$arguments	= $this->client->arguments;
@@ -91,7 +90,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			escapeshellarg( $fileName ),															//  dump output filename
 		) );
 
-		if( $verbose ){
+		if( $this->flags->verbose ){
 			Hymn_Client::out( "DB Server:    ".$host."@".$port );
 			Hymn_Client::out( "Database:     ".$name );
 			Hymn_Client::out( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
@@ -104,7 +103,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		exec( $command, $resultOutput, $resultCode );
 		if( $resultCode !== 0 )
 			return Hymn_Client::out( "Database dump failed." );
-		if( $dry ){
+		if( $this->flags->dry ){
 			unlink( $fileName );
 			return Hymn_Client::out( "Simulated database dump has been successful." );
 		}

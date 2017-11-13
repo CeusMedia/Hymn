@@ -55,8 +55,8 @@ class Hymn_Test {
 
 	static public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
 		$indent	= str_repeat( ". ", $level );
-		if( $verbose )
-			Hymn_Client::out( $indent."Folder: ".$path );
+//		if( $verbose )
+//			Hymn_Client::out( $indent."Folder: ".$path );
 		$index	= new DirectoryIterator( $path );
 		$valid	= TRUE;
 		foreach( $index as $entry ){
@@ -65,7 +65,7 @@ class Hymn_Test {
 			if( $entry->isDir() && $recursive )
 				self::checkPhpClasses( $entry->getPathname(), $recursive, $verbose, $level + 1 );
 			else if( $entry->isFile() ){
-				if( !preg_match( "/\.php/", $entry->getFilename() ) )
+				if( !preg_match( '/\.php[0-9]*$/', $entry->getFilename() ) )
 					continue;
 				if( $verbose )
 					Hymn_Client::out( $indent.". File: ".$entry->getPathname() );

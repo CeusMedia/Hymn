@@ -40,10 +40,6 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 
 	protected $installType	= "link";
 	protected $installMode	= "dev";
-	protected $dry			= FALSE;
-	protected $force		= FALSE;
-	protected $quiet		= FALSE;
-	protected $verbose		= FALSE;
 
 	/**
 	 *	Execute this command.
@@ -51,12 +47,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@return		void
 	 */
 	public function run(){
-		$this->dry		= $this->client->arguments->getOption( 'dry' );
-		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
-
-		if( $this->dry )
+		if( $this->flags->dry )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 //		$start		= microtime( TRUE );
@@ -115,8 +106,8 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$installType
 			);
 			Hymn_Client::out( $message );
-			$installer	= new Hymn_Module_Updater( $this->client, $library, $this->quiet );
-			$installer->update( $module, $installType, $this->verbose, $this->dry );
+			$installer	= new Hymn_Module_Updater( $this->client, $library );
+			$installer->update( $module, $installType );
 		}
 	}
 }

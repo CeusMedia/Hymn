@@ -38,9 +38,6 @@
 class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	protected $installType	= "link";
-	protected $force		= FALSE;
-	protected $verbose		= FALSE;
-	protected $quiet		= FALSE;
 
 	/**
 	 *	Execute this command.
@@ -48,12 +45,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
-		$this->dry		= $this->client->arguments->getOption( 'dry' );
-		$this->force	= $this->client->arguments->getOption( 'force' );
-		$this->quiet	= $this->client->arguments->getOption( 'quiet' );
-		$this->verbose	= $this->client->arguments->getOption( 'verbose' );
-
-		if( $this->dry )
+		if( $this->flags->dry )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
@@ -73,15 +65,15 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			foreach( $listInstalled as $installedModuleId => $installedModule )
 				if( in_array( $moduleId, $installedModule->relations->needs ) )
 					$neededBy[]	= $installedModuleId;
-			if( $neededBy && !$this->force ) {
+			if( $neededBy && !$this->flags->force ) {
 				$list	= implode( ', ', $neededBy );
 				$msg	= "Module '%s' is needed by %d other modules (%s)";
 				Hymn_Client::out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
 			}
 			else{
 				$module->path	= 'not_relevant/';
-				$installer	= new Hymn_Module_Installer( $this->client, $library, $this->quiet );
-				$installer->uninstall( $module, $this->verbose, $this->dry );
+				$installer	= new Hymn_Module_Installer( $this->client, $library );
+				$installer->uninstall( $module );
 			}
 		}
 	}

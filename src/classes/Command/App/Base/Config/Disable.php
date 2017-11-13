@@ -44,9 +44,7 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 	 */
 	public function run(){
 		$key		= $this->client->arguments->getArgument( 0 );
-		$dry		= $this->client->arguments->getOption( 'dry' );
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
+
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
@@ -54,15 +52,15 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		if( !$editor->isActiveProperty( $key ) ){
-			if( !$quiet )
+			if( !$this->flags->quiet )
 				Hymn_Client::out( 'Base config key "'.$key.'" already is disabled' );
 			return;
 		}
-		if( !$dry ){
+		if( !$this->flags->dry ){
 			$editor->deactivateProperty( $key );
 			clearstatcache();
 		}
-		if( !$quiet && $verbose )
+		if( $this->flags->verbose && !$this->flags->quiet )
 			Hymn_Client::out( 'Base config key "'.$key.'" disabled' );
 	}
 }

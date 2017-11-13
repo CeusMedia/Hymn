@@ -50,7 +50,6 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		$hymnFile		= json_decode( file_get_contents( $fileName ) );
 		$knownModules	= array_keys( (array) $hymnFile->modules );
 
-
 		$index	= new DirectoryIterator( "config/modules" );
 		$list	= array();
 		foreach( $index as $entry ){

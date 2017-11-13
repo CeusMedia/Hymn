@@ -39,18 +39,21 @@ class Hymn_Module_Files{
 
 	protected $client;
 	protected $config;
-	protected $quiet;
+	protected $flags;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Hymn_Client		$client		Hymn client instance
-	 *	@param		boolean			$quiet		Flag: be quiet and ignore verbosity
 	 */
-	public function __construct( Hymn_Client $client, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
-		$this->quiet	= $quiet;
+		$this->flags	= (object) array(
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 	}
 
 	/**
@@ -58,12 +61,13 @@ class Hymn_Module_Files{
 	 *	@access		public
 	 *	@param 		object 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
-	 *	@param		boolean		$verbose		Flag: be verbose during processing
-	 *	@param		boolean		$dry			Flag: dry run mode - simulation only
 	 *	@return		void
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( $module, $installType = "link", $verbose = FALSE, $dry = FALSE ){
+	public function copyFiles( $module, $installType = "link" ){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_FILES )
+			return TRUE;
+
 		$fileMap	= $this->prepareModuleFileMap( $module );
 		foreach( $fileMap as $source => $target ){
 			self::createPath( dirname( $target ) );
@@ -79,7 +83,7 @@ class Hymn_Module_Files{
 //						throw new Exception( 'Source file '.$source.' is not executable' );
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
-					if( !$dry ){																	//  not a dry run
+					if( !$this->flags->dry ){														//  not a dry run
 						if( file_exists( $target ) ){
 						//	if( !$force )
 						//		throw new Exception( 'Target file '.$target.' is already existing' );
@@ -88,7 +92,7 @@ class Hymn_Module_Files{
 						if( !@symlink( $source, $target ) )
 							throw new Exception( 'Link of source file '.$source.' is not creatable' );
 					}
-					if( $verbose && !$this->quiet )
+					if( $this->flags->verbose && !$this->flags->quiet )
 						Hymn_Client::out( '  … linked file '.$source );
 //				}
 //				catch( Exception $e ){
@@ -104,11 +108,11 @@ class Hymn_Module_Files{
 						throw new Exception( 'Source file '.$source.' is not readable' );
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
-					if( !$dry ){																	//  not a dry run
+					if( !$this->flags->dry ){														//  not a dry run
 						if( !@copy( $source, $target ) )											//  copying failed
 							throw new Exception( 'Source file '.$source.' could not been copied' );
 					}
-					if( $verbose && !$this->quiet )
+					if( $this->flags->verbose && !$this->flags->quiet )
 						Hymn_Client::out( '  … copied file '.$source );
 //				}
 //				catch( Exception $e ){
@@ -239,13 +243,13 @@ class Hymn_Module_Files{
 	 *	Removed installed files of module.
 	 *	@access		public
 	 *	@param 		object 		$module			Module object
-	 *	@param 		boolean 	$verbose		Flag: be verbose
-	 *	@param		boolean		$dry			Flag: dry run mode - simulation only
 	 *	@return		void
 	 *	@throws		RuntimeException			if target file is not readable
 	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	public function removeFiles( $module, $verbose = FALSE, $dry =  FALSE ){
+	public function removeFiles( $module ){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_FILES )
+			return TRUE;
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( $fileMap as $source => $target ){													//  iterate file list
 			if( !file_exists( $target ) )
@@ -254,10 +258,10 @@ class Hymn_Module_Files{
 				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
 			if( !is_link( $target ) && !is_writable( $target ) )									//  if installed file is a copy and not writable
 				throw new RuntimeException( 'Target file '.$target.' is not removable' );			//  throw exception
-			if( !$dry ){																			//  not a dry run
+			if( !$this->flags->dry ){																//  not a dry run
 				@unlink( $target );																	//  remove installed file
 			}
-			if( $verbose && !$this->quiet )															//  be verbose
+			if( $this->flags->verbose && !$this->flags->quiet )										//  be verbose
 				Hymn_Client::out( '  … removed file '.$target );									//  print note about removed file
 		}
 	}

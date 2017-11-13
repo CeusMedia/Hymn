@@ -41,20 +41,24 @@ class Hymn_Module_Installer{
 	protected $config;
 	protected $library;
 	protected $dbc;
-	protected $quiet;
 	protected $files;
 	protected $sql;
 	protected $isLiveCopy	= FALSE;
+	protected $flags;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->quiet	= $quiet;
 		$this->dbc		= $client->setupDatabaseConnection();
-		$this->files	= new Hymn_Module_Files( $client, $quiet );
-		$this->sql		= new Hymn_Module_SQL( $client, $quiet );
+		$this->files	= new Hymn_Module_Files( $client );
+		$this->sql		= new Hymn_Module_SQL( $client );
 		$this->app		= $this->config->application;												//  shortcut to application config
+		$this->flags	= (object) array(
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 
 /*		if( isset( $this->app->installMode ) )
 			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
@@ -80,14 +84,12 @@ class Hymn_Module_Installer{
 	 *	4. combine values from hymn file and console input and apply to module file
 	 *	@access		public
 	 *	@param		object		$module			Data object of module to install
-	 *	@param		boolean		$verbose		Flag: be verbose
-	 *	@param		boolean		$dry			Flag: dry run move - simulation only
 	 *	@return		void
 	 */
-	public function configure( $module, $verbose = FALSE, $dry = FALSE ){
+	public function configure( $module ){
 		$source	= $module->path.'module.xml';
 		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
-		if( !$dry ){																				//  if not in dry mode
+		if( !$this->flags->dry ){																	//  if not in dry mode
 			Hymn_Module_Files::createPath( dirname( $target ) );									//  create folder for module configurations in app
 			@copy( $source, $target );																//  copy module configuration into this folder
 		}
@@ -98,9 +100,11 @@ class Hymn_Module_Installer{
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XmlElement( $xml );
 		$type	= isset( $this->app->type ) ? $this->app->type : 1;
-		$xml->version->setAttribute( 'install-type', $type );
-		$xml->version->setAttribute( 'install-source', $module->sourceId );
-		$xml->version->setAttribute( 'install-date', date( "c" ) );
+		if( !$this->flags->dry ){																	//  if not in dry mode
+			$xml->version->setAttribute( 'install-type', $type );
+			$xml->version->setAttribute( 'install-source', $module->sourceId );
+			$xml->version->setAttribute( 'install-date', date( "c" ) );
+		}
 
 		$config	= (object) array();																	//  prepare empty hymn module config
 		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
@@ -126,21 +130,24 @@ class Hymn_Module_Installer{
 			if( isset( $config->{$key} ) ){															//  a config value has been set
 				$dom = dom_import_simplexml( $node );												//  import DOM node of module file
 				$dom->nodeValue = $config->{$key};													//  set new value on DOM node
-				if( $verbose && !$this->quiet )														//  verbose mode is on
+				if( $this->flags->verbose && !$this->flags->quiet )									//  verbose mode is on
 					Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
 			}
 		}
-		if( !$dry ){
+		if( !$this->flags->dry ){																	//  no a dry run
 			$xml->saveXml( $target );																//  save changed DOM to module file
 			@unlink( $this->app->uri.'config/modules.cache.serial' );							 	//  remove modules cache file
 		}
 	}
 
-	public function install( $module, $installType = "link", $verbose = FALSE, $dry = FALSE ){
+	public function install( $module, $installType = "link" ){
 		try{
-			$this->files->copyFiles( $module, $installType, $verbose, $dry );						//  copy module files
-			$this->configure( $module, $verbose, $dry );											//  configure module
-			$this->sql->runModuleInstallSql( $module, $verbose, $dry || $this->isLiveCopy );		//  run SQL scripts, not for live copy builds
+			if( !( $this->client->flags & Hymn_Client::FLAG_NO_FILES ) ){
+				$this->files->copyFiles( $module, $installType );									//  copy module files
+			}
+			$this->configure( $module );															//  configure module
+			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
+				$this->sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );					//  run SQL scripts, not for live copy builds
 			return TRUE;
 		}
 		catch( Exception $e ){
@@ -149,17 +156,18 @@ class Hymn_Module_Installer{
 		}
 	}
 
-	public function uninstall( $module, $verbose = FALSE, $dry = FALSE ){
+	public function uninstall( $module ){
 		try{
 			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
 			$localModule->path	= $appUri;
-			$this->files->removeFiles( $localModule, $verbose, $dry );								//  remove module files
-			if( !$dry ){																			//  not a dry run
+			$this->files->removeFiles( $localModule );												//  remove module files
+			if( !$this->flags->dry ){																//  not a dry run
 				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
 				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
 			}
-			$this->sql->runModuleUninstallSql( $localModule, $verbose, $dry );						//  run SQL scripts
+			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )								//  database actions are enabled
+				$this->sql->runModuleUninstallSql( $localModule );									//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){

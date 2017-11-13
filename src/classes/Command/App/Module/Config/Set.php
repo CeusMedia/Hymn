@@ -43,10 +43,6 @@ class Hymn_Command_App_Module_Config_Set extends Hymn_Command_Abstract implement
 	 *	@return		void
 	 */
 	public function run(){
-		$dry		= $this->client->arguments->getOption( 'dry' );
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
-
 		$key		= $this->client->arguments->getArgument( 0 );
 		$value		= $this->client->arguments->getArgument( 1 );
 		if( !strlen( trim( $key ) ) )
@@ -58,7 +54,7 @@ class Hymn_Command_App_Module_Config_Set extends Hymn_Command_Abstract implement
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
 
-		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary(), $quiet );
-		$config			= $configurator->set( $moduleId, $configKey, $value, $verbose, $dry );
+		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
+		$config			= $configurator->set( $moduleId, $configKey, $value );
 	}
 }

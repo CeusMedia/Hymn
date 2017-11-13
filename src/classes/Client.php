@@ -37,9 +37,22 @@
  */
 class Hymn_Client{
 
+	const FLAG_VERBOSE			= 1;
+	const FLAG_QUIET			= 2;
+	const FLAG_DRY				= 4;
+	const FLAG_FORCE			= 8;
+	const FLAG_NO_DB			= 16;
+	const FLAG_NO_FILES			= 32;
+
 	protected $application;
 
 	protected $baseArgumentOptions	= array(
+		'db'		=> array(
+			'pattern'	=> '/^--db=(\S+)$/',
+			'resolve'	=> '\\1',
+			'values'	=> array( 'yes', 'no', 'only' ),
+			'default'	=> 'yes',
+		),
 		'dry'		=> array(
 			'pattern'	=> '/^-d|--dry/',
 			'resolve'	=> TRUE,
@@ -102,7 +115,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.3.5";
+	static public $version	= "0.9.4";
 
 	public $arguments;
 
@@ -116,6 +129,8 @@ class Hymn_Client{
 
 	protected $isLiveCopy	= FALSE;
 
+	public $flags			= 0;
+
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
@@ -124,6 +139,16 @@ class Hymn_Client{
 			ob_start();
 
 		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+		if( $this->arguments->getOption( 'dry' ) )
+			$this->flags	|= self::FLAG_DRY;
+		if( $this->arguments->getOption( 'quiet' ) )
+			$this->flags	|= self::FLAG_QUIET;
+		if( $this->arguments->getOption( 'verbose' ) )
+			$this->flags	|= self::FLAG_VERBOSE;
+		if( $this->arguments->getOption( 'db' ) === 'no' )
+			$this->flags	|= self::FLAG_NO_DB;
+		if( $this->arguments->getOption( 'db' ) === 'only' )
+			$this->flags	|= self::FLAG_NO_FILES;
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
 		try{
@@ -204,16 +229,11 @@ class Hymn_Client{
 		$typeIsInteger	= in_array( $type, array( 'int', 'integer' ) );
 		$typeIsNumber	= in_array( $type, array( 'float', 'double', 'decimal' ) );
 		if( $typeIsBoolean ){
-			if( in_array( strtolower( $default ), array( 'y', 'yes', '1' ) ) ){
-				$options	= array( 'y', 'n' );
-				$default	= 'yes';
-			}
-			else {
-				$options	= array( 'y', 'n' );
-				$default	= 'no';
-			}
+			$options		= array( 'y', 'n' );
+			$defaultIsYes	= in_array( strtolower( $default ), array( 'y', 'yes', '1' ) );
+			$default		= $defaultIsYes ? 'yes' : 'no';
 		}
-		if( /*!$typeIsBoolean && */strlen( trim( $default ) ) )
+		if( strlen( trim( $default ) ) )
 			$message	.= " [".$default."]";
 		if( is_array( $options ) && count( $options ) )
 			$message	.= " (".implode( "|", $options ).")";

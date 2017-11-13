@@ -45,9 +45,6 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 	public function run(){
 		$key	= $this->client->arguments->getArgument( 0 );
 		$value	= $this->client->arguments->getArgument( 1 );
-		$dry		= $this->client->arguments->getOption( 'dry' );
-		$quiet		= $this->client->arguments->getOption( 'quiet' );
-		$verbose	= $this->client->arguments->getOption( 'verbose' );
 
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
@@ -66,11 +63,11 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 				FALSE																				//  no break = inline question
 			) );
 
-		if( !$dry ){
+		if( !$this->flags->dry ){
 			$editor->setProperty( $key, $value );
 			clearstatcache();
 		}
-		if( !$quiet && $verbose )
+		if( $this->flags->verbose && !$this->flags->quiet )
 			Hymn_Client::out( 'Base config key "'.$key.'" set to "'.$value.'"' );
 	}
 }

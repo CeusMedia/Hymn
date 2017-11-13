@@ -43,11 +43,11 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return Hymn_Client::out( "Database can NOT be connected." );
 
-		$dry			= $this->client->arguments->getOption( 'dry' );
-		$verbose		= $this->client->arguments->getOption( 'verbose' );
 		$pathName		= $this->client->arguments->getArgument( 0 );
 		if( $pathName && file_exists( $pathName ) ){
 			if( is_dir( $pathName ) )
@@ -94,7 +94,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 				escapeshellarg( $tempName ),														//  temp file name as escaped shell arg
 			) );
 
-			if( $verbose ){
+			if( $this->flags->verbose ){
 				Hymn_Client::out( "Import file:  ".$fileName );
 				Hymn_Client::out( "File size:    ".$fileSize );
 				Hymn_Client::out( "DB Server:    ".$host."@".$port );
@@ -102,7 +102,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 				Hymn_Client::out( "Table prefix: ".( $prefix ? $prefix : "- (none)" ) );
 				Hymn_Client::out( "Access as:    ".$username );
 			}
-			if( $dry )
+			if( $this->flags->dry )
 				return Hymn_Client::out( "Database setup okay - import itself not simulated." );
 
 			Hymn_Client::out( "Importing ".$fileName." (".$fileSize.") ..." );
@@ -127,9 +127,9 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		return FALSE;
 	}
 
-	protected function getLatestDump( $path = NULL, $verbose = FALSE ){
+	protected function getLatestDump( $path = NULL ){
 		$path	= $path ? $path : "config/sql/";
-		if( $verbose )
+		if( $this->flags->verbose )
 			Hymn_Client::out( "Scanning folder ".$path."..." );
 		if( file_exists( $path ) ){
 			$list	= array();

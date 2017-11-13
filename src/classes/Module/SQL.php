@@ -40,11 +40,16 @@ class Hymn_Module_SQL{
 	protected $client;
 //	protected $config;
 	protected $quiet;
+	protected $flags;
 
-	public function __construct( Hymn_Client $client, $quiet = FALSE ){
+	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
 //		$this->config	= $this->client->getConfig();
-		$this->quiet	= $quiet;
+		$this->flags	= (object) array(
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 	}
 
 	/**
@@ -106,12 +111,12 @@ class Hymn_Module_SQL{
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	@access		public
 	 *	@param 		object 		$module				Object of nodule to install
-	 *	@param 		boolean 	$verbose			Flag: be verbose
-	 *	@param		boolean		$dry				Flag: dry run mode - simulation only
 	 *	@return		void
 	 *	@throws		RuntimeException		if target file is not readable
 	 */
-	public function runModuleInstallSql( $module, $verbose, $dry = FALSE ){
+	public function runModuleInstallSql( $module ){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
 			return;																					//  quit here
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
@@ -151,14 +156,13 @@ class Hymn_Module_SQL{
 				}
 			}
 		}
-		if( $dry )																					//  this is a dry run
-			return;																					//  do not execute anything
 		foreach( $scripts as $script ){																//  iterate collected scripts
-			if( $verbose && !$this->quiet ){														//  be verbose
+			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "    … apply database script on %s at version %s";
 				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
 			}
-			$this->executeSql( $script->sql );														//  execute collected SQL script
+			if( !$this->flags->dry )																//  this is a dry run
+				$this->executeSql( $script->sql );													//  execute collected SQL script
 		}
 	}
 
@@ -166,11 +170,11 @@ class Hymn_Module_SQL{
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	@access		public
 	 *	@param 		object 		$installedModule	Object of locally installed module
-	 *	@param 		boolean 	$verbose			Flag: be verbose
-	 *	@param		boolean		$dry				Flag: dry run mode - simulation only
 	 *	@return		void
 	 */
-	public function runModuleUninstallSql( $installedModule, $verbose, $dry = FALSE ){
+	public function runModuleUninstallSql( $installedModule ){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
 			return;																					//  quit here
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
@@ -198,11 +202,11 @@ class Hymn_Module_SQL{
 		}
 
 		foreach( $scripts as $script ){
-			if( $verbose && !$this->quiet ){														//  be verbose
+			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "    … apply database script on %s at version %s";
 				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
 			}
-			if( !$dry )																				//  not a dry run
+			if( !$this->flags->dry )																//  not a dry run
 				$this->executeSql( $script->sql );													//  execute collected SQL script
 		}
 	}
@@ -212,11 +216,11 @@ class Hymn_Module_SQL{
 	 *	@access		public
 	 *	@param 		object 		$installedModule	Object of locally installed module
 	 *	@param 		object 		$module				Object of library module to update to
-	 *	@param 		boolean 	$verbose			Flag: be verbose
-	 *	@param		boolean		$dry				Flag: dry run mode - simulation only
 	 *	@return		void
 	 */
-	public function runModuleUpdateSql( $installedModule, $module, $verbose, $dry = FALSE ){
+	public function runModuleUpdateSql( $installedModule, $module ){
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+			return;
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
 			return;																					//  quit here
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
@@ -235,11 +239,11 @@ class Hymn_Module_SQL{
 		uksort( $scripts, 'version_compare' );														//  sort update scripts by version
 
 		foreach( $scripts as $script ){																//  iterate found ordered update scripts
-			if( $verbose && !$this->quiet ){														//  be verbose
-				$msg	= "    … apply database script on %s at version %s";						//  ...
+			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
+				$msg	= "  … apply database script on %s at version %s";						//  ...
 				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );				//  ...
 			}
-			if( !$dry )																				//  not a dry run
+			if( !$this->flags->dry )																//  not a dry run
 				$this->executeSql( $script->sql );													//  execute collected SQL script
 		}
 	}
