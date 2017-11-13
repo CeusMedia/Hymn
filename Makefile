@@ -40,3 +40,7 @@ test-syntax:
 	@echo "Checking syntax..."
 #	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
 	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED" 
+
+update:
+	@git fetch && git rebase && $(MAKE) -s create-phar
+
