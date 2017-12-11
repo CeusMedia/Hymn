@@ -115,7 +115,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.4";
+	static public $version	= "0.9.4.1";
 
 	public $arguments;
 
@@ -141,6 +141,8 @@ class Hymn_Client{
 		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 		if( $this->arguments->getOption( 'dry' ) )
 			$this->flags	|= self::FLAG_DRY;
+		if( $this->arguments->getOption( 'force' ) )
+			$this->flags	|= self::FLAG_FORCE;
 		if( $this->arguments->getOption( 'quiet' ) )
 			$this->flags	|= self::FLAG_QUIET;
 		if( $this->arguments->getOption( 'verbose' ) )
