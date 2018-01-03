@@ -43,6 +43,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 	 *	@return		void
 	 */
 	public function run(){
+		$filename   = Hymn_Client::$fileName;
 		$config		= $this->client->getConfig();
 		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )

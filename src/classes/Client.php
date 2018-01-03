@@ -115,7 +115,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.4.1";
+	static public $version	= "0.9.4.2";
 
 	public $arguments;
 
@@ -147,6 +147,8 @@ class Hymn_Client{
 			$this->flags	|= self::FLAG_QUIET;
 		if( $this->arguments->getOption( 'verbose' ) )
 			$this->flags	|= self::FLAG_VERBOSE;
+		if( $this->arguments->getOption( 'force' ) )
+			$this->flags	|= self::FLAG_FORCE;
 		if( $this->arguments->getOption( 'db' ) === 'no' )
 			$this->flags	|= self::FLAG_NO_DB;
 		if( $this->arguments->getOption( 'db' ) === 'only' )
