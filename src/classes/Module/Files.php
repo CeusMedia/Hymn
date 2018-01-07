@@ -53,6 +53,7 @@ class Hymn_Module_Files{
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
 		);
 	}
 
@@ -85,9 +86,11 @@ class Hymn_Module_Files{
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !$this->flags->dry ){														//  not a dry run
 						if( file_exists( $target ) ){
+							if( is_file( $target ) && !$this->flags->force )
+								continue;
+							@unlink( $target );
 						//	if( !$force )
 						//		throw new Exception( 'Target file '.$target.' is already existing' );
-								@unlink( $target );
 						}
 						if( !@symlink( $source, $target ) )
 							throw new Exception( 'Link of source file '.$source.' is not creatable' );
@@ -109,7 +112,12 @@ class Hymn_Module_Files{
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !$this->flags->dry ){														//  not a dry run
-						if( !@copy( $source, $target ) )											//  copying failed
+/*						if( file_exists( $target ) ){
+							if( is_file( $target ) && !$this->flags->force )
+								continue;
+							@unlink( $target );
+						}
+*/						if( !@copy( $source, $target ) )											//  copying failed
 							throw new Exception( 'Source file '.$source.' could not been copied' );
 					}
 					if( $this->flags->verbose && !$this->flags->quiet )
