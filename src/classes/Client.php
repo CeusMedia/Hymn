@@ -108,6 +108,7 @@ class Hymn_Client{
 	);
 
 	static public $pathDefaults	= array(
+		'config'		=> 'config/',
 		'images'		=> 'images/',
 		'locales'		=> 'locales/',
 		'scripts'		=> 'scripts/',
@@ -304,13 +305,17 @@ class Hymn_Client{
 				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is not valid JSON' );
 			$this->config->sources = $sources;
 		}
+		$app	= $this->config->application;
+		if( isset( $app->configPath ) )
+			self::$pathDefaults['config'] = $app->configPath;
+
 		$this->config->paths	= (object) array();
 		foreach( self::$pathDefaults as $pathKey => $pathValue )
 			if( !isset( $this->config->paths->{$pathKey} ) )
 				$this->config->paths->{$pathKey}	= $pathValue;
 
-		if( file_exists( 'config/config.ini' ) ){
-			$data	= parse_ini_file( 'config/config.ini' );
+		if( file_exists( $this::$pathDefaults.'config.ini' ) ){
+			$data	= parse_ini_file( $this::$pathDefaults.'config.ini' );
 			foreach( $data as $key => $value ){
 				if( preg_match( "/^path\./", $key ) ){
 					$key	= preg_replace( "/^path\./", "", $key );
@@ -326,11 +331,12 @@ class Hymn_Client{
 			}
 		}
 
-		$app	= $this->config->application;
 		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
 			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
 #		if( $this->isLiveCopy )
 #			self::out( "This is a live copy build. Most hymn functions are not available." );
+		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
 	}
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
