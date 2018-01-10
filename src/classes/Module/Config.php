@@ -56,7 +56,7 @@ class Hymn_Module_Config{
 	}
 
 	public function get( $moduleId, $configKey ){
-		$module		= $this->library->readInstalledModule( $this->app->uri, $moduleId );
+		$module		= $this->library->readInstalledModule( $moduleId );
 		if( array_key_exists( $configKey, $module->config ) )
 			return $module->config[$configKey];
 		$msg	= 'No configuration value for key "%2$s" in module "%1$s" set';						//  exception message
@@ -65,10 +65,10 @@ class Hymn_Module_Config{
 
 	public function set( $moduleId, $configKey, $configValue ){
 		$this->get( $moduleId, $configKey, FALSE );
-
-		$target	= $this->app->uri.'config/modules/'.$moduleId.'.xml';
-		$xml	= file_get_contents( $target );
-		$xml	= new Hymn_Tool_XmlElement( $xml );
+		$pathConfig	= $this->client->getConfigPath();
+		$target		= $pathConfig.'modules/'.$moduleId.'.xml';
+		$xml		= file_get_contents( $target );
+		$xml		= new Hymn_Tool_XmlElement( $xml );
 		foreach( $xml->config as $nr => $node ){													//  iterate original module config pairs
 			$key	= (string) $node['name'];														//  shortcut config pair key
 			if( $key !== $configKey )
@@ -81,7 +81,7 @@ class Hymn_Module_Config{
 		if( $this->flags->dry )
 			return;
 		$xml->saveXml( $target );																	//  save changed DOM to module file
-		@unlink( $this->app->uri.'config/modules.cache.serial' );			 						//  remove modules cache file
+		@unlink( $pathConfig.'modules.cache.serial' );			 						//  remove modules cache file
 		clearstatcache();
 	}
 }

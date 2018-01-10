@@ -52,10 +52,10 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 
 		if( !$moduleId )
 			Hymn_Client::out( "No module id given" );
-		else if( !$library->isInstalledModule( $config->application->uri, $moduleId ) )
+		else if( !$library->isInstalledModule( $moduleId ) )
 			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
 		else{
-			$moduleLocal	= $library->readInstalledModule( $config->application->uri, $moduleId );
+			$moduleLocal	= $library->readInstalledModule( $moduleId );
 			$moduleSource	= $library->getModule( $moduleId, $moduleLocal->installSource );
 			$installer	= new Hymn_Module_Updater( $this->client, $library );
 			$installer->reconfigure( $moduleSource );

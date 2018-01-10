@@ -76,7 +76,7 @@ class Hymn_Module_Updater{
 	}
 
 	public function reconfigure( $module ){
-		$moduleInstalled	= $this->library->readInstalledModule( $this->app->uri, $module->id  );
+		$moduleInstalled	= $this->library->readInstalledModule( $module->id  );
 		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource )
 			throw new RuntimeException( sprintf( 'Module "%" is not available', $module->id ) );
@@ -98,7 +98,8 @@ class Hymn_Module_Updater{
 					$values[$configKey]	= $currentValue;
 			}
 		}
-		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
+		$pathConfig	= $this->client->getConfigPath();
+		$target		= $pathConfig.'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			$installer->configure( $moduleSource );
@@ -114,8 +115,8 @@ class Hymn_Module_Updater{
 	public function update( $module, $installType ){
 		try{
 			$appUri				= $this->app->uri;
-			$localModules		= $this->library->listInstalledModules( $appUri );
-			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
+			$localModules		= $this->library->listInstalledModules();
+			$localModule		= $this->library->readInstalledModule( $module->id );
 			$localModule->path	= $appUri;
 
 			$availableModules	= $this->library->getModules();										//  get list of all available modules
@@ -142,8 +143,9 @@ class Hymn_Module_Updater{
 
 			$this->files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){
-//				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
-				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
+				$pathConfig	= $this->client->getConfigPath();
+//				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
+				@unlink( $pathConfig.'modules.cache.serial' );										//  remove modules cache file
 			}
 			$this->files->copyFiles( $module, $installType );										//  copy module files
 			$this->reconfigure( $module );															//  configure module

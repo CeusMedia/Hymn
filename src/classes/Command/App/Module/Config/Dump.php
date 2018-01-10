@@ -43,14 +43,15 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 	 *	@return		void
 	 */
 	public function run(){
+		$pathConfig	= $this->client->getConfigPath();
 		$fileName	= Hymn_Client::$fileName;
-		if( !file_exists( "config/modules" ) )
+		if( !file_exists( $pathConfig."modules" ) )
 			return Hymn_Client::out( "No modules installed" );
 
 		$hymnFile		= json_decode( file_get_contents( $fileName ) );
 		$knownModules	= array_keys( (array) $hymnFile->modules );
 
-		$index	= new DirectoryIterator( "config/modules" );
+		$index	= new DirectoryIterator( $pathConfig."modules" );
 		$list	= array();
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )

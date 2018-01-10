@@ -43,13 +43,14 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 	 *	@return		void
 	 */
 	public function run(){
-		$key	= $this->client->arguments->getArgument( 0 );
-		$value	= $this->client->arguments->getArgument( 1 );
+		$key		= $this->client->arguments->getArgument( 0 );
+		$value		= $this->client->arguments->getArgument( 1 );
+		$pathConfig	= $this->client->getConfigPath();
 
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 
-		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
+		$editor	= new Hymn_Tool_BaseConfigEditor( $configPath."config.ini" );
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		$current	= $editor->getProperty( $key, FALSE );

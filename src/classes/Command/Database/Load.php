@@ -128,7 +128,8 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	}
 
 	protected function getLatestDump( $path = NULL ){
-		$path	= $path ? $path : "config/sql/";
+		$pathConfig	= $this->client->getConfigPath();
+		$path		= $path ? $path : $pathConfig."sql/";
 		if( $this->flags->verbose )
 			Hymn_Client::out( "Scanning folder ".$path."..." );
 		if( file_exists( $path ) ){

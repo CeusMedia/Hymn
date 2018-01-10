@@ -52,7 +52,7 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !$this->flags->quiet && $this->flags->verbose )
 			Hymn_Client::out( "Loading all needed modules into graph…" );
 
-		$library	= $this->getLibrary( $config );
+		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 		foreach( $config->modules as $moduleId => $module ){
 			if( preg_match( "/^@/", $moduleId ) )
@@ -64,8 +64,8 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 			}
 		}
 
-		$targetFileGraph	= "config/modules.graph";
-		$targetFileImage	= "config/modules.graph.png";
+		$targetFileGraph	= $this->client->getConfigPath()."modules.graph";
+		$targetFileImage	= $this->client->getConfigPath()."modules.graph.png";
 		$graph	= $relation->renderGraphFile( $targetFileGraph );
 //		if( !$this->flags->quiet )
 //			Hymn_Client::out( "Saved graph file to ".$targetFileGraph."." );

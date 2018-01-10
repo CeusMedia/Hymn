@@ -44,7 +44,8 @@ class Hymn_Module_Library{
 	protected $modules		= array();
 	protected $shelves		= array();
 
-	public function __construct(){
+	public function __construct( Hymn_Client $client ){
+		$this->client		= $client;
 	}
 
 	public function addShelf( $id, $path, $type, $active = TRUE ){
@@ -129,8 +130,8 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
-	static public function isInstalledModule( $pathApp = "", $moduleId ){
-		$list	= self::listInstalledModules( $pathApp );
+	public function isInstalledModule( $moduleId ){
+		$list	= self::listInstalledModules();
 		return array_key_exists( $moduleId, $list );
 	}
 
@@ -152,18 +153,19 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
-	static public function listInstalledModules( $pathApp = "", $shelfId = NULL ){
+	public function listInstalledModules( $shelfId = NULL ){
 		if( self::$useCache && self::$listModulesInstalled !== NULL )
 			return self::$listModulesInstalled;
-		$list	= array();
-		if( file_exists( $pathApp.'/config/modules/' ) ){
-			$iterator	= new RecursiveDirectoryIterator( $pathApp.'/config/modules/' );
+		$list			= array();
+		$pathModules	= $this->client->getConfigPath().'modules/';
+		if( file_exists( $pathModules ) ){
+			$iterator	= new RecursiveDirectoryIterator( realpath( $pathModules ) );
 			$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 			foreach( $index as $entry ){
 				if( !$entry->isFile() || !preg_match( "/\.xml$/", $entry->getFilename() ) )
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-				$module	= self::readInstalledModule( $pathApp, $key );
+				$module	= $this->readInstalledModule( $key );
 				if( !$shelfId || $module->installSource === $shelfId )
 					$list[$key]	= $module;
 			}
@@ -185,10 +187,11 @@ class Hymn_Module_Library{
 		return $module;
 	}
 
-	static public function readInstalledModule( $path, $id ){
-		$filename	= $path.'config/modules/'.$id.'.xml';
+	public function readInstalledModule( $id ){
+		$pathModules	= $this->client->getConfigPath().'modules/';
+		$filename		= $pathModules.$id.'.xml';
 		if( !file_exists( $filename ) )
-			throw new Exception( 'Module "'.$id.'" not installed in '.$path );
+			throw new Exception( 'Module "'.$id.'" not installed in '.$pathModules );
 		return Hymn_Module_Reader::load( $filename, $id );
 	}
 }

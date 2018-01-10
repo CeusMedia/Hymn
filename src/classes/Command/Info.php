@@ -51,9 +51,9 @@ class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_In
 //		$shelfId	= $this->client->arguments->getArgument( 1 );
 
 		if( $moduleId ){
-			$library			= $this->getLibrary( $config );
+			$library			= $this->getLibrary();
 			$modulesAvailable	= $library->getModules();
-			$modulesInstalled	= $library->listInstalledModules( $config->application->uri );		//  get list of installed modules
+			$modulesInstalled	= $library->listInstalledModules();		//  get list of installed modules
 			foreach( $modulesAvailable as $availableModule ){
 				if( $moduleId !== $availableModule->id )
 					continue;

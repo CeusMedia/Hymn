@@ -65,7 +65,7 @@ abstract class Hymn_Command_Abstract{
 	 *	@todo		find a better solution!
 	 */
 	protected function getAvailableModulesMap( $config, $shelfId = NULL ){
-		$library	= $this->getLibrary( $config );													//  try to load sources into a library
+		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= array();																		//  prepare empty list of available modules
 		foreach( $library->getModules( $shelfId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
@@ -78,14 +78,13 @@ abstract class Hymn_Command_Abstract{
 	 *	Loads library sources on first call, returns already loaded library on second call.
 	 *	Reloading library is possible with flag 'forceReload'.
 	 *	@access		protected
-	 *	@param		...			$config			Hymn configuration
 	 *	@param		boolean		$forceReload	Flag: reload library (optional, not default)
 	 *	@return		Hymn_Module_Library			Library of available modules in found sources
 	 */
-	protected function getLibrary( $config = NULL, $forceReload = FALSE ){
-		$config	= $config ? $config : $this->client->getConfig();
+	protected function getLibrary( $forceReload = FALSE ){
+		$config	= $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
-			$this->library	= new Hymn_Module_Library();											//  create new module library
+			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 			if( !isset( $config->sources ) || empty( $config->sources ) ){
 				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
 				Hymn_Client::out( sprintf( $msg, $sourceId ) );										//  output warning

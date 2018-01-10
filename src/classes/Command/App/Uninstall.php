@@ -49,11 +49,11 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
+		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleId		= trim( $this->client->arguments->getArgument() );
-		$listInstalled	= $library->listInstalledModules( $config->application->uri );
+		$listInstalled	= $library->listInstalledModules();
 		$isInstalled	= array_key_exists( $moduleId, $listInstalled );
 		if( !$moduleId )
 			Hymn_Client::out( "No module id given" );

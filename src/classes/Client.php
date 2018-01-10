@@ -216,6 +216,13 @@ class Hymn_Client{
 		return $this->config;
 	}
 
+	public function getConfigPath(){
+		$config	= $this->getConfig();
+		if( substr( $config->paths->config, 0, 1 ) === '/' )
+			return $config->paths->config;
+		return $config->application->uri.$config->paths->config;
+	}
+
 	public function getDatabase(){
 		return $this->dbc;
 	}
@@ -314,8 +321,8 @@ class Hymn_Client{
 			if( !isset( $this->config->paths->{$pathKey} ) )
 				$this->config->paths->{$pathKey}	= $pathValue;
 
-		if( file_exists( $this::$pathDefaults.'config.ini' ) ){
-			$data	= parse_ini_file( $this::$pathDefaults.'config.ini' );
+		if( file_exists( $this->config->paths->config.'config.ini' ) ){
+			$data	= parse_ini_file( $this->config->paths->config.'config.ini' );
 			foreach( $data as $key => $value ){
 				if( preg_match( "/^path\./", $key ) ){
 					$key	= preg_replace( "/^path\./", "", $key );

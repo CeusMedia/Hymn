@@ -45,11 +45,11 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 	 */
 	public function run(){
 		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
+		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$modules		= array();																	//  prepare list of modules to update
-		$listInstalled	= $library->listInstalledModules( $config->application->uri );				//  get list of installed modules
+		$listInstalled	= $library->listInstalledModules();											//  get list of installed modules
 		if( !$listInstalled )																		//  application has no installed modules
 			return Hymn_Client::out( "No installed modules found" );
 

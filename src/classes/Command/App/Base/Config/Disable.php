@@ -44,10 +44,11 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 	 */
 	public function run(){
 		$key		= $this->client->arguments->getArgument( 0 );
+		$pathConfig	= $this->client->getConfigPath();
 
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
-		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
+		$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );

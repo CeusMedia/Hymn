@@ -80,7 +80,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 		if( !strlen( trim( $value ) ) )
 			$value	= trim( Hymn_Client::getInput(
-				'Value for "'.$module.':'.$configKey.'"',
+				'Value for "'.$moduleId.':'.$configKey.'"',
 				$configType,
 				$configDefault,
 				$configValues,

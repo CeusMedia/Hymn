@@ -44,7 +44,7 @@ class Hymn_Command_App_Sources extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run(){
 		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
+		$library	= $this->getLibrary();
 		$shelves	= $library->getShelves();
 		Hymn_Client::out( count( $shelves )." installed module source(s) detected:" );
 		foreach( $shelves as $shelf ){

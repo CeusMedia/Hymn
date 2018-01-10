@@ -48,10 +48,12 @@ class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
 		Hymn_Client::out( "DEPRECATED: Please use command 'app-base-config-get' instead!" );		//  output deprecation notice
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		$key	= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument( 0 );
+		$pathConfig	= $this->client->getConfigPath();
+
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
-		$editor	= new Hymn_Tool_BaseConfigEditor( "config/config.ini" );
+		$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );

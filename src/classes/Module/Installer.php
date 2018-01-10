@@ -87,8 +87,9 @@ class Hymn_Module_Installer{
 	 *	@return		void
 	 */
 	public function configure( $module ){
-		$source	= $module->path.'module.xml';
-		$target	= $this->app->uri.'config/modules/'.$module->id.'.xml';
+		$source		= $module->path.'module.xml';
+		$pathConfig	= $this->client->getConfigPath();
+		$target		= $pathConfig.'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																	//  if not in dry mode
 			Hymn_Module_Files::createPath( dirname( $target ) );									//  create folder for module configurations in app
 			@copy( $source, $target );																//  copy module configuration into this folder
@@ -136,7 +137,7 @@ class Hymn_Module_Installer{
 		}
 		if( !$this->flags->dry ){																	//  no a dry run
 			$xml->saveXml( $target );																//  save changed DOM to module file
-			@unlink( $this->app->uri.'config/modules.cache.serial' );							 	//  remove modules cache file
+			@unlink( $pathConfig.'modules.cache.serial' );										 	//  remove modules cache file
 		}
 	}
 
@@ -159,12 +160,16 @@ class Hymn_Module_Installer{
 	public function uninstall( $module ){
 		try{
 			$appUri				= $this->app->uri;
-			$localModule		= $this->library->readInstalledModule( $appUri, $module->id );
+			$localModule		= $this->library->readInstalledModule( $module->id );
+			$pathConfig			= $this->app->uri.$this->config->paths->config;
+			if( substr( $this->config->paths->config, 0, 1 ) === '/' )
+				$pathConfig		= $this->config->paths->config;
+
 			$localModule->path	= $appUri;
 			$this->files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){																//  not a dry run
-				@unlink( $this->app->uri.'config/modules/'.$module->id.'.xml' );					//  remove module configuration file
-				@unlink( $this->app->uri.'config/modules.cache.serial' );							//  remove modules cache file
+				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
+				@unlink( $pathConfig.'modules.cache.serial' );										//  remove modules cache file
 			}
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )								//  database actions are enabled
 				$this->sql->runModuleUninstallSql( $localModule );									//  run SQL scripts

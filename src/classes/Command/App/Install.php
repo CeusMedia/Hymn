@@ -49,7 +49,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary( $config );
+		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleId	= trim( $this->client->arguments->getArgument() );
@@ -77,7 +77,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		foreach( $modules as $module ){
 			$installType	= $this->client->getModuleInstallType( $module->id );
 //			$installMode	= $this->client->getModuleInstallMode( $module->id );
-			$listInstalled	= $library->listInstalledModules( $config->application->uri );
+			$listInstalled	= $library->listInstalledModules();
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
