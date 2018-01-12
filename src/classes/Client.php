@@ -190,9 +190,6 @@ class Hymn_Client{
 		$this->arguments->removeArgument( 0 );
 		if( !in_array( $action, self::$commandWithoutConfig ) ){
 			$this->readConfig();
-
-			db
-
 			$this->setupDatabaseConnection();
 		}
 		$this->executeCommandClass( $className );
