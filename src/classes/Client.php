@@ -190,6 +190,9 @@ class Hymn_Client{
 		$this->arguments->removeArgument( 0 );
 		if( !in_array( $action, self::$commandWithoutConfig ) ){
 			$this->readConfig();
+
+			db
+
 			$this->setupDatabaseConnection();
 		}
 		$this->executeCommandClass( $className );
@@ -348,6 +351,8 @@ class Hymn_Client{
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
 		if( $this->dbc && !$forceReset )
+			return;
+		if( $this->flags &= self::FLAG_NO_DB )
 			return;
 //		$this->dbc			= NULL;
 		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
