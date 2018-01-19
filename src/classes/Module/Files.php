@@ -86,7 +86,7 @@ class Hymn_Module_Files{
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !$this->flags->dry ){														//  not a dry run
 						if( file_exists( $target ) ){
-							if( is_file( $target ) && !$this->flags->force )
+							if( is_file( $target ) && !is_link( $target ) && !$this->flags->force )
 								continue;
 							@unlink( $target );
 						//	if( !$force )

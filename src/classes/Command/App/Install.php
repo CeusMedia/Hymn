@@ -94,7 +94,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				if( !$this->flags->quiet )
 					Hymn_Client::out( $message );
 				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				$installer->install( $module, $installType, $this->client->flags );
+				$installer->install( $module, $installType );
 			}
 		}
 
