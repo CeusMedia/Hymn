@@ -73,8 +73,9 @@ class Hymn_Module_Config{
 			$key	= (string) $node['name'];														//  shortcut config pair key
 			if( $key !== $configKey )
 				continue;
-			$dom = dom_import_simplexml( $node );													//  import DOM node of module file
-			$dom->nodeValue = $configValue;															//  set new value on DOM node
+//			$dom = dom_import_simplexml( $node );													//  import DOM node of module file
+//			$dom->nodeValue = $configValue;															//  set new value on DOM node
+			$node->setValue( (string) $configValue );
 			if( $this->flags->verbose && !$this->flags->quiet )										//  verbose mode is on
 				Hymn_Client::out( "  … configured ".$key );											//  inform about configures config pair
 		}

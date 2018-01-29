@@ -129,8 +129,9 @@ class Hymn_Module_Installer{
 				}
 			}
 			if( isset( $config->{$key} ) ){															//  a config value has been set
-				$dom = dom_import_simplexml( $node );												//  import DOM node of module file
-				$dom->nodeValue = $config->{$key};													//  set new value on DOM node
+//				$dom = dom_import_simplexml( $node );												//  import DOM node of module file
+//				$dom->nodeValue = $config->{$key};													//  set new value on DOM node
+				$node->setValue( (string) $config->{$key} );
 				if( $this->flags->verbose && !$this->flags->quiet )									//  verbose mode is on
 					Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
 			}

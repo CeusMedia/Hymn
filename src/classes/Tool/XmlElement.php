@@ -271,7 +271,7 @@ class Hymn_Tool_XmlElement extends SimpleXMLElement{
 	 */
 	public function setValue( $value, $cdata = FALSE ){
 		if( !is_string( $value ) && $value !== NULL )
-			throw new InvalidArgumentException( 'Value must be a string or NULL' );
+			throw new InvalidArgumentException( 'Value must be a string or NULL - '.gettype( $value ).' given' );
 
 		$value	= preg_replace( "/(.*)<!\[CDATA\[(.*)\]\]>(.*)/iU", "\\1\\2\\3", $value );
 		if( $cdata || preg_match( '/&|</', $value ) ){												//  string is known or detected to be CDATA
