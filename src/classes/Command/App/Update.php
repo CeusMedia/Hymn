@@ -58,22 +58,17 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$library	= $this->getLibrary();
-		$relation	= new Hymn_Module_Graph( $this->client, $library );
-
-		$modules		= array();																	//  prepare list of modules to update
-		$moduleId		= trim( $this->client->arguments->getArgument() );							//  is there a specific module ID is given
-		$listInstalled	= $library->listInstalledModules();											//  get list of installed modules
+		$outdatedModules	= array();																//  prepare empty list of updatable modules
+		$library			= $this->getLibrary();													//  get module library instance
+		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 		if( !$listInstalled )																		//  application has no installed modules
-			return Hymn_Client::out( "No installed modules found" );
-
-		$outdatedModules	= array();																//
-		foreach( $listInstalled as $installedModule ){
-			$source				= $installedModule->installSource;
-			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );
-			if( $availableModule ){
-				if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
-					$outdatedModules[$installedModule->id]	= (object) array(
+			return Hymn_Client::out( "No installed modules found" );								//  not even one module is installed, no update
+		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
+			$source				= $installedModule->installSource;									//  get installed module
+			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );		//  get available module
+			if( $availableModule ){																	//  installed module is available atleast
+				if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){	//  installed module is outdated
+					$outdatedModules[$installedModule->id]	= (object) array(						//  note updatable module
 						'id'		=> $installedModule->id,
 						'installed'	=> $installedModule->version,
 						'available'	=> $availableModule->version,
@@ -83,15 +78,24 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 
-		if( $moduleId ){
-			if( !array_key_exists( $moduleId, $listInstalled ) )
-				return Hymn_Client::out( "Module '".$moduleId."' is not installed and cannot be updated" );
-			if( !array_key_exists( $moduleId, $outdatedModules ) )
-				return Hymn_Client::out( "Module '".$moduleId."' is not outdated and cannot be updated" );
-			$outdatedModules	= array( $moduleId => $outdatedModules[$moduleId] );
+		$relation			= new Hymn_Module_Graph( $this->client, $library );
+		$modules			= array();																//  prepare list of modules to update
+		$modulesToUpdate	= $outdatedModules;														//  updatable modules are all outdated modules
+
+		$moduleIds			= $this->client->arguments->getArguments();
+		if( $moduleIds ){
+			$modulesToUpdate	= array();															//  start with empty list again
+			foreach( $moduleIds as $moduleId ){														//  iterate given modules
+				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
+					Hymn_Client::out( "Module '".$moduleId."' is not installed and cannot be updated" );
+				else if( !array_key_exists( $moduleId, $outdatedModules ) )							//  module is not outdated, no update
+					Hymn_Client::out( "Module '".$moduleId."' is not outdated and cannot be updated" );
+				else																				//  module is updatable
+					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
+			}
 		}
 
-		foreach( $outdatedModules as $update ){
+		foreach( $modulesToUpdate as $update ){
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
 //			$installMode	= $this->client->getModuleInstallMode( $module->id, $this->installMode );
