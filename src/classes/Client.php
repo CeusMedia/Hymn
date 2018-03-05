@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= "0.9.4.7";
+	static public $version	= "0.9.4.8";
 
 	public $arguments;
 
@@ -412,12 +412,10 @@ class Hymn_Client{
 		) );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			$this->dbc->query( "CREATE DATABASE ".$this->dba->name );
-		}
-		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			$this->dbc->query( "USE ".$this->dba->name );
-		}
+		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() )
+			$this->dbc->query( "CREATE DATABASE `".$this->dba->name."`" );
+		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() )
+			$this->dbc->query( "USE `".$this->dba->name."`" );
 	}
 }
 ?>
