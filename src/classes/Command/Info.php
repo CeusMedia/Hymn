@@ -49,6 +49,7 @@ class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_In
 		$config		= $this->client->getConfig();
 		$moduleId	= $this->client->arguments->getArgument( 0 );
 //		$shelfId	= $this->client->arguments->getArgument( 1 );
+//		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		if( $moduleId ){
 			$library			= $this->getLibrary();
