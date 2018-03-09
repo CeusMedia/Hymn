@@ -46,18 +46,23 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$shelfId	= $this->client->arguments->getArgument( 0 );
+		$shelfId	= $this->evaluateShelfId( $shelfId );
 
-		if( $shelfId ){
-			$modules	= $library->getModules( $shelfId );
-			Hymn_Client::out( count( $modules )." modules available in module source '".$shelfId."':" );
-			foreach( $modules as $module )
-				Hymn_Client::out( "- ".$module->id );
+		$modules	= $library->getModules( $shelfId );
+		if( count( $modules ) ){
+			$message	= 'Found '.count( $modules ).' available modules:';
+			if( $shelfId )
+				$message	= 'Found '.count( $modules ).' available modules in source '.$shelfId.':';
 		}
 		else{
-			$modules	= $library->getModules();
-			Hymn_Client::out( count( $modules )." modules available:" );
-			foreach( $modules as $module )
-				Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
+			$message	= 'No available modules found.';
+			if( $shelfId )
+				$message	= 'No available modules found in source '.$shelfId.'.';
+			if( !$library->getShelves() )
+				$message	= 'No available modules found. No modules sources configured.';
 		}
+		Hymn_Client::out( $message );
+		foreach( $modules as $module )
+			Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
 	}
 }

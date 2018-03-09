@@ -46,6 +46,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 		$config		= $this->client->getConfig();
 		$term		= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->client->arguments->getArgument( 1 );
+		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		$msgTotal		= '%d module(s) found in all module sources:';
 		$msgEntry		= '- %s (%s)';
