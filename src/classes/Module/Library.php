@@ -58,20 +58,28 @@ class Hymn_Module_Library{
 			'active'	=> $active,
 		);
 		ksort( $this->shelves );
-		$this->modules[$id]	= array();
-		if( $active ){
-			foreach( self::listModules( $path ) as $module ){
-				$module->sourceId	= $id;
-				$module->sourcePath	= $path;
-				$module->sourceType	= $type;
-				$this->modules[$id][$module->id] = $module;
-				ksort( $this->modules[$id] );
+	}
+
+	protected function loadModulesInShelves( $force = FALSE ){
+		if( count( $this->modules ) && !$force )
+			return;
+		foreach( $this->shelves as $shelf ){
+			if( !$shelf->active )
+				continue;
+			$this->modules[$shelf->id]	= array();
+			foreach( self::listModulesInPath( $shelf->path ) as $module ){
+				$module->sourceId	= $shelf->id;
+				$module->sourcePath	= $shelf->path;
+				$module->sourceType	= $shelf->type;
+				$this->modules[$shelf->id][$module->id] = $module;
+				ksort( $this->modules[$shelf->id] );
 			}
 		}
 		ksort( $this->modules );
 	}
 
 	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
+		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !in_array( $shelfId, array_keys( $this->shelves ) ) )
 				throw new Exception( 'Invalid shelf ID: '.$shelfId );
@@ -91,6 +99,7 @@ class Hymn_Module_Library{
 	}
 
 	public function getModules( $shelfId = NULL ){
+		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
 				throw new Exception( 'Invalid shelf ID: '.$shelfId );
@@ -135,11 +144,14 @@ class Hymn_Module_Library{
 		return array_key_exists( $moduleId, $list );
 	}
 
-	static public function listModules( $path = "" ){
-		if( self::$useCache && self::$listModulesAvailable !== NULL )
-			return self::$listModulesAvailable;
+	public function isShelf( $shelfId ){
+		return array_key_exists( $shelfId, $this->getShelves() );
+	}
 
-		$list	= array();
+	static protected function listModulesInPath( $path = "" ){
+//		if( self::$useCache && self::$listModulesAvailable !== NULL )			//  @todo realize shelves in cache
+//			return self::$listModulesAvailable;									//  @todo realize shelves in cache
+		$list		= array();
 		$iterator	= new RecursiveDirectoryIterator( $path );
 		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 		foreach( $index as $entry ){
@@ -149,13 +161,13 @@ class Hymn_Module_Library{
 			$module	= self::readModule( $path, $key );
 			$list[$key]	= $module;
 		}
-		self::$listModulesAvailable	= $list;
+//		self::$listModulesAvailable	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
 
 	public function listInstalledModules( $shelfId = NULL ){
-		if( self::$useCache && self::$listModulesInstalled !== NULL )
-			return self::$listModulesInstalled;
+//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
+//			return self::$listModulesInstalled;									//  @todo realize shelves in cache
 		$list			= array();
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		if( file_exists( $pathModules ) ){
@@ -171,7 +183,7 @@ class Hymn_Module_Library{
 			}
 		}
 		ksort( $list );
-		self::$listModulesInstalled	= $list;
+//		self::$listModulesInstalled	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
 
