@@ -55,6 +55,21 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	/**
+	 *	@throws
+	 */
+	protected function evaluateShelfId( $shelfId = NULL, $strict = TRUE ){
+		$all	= array( 'all' );
+		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
+			return NULL;
+		$library	= $this->getLibrary();
+		if( $library->isShelf( $shelfId ) )
+			return $shelfId;
+		if( $strict )
+			throw new \RangeException( 'Source ID '.$shelfId.' is invalid' );
+		return FALSE;
+	}
+
+	/**
 	 *	Return all available modules in library as map by module ID.
 	 *	Reduce all available modules in library (from all source) to map by module ID.
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
