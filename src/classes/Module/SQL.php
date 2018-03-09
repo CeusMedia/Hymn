@@ -70,7 +70,7 @@ class Hymn_Module_SQL{
 	/**
 	 *	Executes single SQL script against database connection.
 	 *	@access		protected
-	 *	@param 		string 		$sql				SQL script to execute
+	 *	@param		string 		$sql				SQL script to execute
 	 *	@return		void
 	 *	@throws		RuntimeException				if execution fails
 	 */
@@ -85,7 +85,7 @@ class Hymn_Module_SQL{
 			$line = array_shift( $lines );
 			if( !trim( $line ) )
 				continue;
-			$buffer[]	= str_replace( "<%?prefix%>", $prefix, trim( $line ) );
+			$buffer[]	= $this->realizeTablePrefix( trim( $line ), $prefix );
 			if( preg_match( '/;$/', trim( $line ) ) ){
 				$statements[]	= join( "\n", $buffer );
 				$buffer			= array();
@@ -108,13 +108,12 @@ class Hymn_Module_SQL{
 	}
 
 	/**
-	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	Return list of SQL statements to execute on module update.
 	 *	@access		public
-	 *	@param 		object 		$module				Object of nodule to install
-	 *	@return		void
-	 *	@throws		RuntimeException		if target file is not readable
+	 *	@param		object 		$module				Object of library module to install
+	 *	@return		array		List of SQL statements to execute on module installation
 	 */
-	public function runModuleInstallSql( $module ){
+	public function getModuleInstallSql( $module ){
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
@@ -156,23 +155,16 @@ class Hymn_Module_SQL{
 				}
 			}
 		}
-		foreach( $scripts as $script ){																//  iterate collected scripts
-			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
-				$msg	= "    … apply database script on %s at version %s";
-				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
-			}
-			if( !$this->flags->dry )																//  this is a dry run
-				$this->executeSql( $script->sql );													//  execute collected SQL script
-		}
+		return $scripts;
 	}
 
 	/**
-	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	Reads module SQL scripts and returns list of uninstall scripts.
 	 *	@access		public
-	 *	@param 		object 		$installedModule	Object of locally installed module
-	 *	@return		void
+	 *	@param		object 		$installedModule	Object of locally installed module
+	 *	@return		array		List of SQL statements to execute on module uninstallation
 	 */
-	public function runModuleUninstallSql( $installedModule ){
+	public function getModuleUninstallSql( $installedModule ){
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
@@ -200,25 +192,17 @@ class Hymn_Module_SQL{
 				}
 			}
 		}
-
-		foreach( $scripts as $script ){
-			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
-				$msg	= "    … apply database script on %s at version %s";
-				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
-			}
-			if( !$this->flags->dry )																//  not a dry run
-				$this->executeSql( $script->sql );													//  execute collected SQL script
-		}
+		return $scripts;
 	}
 
 	/**
-	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	Return list of SQL statements to execute on module update.
 	 *	@access		public
-	 *	@param 		object 		$installedModule	Object of locally installed module
-	 *	@param 		object 		$module				Object of library module to update to
-	 *	@return		void
+	 *	@param		object		$installedModule	Object of locally installed module
+	 *	@param		object		$module				Object of library module to update to
+	 *	@return		array		List of SQL statements to execute on module update
 	 */
-	public function runModuleUpdateSql( $installedModule, $module ){
+	public function getModuleUpdateSql( $installedModule, $module ){
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
@@ -237,7 +221,62 @@ class Hymn_Module_SQL{
 			}
 		}
 		uksort( $scripts, 'version_compare' );														//  sort update scripts by version
+		return $scripts;
+	}
 
+	public function realizeTablePrefix( $sql, $prefix = NULL ){
+		if( is_null( $prefix ) )
+			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+		return str_replace( "<%?prefix%>", $prefix, $sql );
+	}
+
+	/**
+	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	@access		public
+	 *	@param		object 		$module				Object of nodule to install
+	 *	@param		object 		$module				Object of nodule to install
+	 *	@throws		RuntimeException		if target file is not readable
+	 */
+	public function runModuleInstallSql( $module ){
+		$scripts	= $this->getModuleInstallSql( $module );
+		foreach( $scripts as $script ){																//  iterate collected scripts
+			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
+				$msg	= "    … apply database script on %s at version %s";
+				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+			}
+			if( !$this->flags->dry )																//  this is a dry run
+				$this->executeSql( $script->sql );													//  execute collected SQL script
+		}
+	}
+
+	/**
+	 *	Reads module SQL scripts and executes uninstall scripts.
+	 *	@access		public
+	 *	@param		object 		$installedModule	Object of locally installed module
+	 *	@return		void
+	 */
+	public function runModuleUninstallSql( $installedModule ){
+		$scripts	= $this->getModuleUninstallSql( $installedModule );
+
+		foreach( $scripts as $script ){
+			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
+				$msg	= "    … apply database script on %s at version %s";
+				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+			}
+			if( !$this->flags->dry )																//  not a dry run
+				$this->executeSql( $script->sql );													//  execute collected SQL script
+		}
+	}
+
+	/**
+	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	@access		public
+	 *	@param		object 		$installedModule	Object of locally installed module
+	 *	@param		object 		$module				Object of library module to update to
+	 *	@return		void
+	 */
+	public function runModuleUpdateSql( $installedModule, $module ){
+		$scripts	= $this->getModuleUpdateSql( $installedModule, $module );
 		foreach( $scripts as $script ){																//  iterate found ordered update scripts
 			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "  … apply database script on %s at version %s";							//  ...
