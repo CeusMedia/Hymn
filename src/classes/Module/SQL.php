@@ -114,10 +114,10 @@ class Hymn_Module_SQL{
 	 *	@return		array		List of SQL statements to execute on module installation
 	 */
 	public function getModuleInstallSql( $module ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
-			return;
+		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )										//  flag to skip database operations is set
+			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return;																					//  quit here
+			return array();																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
 		$scripts	= array();																		//  prepare empty list for collected scripts
