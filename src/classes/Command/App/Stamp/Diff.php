@@ -115,7 +115,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 					if( in_array( $item->key, array( 'title', 'values' ) ) )
 						continue;
 					if( !isset( $moduleConfigOld->{$item->key} ) ){
-						Hymn_Client::out( '   - '.$property.' has beend added with default value: '.$item->value );
+						Hymn_Client::out( '   - '.$item->key.' has beend added with default value: '.$item->value );
 					}
 					else if( $item != $moduleConfigOld->{$item->key} ){
 						foreach( $item as $property => $value ){
