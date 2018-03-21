@@ -166,9 +166,9 @@ class Hymn_Module_SQL{
 	 */
 	public function getModuleUninstallSql( $installedModule ){
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
-			return;
+			return array();																			//  quit here and return empty list
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
-			return;																					//  quit here
+			return array();																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
 		$scripts	= array();																		//  prepare empty list for collected scripts
@@ -204,9 +204,9 @@ class Hymn_Module_SQL{
 	 */
 	public function getModuleUpdateSql( $installedModule, $module ){
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
-			return;
+			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return;																					//  quit here
+			return array();																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= $installedModule->version;													//  start by version of currently installed module
 		$scripts	= array();																		//  prepare empty list for collected scripts

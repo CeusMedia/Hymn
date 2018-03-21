@@ -1,16 +1,16 @@
-Hymn - Hydrogen Framework Console Tool v%v%
+Hymn - Hydrogen Framework Console Tool v%v% (%l%)
 
-Usage: hymn COMMAND [ARG]*
+Usage: hymn KOMMANDO [ARG]*
 
-Keywords explained:
-- Project   = Blueprint for an App installation configured by Hymn file
-- App       = Set of installed modules, built or installed by project configuration
-- Source    = Container of installable modules
-- Module    = Collection of files and definitions to be installed into App
+Schlüsselwörter kurz erklärt:
+- Projekt   = Vorlage für eine App-Installation, definiert durch Hymn-Datei
+- App       = Menge von installierten Modulen im Rahmen einer Projektkonfiguration
+- Quelle    = Container mit installiertbaren Modulen
+- Modul     = Zustammenstellung von Dateien und Definition zur Installation in einer App
 
-Commands:
+Kommandos:
 
-A. Source Management
+A. Quellenverwaltung
 ==============================================================================
 
 For creating and extending an App's Hymn config file, you execute these commands:

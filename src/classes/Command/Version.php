@@ -43,7 +43,7 @@ class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( Hymn_Client::$version );
+		Hymn_Client::out( Hymn_Client::$version.' ('.Hymn_Client::$language.')' );
 //		Hymn_Client::out( "Working in: " . getCwd() );
 //		Hymn_Client::out( "Hymn Path: " . __DIR__ );
 	}

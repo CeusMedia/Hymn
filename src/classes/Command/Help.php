@@ -54,8 +54,10 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 			call_user_func( array( $object, 'help' ) );												//  call public custom public help method of command class
 			return;																					//  return here to avoid fallback
 		}
-		$text	= file_get_contents( "phar://hymn.phar/locales/en/help/default.txt" );				//  read default help text
-		$text	= str_replace( "%v%", Hymn_Client::$version, $text );								//  insert version number
+		$fileName	= 'hymn.phar/locales/'.Hymn_Client::$language.'/help/default.txt';				//  get file name of help text
+		$text		= file_get_contents( "phar://".$fileName );										//  read default help text
+		$text		= str_replace( "%v%", Hymn_Client::$version, $text );							//  insert version number
+		$text		= str_replace( "%l%", Hymn_Client::$language, $text );							//  insert version number
 		Hymn_Client::out( $text );																	//	print default help text
 	}
 }

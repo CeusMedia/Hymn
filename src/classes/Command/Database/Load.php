@@ -58,6 +58,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		}
 		else
 			$fileName		= $this->getLatestDump( NULL, TRUE );
+		Hymn_Client::out( "File: ".$fileName );
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
 
@@ -129,24 +130,26 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 
 	protected function getLatestDump( $path = NULL ){
 		$pathConfig	= $this->client->getConfigPath();
-		$path		= $path ? $path : $pathConfig."sql/";
+		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig."sql/";
+		if( !file_exists( $path ) )
+			throw new RuntimeException( 'Path is not existing: '.$path );
 		if( $this->flags->verbose )
 			Hymn_Client::out( "Scanning folder ".$path."..." );
-		if( file_exists( $path ) ){
-			$list	= array();
-			$index	= new DirectoryIterator( $path );
-			foreach( $index as $entry ){
-				if( $entry->isDir() || $entry->isDot() )
-					continue;
-				if( !preg_match( "/^dump_.[0-9:_-]+\.sql$/", $entry->getFilename() ) )
-					continue;
-				$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
-				$list[$key]	= $entry->getFilename();
-			}
-			krsort( $list );
-			if( $list ){
-				return $path.array_shift( $list );
-			}
+		$list	= array();
+		$index	= new DirectoryIterator( $path );
+		foreach( $index as $entry ){
+			if( $entry->isDir() || $entry->isDot() )
+				continue;
+			if( $this->flags->verbose )
+				Hymn_Client::out( "Found: ".$entry->getFilename() );
+			if( !preg_match( '/^dump_[0-9:_-]+\.sql$/', $entry->getFilename() ) )
+				continue;
+			$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
+			$list[$key]	= $entry->getFilename();
+		}
+		krsort( $list );
+		if( $list ){
+			return $path.array_shift( $list );
 		}
 		return NULL;
 	}

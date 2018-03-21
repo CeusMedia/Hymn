@@ -23,6 +23,7 @@ try {
 }
 __HALT_COMPILER(); ?>' );
 $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFileName ) );
+$archive->addFile( $rootPath.'/src/locales/de/help/default.txt', 'locales/de/help/default.txt' );
 $archive->addFile( $rootPath.'/src/locales/en/help/default.txt', 'locales/en/help/default.txt' );
 $archive->addFile( $rootPath.'/src/locales/en/help/reflect-options.txt', 'locales/en/help/reflect-options.txt' );
 $archive->addFile( $rootPath.'/src/templates/Makefile', 'templates/Makefile' );
