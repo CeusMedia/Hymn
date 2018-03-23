@@ -101,12 +101,22 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 				$input		= Hymn_Client::getInput( $question->label, 'string', $default, $options, FALSE );	//  ask for value
 				$dba->{$question->key}	= $input;													//  assign given value
 			}
-			$dsn	= $dba->driver.":host=".$dba->host.";port=".$dba->port.";dbname=".$dba->name;	//  render PDO DSN
-			try{																					//  try to connect database
-				if( $dbc = @new PDO( $dsn, $dba->username, $dba->password ) ){						//  connection can be established
-					$result	= $dbc->query( "SHOW TABLES" );											//  query for tables
-					if( is_object( $result ) && is_array( $result->fetchAll() ) )					//  query has been successful
-						$connectable	= TRUE;														//  note connectability for loop break
+			$dsn			= $dba->driver.':'.implode( ";", array(									//  render PDO DSN
+				"host=".$dba->host,
+				"port=".$dba->port,
+	//			"dbname=".$this->dba->name,
+			) );
+			try{																					//  try to connect database server
+				if( $dbc = new PDO( $dsn, $dba->username, $dba->password ) ){						//  connection can be established
+//					$dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
+					if( !$dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() )			//  given database is not existing
+						$dbc->query( "CREATE DATABASE `".$dba->name."`" );							//  try to create database
+					if( $dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() ){			//  this time database is existing
+						$dbc->query( "USE `".$dba->name."`" );										//  switch to database
+						$result	= $dbc->query( "SHOW TABLES" );										//  try to read tables in database
+						if( is_object( $result ) && is_array( $result->fetchAll() ) )				//  read attempt has been successful
+							$connectable	= TRUE;													//  note connectability
+					}
 				}
 				if( !$connectable )																	//  still not connectable
 					Hymn_Client::out( 'Database connection failed' );								//  show error message
