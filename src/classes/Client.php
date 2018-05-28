@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.5';
+	static public $version	= '0.9.6';
 
 	static public $language	= 'de';
 
@@ -138,9 +138,11 @@ class Hymn_Client{
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
-		if( in_array( $language, array( 'en', 'de' ) ) )
-			self::$language	= $language;
+		if( class_exists( 'Locale' ) ){
+			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
+			if( in_array( $language, array( 'en', 'de' ) ) )
+				self::$language	= $language;
+		}
 
 		if( self::$outputMethod !== "print" )
 			ob_start();
