@@ -98,7 +98,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 			file_put_contents( Hymn_Client::$fileName, $json );
 
 			if( $this->flags->verbose )
-				Hymn_Client::out( "- moving folder, files and links" );
+				Hymn_Client::out( "- moving folders, files and links" );
 			rename( $source, $dest );
 			if( $this->flags->verbose )
 				Hymn_Client::out( "- fixing links" );
