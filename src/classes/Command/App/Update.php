@@ -88,8 +88,19 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			foreach( $moduleIds as $moduleId ){														//  iterate given modules
 				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
 					Hymn_Client::out( "Module '".$moduleId."' is not installed and cannot be updated" );
-				else if( !array_key_exists( $moduleId, $outdatedModules ) )							//  module is not outdated, no update
-					Hymn_Client::out( "Module '".$moduleId."' is not outdated and cannot be updated" );
+				else if( !array_key_exists( $moduleId, $outdatedModules ) ){							//  module is not outdated, no update
+					if( $this->flags->force ){
+						$installedModule	= $listInstalled[$moduleId];
+						$modulesToUpdate[$moduleId]	= (object) array(
+							'id'		=> $installedModule->id,
+							'installed'	=> $installedModule->version,
+							'available'	=> $installedModule->version,
+							'source'	=> $installedModule->installSource,
+						);
+					}
+					else
+						Hymn_Client::out( "Module '".$moduleId."' is not outdated and cannot be updated" );
+				}
 				else																				//  module is updatable
 					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
 			}
