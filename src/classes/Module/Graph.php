@@ -46,13 +46,16 @@ class Hymn_Module_Graph{
 	public $client;
 	public $library;
 	public $nodes		= array();
-	protected $quiet	= FALSE;
+	protected $flags;
 	protected $status	= self::STATUS_EMPTY;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
 		$this->library	= $library;
-		$this->quiet	= $this->client->flags & Hymn_Client::FLAG_QUIET;
+		$this->flags	= (object) array(
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 	}
 
 	/**
@@ -82,6 +85,31 @@ class Hymn_Module_Graph{
 		}
 	}
 
+	/**
+	 *	Check for loop in module relations.
+	 *	@access		protected
+	 *	@param		object		$node		Node data object containing module and in and out relations
+	 *	@param		integer		$level		Counter of recursion level, 0 by default.
+	 *	@return		object|NULL				Object if looping node or null if no loop found
+	 */
+	protected function checkForLoop( $node, $level = 0, $steps = array() ){
+		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
+			return (object) array(																	//  return loop data ...
+				'module'	=> $node->module,														//  ... containing looping module
+				'modules'	=> $steps																//  ... and the module chain
+			);
+		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
+		if( count( $node->in ) ){																	//  there are relations
+			foreach( $node->in as $nr => $parent ){													//  iterate these relations
+				$parent	= $this->nodes[$parent->id];												//  shortcut parent module
+				$loop	= $this->checkForLoop( $parent, $level + 1, $steps );						//  recurse for related node
+				if( $loop )																			//  found loop
+					return $loop;																	//  return looping node to prior rounds
+			}
+		}
+		return NULL;																				//  no loop found
+	}
+
 	protected function countModuleEdgesToRoot( $node, $level = 0 ){
 		$count	= $level;
 		if( count( $node->in ) ){
@@ -90,7 +118,6 @@ class Hymn_Module_Graph{
 				$ways[$nr]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
 			$count	= max( $ways );
 		}
-//		print( $count.' '.$node->module->id.PHP_EOL );
 		return $count;
 	}
 
@@ -111,6 +138,15 @@ class Hymn_Module_Graph{
 		$list	= array();
 		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
+			if( $this->flags->verbose && !$this->flags->quiet )
+				Hymn_Client::out( 'Check for loop: '.$node->module->id.' @ '.$node->module->sourceId );
+			$loop	= $this->checkForLoop( $node );
+			if( $loop ){
+				Hymn_Client::out( 'Error: Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );
+				foreach( array_values( $loop->modules ) as $nr => $item )
+					Hymn_Client::out( ' '.str_pad( $nr + 1, 3, ' ', STR_PAD_LEFT ).'. '.$item->id.' @ '.$item->sourceId );
+				exit;
+			}
 			$edges	= $this->countModuleEdgesToRoot( $node );
 			$rand	= str_pad( rand( 0, $max ), 8, '0', STR_PAD_LEFT );
 			$list[(float) $edges.'.'.$rand]	= $id;
@@ -133,7 +169,7 @@ class Hymn_Module_Graph{
 			}
 		}
 		$this->status	= self::STATUS_LINKED;
-		if( $this->client->flags & Hymn_Client::FLAG_VERBOSE && !$this->quiet )
+		if( $this->flags->verbose && !$this->flags->quiet )
 			Hymn_Client::out( "Found ".count( $this->nodes )." modules." );
 	}
 
@@ -154,11 +190,11 @@ class Hymn_Module_Graph{
 		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
 		$graph		= "digraph {".$options.$nodes.$edges."\n}";
 		$this->status	= self::STATUS_PRODUCED;
-		if( $this->client->flags & Hymn_Client::FLAG_VERBOSE && !$this->quiet )
+		if( $this->flags->verbose && !$this->flags->quiet )
 			Hymn_Client::out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
 		if( $targetFile ){
 			file_put_contents( $targetFile, $graph );
-			if( !$this->quiet )
+			if( !$this->flags->quiet )
 				Hymn_Client::out( "Saved graph file to ".$targetFile."." );
 		}
 		return $graph;
@@ -176,7 +212,7 @@ class Hymn_Module_Graph{
 
 			if( $targetFile ){
 				@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
-				if( !$this->quiet )
+				if( !$this->flags->quiet )
 					Hymn_Client::out( 'Graph image saved to '.$targetFile.'.' );
 			}
 			else{
