@@ -81,20 +81,23 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
-			if( $isInstalled && !$isForced )
-				Hymn_Client::out( "Module '".$module->id."' is already installed" );
-			else{
-				$message	= "Installing module '%s' version %s as %s ...";
-				$message	= sprintf(
-					$message,
-					$module->id,
-					$module->versionAvailable,
-					$installType
-				);
+			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
-					Hymn_Client::out( $message );
+					Hymn_Client::out( "Module '".$module->id."' is already installed" );
+			}
+			else{
+				if( !$this->flags->quiet ){
+					Hymn_Client::out( sprintf(
+						"%sInstalling module '%s' version %s as %s ...",
+						$this->flags->dry ? 'Dry: ' : '',
+						$module->id,
+						$module->version,
+						$installType
+					) );
+				}
 				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				$installer->install( $module, $installType );
+				if( !$this->flags->dry )
+					$installer->install( $module, $installType );
 			}
 		}
 

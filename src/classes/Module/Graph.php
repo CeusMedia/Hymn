@@ -202,7 +202,7 @@ class Hymn_Module_Graph{
 
 	public function renderGraphImage( $graph = NULL, $targetFile = NULL ){
 		Hymn_Client::out( "Checking graphviz: ", FALSE );
-		Hymn_Test::checkShellCommand( "graphviz" );
+		Hymn_Tool_Test::checkShellCommand( "graphviz" );
 		Hymn_Client::out( "OK" );
 		try{
 			if( !$graph )

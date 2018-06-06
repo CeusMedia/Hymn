@@ -73,7 +73,15 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			else{
 				$module->path	= 'not_relevant/';
 				$installer	= new Hymn_Module_Installer( $this->client, $library );
-				$installer->uninstall( $module );
+				if( !$this->flags->quiet ) {
+					Hymn_Client::out( sprintf(
+						'%sUninstalling module %s ...',
+						$this->flags->dry ? 'Dry: ' : '',
+						$module->id
+					) );
+				}
+				if( !$this->flags->dry )
+					$installer->uninstall( $module );
 			}
 		}
 	}
