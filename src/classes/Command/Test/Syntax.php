@@ -51,12 +51,12 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 		if( !$path )
 			$path	= ".";
 
-		Hymn_Test::checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );
+		Hymn_Tool_Test::checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );
 
-/*		Hymn_Test::checkPhpClasses( "./", FALSE, !FALSE );
+/*		Hymn_Tool_Test::checkPhpClasses( "./", FALSE, !FALSE );
 		if( file_exists( "classes" ) )
-			Hymn_Test::checkPhpClasses( "./classes", TRUE, !FALSE );
+			Hymn_Tool_Test::checkPhpClasses( "./classes", TRUE, !FALSE );
 		if( file_exists( "templates" ) )
-			Hymn_Test::checkPhpClasses( "./templates", TRUE, !FALSE );
+			Hymn_Tool_Test::checkPhpClasses( "./templates", TRUE, !FALSE );
 */	}
 }

@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Test {
+class Hymn_Tool_Test {
 
 	static protected $shellCommands	= array(
 		'graphviz'	=> array(
@@ -51,6 +51,24 @@ class Hymn_Test {
 		exec( $command, $results, $code );
 		if( $code == 127 )
 			throw new RuntimeException( self::$shellCommands[$key]['error'] );
+	}
+
+	static public function checkPhpfileSyntax( $filePath ){
+		$code		= 0;
+		$output		= array();
+		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
+		@exec( $command, $output, $code );
+		$message	= 'Syntax error in file '.$filePath;
+		if( isset( $output[0] ) && strlen( trim( $output[0] ) ) )
+			$message	= $output[0];
+		if( isset( $output[2] ) && strlen( trim( $output[2] ) ) )
+			$message	= $output[2];
+		return (object) array(
+			'valid'		=> $code === 0 ? TRUE : FALSE,
+			'code'		=> $code,
+			'message'	=> $message,
+			'output'	=> $output,
+		);
 	}
 
 	static public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
@@ -70,15 +88,11 @@ class Hymn_Test {
 				if( $verbose )
 					Hymn_Client::out( $indent.". File: ".$entry->getPathname() );
 
-				$code		= 0;
-				$results	= array();
-				$command	= "php -l ".$entry->getPathname()/*." >/dev/null"*/." 2>&1";
-				@exec( $command, $results, $code );
-				if( $code !== 0 ){
-					$valid		= FALSE;
-					$message	= "Invalid PHP code has been found in ".$entry->getPathname().".";
-					$message	= isset( $results[0] ) ? $results[0]."." : $message;
-					Hymn_Client::out( $message );
+				$syntax	= self::checkPhpfileSyntax( $entry->getPathname() );
+				if( !$syntax->valid ){
+					Hymn_Client::out( "Invalid PHP code found in ".$entry->getPathname() );
+					if( $syntax->output )
+						Hymn_Client::out( join( PHP_EOL, $syntax->output ) );
 				}
 			}
 		}
