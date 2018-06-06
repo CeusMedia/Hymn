@@ -1,19 +1,17 @@
 export PWD	:= $(shell pwd)
 
+help:
+	@echo "make create-phar [MODE=(prod|dev)]"
+
 create: create-phar
 
 create-phar:
-	@echo "Creating hymn.phar @ Production"
 	@test -f hymn.phar && rm hymn.phar || true
-	@php build/create.php
-	@chmod +x hymn.phar
+	@php build/create.php --mode=${MODE} && chmod +x hymn.phar || true
 
 create-phar-dev:
-	@echo "Creating hymn.phar @ Development"
 	@test -f hymn.phar && rm hymn.phar || true
-	@php build/create.php dev
-	@chmod +x hymn.phar
-
+	$(MAKE) -s create-phar MODE=dev
 
 install: uninstall create-phar
 	@echo "Installing hymn to /usr/local/bin"
@@ -39,8 +37,7 @@ test-units:
 test-syntax:
 	@echo "Checking syntax..."
 #	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
-	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED" 
+	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED"
 
 update:
 	@git fetch && git rebase && $(MAKE) -s create-phar
-
