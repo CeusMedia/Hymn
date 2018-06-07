@@ -75,7 +75,7 @@ class Hymn_Module_SQL{
 	 *	@throws		RuntimeException				if execution fails
 	 */
 	protected function executeSql( $sql ){
-//		$dbc		= $this->client->setupDatabaseConnection();
+		$dbc		= $this->client->setupDatabaseConnection();
 		$dbc		= $this->client->getDatabase();
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
