@@ -355,8 +355,11 @@ class Hymn_Client{
 	}
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
-		if( $this->dbc && !$forceReset )
+		if( $this->dbc && !$forceReset ){
+			if( $this->flags &= self::FLAG_VERBOSE )
+				Hymn_Client::out( "Database already set up." );
 			return;
+		}
 		if( $this->flags &= self::FLAG_NO_DB )
 			return;
 //		$this->dbc			= NULL;
@@ -407,9 +410,6 @@ class Hymn_Client{
 		foreach( $this->dba as $key => $value )
 			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 
-		if( $this->isLiveCopy )																		//  this run is a build for a live copy
-			return;																					//  so target database is NOT available in this environment
-
 		if( strtolower( $this->dba->driver ) !== "mysql" )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
 			throw new OutOfRangeException( 'PDO driver "'.$this->dba->driver .'" is not supported at the moment' );
 
@@ -418,12 +418,26 @@ class Hymn_Client{
 			"port=".$this->dba->port,
 //			"dbname=".$this->dba->name,
 		) );
+		if( $this->flags &= self::FLAG_VERBOSE )
+			Hymn_Client::out( "Connecting database ...", FALSE );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
+		if( $this->flags &= self::FLAG_VERBOSE )
+			Hymn_Client::out( "OK" );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() )
+		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
+			if( $this->flags &= self::FLAG_VERBOSE )
+				Hymn_Client::out( 'Creating database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "CREATE DATABASE `".$this->dba->name."`" );
-		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() )
+			if( $this->flags &= self::FLAG_VERBOSE )
+				Hymn_Client::out( "OK" );
+		}
+		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
+			if( $this->flags &= self::FLAG_VERBOSE )
+				Hymn_Client::out( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "USE `".$this->dba->name."`" );
+			if( $this->flags &= self::FLAG_VERBOSE )
+				Hymn_Client::out( "OK" );
+		}
 	}
 }
 ?>
