@@ -11,7 +11,7 @@ create-phar:
 
 create-phar-dev:
 	@test -f hymn.phar && rm hymn.phar || true
-	$(MAKE) -s create-phar MODE=dev
+	@$(MAKE) -s create-phar MODE=dev
 
 install: uninstall create-phar
 	@echo "Installing hymn to /usr/local/bin"

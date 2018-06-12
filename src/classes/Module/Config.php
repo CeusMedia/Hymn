@@ -63,6 +63,11 @@ class Hymn_Module_Config{
 		throw new InvalidArgumentException( sprintf( $msg, $moduleId, $configKey ) );				//  throw exception
 	}
 
+	public function getAll( $moduleId ){
+		$module		= $this->library->readInstalledModule( $moduleId );
+		return $module->config;
+	}
+
 	public function set( $moduleId, $configKey, $configValue ){
 		$this->get( $moduleId, $configKey, FALSE );
 		$pathConfig	= $this->client->getConfigPath();

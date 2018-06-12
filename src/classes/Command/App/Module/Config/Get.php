@@ -47,14 +47,67 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
-		$parts		= explode( ".", $key );
+		$parts		= explode( '.', $key );
 		$moduleId	= array_shift( $parts );
 		if( !$parts )
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
-		$configKey	= join( ".", $parts );
+		$configKey	= join( '.', $parts );
 
-		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
-		$config			= $configurator->get( $moduleId, $configKey );
-		Hymn_Client::out( $config->value );
+		if( $configKey === '*' ){
+			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
+			foreach( $configurator->getAll( $moduleId ) as $item ){
+				if( $this->flags->verbose ){
+					$type	= 'string';
+					if( in_array( $item->type, array( 'bool', 'boolean' ) ) )
+						$type	= 'boolean';
+					if( in_array( $item->type, array( 'int', 'integer' ) ) )
+						$type	= 'integer';
+					if( in_array( $item->type, array( 'float', 'single', 'double' ) ) )
+						$type	= 'float';
+ 					Hymn_Client::out( $item->key );
+ 					Hymn_Client::out( ' - Type:      '.$type );
+ 					Hymn_Client::out( ' - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );
+ 					Hymn_Client::out( ' - Protected: '.$item->protected );
+ 					Hymn_Client::out( ' - Value:     '.$this->renderValue( $item ) );
+					if( $item->values )
+ 						Hymn_Client::out( ' - Values:     '.join( ', ', preg_split( '/\s*,\s*/', $item->values ) ) );
+					if( $item->title )
+ 						Hymn_Client::out( ' - Title:      '.$item->title );
+/*					$mandatory	= $item->mandatory ? 'mandatory' : 'optional';
+					$protected	= str_replace( 'yes', 'protected', $item->protected );
+					$protected	= str_replace( 'user', 'customer', $protected );
+					$protected	= str_replace( 'no', 'public', $protected );
+					$type		= str_replace( 'integer', 'int', $item->type );
+					$type		= str_replace( 'boolean', 'bool', $type );
+					$values		= $item->values ? ' ('.join( ',', $item->values ).')' : '';
+					$title		= $item->title ? ' - '.$item->title : '';
+ 					Hymn_Client::out( vsprintf( ' - %s %s %s %s => %s [%s]', array(
+						$mandatory,
+						$protected,
+						$type,
+						$item->key,
+						$this->renderValue( $item ),
+						json_encode( $item )
+					) ) );*/
+				}
+				else
+					Hymn_Client::out( $item->key.': '.$this->renderValue( $item ) );
+			}
+		}
+		else{
+			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
+			$config			= $configurator->get( $moduleId, $configKey );
+			Hymn_Client::out( $config->value );
+		}
+	}
+
+	protected function renderValue( $item ){
+		if( in_array( $item->type, array( 'bool', 'boolean' ) ) )
+			return $item->value ? 'yes' : 'no';
+		if( in_array( $item->type, array( 'int', 'integer' ) ) )
+			return (int) $item->value;
+		if( in_array( $item->type, array( 'float', 'single', 'double' ) ) )
+			return (float) $item->value;
+		return (string) $item->value;
 	}
 }
