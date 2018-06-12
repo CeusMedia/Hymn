@@ -47,13 +47,13 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
-		$parts		= explode( '.', $key );
-		$moduleId	= array_shift( $parts );
-		if( !$parts )
-			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
-		$configKey	= join( '.', $parts );
+		$keyParts	= explode( '.', $key );
+		$moduleId	= array_shift( $keyParts );
+		if( !$moduleId )
+			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name[.(section.)key]"' );
+		$configKey	= join( '.', $keyParts );
 
-		if( $configKey === '*' ){
+		if( !$keyParts || $configKey === '*' ){
 			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			foreach( $configurator->getAll( $moduleId ) as $item ){
 				if( $this->flags->verbose ){
