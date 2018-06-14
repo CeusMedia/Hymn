@@ -145,16 +145,18 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 
 	protected function getLatestStamp( $path = NULL, $shelfId = NULL ){
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$path		= $path ? $path : $pathDump;
+		$path		= preg_replace( '@\.+/@', '', $path );
+		$path		= rtrim( $path, '/' );
+		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( "Scanning folder ".$path."..." );
+			Hymn_Client::out( "Scanning folder ".$path." ..." );
 		if( file_exists( $path ) ){
 			$list	= array();
 			$index	= new DirectoryIterator( $path );
 			foreach( $index as $entry ){
 				if( $entry->isDir() || $entry->isDot() )
 					continue;
-				$pattern	= '/^stamp_.[0-9:_-]+\.json$/';
+				$pattern	= '/^stamp_[0-9:_-]+\.json$/';
 				if( $shelfId )
 					$pattern	= '/^stamp_'.preg_quote( $shelfId, '/' ).'_[0-9:_-]+\.json$/';
 				if( !preg_match( $pattern, $entry->getFilename() ) )
