@@ -185,6 +185,6 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		}
 		if( $this->flags->verbose && !$this->flags->quiet )
 			Hymn_Client::out( 'Loading stamp: '.$fileName );
-		return json_decode( file_get_contents( $fileName ) );
+		return json_decode( trim( file_get_contents( $fileName ) ) );
 	}
 }
