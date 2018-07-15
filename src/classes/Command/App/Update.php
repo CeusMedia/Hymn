@@ -84,6 +84,18 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$moduleIds			= $this->client->arguments->getArguments();
 		if( $moduleIds ){
+			$wildcardModuleIds	= array();
+			foreach( $moduleIds as $nr => $moduleId ){
+				if( substr_count( $moduleId, '*' ) ){
+					unset( $moduleIds[$nr] );
+					$pattern	= str_replace( '*', '.+', preg_quote( $moduleId, '/' ) );
+					foreach( array_keys( $outdatedModules ) as $outdatedModuleId )
+						if( preg_match( '/^'.$pattern.'$/i', $outdatedModuleId ) )
+							$wildcardModuleIds[]	= $outdatedModuleId;
+				}
+			}
+			$moduleIds	+= $wildcardModuleIds;
+
 			$modulesToUpdate	= array();															//  start with empty list again
 			foreach( $moduleIds as $moduleId ){														//  iterate given modules
 				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
