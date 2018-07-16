@@ -86,12 +86,19 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( $moduleIds ){
 			$wildcardModuleIds	= array();
 			foreach( $moduleIds as $nr => $moduleId ){
-				if( substr_count( $moduleId, '*' ) ){
+				if( substr_count( $moduleId, '*' ) > 0 ){
 					unset( $moduleIds[$nr] );
-					$pattern	= str_replace( '*', '.+', preg_quote( $moduleId, '/' ) );
-					foreach( array_keys( $outdatedModules ) as $outdatedModuleId )
-						if( preg_match( '/^'.$pattern.'$/i', $outdatedModuleId ) )
+					$pattern	= str_replace( '\*', '.+', preg_quote( $moduleId, '/' ) );
+					if( $this->flags->verbose )
+						Hymn_Client::out( 'Looking for suitable outdated modules for module group: '.$moduleId.' ...' );
+//						Hymn_Client::out( 'Module group: '.$moduleId.' - looking for suitable outdated modules ...' );
+					foreach( array_keys( $outdatedModules ) as $outdatedModuleId ){
+						if( preg_match( '/^'.$pattern.'$/i', $outdatedModuleId ) ){
+							if( $this->flags->verbose )
+								Hymn_Client::out( ' - found module '.$outdatedModuleId );
 							$wildcardModuleIds[]	= $outdatedModuleId;
+						}
+					}
 				}
 			}
 			$moduleIds	+= $wildcardModuleIds;
@@ -118,6 +125,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 
+		$installer	= new Hymn_Module_Updater( $this->client, $library );
 		foreach( $modulesToUpdate as $update ){
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
@@ -133,8 +141,8 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$installType
 			);
 			Hymn_Client::out( $message );
-			$installer	= new Hymn_Module_Updater( $this->client, $library );
-			$installer->update( $module, $installType );
+			if( !$this->flags->dry )
+				$installer->update( $module, $installType );
 		}
 	}
 }
