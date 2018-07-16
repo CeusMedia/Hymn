@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.2';
+	static public $version	= '0.9.7.3';
 
 	static public $language	= 'en';
 
@@ -287,21 +287,56 @@ class Hymn_Client{
 		$type	= $defaultInstallType;
 		if( isset( $this->config->application->{"installType"} ) )
 			$type	= $this->config->application->{"installType"};
-		else if( isset( $this->config->modules->{"@installType"} ) )								//  @deprecated: use application->type instead
-			$type	= $this->config->modules->{"@installType"};										//  @todo to be removed in 1.0
+		else if( isset( $this->config->modules->{"@installType"} ) )							//  @deprecated: use application->type instead
+			$type	= $this->config->modules->{"@installType"};									//  @todo to be removed in 1.0
 		else if( isset( $this->config->modules->$moduleId ) )
 			if( isset( $this->config->modules->$moduleId->{"installType"} ) )
 				$type	= $this->config->modules->$moduleId->{"installType"};
 		return $type;
 	}
 
-	static public function out( $messages = NULL, $newLine = TRUE ){
-		if( !is_array( $messages ) )
-			$messages	= array( $messages );
+	/**
+	 *	Prints out message of one ore more lines.
+	 *	@access		public
+	 *	@static
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 */
+	public static function out( $lines = NULL, $newLine = TRUE ){
+		if( is_null( $lines ) )
+			$lines	= array();
+		if( !is_array( $lines ) ){
+			if( !is_string( $lines ) )
+				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
+			$lines	= array( $lines );
+		}
 		foreach( $messages as $message )
 			print( $message );
 		if( $newLine )
 			print( PHP_EOL );
+	}
+
+	/**
+	 *	Prints out deprecation message of one ore more lines.
+	 *	@access		public
+	 *	@static
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@throws		InvalidArgumentException		if neither array nor string given
+	 *	@throws		InvalidArgumentException		if given string is empty
+	 */
+	public static function outDeprecation( $lines = array() ){
+		if( !is_array( $lines ) ){
+			if( !is_string( $lines ) )
+				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
+			if( !strlen( trim( $lines ) ) )
+				throw new InvalidArgumentException( 'Argument must not be empty.' );			//  ...
+			$lines	= array( $lines );
+		}
+		$prefix		= 'DEPRECATED: ';
+		$lines[0]	= $prefix.$lines[0];
+		array_unshift( $lines, '' );
+		array_push( $lines, '' );
+		Hymn_Client::out( $lines );
 	}
 
 	protected function readConfig( $forceReload = FALSE ){
@@ -346,12 +381,12 @@ class Hymn_Client{
 			}
 		}
 
-		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
+		if( isset( $app->installMode ) && isset( $app->installType ) )							//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";	//  this installation is a build for a live copy
 #		if( $this->isLiveCopy )
 #			self::out( "This is a live copy build. Most hymn functions are not available." );
-		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
+		if( isset( $app->installMode ) && isset( $app->installType ) )							//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";	//  this installation is a build for a live copy
 	}
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
@@ -410,9 +445,11 @@ class Hymn_Client{
 		foreach( $this->dba as $key => $value )
 			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 
-		if( strtolower( $this->dba->driver ) !== "mysql" )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
-			throw new OutOfRangeException( 'PDO driver "'.$this->dba->driver .'" is not supported at the moment' );
-
+		if( strtolower( $this->dba->driver ) !== "mysql" )										//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
+			throw new OutOfRangeException( sprintf(
+				'PDO driver "%s" is not supported at the moment',
+				$this->dba->driver
+			) );
 		$dsn			= $this->dba->driver.':'.implode( ";", array(
 			"host=".$this->dba->host,
 			"port=".$this->dba->port,
