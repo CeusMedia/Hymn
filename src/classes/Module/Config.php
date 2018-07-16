@@ -49,8 +49,8 @@ class Hymn_Module_Config{
 		$this->library	= $library;
 		$this->app		= $this->config->application;												//  shortcut to application config
 		$this->flags	= (object) array(
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 		);
 	}

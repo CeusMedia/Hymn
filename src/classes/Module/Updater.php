@@ -55,8 +55,9 @@ class Hymn_Module_Updater{
 		$this->sql		= new Hymn_Module_SQL( $client );
 		$this->app		= $this->config->application;												//  shortcut to application config
 		$this->flags	= (object) array(
-			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
+			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'	=> $client->flags & Hymn_Client::FLAG_VERBOSE,
 		);
 
 /*		if( isset( $this->app->installMode ) )

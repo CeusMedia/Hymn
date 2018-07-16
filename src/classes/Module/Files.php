@@ -50,10 +50,10 @@ class Hymn_Module_Files{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->flags	= (object) array(
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 		);
 	}
 
