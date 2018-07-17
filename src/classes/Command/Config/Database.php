@@ -33,7 +33,8 @@
  *	@copyright		2014-2017 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@deprecated		use command 'database-config' instead
+ *	@todo			remove in v0.9.8
  */
 class Hymn_Command_Configure_Database extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
@@ -43,11 +44,12 @@ class Hymn_Command_Configure_Database extends Hymn_Command_Abstract implements H
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use command 'database-config' instead!" );
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		$config	= $this->client->getConfig();
+		$this->deprecate( array(																//  output notice of deprecated command
+			"Please use command 'database-config' instead!",									//  output deprecation notice
+			"This fallback will be removed in v0.9.8.",											//  announce removal
+		) );
 
+		$config	= $this->client->getConfig();
 		if( !isset( $config->database ) )
 			$config->database	= (object) array();
 		$dba	= $config->database;

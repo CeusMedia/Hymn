@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  *	@deprecated		use command 'app-base-config-enable' instead
- *	@todo   		to be removed in v1.0
+ *	@todo   		to be removed in v0.9.8
  */
 class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
@@ -45,9 +45,10 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use command 'app-base-config-enable' instead!" );		//  output deprecation notice
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		Hymn_Client::outDeprecation( array(														//  output deprecation
+			"Please use command 'app-base-config-enable' instead!",								//  death or substitute notice
+			"This fallback will be removed in v0.9.8.",											//  announce removal in version
+		) );
 		$key		= $this->client->arguments->getArgument( 0 );
 		$pathConfig	= $this->client->getConfigPath();
 
