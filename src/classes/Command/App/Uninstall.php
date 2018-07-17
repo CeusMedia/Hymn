@@ -45,44 +45,61 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
+		$config				= $this->client->getConfig();
+		$library			= $this->getLibrary();												//  get module library instance
+		$relation			= new Hymn_Module_Graph( $this->client, $library );
+
 		if( $this->flags->dry )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary();
-		$relation	= new Hymn_Module_Graph( $this->client, $library );
+		$listInstalled		= $library->listInstalledModules();									//  get list of installed modules
+		if( !$listInstalled )																	//  application has no installed modules
+			return Hymn_Client::out( "No installed modules found" );							//  not even one module is installed, no update
 
-		$moduleId		= trim( $this->client->arguments->getArgument() );
-		$listInstalled	= $library->listInstalledModules();
-		$isInstalled	= array_key_exists( $moduleId, $listInstalled );
-		if( !$moduleId )
-			Hymn_Client::out( "No module id given" );
-		else if( !$isInstalled )
-			Hymn_Client::out( "Module '".$moduleId."' is not installed" );
-		else{
-			$module		= $listInstalled[$moduleId];
-			$neededBy	= array();
-			foreach( $listInstalled as $installedModuleId => $installedModule )
-				if( in_array( $moduleId, $installedModule->relations->needs ) )
-					$neededBy[]	= $installedModuleId;
-			if( $neededBy && !$this->flags->force ) {
-				$list	= implode( ', ', $neededBy );
-				$msg	= "Module '%s' is needed by %d other modules (%s)";
-				Hymn_Client::out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
+		/*  fetch arguments  */
+		$moduleIds			= $this->client->arguments->getArguments();							//  get all arguments as one or more module IDs
+		if( $moduleIds ){
+			$installedModuleIds	= array_keys( $listInstalled );
+			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );	//  replace wildcarded modules
+			if( !$moduleIds ){
+				Hymn_Client::out( "No uninstallable modules given" );
+				return;
 			}
-			else{
-				$module->path	= 'not_relevant/';
-				$installer	= new Hymn_Module_Installer( $this->client, $library );
-				if( !$this->flags->quiet ) {
-					Hymn_Client::out( sprintf(
-						'%sUninstalling module %s ...',
-						$this->flags->dry ? 'Dry: ' : '',
-						$module->id
-					) );
+			foreach( $moduleIds as $moduleId ){
+				if( !array_key_exists( $moduleId, $listInstalled ) ){
+					Hymn_Client::out( "Module '".$moduleId."' is not installed." );
+					continue;
 				}
-				if( !$this->flags->dry )
-					$installer->uninstall( $module );
+				$this->uninstallModuleById( $moduleId, $listInstalled );
 			}
+		}
+		throw new Exception( 'Uninstallation of all modules is not supported at the moment' );
+	}
+
+	private function uninstallModule( $moduleId, $listInstalled ){
+		$neededBy	= array();
+		foreach( $listInstalled as $installedModuleId => $installedModule )
+			if( in_array( $moduleId, $installedModule->relations->needs ) )
+				$neededBy[]	= $installedModuleId;
+
+		$module		= $listInstalled[$moduleId];
+		if( $neededBy && !$this->flags->force ) {
+			$list	= implode( ', ', $neededBy );
+			$msg	= "Module '%s' is needed by %d other modules (%s)";
+			Hymn_Client::out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
+		}
+		else{
+			$module->path	= 'not_relevant/';
+			$installer	= new Hymn_Module_Installer( $this->client, $library );
+			if( !$this->flags->quiet ) {
+				Hymn_Client::out( sprintf(
+					'%sUninstalling module %s ...',
+					$this->flags->dry ? 'Dry: ' : '',
+					$module->id
+				) );
+			}
+			if( !$this->flags->dry )
+				$installer->uninstall( $module );
 		}
 	}
 }

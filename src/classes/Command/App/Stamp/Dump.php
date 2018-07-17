@@ -60,8 +60,8 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			$fileName	= $pathDump.'stamp_'.$datetime.'.json';
 			Hymn_Client::out( count( $modules )." modules installed:" );
 		}
-		if( dirname( $fileName) )																	//  path is not existing
-			exec( "mkdir -p ".dirname( $fileName ) );												//  create path
+		if( dirname( $fileName) )																//  path is not existing
+			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
 
 		ksort( $modules );
 		$data	= (object) array( 'modules' => array() );

@@ -48,7 +48,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$type		= $this->client->arguments->getArgument( 2 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 		$stamp		= $this->getStamp( $pathName, $shelfId );
-		$modules	= $this->getAvailableModules( $shelfId );					//  load available modules
+		$modules	= $this->getAvailableModules( $shelfId );									//  load available modules
 
 		/*  --  FIND MODULE CHANGES  --  */
 		$changes	= array();

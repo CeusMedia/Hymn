@@ -105,7 +105,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		if( isset( $config->database->import ) ){
 			foreach( $config->database->import as $import ){
 				if( file_exists( $import ) )
-					$installer->executeSql( file_get_contents( $import ) );							//  broken on this point since extraction to Hymn_Module_SQL
+					$installer->executeSql( file_get_contents( $import ) );						//  broken on this point since extraction to Hymn_Module_SQL
 			}
 		}*/
 	}
