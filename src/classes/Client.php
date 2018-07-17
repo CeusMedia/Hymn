@@ -310,8 +310,8 @@ class Hymn_Client{
 				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
 			$lines	= array( $lines );
 		}
-		foreach( $messages as $message )
-			print( $message );
+		foreach( $lines as $line )
+			print( $line );
 		if( $newLine )
 			print( PHP_EOL );
 	}
