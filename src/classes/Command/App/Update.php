@@ -107,7 +107,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 							'installed'	=> $installedModule->version,
 							'available'	=> $installedModule->version,
 							'source'	=> $installedModule->installSource,
-						) );
+						);
 					}
 					else
 						Hymn_Client::out( sprintf(

@@ -158,7 +158,7 @@ abstract class Hymn_Command_Abstract{
 			if( $this->flags->verbose ){
 				Hymn_Client::out( sprintf(
 					'Looking for suitable modules for module group: %s ...',
-					$givenModuleId,
+					$givenModuleId
 				) );
 			}
 			foreach( $availableModuleIds as $availableModuleId ){
