@@ -37,7 +37,7 @@
 abstract class Hymn_Command_Abstract{
 
 	protected $client;
-	protected $library	= NULL;
+//	protected $library	= NULL;
 	protected $flags;
 
 	public function __construct( Hymn_Client $client ){
@@ -52,6 +52,10 @@ abstract class Hymn_Command_Abstract{
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
 		return Hymn_Client::getInput( $message, $type, $default, $options, $break );
+	}
+
+	protected function deprecate( $messageLines, $exit = FALSE ){
+		Hymn_Client::outDeprecation( $messageLines );
 	}
 
 	/**
@@ -139,6 +143,33 @@ abstract class Hymn_Command_Abstract{
 			Hymn_Client::out( "- make a fork or patch on: https://github.com/CeusMedia/Hymn" );
 			Hymn_Client::out( "" );																	//  print empty line as optical separator
 		}
+	}
+
+	protected function realizeWildcardedModuleIds( $givenModuleIds, $availableModuleIds ){
+		$list	= array();
+		foreach( $givenModuleIds as $givenModuleId ){
+			if( !substr_count( $givenModuleId, '*' ) ){
+				if( in_array( $givenModuleId, $availableModuleIds ) ){
+					$list[]	= $givenModuleId;
+				}
+				continue;
+			}
+			$pattern	= str_replace( '\*', '.+', preg_quote( $givenModuleId, '/' ) );
+			if( $this->flags->verbose ){
+				Hymn_Client::out( sprintf(
+					'Looking for suitable modules for module group: %s ...',
+					$givenModuleId,
+				) );
+			}
+			foreach( $availableModuleIds as $availableModuleId ){
+				if( preg_match( '/^'.$pattern.'$/i', $availableModuleId ) ){
+					if( $this->flags->verbose )
+						Hymn_Client::out( ' - found module '.$availableModuleId );
+					$list[]	= $availableModuleId;
+				}
+			}
+		}
+		return $list;
 	}
 
 	/**
