@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  *	@deprecated		use config-get and config-set instead
- *	@todo			remove in v0.9.1
+ *	@todo			remove in v0.9.8
  */
 class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
@@ -45,10 +45,10 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use commands 'config-set' or 'config-get' instead!" );	//  output deprecation notice
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-
+		$this->deprecate( array(																//  output notice of deprecated command
+			"Please use commands 'config-set' or 'config-get' instead!",						//  output deprecation notice
+			"This fallback will be removed in v0.9.8.",											//  announce removal
+		) );
 		$filename	= Hymn_Client::$fileName;
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'File "'.$filename.'" is missing' );

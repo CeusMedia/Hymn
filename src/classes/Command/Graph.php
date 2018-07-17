@@ -34,7 +34,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@deprecated		use command 'app-graph' instead
- *	@todo   		to be removed in v1.0
+ *	@todo   		to be removed in v0.9.8
  */
 class Hymn_Command_Graph extends Hymn_Command_App_Graph{
 
@@ -44,9 +44,10 @@ class Hymn_Command_Graph extends Hymn_Command_App_Graph{
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use command 'app-graph' instead!" );					//  output deprecation notice
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		$this->deprecate( array(																//  output notice of deprecated command
+			"Please use command 'app-graph' instead!",											//  death or substitute notice
+			"This fallback will be removed in v0.9.8.",											//  announce removal in version
+		) );
 		parent::run();																				//  run newer command
 	}
 }

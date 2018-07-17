@@ -36,7 +36,7 @@ require_once __DIR__.'/Init.php';
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  *	@deprecated		use command 'init' instead
- *	@todo   		to be removed in v0.9.1
+ *	@todo   		to be removed in v0.9.8
  */
 class Hymn_Command_Create extends Hymn_Command_Init{
 
@@ -46,9 +46,10 @@ class Hymn_Command_Create extends Hymn_Command_Init{
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "DEPRECATED: Please use command 'init' instead!" );						//  output deprecation notice
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		parent::run();																				//  run newer command
+		$this->deprecate( array(																//  output notice of deprecated command
+			"Please use command 'init' instead!",												//  death or substitute notice
+			"This fallback will be removed in v0.9.8.",											//  announce removal in version
+		) );
+		parent::run();																			//  run newer command
 	}
 }
