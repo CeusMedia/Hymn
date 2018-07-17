@@ -190,23 +190,23 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		/*  --  CREATE COMPOSER FILE  --  */
 		if( $this->ask( "Configure composer?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createComposerFile();
-			Hymn_Client::out( "" );																		//  print empty line as optical separator
+			Hymn_Client::out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE APP BASE CONFIG FILE  --  */
 		if( $this->ask( "Create base config file?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createConfigFile();
-			Hymn_Client::out( "" );																		//  print empty line as optical separator
+			Hymn_Client::out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE MAKE FILE  --  */
 		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createMakeFile();
-			Hymn_Client::out( "" );																		//  print empty line as optical separator
+			Hymn_Client::out( "" );																//  print empty line as optical separator
 		}
 
 		Hymn_Client::out( "Done." );
 		Hymn_Client::out( "Now you can execute commands like install module sources using 'hymn source-add'." );
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		Hymn_Client::out( "" );																	//  print empty line as optical separator
 	}
 }

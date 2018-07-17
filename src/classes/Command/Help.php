@@ -42,22 +42,27 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@return		void
 	 */
 	public function run(){
-		$action		= $this->client->arguments->getArgument( 0 );									//  get first argument as action
-		$className	= "Hymn_Command_Default";														//  @todo remove this line since it is not used anymore
-		if( strlen( $action ) ){																	//  a help topic has been given (by first argument after 'help')
-			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );							//  resolve folder and classes from command
-			$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );					//  build possible command class name
-			if( !class_exists( $className ) )														//  built command class it not existing
-				throw new InvalidArgumentException( "Command '".$action."' is not existing" );		//  quit with exception
-			$class	= new ReflectionClass( $className );											//  otherwise reflect command class
-			$object	= $class->newInstanceArgs( array( $this->client ) );							//  invoke command class
-			call_user_func( array( $object, 'help' ) );												//  call public custom public help method of command class
-			return;																					//  return here to avoid fallback
+		$action		= $this->client->arguments->getArgument( 0 );								//  get first argument as action
+		$className	= "Hymn_Command_Default";													//  @todo remove this line since it is not used anymore
+		if( strlen( $action ) ){																//  a help topic has been given (by first argument after 'help')
+			$command	= ucwords( preg_replace( "/-+/", " ", $action ) );						//  resolve folder and classes from command
+			$command	= preg_replace( "/ +/", "_", $command );								//  replace whitespace by underscore
+			$className	= "Hymn_Command_".$command;												//  build possible command class name
+			if( !class_exists( $className ) )													//  built command class it not existing
+				throw new InvalidArgumentException( sprint(										//  quit with exception
+					"Command '%s' is not existing",
+					$action
+				) );
+			$class	= new ReflectionClass( $className );										//  otherwise reflect command class
+			$object	= $class->newInstanceArgs( array( $this->client ) );						//  invoke command class
+			call_user_func( array( $object, 'help' ) );											//  call public custom public help method of command class
+			return;																				//  return here to avoid fallback
 		}
-		$fileName	= 'hymn.phar/locales/'.Hymn_Client::$language.'/help/default.txt';				//  get file name of help text
-		$text		= file_get_contents( "phar://".$fileName );										//  read default help text
-		$text		= str_replace( "%v%", Hymn_Client::$version, $text );							//  insert version number
-		$text		= str_replace( "%l%", Hymn_Client::$language, $text );							//  insert version number
-		Hymn_Client::out( $text );																	//	print default help text
+		$language	= Hymn_Client::$language;
+		$fileName	= 'hymn.phar/locales/'.$language.'/help/default.txt';						//  get file name of help text
+		$text		= file_get_contents( "phar://".$fileName );									//  read default help text
+		$text		= str_replace( "%v%", Hymn_Client::$version, $text );						//  insert version number
+		$text		= str_replace( "%l%", Hymn_Client::$language, $text );						//  insert version number
+		Hymn_Client::out( $text );																//	print default help text
 	}
 }

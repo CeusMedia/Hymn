@@ -45,9 +45,9 @@ class Hymn_Command_Sleep extends Hymn_Command_Abstract implements Hymn_Command_I
 	 *	@return		void
 	 */
 	public function run(){
-		$seconds	= $this->client->arguments->getArgument();										//  get amount of seconds from arguments
-		$seconds	= max( 0, min( self::$maxSeconds, abs( (int) $seconds ) ) );					//  limit seconds in interval (0,maxSeconds)
-		if( $seconds )																				//  amount of seconds is atleast 1
-			sleep( $seconds );																		//  sleep for given amount of seconds
+		$seconds	= $this->client->arguments->getArgument();									//  get amount of seconds from arguments
+		$seconds	= max( 0, min( self::$maxSeconds, abs( (int) $seconds ) ) );				//  limit seconds in interval (0,maxSeconds)
+		if( $seconds )																			//  amount of seconds is atleast 1
+			sleep( $seconds );																	//  sleep for given amount of seconds
 	}
 }
