@@ -37,7 +37,7 @@
 abstract class Hymn_Command_Abstract{
 
 	protected $client;
-//	protected $library	= NULL;
+	protected $library	= NULL;
 	protected $flags;
 
 	public function __construct( Hymn_Client $client ){
@@ -48,6 +48,10 @@ abstract class Hymn_Command_Abstract{
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 		);
+		$this->__onInit();
+	}
+
+	protected function __onInit(){
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
