@@ -37,6 +37,12 @@
  */
 class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	protected $defaultPath;
+
+	protected function __onInit(){
+		$this->defaultPath		= $this->client->getConfigPath()."sql/";
+	}
+
 	/**
 	 *	Execute this command.
 	 *	@access		public
@@ -56,8 +62,11 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 				$fileName	= $pathName;
 			}
 		}
-		else
+		else if( file_exists( $this->defaultPath ) )
 			$fileName		= $this->getLatestDump( NULL, TRUE );
+		else
+			return Hymn_Client::out( "No loadable database file or folder found." );
+
 		Hymn_Client::out( "File: ".$fileName );
 		if( !( $fileName && file_exists( $fileName ) ) )
 			return Hymn_Client::out( "No loadable database file found." );
