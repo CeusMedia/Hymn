@@ -88,9 +88,12 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			$relation->addModule( $module, $installedModule->installType );
 		}
 		$orderedInstalledModules	= array_reverse( $relation->getOrder(), TRUE );
-		foreach( $orderedInstalledModules as $orderedModule )
-			if( array_key_exists( $orderedModule->id, $listInstalled ) )
+		foreach( $orderedInstalledModules as $orderedModule ){
+			if( array_key_exists( $orderedModule->id, $listInstalled ) ){
 				$this->uninstallModuleById( $orderedModule->id, $listInstalled );
+				$listInstalled		= $this->library->listInstalledModules();					//  get list of installed modules
+			}
+		}
 	}
 
 	private function uninstallModuleById( $moduleId, $listInstalled ){
