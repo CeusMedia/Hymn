@@ -47,9 +47,9 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@return		void
 	 */
 	public function run(){
-		$relation			= new Hymn_Module_Graph( $this->client, $library );
 		$config				= $this->client->getConfig();										//
 		$library			= $this->getLibrary();												//  get module library instance
+		$relation			= new Hymn_Module_Graph( $this->client, $library );
 		$listInstalled		= $library->listInstalledModules();									//  get list of installed modules
 
 		if( $this->flags->dry )

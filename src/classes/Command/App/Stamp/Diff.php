@@ -173,10 +173,14 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	}
 
 	protected function getStamp( $pathName, $shelfId ){
-		if( $pathName && file_exists( $pathName ) ){
-			$fileName	= $pathName;
-			if( is_dir( $pathName ) )
+		if( $pathName ){
+			$fileName	= NULL;
+			if( $pathName === 'latest' )
+				$fileName	= $this->getLatestStamp( NULL, $shelfId );
+			else if( file_exists( $pathName ) && is_dir( $pathName ) )
 				$fileName	= $this->getLatestStamp( $pathName, $shelfId );
+			else if( file_exists( $pathName ) )
+				$fileName	= $pathName;
 		}
 		else
 			$fileName		= $this->getLatestStamp( NULL, $shelfId );

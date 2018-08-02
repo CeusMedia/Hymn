@@ -39,6 +39,10 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 
 	protected $installType	= "link";
 
+	protected function __onInit(){
+		$this->library		= $this->getLibrary();												//  get module library instance
+	}
+
 	/**
 	 *	Execute this command.
 	 *	@access		public
@@ -46,13 +50,12 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run(){
 		$config				= $this->client->getConfig();
-		$library			= $this->getLibrary();												//  get module library instance
-		$relation			= new Hymn_Module_Graph( $this->client, $library );
+		$relation			= new Hymn_Module_Graph( $this->client, $this->library );
 
 		if( $this->flags->dry )
 			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$listInstalled		= $library->listInstalledModules();									//  get list of installed modules
+		$listInstalled		= $this->library->listInstalledModules();							//  get list of installed modules
 		if( !$listInstalled )																	//  application has no installed modules
 			return Hymn_Client::out( "No installed modules found" );							//  not even one module is installed, no update
 
@@ -61,10 +64,6 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		if( $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );	//  replace wildcarded modules
-			if( !$moduleIds ){
-				Hymn_Client::out( "No uninstallable modules given" );
-				return;
-			}
 			foreach( $moduleIds as $moduleId ){
 				if( !array_key_exists( $moduleId, $listInstalled ) ){
 					Hymn_Client::out( "Module '".$moduleId."' is not installed." );
@@ -73,10 +72,28 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 				$this->uninstallModuleById( $moduleId, $listInstalled );
 			}
 		}
-		throw new Exception( 'Uninstallation of all modules is not supported at the moment' );
+		else{
+			if( !( $answer = (boolean) $this->flags->force ) )
+				$answer	= Hymn_Client::getInput( "Do you really want to uninstall ALL installed modules?", 'boolean', 'no' );
+			if( !$answer )
+				return;
+			$this->uninstallAllModules( $listInstalled );
+		}
 	}
 
-	private function uninstallModule( $moduleId, $listInstalled ){
+	private function uninstallAllModules( $listInstalled ){
+		$relation	= new Hymn_Module_Graph( $this->client, $this->library );
+		foreach( $listInstalled as $installedModuleId => $installedModule ){
+			$module	= $this->library->getModule( $installedModuleId );
+			$relation->addModule( $module, $installedModule->installType );
+		}
+		$orderedInstalledModules	= array_reverse( $relation->getOrder(), TRUE );
+		foreach( $orderedInstalledModules as $orderedModule )
+			if( array_key_exists( $orderedModule->id, $listInstalled ) )
+				$this->uninstallModuleById( $orderedModule->id, $listInstalled );
+	}
+
+	private function uninstallModuleById( $moduleId, $listInstalled ){
 		$neededBy	= array();
 		foreach( $listInstalled as $installedModuleId => $installedModule )
 			if( in_array( $moduleId, $installedModule->relations->needs ) )
@@ -90,7 +107,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 		else{
 			$module->path	= 'not_relevant/';
-			$installer	= new Hymn_Module_Installer( $this->client, $library );
+			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			if( !$this->flags->quiet ) {
 				Hymn_Client::out( sprintf(
 					'%sUninstalling module %s ...',
