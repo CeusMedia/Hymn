@@ -138,8 +138,8 @@ class Hymn_Module_Graph{
 		$list	= array();
 		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
-			if( $this->flags->verbose && !$this->flags->quiet )
-				Hymn_Client::out( 'Check for loop: '.$node->module->id.' @ '.$node->module->sourceId );
+//			if( $this->flags->verbose && !$this->flags->quiet )
+//				Hymn_Client::out( 'Check for loop: '.$node->module->id.' @ '.$node->module->sourceId );
 			$loop	= $this->checkForLoop( $node );
 			if( $loop ){
 				Hymn_Client::out( 'Error: Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );

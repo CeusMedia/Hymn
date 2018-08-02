@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.3';
+	static public $version	= '0.9.7.4';
 
 	static public $language	= 'en';
 
