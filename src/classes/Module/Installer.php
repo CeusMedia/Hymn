@@ -53,7 +53,7 @@ class Hymn_Module_Installer{
 		$this->dbc		= $client->setupDatabaseConnection();
 		$this->files	= new Hymn_Module_Files( $client );
 		$this->sql		= new Hymn_Module_SQL( $client );
-		$this->app		= $this->config->application;												//  shortcut to application config
+		$this->app		= $this->config->application;											//  shortcut to application config
 		$this->flags	= (object) array(
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
@@ -65,8 +65,8 @@ class Hymn_Module_Installer{
 		if( isset( $this->app->installType ) )
 			Hymn_Client::out( "Install Type: ".$this->app->installType );*/
 
-		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
-			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
+		if( isset( $this->app->installType ) && $this->app->installType === "copy" )			//  installation is a copy
+			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )		//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy ){
 			Hymn_Client::out( "" );
@@ -88,11 +88,10 @@ class Hymn_Module_Installer{
 	 */
 	public function configure( $module ){
 		$source		= $module->path.'module.xml';
-		$pathConfig	= $this->client->getConfigPath();
-		$target		= $pathConfig.'modules/'.$module->id.'.xml';
-		if( !$this->flags->dry ){																	//  if not in dry mode
-			Hymn_Module_Files::createPath( dirname( $target ) );									//  create folder for module configurations in app
-			@copy( $source, $target );																//  copy module configuration into this folder
+		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
+		if( !$this->flags->dry ){																//  if not in dry mode
+			Hymn_Module_Files::createPath( dirname( $target ) );								//  create folder for module configurations in app
+			@copy( $source, $target );															//  copy module configuration into this folder
 		}
 		else {
 			$target	= $source;
@@ -101,55 +100,93 @@ class Hymn_Module_Installer{
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XmlElement( $xml );
 		$type	= isset( $this->app->type ) ? $this->app->type : 1;
-		if( !$this->flags->dry ){																	//  if not in dry mode
+		if( !$this->flags->dry ){																//  if not in dry mode
 			$xml->version->setAttribute( 'install-type', $type );
 			$xml->version->setAttribute( 'install-source', $module->sourceId );
 			$xml->version->setAttribute( 'install-date', date( "c" ) );
 		}
 
-		$config	= (object) array();																	//  prepare empty hymn module config
-		if( isset( $this->config->modules->{$module->id}->config ) )								//  module config is set in hymn file
-			$config	= $this->config->modules->{$module->id}->config;								//  get module config from hymn file
+		//  get configured module config pairs
+		$configModule	= (object) array();
+		if( isset( $this->config->modules->{$module->id} ) )									//  module not mentioned in hymn file
+			if( isset( $this->config->modules->{$module->id}->config ) )
+				$configModule	= $this->config->modules->{$module->id}->config;
 
-		foreach( $xml->config as $nr => $node ){													//  iterate original module config pairs
-			$key	= (string) $node['name'];														//  shortcut config pair key
-			if( $module->config[$key]->mandatory == "yes" ){										//  config pair is mandatory
-				if( $module->config[$key]->type !== "boolean" ){									//  ... and not of type boolean
-					if( !strlen( trim( $module->config[$key]->value ) ) ){							//  ... and has no value
-						if( !isset( $config->{$key} ) ){											//  ... and is not set in hymn file
-							$config->{$key}	= Hymn_Client::getInput(								//  get new value from console
-								"  … configure '".$key."'",											//  render console input label
-								$module->config[$key]->type,
-								NULL,
-								$module->config[$key]->values,										//  get suggested values if set
-								FALSE																//  no break = inline question
-							);
-						}
-					}
+		//  determine if module is active
+		$isActive	= TRUE;																		//  module without main switch are active by default
+		if( isset( $module->config['active'] ) ){												//  switch is defined in module config
+			$isActive	= $module->config['active']->value;										//  take switch value from module config
+			if( isset( $configModule->active ) )												//  switch is also defined in hymn file
+				$isActive	= in_array( $configModule->active, array( 'yes', 'true', '1' ) );	//  take switch value from hymn file
+		}
+
+		$changeSet	= array();
+		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
+			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type
+			$isBoolean		= in_array( $dataType, array( 'boolean', 'bool' ) );				//  note whether module config value is boolean
+			$isMandatory	= $moduleConfigData->mandatory === 'yes';							//  note whether module config value is mandatory
+			$isInConfig		= isset( $configModule->{$moduleConfigKey} );						//  note whether config value is set in hymn file
+			$value			= $moduleConfigData->value;											//  note original module config value
+			$configValue	= $isInConfig ? $configModule->{$moduleConfigKey} : $value;			//  note configured nodule config value as string
+			if( $isBoolean && $isInConfig ){													//  overriden boolean module config value by hymn file
+				$valueAsString	= strtolower( trim( $configValue ) );
+				$configValue	= NULL;
+				if( in_array( $valueAsString, array( 'no', 'false', '0' ) ) )
+					$configValue	= FALSE;
+				else if( in_array( $valueAsString, array( 'yes', 'true', '1' ) ) )
+					$configValue	= TRUE;
+			}
+			$hasValue	= strlen( $configValue ) > 0;
+			if( $isBoolean )
+				$hasValue	= $configValue !== NULL;
+			if( $isMandatory && !$hasValue ){
+				if( $this->flags->quiet ){														//  in quiet mode no input is allowed
+					$message	= 'Missing module config value %s:%s';							//  build exception message
+					throw new RuntimeException( vsprintf( $message, array(						//  throw exception
+						$module->id,
+						$moduleConfigKey,
+					) ) );
+				}
+				$configValue	= Hymn_Client::getInput(										//  get new value from console
+					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
+						$module->id,
+						$moduleConfigKey,
+					) ),
+					$dataType,																	//  provide data type
+					NULL,																		//  no default value
+					$moduleConfigData->values,													//  get suggested values if set
+					FALSE																		//  no break = inline question
+				);
+			}
+			if( $moduleConfigData->value !== $configValue )
+				$changeSet[$moduleConfigKey]	= $configValue;
+		}
+
+		foreach( $xml->config as $nr => $node ){												//  iterate original module config pairs
+			$moduleConfigKey	= (string) $node['name'];										//  shortcut config pair key
+			$moduleConfigValue	= $node->getValue();
+			if( array_key_exists( $moduleConfigKey, $changeSet ) ){
+				$node->setValue( (string) $changeSet[$moduleConfigKey] );
+				if( $this->flags->verbose && !$this->flags->quiet ){							//  verbose mode is on
+					$message	= '    - configured %s:%s';										//  ...
+					Hymn_Client::out( sprintf( $message, $module->id, $key ) );					//  inform about configured config pair
 				}
 			}
-			if( isset( $config->{$key} ) ){															//  a config value has been set
-//				$dom = dom_import_simplexml( $node );												//  import DOM node of module file
-//				$dom->nodeValue = $config->{$key};													//  set new value on DOM node
-				$node->setValue( (string) $config->{$key} );
-				if( $this->flags->verbose && !$this->flags->quiet )									//  verbose mode is on
-					Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
-			}
 		}
-		if( !$this->flags->dry ){																	//  no a dry run
-			$xml->saveXml( $target );																//  save changed DOM to module file
-			@unlink( $pathConfig.'modules.cache.serial' );										 	//  remove modules cache file
+		if( !$this->flags->dry ){																//  no a dry run
+			$xml->saveXml( $target );															//  save changed DOM to module file
+			Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 		}
 	}
 
 	public function install( $module, $installType = "link" ){
 		try{
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_FILES ) ){
-				$this->files->copyFiles( $module, $installType );									//  copy module files
+				$this->files->copyFiles( $module, $installType );								//  copy module files
 			}
-			$this->configure( $module );															//  configure module
+			$this->configure( $module );														//  configure module
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
-				$this->sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );					//  run SQL scripts, not for live copy builds
+				$this->sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );				//  run SQL scripts, not for live copy builds
 			return TRUE;
 		}
 		catch( Exception $e ){
@@ -162,18 +199,16 @@ class Hymn_Module_Installer{
 		try{
 			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $module->id );
-			$pathConfig			= $this->app->uri.$this->config->paths->config;
-			if( substr( $this->config->paths->config, 0, 1 ) === '/' )
-				$pathConfig		= $this->config->paths->config;
+			$pathConfig			= $this->client->getConfigPath();
 
 			$localModule->path	= $appUri;
-			$this->files->removeFiles( $localModule );												//  remove module files
-			if( !$this->flags->dry ){																//  not a dry run
-				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
-				@unlink( $pathConfig.'modules.cache.serial' );										//  remove modules cache file
+			$this->files->removeFiles( $localModule );											//  remove module files
+			if( !$this->flags->dry ){															//  not a dry run
+				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );							//  remove module configuration file
+				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );					//  remove modules cache file
 			}
-			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )								//  database actions are enabled
-				$this->sql->runModuleUninstallSql( $localModule );									//  run SQL scripts
+			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )							//  database actions are enabled
+				$this->sql->runModuleUninstallSql( $localModule );								//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){

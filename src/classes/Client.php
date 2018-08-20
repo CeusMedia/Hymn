@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.4';
+	static public $version	= '0.9.7.5a';
 
 	static public $language	= 'en';
 
@@ -268,7 +268,7 @@ class Hymn_Client{
 		}
 		while( $options && is_null( $default ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
-			$input	= in_array( $input, array( 'y', 'yes', '1' ) ) ? TRUE : FALSE;
+			$input	= in_array( strtolower( $input ), array( 'y', 'yes' ) );
 		if( $typeIsInteger )
 			$input	= (int) $input;
 		if( $typeIsNumber )
@@ -395,8 +395,6 @@ class Hymn_Client{
 				Hymn_Client::out( "Database already set up." );
 			return;
 		}
-		if( $this->flags &= self::FLAG_NO_DB )
-			return;
 //		$this->dbc			= NULL;
 		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
 		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
@@ -439,11 +437,14 @@ class Hymn_Client{
 			$this->dba->prefix		= Hymn_Client::getInput( "Table Prefix:" );
 		}
 
-		if( !isset( $this->config->modules->Resource_Database ) )
+		if( $this->dba->name && !$usesDatabaseModule ){
 			$this->config->modules->Resource_Database	= (object) array();
-		$this->config->modules->Resource_Database->config	= (object) array();
-		foreach( $this->dba as $key => $value )
-			$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
+			$this->config->modules->Resource_Database->config	= (object) array();
+			foreach( $this->dba as $key => $value )
+				$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
+		}
+		if( $this->flags &= self::FLAG_NO_DB )
+			return;
 
 		if( strtolower( $this->dba->driver ) !== "mysql" )										//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
 			throw new OutOfRangeException( sprintf(

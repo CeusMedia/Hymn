@@ -144,9 +144,9 @@ class Hymn_Module_Updater{
 
 			$this->files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){
-				$pathConfig	= $this->client->getConfigPath();
+//				$pathConfig	= $this->client->getConfigPath();
 //				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
-				@unlink( $pathConfig.'modules.cache.serial' );										//  remove modules cache file
+				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 			}
 			$this->files->copyFiles( $module, $installType );										//  copy module files
 			$this->reconfigure( $module );															//  configure module
