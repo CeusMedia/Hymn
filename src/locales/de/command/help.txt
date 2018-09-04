@@ -1,4 +1,4 @@
-Hymn - Hydrogen Framework Console Tool v%v% (%l%)
+Hymn - Hydrogen Framework Console Tool v%version% (%language%)
 
 Usage: hymn KOMMANDO [ARG]*
 

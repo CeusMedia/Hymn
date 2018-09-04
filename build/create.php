@@ -16,26 +16,30 @@ $pharFileName	= 'hymn.phar';
 $pharFilePath	= $rootPath.'/'.$pharFileName;
 $mainFileName	= 'hymn.php';
 $stubFileName	= __DIR__.'/'.'stub.php';
-$filesToAdd		= array(
-	'locales/de/help/default.txt',
-	'locales/en/help/default.txt',
-	'locales/en/help/reflect-options.txt',
-	'templates/Makefile',
-	'templates/phpunit.xml',
-	'templates/config/config.ini',
-	'templates/config/.htaccess',
-	'templates/test/bootstrap.php',
-);
+$filesToAdd		= array();
+$pathsToAdd		= array( 'locales', 'templates' );
+
+foreach( $pathsToAdd as $pathToAdd ){
+	$directory	= new RecursiveDirectoryIterator( $rootPath."/src/".$pathToAdd, RecursiveDirectoryIterator::SKIP_DOTS );
+	$iterator	= new RecursiveIteratorIterator( $directory, RecursiveIteratorIterator::CHILD_FIRST );
+	$pattern	= '/^'.preg_quote( $rootPath."/src/", '/' ).'/';
+	foreach( $iterator as $entry )
+		if( !$entry->isDir() )
+			$filesToAdd[]	= preg_replace( $pattern, '', $entry->getPathname() );
+}
 
 /*  --  CREATION  --  */
 $pharFlags	= FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME;
 $archive	= new Phar( $pharFilePath, $pharFlags, $pharFileName );
-$stub	= $options['mode'] === 'prod' ? php_strip_whitespace( $stubFileName ) : file_get_contents( $stubFileName );
-$stub	= strtr( $stub, array( '[pharFileName]' => $pharFileName, '[mainFileName]' => $mainFileName ) );
+$stub		= $options['mode'] === 'prod' ? php_strip_whitespace( $stubFileName ) : file_get_contents( $stubFileName );
+$stub		= strtr( $stub, array( '[pharFileName]' => $pharFileName, '[mainFileName]' => $mainFileName ) );
+
 $archive->startBuffering();
 $archive->setStub( "#!/usr/bin/env php".PHP_EOL.$stub );
 $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFileName ) );
-foreach( $filesToAdd as $item ) $archive->addFile( $rootPath.'/src/'.$item, $item );
+foreach( $filesToAdd as $item )
+	$archive->addFile( $rootPath.'/src/'.$item, $item );
+
 shell_exec( "cp -r ".$rootPath."/src/classes ".$rootPath."/build/" );
 $directory	= new RecursiveDirectoryIterator( $rootPath."/build/classes", RecursiveDirectoryIterator::SKIP_DOTS );
 $iterator	= new RecursiveIteratorIterator( $directory, RecursiveIteratorIterator::CHILD_FIRST );
@@ -68,6 +72,7 @@ foreach( $iterator as $entry ){
 }
 print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
+//if( $options['mode'] !== 'dev' )
 $archive->compressFiles( Phar::GZ );
 $archive->stopBuffering();
 shell_exec( "rm -rf ".$rootPath."/build/classes" );

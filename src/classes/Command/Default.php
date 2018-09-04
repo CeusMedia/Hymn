@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Default extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -43,11 +43,14 @@ class Hymn_Command_Default extends Hymn_Command_Abstract implements Hymn_Command
 	 *	@return		void
 	 */
 	public function run(){
+
+		$language	= Hymn_Client::$language;
+		$fileName	= 'hymn.phar/locales/'.$language.'/index.txt';									//  get file name of help text
+		$text		= file_get_contents( "phar://".$fileName );										//  read default help text
+		$text		= str_replace( "%version%", Hymn_Client::$version, $text );						//  insert version number
+		$text		= str_replace( "%l%", Hymn_Client::$language, $text );							//  insert version number
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "This is Hymn - the swiss army knife for Hydrogen applications." );
-		Hymn_Client::out( "Use it to create and install an application or manage its modules." );
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( "Please see 'hymn help' for usage information!" );
+		Hymn_Client::out( $text );																	//	print default help text
 		Hymn_Client::out( "" );																		//  print empty line as optical separator
 	}
 }

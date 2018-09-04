@@ -116,7 +116,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.5a';
+	static public $version	= '0.9.7.5';
 
 	static public $language	= 'en';
 
@@ -134,6 +134,8 @@ class Hymn_Client{
 
 	public $flags			= 0;
 
+	public $locale;
+
 	public function __construct( $arguments ){
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
@@ -143,6 +145,7 @@ class Hymn_Client{
 			if( in_array( $language, array( 'en', 'de' ) ) )
 				self::$language	= $language;
 		}
+		$this->locale	= new Hymn_Tool_Locale( Hymn_Client::$language );
 
 		if( self::$outputMethod !== "print" )
 			ob_start();
@@ -190,17 +193,19 @@ class Hymn_Client{
 	}
 
 	protected function dispatch(){
-		$action			= "default";
-		$className		= "Hymn_Command_Default";
 		$calledAction	= $this->arguments->getArgument( 0 );
-		if( strlen( trim( $calledAction ) ) )
+		if( strlen( trim( $calledAction ) ) ){
 			$className	= $this->disolveCommandClass( $calledAction );
-		$this->arguments->removeArgument( 0 );
-		if( !in_array( $action, self::$commandWithoutConfig ) ){
-			$this->readConfig();
-			$this->setupDatabaseConnection();
+			$this->arguments->removeArgument( 0 );
+			if( !in_array( $calledAction, self::$commandWithoutConfig ) ){
+				$this->readConfig();
+				$this->setupDatabaseConnection();
+			}
+			$this->executeCommandClass( $className );
 		}
-		$this->executeCommandClass( $className );
+		else{
+			Hymn_Client::out( $this->locale->loadText( 'command/index' ) );
+		}
 	}
 
 	protected function disolveCommandClass( $action ){
@@ -274,6 +279,10 @@ class Hymn_Client{
 		if( $typeIsNumber )
 			$input	= (float) $input;
 		return $input;
+	}
+
+	public function getLocale(){
+		return $this->locale;
 	}
 
 /*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = "dev" ){

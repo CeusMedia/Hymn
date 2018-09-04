@@ -1,0 +1,5 @@
+
+Das ist Hymn - das schweizer Taschenmesser für Hydrogen Anwendungen.
+Benutze es, um Anwendungen zu erzeugen und ihre Module zu verwalten.
+
+Für mehr Informationen, führe 'hymn help' aus!

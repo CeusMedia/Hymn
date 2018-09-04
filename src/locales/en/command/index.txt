@@ -1,0 +1,5 @@
+
+This is Hymn - the swiss army knife for Hydrogen applications.
+Use it to create and install an application or manage its modules.
+
+Please see 'hymn help' for usage information!
