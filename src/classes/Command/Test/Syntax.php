@@ -53,11 +53,5 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 
 		$toolTest	= new Hymn_Tool_Test( $this->client );
 		$toolTest->checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );
-
-/*		$toolTest->checkPhpClasses( "./", FALSE, !FALSE );
-		if( file_exists( "classes" ) )
-			$toolTest->checkPhpClasses( "./classes", TRUE, !FALSE );
-		if( file_exists( "templates" ) )
-			$toolTest->checkPhpClasses( "./templates", TRUE, !FALSE );
-*/	}
+	}
 }
