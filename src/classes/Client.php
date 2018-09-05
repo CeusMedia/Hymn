@@ -105,6 +105,7 @@ class Hymn_Client{
 		'create',																					//  @deprecated
 		'init',
 		'version',
+		'test-syntax',
 	);
 
 	static public $pathDefaults	= array(
