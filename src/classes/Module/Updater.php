@@ -61,18 +61,18 @@ class Hymn_Module_Updater{
 		);
 
 /*		if( isset( $this->app->installMode ) )
-			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
+			$this->client->out( "Install Mode: ".$this->app->installMode );
 		if( isset( $this->app->installType ) )
-			Hymn_Client::out( "Install Type: ".$this->app->installType );*/
+			$this->client->out( "Install Type: ".$this->app->installType );*/
 
 		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy ){
-			Hymn_Client::out( "" );
-			Hymn_Client::out( "ATTENTION: This build is a live installation in copy mode." );
-			Hymn_Client::out( "There is not uplink to commit file changes to source repository." );
-			Hymn_Client::out( "" );
+			$this->client->out( "" );
+			$this->client->out( "ATTENTION: This build is a live installation in copy mode." );
+			$this->client->out( "There is not uplink to commit file changes to source repository." );
+			$this->client->out( "" );
 		}
 	}
 
@@ -93,8 +93,9 @@ class Hymn_Module_Updater{
 			if( $this->flags->quiet )
 				$values[$configKey]	= $installed->value;
 			else{
-				Hymn_Client::out( '- Config key "'.$configKey.'" differs. Source: '.$sourceValue.' | Installed: '.$currentValue );
-				$answer		= Hymn_Tool_Decision::askStatic( "Keep custom value?", NULL, NULL, FALSE );
+				$this->client->out( '- Config key "'.$configKey.'" differs. Source: '.$sourceValue.' | Installed: '.$currentValue );
+				$toolDecision	= new Hymn_Tool_Decision( $this->client, "Keep custom value?", NULL, NULL, FALSE );
+				$answer			= $toolDecision->ask();
 				if( $answer === "y" )
 					$values[$configKey]	= $currentValue;
 			}
@@ -133,8 +134,8 @@ class Hymn_Module_Updater{
 						throw new RuntimeException( sprintf( $message, $relation ) );				//  throw exception
 					}
 					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
-					if( !$this->flags->quiet )																//  quiet mode is off
-						Hymn_Client::out( " - Installing needed module '".$relation."' ..." );		//  inform about installation of needed module
+					if( !$this->flags->quiet )														//  quiet mode is off
+						$this->client->out( " - Installing needed module '".$relation."' ..." );	//  inform about installation of needed module
 					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}

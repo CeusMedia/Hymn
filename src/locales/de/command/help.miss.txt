@@ -1,0 +1,7 @@
+
+Autsch! Die Hilfe für dieses Kommando wurde noch nicht geschrieben :-/
+
+Aber DU kannst diese Situation verbessern :-)
+- erstelle ein Fork von: https://github.com/CeusMedia/Hymn
+- übersetze und stelle einen Pull Request
+- weitere Informationen: https://ceusmedia.de/

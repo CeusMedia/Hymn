@@ -42,19 +42,17 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@return		void
 	 */
 	public function run(){
-		$action		= $this->client->arguments->getArgument( 0 );				//  get first argument as action
+		$command	= $this->client->arguments->getArgument( 0 );				//  get first argument as command
 		$locale		= $this->client->getLocale();								//  shortcut client locale handler
 		$words		= $locale->loadWords( 'command/help' );
 
-		$action		= strlen( trim( $action ) ) ? $action : 'help';				//  set default action to show help index
-		$path		= str_replace( '-', '/', strtolower( trim( $action ) ) );	//  realize locale file path
-		$message	= sprintf(													//  set default message (negative)
-			$words->errorNoHelpFileForCommand,
-			$action
-		);
+		$command	= strlen( trim( $command ) ) ? $command : 'help';			//  set default command to show help index
+		$path		= str_replace( '-', '/', strtolower( trim( $command ) ) );	//  realize locale file path
+		$message	= $locale->loadText( 'command/help.miss' );					//  load fallback help text locale
 		if( $locale->hasText( 'command/'.$path ) )								//  help text locale exists
 			$message	= $locale->loadText( 'command/'.$path );				//  load help text locale
-		Hymn_Client::out( $message );											//	print command help text
+
+		$this->client->out( $message );											//	print command help text
 		return TRUE;
 	}
 }

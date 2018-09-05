@@ -48,9 +48,9 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		$config		= $this->client->getConfig();
 
 		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
-			return Hymn_Client::out( "Configuration folder is either not existing or not writable" );
+			return $this->client->out( "Configuration folder is either not existing or not writable" );
 		if( !$this->flags->quiet && $this->flags->verbose )
-			Hymn_Client::out( "Loading all needed modules into graph…" );
+			$this->client->out( "Loading all needed modules into graph…" );
 
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
@@ -68,10 +68,10 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		$targetFileImage	= $this->client->getConfigPath()."modules.graph.png";
 		$graph	= $relation->renderGraphFile( $targetFileGraph );
 //		if( !$this->flags->quiet )
-//			Hymn_Client::out( "Saved graph file to ".$targetFileGraph."." );
+//			$this->client->out( "Saved graph file to ".$targetFileGraph."." );
 
 		$image	= $relation->renderGraphImage( $graph, $targetFileImage );
 //		if( !$this->flags->quiet )
-//			Hymn_Client::out( "Saved graph image to ".$targetFileImage."." );
+//			$this->client->out( "Saved graph image to ".$targetFileImage."." );
 	}
 }

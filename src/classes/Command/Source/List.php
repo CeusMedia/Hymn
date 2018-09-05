@@ -49,7 +49,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 		if( !isset( $config->sources ) )
 			$config->sources	= (object) array();
 
-		Hymn_Client::out( sprintf( "Found %d source(s):", count( (array) $config->sources ) ) );
+		$this->client->out( sprintf( "Found %d source(s):", count( (array) $config->sources ) ) );
 		foreach( $config->sources as $sourceId => $source ){
 			$status		= 'not defined';
 			if( isset( $source->path ) && strlen( trim ( $source->path ) ) )
@@ -57,11 +57,11 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 			if( isset( $source->path ) && file_exists( $source->path ) )
 			 	$status	= 'defined and existing';
 			$active	= isset( $source->path ) && file_exists( $source->path ) && $source->active;
-			Hymn_Client::out( "* ".$sourceId.":" );
-			Hymn_Client::out( "  - Status: ".$status );
-			Hymn_Client::out( "  - Active: ".( $active ? 'yes' : 'no' ) );
-			Hymn_Client::out( "  - Type: ".$source->type );
-			Hymn_Client::out( "  - Path: ".$source->path );
+			$this->client->out( "* ".$sourceId.":" );
+			$this->client->out( "  - Status: ".$status );
+			$this->client->out( "  - Active: ".( $active ? 'yes' : 'no' ) );
+			$this->client->out( "  - Type: ".$source->type );
+			$this->client->out( "  - Path: ".$source->path );
 		}
 	}
 }

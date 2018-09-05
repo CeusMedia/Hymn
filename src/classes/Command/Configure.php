@@ -89,10 +89,10 @@ class Hymn_Command_Configure extends Hymn_Command_Abstract implements Hymn_Comma
 			else if( count( $parts ) === 2 )
 				$config->{$parts[0]}->{$parts[1]}	= $value;
 			file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
-//			Hymn_Client::out( "Saved." );
+//			$this->client->out( "Saved." );
 		}
 		else{
-			Hymn_Client::out( $current );
+			$this->client->out( $current );
 //			print "Current value: ".$current . PHP_EOL;
 		}
 	}

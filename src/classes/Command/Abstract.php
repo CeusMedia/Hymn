@@ -55,11 +55,11 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
-		return Hymn_Client::getInput( $message, $type, $default, $options, $break );
+		return $this->client->getInput( $message, $type, $default, $options, $break );
 	}
 
 	protected function deprecate( $messageLines, $exit = FALSE ){
-		Hymn_Client::outDeprecation( $messageLines );
+		$this->client->outDeprecation( $messageLines );
 	}
 
 	/**
@@ -110,17 +110,17 @@ abstract class Hymn_Command_Abstract{
 			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 			if( !isset( $config->sources ) || empty( $config->sources ) ){
 				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
-				Hymn_Client::out( sprintf( $msg, $sourceId ) );										//  output warning
+				$this->client->out( sprintf( $msg, $sourceId ) );										//  output warning
 				return $this->library;																//  return empty library
 			}
 			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
 				if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
 					$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
-					Hymn_Client::out( sprintf( $msg, $sourceId ) );									//  output warning
+					$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
 				}
 				else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
 					$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
-					Hymn_Client::out( sprintf( $msg, $sourceId ) );									//  output warning
+					$this->client->out( sprintf( $msg, $sourceId ) );									//  output warning
 				}
 				else{
 					$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
@@ -130,23 +130,6 @@ abstract class Hymn_Command_Abstract{
 			}
 		}
 		return $this->library;																		//  return loaded library
-	}
-
-	public function help(){
-		$class		= preg_replace( "/^Hymn_Command_/", "", get_class( $this ) );
-		$command	= strtolower( str_replace( "_", "-", $class ) );
-		$fileName	= "phar://hymn.phar/locales/en/help/".$command.".txt";
-		if( file_exists( $fileName ) )
-			Hymn_Client::out( file( $fileName ) );
-		else{
-			Hymn_Client::out( "" );																	//  print empty line as optical separator
-			Hymn_Client::out( "Outch! Help on this topic is not available yet. I am sorry :-/" );
-			Hymn_Client::out( "" );																	//  print empty line as optical separator
-			Hymn_Client::out( "But YOU can improve this situation :-)" );
-			Hymn_Client::out( "- get more information on: https://ceusmedia.de/" );
-			Hymn_Client::out( "- make a fork or patch on: https://github.com/CeusMedia/Hymn" );
-			Hymn_Client::out( "" );																	//  print empty line as optical separator
-		}
 	}
 
 	protected function realizeWildcardedModuleIds( $givenModuleIds, $availableModuleIds ){
@@ -160,7 +143,7 @@ abstract class Hymn_Command_Abstract{
 			}
 			$pattern	= str_replace( '\*', '.+', preg_quote( $givenModuleId, '/' ) );
 			if( $this->flags->verbose ){
-				Hymn_Client::out( sprintf(
+				$this->client->out( sprintf(
 					'Looking for suitable modules for module group: %s ...',
 					$givenModuleId
 				) );
@@ -168,7 +151,7 @@ abstract class Hymn_Command_Abstract{
 			foreach( $availableModuleIds as $availableModuleId ){
 				if( preg_match( '/^'.$pattern.'$/i', $availableModuleId ) ){
 					if( $this->flags->verbose )
-						Hymn_Client::out( ' - found module '.$availableModuleId );
+						$this->client->out( ' - found module '.$availableModuleId );
 					$list[]	= $availableModuleId;
 				}
 			}

@@ -78,7 +78,7 @@ class Hymn_Command_Config_Set extends Hymn_Command_Abstract implements Hymn_Comm
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
 
 		if( !strlen( trim( $value ) ) )
-			$value	= trim( Hymn_Client::getInput(
+			$value	= trim( $this->client->getInput(
 				"Value for '".$key."'",
 				'string',
 				$current,

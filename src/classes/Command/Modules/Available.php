@@ -61,8 +61,8 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 			if( !$library->getShelves() )
 				$message	= 'No available modules found. No modules sources configured.';
 		}
-		Hymn_Client::out( $message );
+		$this->client->out( $message );
 		foreach( $modules as $module )
-			Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
+			$this->client->out( "- ".$module->id.' ('.$module->version.')' );
 	}
 }

@@ -54,7 +54,7 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		if( !$editor->isActiveProperty( $key ) ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( 'Base config key "'.$key.'" already is disabled' );
+				$this->client->out( 'Base config key "'.$key.'" already is disabled' );
 			return;
 		}
 		if( !$this->flags->dry ){
@@ -62,6 +62,6 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 			clearstatcache();
 		}
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( 'Base config key "'.$key.'" disabled' );
+			$this->client->out( 'Base config key "'.$key.'" disabled' );
 	}
 }

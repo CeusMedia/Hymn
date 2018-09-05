@@ -98,7 +98,7 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 			foreach( $questions as $question ){														//  iterate questions
 				$default	= $dba->{$question->key};												//  shortcut default
 				$options	= isset( $question->options ) ? $question->options : array();			//  realize options
-				$input		= Hymn_Client::getInput( $question->label, 'string', $default, $options, FALSE );	//  ask for value
+				$input		= $this->client->getInput( $question->label, 'string', $default, $options, FALSE );	//  ask for value
 				$dba->{$question->key}	= $input;													//  assign given value
 			}
 			$dsn			= $dba->driver.':'.implode( ";", array(									//  render PDO DSN
@@ -119,10 +119,10 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 					}
 				}
 				if( !$connectable )																	//  still not connectable
-					Hymn_Client::out( 'Database connection failed' );								//  show error message
+					$this->client->out( 'Database connection failed' );								//  show error message
 			}
 			catch( Exception $e ){																	//  catch all exceptions
-				Hymn_Client::out( 'Database connection error: '.$e->getMessage() );
+				$this->client->out( 'Database connection error: '.$e->getMessage() );
 			}
 		}
 		while( !$connectable );																		//  repeat until connectable

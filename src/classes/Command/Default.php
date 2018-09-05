@@ -49,8 +49,8 @@ class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_I
 		$text		= file_get_contents( "phar://".$fileName );										//  read default help text
 		$text		= str_replace( "%version%", Hymn_Client::$version, $text );						//  insert version number
 		$text		= str_replace( "%l%", Hymn_Client::$language, $text );							//  insert version number
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
-		Hymn_Client::out( $text );																	//	print default help text
-		Hymn_Client::out( "" );																		//  print empty line as optical separator
+		$this->client->out( "" );																	//  print empty line as optical separator
+		$this->client->out( $text );																//	print default help text
+		$this->client->out( "" );																	//  print empty line as optical separator
 	}
 }

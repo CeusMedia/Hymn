@@ -58,31 +58,31 @@ class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_In
 			foreach( $modulesAvailable as $availableModule ){
 				if( $moduleId !== $availableModule->id )
 					continue;
-				Hymn_Client::out( 'Module: '.$availableModule->title );
+				$this->client->out( 'Module: '.$availableModule->title );
 				if( $availableModule->description )
-					Hymn_Client::out( $availableModule->description );
-				Hymn_Client::out( 'Category: '.$availableModule->category );
-				Hymn_Client::out( 'Source: '.$availableModule->sourceId );
-				Hymn_Client::out( 'Version: '.$availableModule->version );
+					$this->client->out( $availableModule->description );
+				$this->client->out( 'Category: '.$availableModule->category );
+				$this->client->out( 'Source: '.$availableModule->sourceId );
+				$this->client->out( 'Version: '.$availableModule->version );
 				if( array_key_exists( $moduleId, $modulesInstalled ) ){
 					$installedModule	= $modulesInstalled[$moduleId];
-					Hymn_Client::out( 'Installed: '.$installedModule->version );
+					$this->client->out( 'Installed: '.$installedModule->version );
 					if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
 						$message	= 'Update available: %s -> %s';
 						$message	= sprintf( $message, $installedModule->version, $availableModule->version );
-						Hymn_Client::out( $message );
+						$this->client->out( $message );
 					}
 				}
 				return;
 			}
-			Hymn_Client::out( 'Module '.$moduleId.' not available.' );
+			$this->client->out( 'Module '.$moduleId.' not available.' );
 		}
 		else{
-			Hymn_Client::out( "Application Settings:" );
+			$this->client->out( "Application Settings:" );
 			foreach( $config->application as $key => $value ){
 				if( is_object( $value ) )
 					$value	= json_encode( $value, JSON_PRETTY_PRINT );
-				Hymn_Client::out( "- ".$key." => ".$value );
+				$this->client->out( "- ".$key." => ".$value );
 			}
 		}
 	}

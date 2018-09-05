@@ -78,7 +78,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$connectable	= FALSE;
 		do{
 			foreach( $questions as $question ){														//  iterate questions
-				$input		= Hymn_Client::getInput(												//  ask for value
+				$input		= $this->client->getInput(												//  ask for value
 					$question->label,
 					'string',
 					$data->{$question->key},														//  shortcut default value
@@ -88,9 +88,9 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 				$data->{$question->key}	= $input;													//  assign given value
 			}
 			if( isset( $config->sources->{$data->key} ) )
-				Hymn_Client::out( 'Error: Source with ID "'.$data->key.'" is already registered.' );
+				$this->client->outError( 'Source with ID "'.$data->key.'" is already registered.' );
 			else if( $data->type === "folder" && !file_exists( $data->path ) )
-				Hymn_Client::out( 'Error: Path to module library source is not existing.' );
+				$this->client->outError( 'Path to module library source is not existing.' );
 			else
 				$connectable	= TRUE;																//  note connectability for loop break
 		}

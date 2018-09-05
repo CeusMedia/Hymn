@@ -96,10 +96,10 @@ class Hymn_Module_Files{
 							throw new Exception( 'Link of source file '.$source.' is not creatable' );
 					}
 					if( $this->flags->verbose && !$this->flags->quiet )
-						Hymn_Client::out( '  … linked file '.$source );
+						$this->client->out( '  … linked file '.$source );
 //				}
 //				catch( Exception $e ){
-//					Hymn_Client::out( 'Link Error: '.$e->getMessage().'.' );
+//					$this->client->out( 'Link Error: '.$e->getMessage().'.' );
 //					return FALSE;
 //				}
 			}
@@ -121,7 +121,7 @@ class Hymn_Module_Files{
 							throw new Exception( 'Source file '.$source.' could not been copied' );
 					}
 					if( $this->flags->verbose && !$this->flags->quiet )
-						Hymn_Client::out( '  … copied file '.$source );
+						$this->client->out( '  … copied file '.$source );
 //				}
 //				catch( Exception $e ){
 //					throw new Exception( 'Copy Error: '.$e->getMessage() );
@@ -270,7 +270,7 @@ class Hymn_Module_Files{
 				@unlink( $target );																	//  remove installed file
 			}
 			if( $this->flags->verbose && !$this->flags->quiet )										//  be verbose
-				Hymn_Client::out( '  … removed file '.$target );									//  print note about removed file
+				$this->client->out( '  … removed file '.$target );									//  print note about removed file
 		}
 	}
 }

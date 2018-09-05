@@ -73,6 +73,6 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 		else
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
-		Hymn_Client::out( $current );
+		$this->client->out( $current );
 	}
 }

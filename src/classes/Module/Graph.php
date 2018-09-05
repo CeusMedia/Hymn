@@ -139,12 +139,12 @@ class Hymn_Module_Graph{
 		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
 //			if( $this->flags->verbose && !$this->flags->quiet )
-//				Hymn_Client::out( 'Check for loop: '.$node->module->id.' @ '.$node->module->sourceId );
+//				$this->client->out( 'Check for loop: '.$node->module->id.' @ '.$node->module->sourceId );
 			$loop	= $this->checkForLoop( $node );
 			if( $loop ){
-				Hymn_Client::out( 'Error: Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );
+				$this->client->outError( 'Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );
 				foreach( array_values( $loop->modules ) as $nr => $item )
-					Hymn_Client::out( ' '.str_pad( $nr + 1, 3, ' ', STR_PAD_LEFT ).'. '.$item->id.' @ '.$item->sourceId );
+					$this->client->out( ' '.str_pad( $nr + 1, 3, ' ', STR_PAD_LEFT ).'. '.$item->id.' @ '.$item->sourceId );
 				exit;
 			}
 			$edges	= $this->countModuleEdgesToRoot( $node );
@@ -170,7 +170,7 @@ class Hymn_Module_Graph{
 		}
 		$this->status	= self::STATUS_LINKED;
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( "Found ".count( $this->nodes )." modules." );
+			$this->client->out( "Found ".count( $this->nodes )." modules." );
 	}
 
 	public function renderGraphFile( $targetFile = NULL, $type = 'needs' ){							//  @todo	make indepentent from need/support
@@ -191,19 +191,20 @@ class Hymn_Module_Graph{
 		$graph		= "digraph {".$options.$nodes.$edges."\n}";
 		$this->status	= self::STATUS_PRODUCED;
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
+			$this->client->out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
 		if( $targetFile ){
 			file_put_contents( $targetFile, $graph );
 			if( !$this->flags->quiet )
-				Hymn_Client::out( "Saved graph file to ".$targetFile."." );
+				$this->client->out( "Saved graph file to ".$targetFile."." );
 		}
 		return $graph;
 	}
 
 	public function renderGraphImage( $graph = NULL, $targetFile = NULL ){
-		Hymn_Client::out( "Checking graphviz: ", FALSE );
-		Hymn_Tool_Test::checkShellCommand( "graphviz" );
-		Hymn_Client::out( "OK" );
+		$this->client->out( "Checking graphviz: ", FALSE );
+		$toolTest	= new Hymn_Tool_Test( $this->client );
+		$toolTest->checkShellCommand( "graphviz" );
+		$this->client->out( "OK" );
 		try{
 			if( !$graph )
 				$graph		= $this->renderGraphFile( NULL );
@@ -213,7 +214,7 @@ class Hymn_Module_Graph{
 			if( $targetFile ){
 				@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
 				if( !$this->flags->quiet )
-					Hymn_Client::out( 'Graph image saved to '.$targetFile.'.' );
+					$this->client->out( 'Graph image saved to '.$targetFile.'.' );
 			}
 			else{
 				exec( 'dot -Tpng -O '.$sourceFile );
@@ -224,7 +225,7 @@ class Hymn_Module_Graph{
 			}
 		}
 		catch( Exception $e ){
-			Hymn_Client::out( 'Graph rendering failed: '.$e->getMessage().'.' );
+			$this->client->out( 'Graph rendering failed: '.$e->getMessage().'.' );
 		}
 	}
 }

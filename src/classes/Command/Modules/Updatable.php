@@ -51,7 +51,7 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 		$modules		= array();																	//  prepare list of modules to update
 		$listInstalled	= $library->listInstalledModules();											//  get list of installed modules
 		if( !$listInstalled )																		//  application has no installed modules
-			return Hymn_Client::out( "No installed modules found" );
+			return $this->client->out( "No installed modules found" );
 
 		$outdatedModules	= array();																//
 		foreach( $listInstalled as $installedModule ){
@@ -72,7 +72,7 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 		foreach( $outdatedModules as $update ){
 			$message	= "- %s: %s -> %s";
 			$message	= sprintf( $message, $update->id, $update->installed, $update->available );
-			Hymn_Client::out( $message );
+			$this->client->out( $message );
 		}
 	}
 }

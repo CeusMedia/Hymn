@@ -46,9 +46,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run(){
 		if( $this->flags->dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
+		$this->client->setupDatabaseConnection();													//  setup connection to database
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
@@ -83,11 +84,11 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
 			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
-					Hymn_Client::out( "Module '".$module->id."' is already installed" );
+					$this->client->out( "Module '".$module->id."' is already installed" );
 			}
 			else{
 				if( !$this->flags->quiet ){
-					Hymn_Client::out( sprintf(
+					$this->client->out( sprintf(
 						"%sInstalling module '%s' version %s as %s ...",
 						$this->flags->dry ? 'Dry: ' : '',
 						$module->id,
@@ -105,7 +106,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		if( isset( $config->database->import ) ){
 			foreach( $config->database->import as $import ){
 				if( file_exists( $import ) )
-					$installer->executeSql( file_get_contents( $import ) );						//  broken on this point since extraction to Hymn_Module_SQL
+					$installer->executeSql( file_get_contents( $import ) );							//  broken on this point since extraction to Hymn_Module_SQL
 			}
 		}*/
 	}

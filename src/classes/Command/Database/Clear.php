@@ -46,7 +46,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return Hymn_Client::out( "Database can NOT be connected." );
+			return $this->client->out( "Database can NOT be connected." );
 
 		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
 
@@ -55,27 +55,27 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		$tables	= $result->fetchAll();
 		if( !$tables ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( "Database is empty" );
+				$this->client->out( "Database is empty" );
 			return;
 		}
 		if( !( $this->flags->force ) ){
 			if( $this->flags->quiet )
-				return Hymn_Client::out( "Quiet mode needs force mode (-f|--force)" );
-			Hymn_Client::out( "Database tables:" );
+				return $this->client->out( "Quiet mode needs force mode (-f|--force)" );
+			$this->client->out( "Database tables:" );
 			foreach( $tables as $table )
-				Hymn_Client::out( "- ".$table[0] );
-			$answer	= Hymn_Client::getInput( "Do you really want to drop these tables?", 'boolean', 'no' );
+				$this->client->out( "- ".$table[0] );
+			$answer	= $this->client->getInput( "Do you really want to drop these tables?", 'boolean', 'no' );
 			if( $answer !== TRUE )
 				return;
 		}
 
 		foreach( $tables as $table ){
 			if( !$this->flags->quiet && $this->flags->verbose )
-				Hymn_Client::out( "- Drop table '".$table[0]."'" );
+				$this->client->out( "- Drop table '".$table[0]."'" );
 			$dbc->query( "DROP TABLE ".$table[0] );
 		}
 		if( !$this->flags->quiet )
-			Hymn_Client::out( "Database cleared" );
+			$this->client->out( "Database cleared" );
 	}
 
 	static public function getTables( $client ){

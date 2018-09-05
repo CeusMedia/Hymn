@@ -47,16 +47,17 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@return		void
 	 */
 	public function run(){
-		$config				= $this->client->getConfig();										//
-		$library			= $this->getLibrary();												//  get module library instance
+		$config				= $this->client->getConfig();											//
+		$library			= $this->getLibrary();													//  get module library instance
+		$this->client->setupDatabaseConnection();													//  setup connection to database
 		$relation			= new Hymn_Module_Graph( $this->client, $library );
-		$listInstalled		= $library->listInstalledModules();									//  get list of installed modules
+		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 
 		if( $this->flags->dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		if( !$listInstalled )																	//  application has no installed modules
-			return Hymn_Client::out( "No installed modules found" );							//  not even one module is installed, no update
+		if( !$listInstalled )																		//  application has no installed modules
+			return $this->client->out( "No installed modules found" );								//  not even one module is installed, no update
 
 //		$start		= microtime( TRUE );
 
@@ -66,15 +67,15 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$outdatedModules	= array();															//  prepare empty list of updatable modules
-		foreach( $listInstalled as $installedModule ){											//  iterate installed modules
-			$source				= $installedModule->installSource;								//  get installed module
-			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );	//  get available module
-			if( $availableModule ){																//  installed module is available atleast
-				$versionInstalled	= $installedModule->version;								//  shortcut installed module version
-				$versionAvailable	= $availableModule->version;								//  shortcut available module version
-				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){				//  installed module is outdated
-					$outdatedModules[$installedModule->id]	= (object) array(					//  note updatable module
+		$outdatedModules	= array();																//  prepare empty list of updatable modules
+		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
+			$source				= $installedModule->installSource;									//  get installed module
+			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );		//  get available module
+			if( $availableModule ){																	//  installed module is available atleast
+				$versionInstalled	= $installedModule->version;									//  shortcut installed module version
+				$versionAvailable	= $availableModule->version;									//  shortcut available module version
+				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){					//  installed module is outdated
+					$outdatedModules[$installedModule->id]	= (object) array(						//  note updatable module
 						'id'		=> $installedModule->id,
 						'installed'	=> $installedModule->version,
 						'available'	=> $availableModule->version,
@@ -84,22 +85,22 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 
-		$modules			= array();															//  prepare list of modules to update
-		$modulesToUpdate	= $outdatedModules;													//  updatable modules are all outdated modules
+		$modules			= array();																//  prepare list of modules to update
+		$modulesToUpdate	= $outdatedModules;														//  updatable modules are all outdated modules
 
 		$moduleIds			= $this->client->arguments->getArguments();
 		if( $moduleIds ){
 			$outdatedModuleIds	= array_keys( $outdatedModules );
-			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );	//  replace wildcarded modules
+			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );		//  replace wildcarded modules
 
-			$modulesToUpdate	= array();														//  start with empty list again
-			foreach( $moduleIds as $moduleId ){													//  iterate given modules
-				if( !array_key_exists( $moduleId, $listInstalled ) )							//  module is not installed, no update
-					Hymn_Client::out( sprintf(
+			$modulesToUpdate	= array();															//  start with empty list again
+			foreach( $moduleIds as $moduleId ){														//  iterate given modules
+				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
+					$this->client->out( sprintf(
 						"Module '%s' is not installed and cannot be updated",
 						$moduleId
 					) );
-				else if( !array_key_exists( $moduleId, $outdatedModules ) ){					//  module is not outdated, no update
+				else if( !array_key_exists( $moduleId, $outdatedModules ) ){						//  module is not outdated, no update
 					if( $this->flags->force ){
 						$installedModule	= $listInstalled[$moduleId];
 						$modulesToUpdate[$moduleId]	= (object) array(
@@ -110,13 +111,13 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 						);
 					}
 					else
-						Hymn_Client::out( sprintf(
+						$this->client->out( sprintf(
 							"Module '%s' is not outdated and cannot be updated",
 							$moduleId
 						) );
 				}
-				else																			//  module is updatable
-					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];					//  note module by copy from outdated modules
+				else																				//  module is updatable
+					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
 			}
 		}
 
@@ -135,7 +136,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$update->available,
 				$installType
 			);
-			Hymn_Client::out( $message );
+			$this->client->out( $message );
 			if( !$this->flags->dry )
 				$installer->update( $module, $installType );
 		}

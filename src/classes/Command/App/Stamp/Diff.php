@@ -55,7 +55,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) ){
 				if( !$this->flags->quiet )
-					Hymn_Client::out( 'Module '.$module->id.' was not installed before.' );
+					$this->client->out( 'Module '.$module->id.' was not installed before.' );
 			}
 			else{
 				$oldModule	= $stamp->modules->{$module->id};
@@ -70,35 +70,35 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		}
 		if( !$changes ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( 'No modules have changed.' );
+				$this->client->out( 'No modules have changed.' );
 			return;
 		}
 		if( !$this->flags->quiet )
-			Hymn_Client::out( 'Found '.count( $changes ).' modules have changed:' );
+			$this->client->out( 'Found '.count( $changes ).' modules have changed:' );
 
 		$helperSql	= new Hymn_Module_SQL( $this->client );
 		foreach( $changes as $change ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( ' - Module: '.$change->target->id );
+				$this->client->out( ' - Module: '.$change->target->id );
 			$moduleOld		= $change->source;
 			$moduleNew		= $change->target;
 			if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
 				$sql	= $scripts = $helperSql->getModuleUpdateSql( $change->source, $moduleNew );
 				if( $sql ){
 					if( !$this->flags->quiet )
-						Hymn_Client::out( '   SQL: '.count( $scripts ).' updates:' );
+						$this->client->out( '   SQL: '.count( $scripts ).' updates:' );
 					if( $this->flags->verbose )
-						Hymn_Client::out( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
+						$this->client->out( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 					$version	= $change->source->version;
 					foreach( $scripts as $script ){
 						$query	= $helperSql->realizeTablePrefix( $script->sql );
 						if( $this->flags->verbose ){
-							Hymn_Client::out( sprintf(
+							$this->client->out( sprintf(
 								'--  UPDATE %s: '.$version.' -> '.$script->version.'',
 								strtoupper( $moduleNew->id )
 							) );
 						}
-						Hymn_Client::out( trim( $query ) );
+						$this->client->out( trim( $query ) );
 						$version	= $script->version;
 					}
 				}
@@ -108,21 +108,21 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$moduleConfigNew	= (object) $moduleNew->config;
 				foreach( $moduleConfigOld as $item ){
 					if( !isset( $moduleConfigNew->{$item->key} ) ){
-						Hymn_Client::out( '   - '.$item->key.' has been removed.' );
+						$this->client->out( '   - '.$item->key.' has been removed.' );
 					}
 				}
 				foreach( $moduleConfigNew as $item ){
 					if( in_array( $item->key, array( 'title', 'values' ) ) )
 						continue;
 					if( !isset( $moduleConfigOld->{$item->key} ) ){
-						Hymn_Client::out( '   - '.$item->key.' has beend added with default value: '.$item->value );
+						$this->client->out( '   - '.$item->key.' has beend added with default value: '.$item->value );
 					}
 					else if( $item != $moduleConfigOld->{$item->key} ){
 						foreach( $item as $property => $value ){
 							$propValOld	= $moduleConfigOld->{$item->key}->{$property};
 							$propValNew	= $item->{$property};
 							if( $propValOld !== $propValNew ){
-								Hymn_Client::out( '   - '.$item->key.': '.$property.' has changed from '.$propValOld.' to '.$propValNew );
+								$this->client->out( '   - '.$item->key.': '.$property.' has changed from '.$propValOld.' to '.$propValNew );
 							}
 						}
 					}
@@ -138,7 +138,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			$message	= 'Found '.count( $modules ).' installed modules in source '.$shelfId.'.';
 			if( !$shelfId )
 				$message	= 'Found '.count( $modules ).' installed modules.';
-			Hymn_Client::out( $message );
+			$this->client->out( $message );
 		}
 		return $modules;
 	}
@@ -149,7 +149,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( "Scanning folder ".$path." ..." );
+			$this->client->out( "Scanning folder ".$path." ..." );
 		if( file_exists( $path ) ){
 			$list	= array();
 			$index	= new DirectoryIterator( $path );
@@ -186,11 +186,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			$fileName		= $this->getLatestStamp( NULL, $shelfId );
 		if( !( $fileName && file_exists( $fileName ) ) ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( "No comparable stamp file found." );
+				$this->client->out( "No comparable stamp file found." );
 			exit( 0 );
 		}
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( 'Loading stamp: '.$fileName );
+			$this->client->out( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
 	}
 }

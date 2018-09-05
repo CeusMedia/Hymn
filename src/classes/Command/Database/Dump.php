@@ -48,7 +48,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return Hymn_Client::out( "Database can NOT be connected." );
+			return $this->client->out( "Database can NOT be connected." );
 
 		$dbc		= $this->client->getDatabase();
 		$arguments	= $this->client->arguments;
@@ -92,10 +92,10 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		) );
 
 		if( $this->flags->verbose ){
-			Hymn_Client::out( "DB Server:    ".$host."@".$port );
-			Hymn_Client::out( "Database:     ".$name );
-			Hymn_Client::out( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
-			Hymn_Client::out( "Access as:    ".$username );
+			$this->client->out( "DB Server:    ".$host."@".$port );
+			$this->client->out( "Database:     ".$name );
+			$this->client->out( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
+			$this->client->out( "Access as:    ".$username );
 		}
 
 		$resultCode		= 0;
@@ -103,10 +103,10 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 		exec( $command, $resultOutput, $resultCode );
 		if( $resultCode !== 0 )
-			return Hymn_Client::out( "Database dump failed." );
+			return $this->client->out( "Database dump failed." );
 		if( $this->flags->dry ){
 			unlink( $fileName );
-			return Hymn_Client::out( "Simulated database dump has been successful." );
+			return $this->client->out( "Simulated database dump has been successful." );
 		}
 
 		/*  --  REPLACE PREFIX  --  */
@@ -127,24 +127,12 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		fclose( $fpIn );																			//  close source file
 		unlink( $fileName."_" );																	//  remove source file
 
-		return Hymn_Client::out( "Database dumped to ".$fileName );
+		return $this->client->out( "Database dumped to ".$fileName );
 	}
 
 	protected function _callbackReplacePrefix( $matches ){
 		if( $matches[1] === 'for table' )
 			return $matches[1].$matches[2].$matches[4].$matches[5];
 		return $matches[1].$matches[2].$this->prefixPlaceholder.$matches[4].$matches[5];
-	}
-
-	static public function test( $client ){
-		$config		= $client->getConfig();
-		$client->setupDatabaseConnection();
-		$dbc		= $client->getDatabase();
-		if( $dbc ){
-			$result	= $dbc->query( "SHOW TABLES" );
-			if( is_object( $result ) && is_array( $result->fetchAll() ) )
-				return TRUE;
-		}
-		return FALSE;
 	}
 }

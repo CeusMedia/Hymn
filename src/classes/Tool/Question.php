@@ -1,13 +1,15 @@
 <?php
 class Hymn_Tool_Question{
 
+	protected $client;
 	protected $message;
 	protected $type			= 'string';
 	protected $default		= NULL;
 	protected $options		= array();
 	protected $break		= TRUE;
 
-	public function __construct( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	public function __construct( Hymn_Client $client, $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+		$this->client	= $client;
 		$this->message	= $message;
 		$this->setType( $type );
 		$this->setDefault( $default );
@@ -39,7 +41,7 @@ class Hymn_Tool_Question{
 		if( !$this->break )
 			$message	.= ": ";
 		do{
-			Hymn_Client::out( $message, $this->break );
+			$this->client->out( $message, $this->break );
 			$handle	= fopen( "php://stdin","r" );
 			$input	= trim( fgets( $handle ) );
 			if( !strlen( $input ) && $default )
@@ -55,10 +57,14 @@ class Hymn_Tool_Question{
 		return $input;
 	}
 
-	static public function askStatic( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	/**
+	 *	@deprecated
+	 *	@todo			to be removed in v0.9.8
+	 */
+/*	static public function askStatic( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
 		$input	= new self( $message, $type, $default, $options, $break );
 		return $input->ask();
-	}
+	}*/
 
 	public function setBreak( $break = TRUE ){
 		$this->break	= $break;

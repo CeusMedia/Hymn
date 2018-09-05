@@ -70,10 +70,10 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-		Hymn_Client::out( sprintf( $msgTotal, count( $foundModules ), $shelfId ) );
+		$this->client->out( sprintf( $msgTotal, count( $foundModules ), $shelfId ) );
 		foreach( $foundModules as $moduleId => $module ){
 			$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
-			Hymn_Client::out( $msg );
+			$this->client->out( $msg );
 		}
 	}
 }

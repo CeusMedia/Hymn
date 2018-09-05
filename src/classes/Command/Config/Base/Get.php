@@ -45,7 +45,7 @@ class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::outDeprecation( array(														//  output deprecation
+		$this->client->outDeprecation( array(													//  output deprecation
 			"Please use command 'app-base-config-get' instead!",								//  death or substitute notice
 			"This fallback will be removed in v0.9.8.",											//  announce removal in version
 		) );
@@ -59,7 +59,7 @@ class Hymn_Command_Config_Base_Get extends Hymn_Command_Abstract implements Hymn
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		$current	= $editor->getProperty( $key );
-		Hymn_Client::out( $current );
+		$this->client->out( $current );
 		clearstatcache();
 	}
 }

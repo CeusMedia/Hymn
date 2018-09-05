@@ -242,7 +242,7 @@ class Hymn_Module_SQL{
 		foreach( $scripts as $script ){																//  iterate collected scripts
 			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "    … apply database script on %s at version %s";
-				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+				$this->client->out( sprintf( $msg, $script->event, $script->version ) );
 			}
 			if( !$this->flags->dry )																//  this is a dry run
 				$this->executeSql( $script->sql );													//  execute collected SQL script
@@ -261,7 +261,7 @@ class Hymn_Module_SQL{
 		foreach( $scripts as $script ){
 			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "    … apply database script on %s at version %s";
-				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );
+				$this->client->out( sprintf( $msg, $script->event, $script->version ) );
 			}
 			if( !$this->flags->dry )																//  not a dry run
 				$this->executeSql( $script->sql );													//  execute collected SQL script
@@ -280,14 +280,14 @@ class Hymn_Module_SQL{
 		foreach( $scripts as $script ){																//  iterate found ordered update scripts
 			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
 				$msg	= "  … apply database script on %s at version %s";							//  ...
-				Hymn_Client::out( sprintf( $msg, $script->event, $script->version ) );				//  ...
+				$this->client->out( sprintf( $msg, $script->event, $script->version ) );				//  ...
 			}
 			if( !$this->flags->dry ){																//  not a dry run
 				try{
 					$this->executeSql( $script->sql );												//  execute collected SQL script
 				}
 				catch( Exception $e ){
-					Hymn_Client::out( 'Problem occured: '.$e->getMessage() );						//  ...
+					$this->client->out( 'Problem occured: '.$e->getMessage() );						//  ...
 				}
 			}
 		}

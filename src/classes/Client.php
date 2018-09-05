@@ -146,6 +146,7 @@ class Hymn_Client{
 				self::$language	= $language;
 		}
 		$this->locale	= new Hymn_Tool_Locale( Hymn_Client::$language );
+		$this->words	= $this->locale->loadWords( 'client' );
 
 		if( self::$outputMethod !== "print" )
 			ob_start();
@@ -185,7 +186,7 @@ class Hymn_Client{
 			exit( 0 );
 		}
 		catch( Exception $e ){
-			Hymn_Client::out( "Error: ".$e->getMessage()."." );
+			$this->outError( $e->getMessage()."." );
 			if( self::$outputMethod !== "print" )
 				return ob_get_clean();
 			exit( 1 );
@@ -193,34 +194,54 @@ class Hymn_Client{
 	}
 
 	protected function dispatch(){
-		$calledAction	= $this->arguments->getArgument( 0 );
-		if( strlen( trim( $calledAction ) ) ){
-			$className	= $this->disolveCommandClass( $calledAction );
-			$this->arguments->removeArgument( 0 );
-			if( !in_array( $calledAction, self::$commandWithoutConfig ) ){
-				$this->readConfig();
-				$this->setupDatabaseConnection();
+		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
+		if( strlen( $calledAction ) ){																//  command string given
+			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
+			try{
+				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
+					if( $this->flags &= self::FLAG_VERBOSE )										//  verbose mode
+						$this->out( 'Reading application configuration ...' );						//  note reading of application configuration
+					$this->readConfig();															//  read application configuration from hymn file
+				}
+				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
+				$reflectedClass		= new ReflectionClass( $className );							//  reflect class
+				$classInterfaces	= $reflectedClass->getInterfaceNames();							//  get interfaces implemented by class
+				if( !$reflectedClass->implementsInterface( 'Hymn_Command_Interface' ) )
+					throw new RuntimeException( sprintf(
+						$this->words->errorCommandClassNotImplementingInterface,
+						$className
+					) );
+				$commandObject		= $reflectedClass->newInstanceArgs( array( $this ) );			//  create object of reflected class
+				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
+				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
+				$reflectedMethod->invokeArgs( $commandObject, (array) $this->arguments );			//  call reflected object method
 			}
-			$this->executeCommandClass( $className );
+			catch( Exception $e ){
+				$this->outError( $e->getMessage()."." );
+			}
 		}
-		else{
-			Hymn_Client::out( $this->locale->loadText( 'command/index' ) );
-		}
+		else																						//  no command string given
+			$this->out( $this->locale->loadText( 'command/index' ) );								//  print index text
 	}
 
-	protected function disolveCommandClass( $action ){
-		if( !strlen( trim( $action ) ) )
-			throw new InvalidArgumentException( 'No valid action given' );
-		$command		= ucwords( preg_replace( "/-+/", " ", $action ) );
-		$className	= "Hymn_Command_".preg_replace( "/ +/", "_", $command );
+	/**
+	 *	Tries to find and return command class name for a called command.
+	 *	@access		protected
+	 *	@param		string			$command			Called command
+	 *	@return		string								Command class name
+	 *	@throws		InvalidArgumentException			if no command class is available for called command
+	 */
+	protected function getCommandClassFromCommand( $command ){
+		if( !strlen( trim( $command ) ) )
+			throw new InvalidArgumentException( 'No command given' );
+		$commandWords	= ucwords( preg_replace( "/-+/", " ", $command ) );
+		$className		= "Hymn_Command_".preg_replace( "/ +/", "_", $commandWords );
 		if( !class_exists( $className ) )
-			throw new InvalidArgumentException( sprintf( "Invalid action '%s'", $action ) );
+			throw new RangeException( sprintf(
+				$this->words->errorCommandUnknown,
+				$command
+			) );
 		return $className;
-	}
-
-	protected function executeCommandClass( $className ){
-		$object		= new $className( $this );
-		$object->run( $this->arguments );
 	}
 
 	public function getConfig(){
@@ -249,7 +270,7 @@ class Hymn_Client{
 			throw new InvalidArgumentException( 'Invalid database access property key "'.$key.'"' );
 	}
 
-	static public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
 		$typeIsBoolean	= in_array( $type, array( 'bool', 'boolean' ) );
 		$typeIsInteger	= in_array( $type, array( 'int', 'integer' ) );
 		$typeIsNumber	= in_array( $type, array( 'float', 'double', 'decimal' ) );
@@ -265,7 +286,7 @@ class Hymn_Client{
 		if( !$break )
 			$message	.= ": ";
 		do{
-			Hymn_Client::out( $message, $break );
+			$this->out( $message, $break );
 			$handle	= fopen( "php://stdin","r" );
 			$input	= trim( fgets( $handle ) );
 			if( !strlen( $input ) && $default )
@@ -307,11 +328,10 @@ class Hymn_Client{
 	/**
 	 *	Prints out message of one ore more lines.
 	 *	@access		public
-	 *	@static
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
-	public static function out( $lines = NULL, $newLine = TRUE ){
+	public function out( $lines = NULL, $newLine = TRUE ){
 		if( is_null( $lines ) )
 			$lines	= array();
 		if( !is_array( $lines ) ){
@@ -328,12 +348,12 @@ class Hymn_Client{
 	/**
 	 *	Prints out deprecation message of one ore more lines.
 	 *	@access		public
-	 *	@static
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
+	 *	@return		void
 	 */
-	public static function outDeprecation( $lines = array() ){
+	public function outDeprecation( $lines = array() ){
 		if( !is_array( $lines ) ){
 			if( !is_string( $lines ) )
 				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
@@ -341,11 +361,20 @@ class Hymn_Client{
 				throw new InvalidArgumentException( 'Argument must not be empty.' );			//  ...
 			$lines	= array( $lines );
 		}
-		$prefix		= 'DEPRECATED: ';
-		$lines[0]	= $prefix.$lines[0];
+		$lines[0]	= $this->words->outPrefixDeprecation.$prefix.$lines[0];
 		array_unshift( $lines, '' );
 		array_push( $lines, '' );
-		Hymn_Client::out( $lines );
+		$this->out( $lines );
+	}
+
+	/**
+	 *	Prints out error message.
+	 *	@access		public
+	 *	@param		string			$message		Error message to print
+	 *	@return		void
+	 */
+	public function outError( $message ){
+		$this->out( $this->words->outPrefixError.$message );
 	}
 
 	protected function readConfig( $forceReload = FALSE ){
@@ -401,7 +430,7 @@ class Hymn_Client{
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
 		if( $this->dbc && !$forceReset ){
 			if( $this->flags &= self::FLAG_VERBOSE )
-				Hymn_Client::out( "Database already set up." );
+				$this->out( "Database already set up." );
 			return;
 		}
 //		$this->dbc			= NULL;
@@ -434,16 +463,16 @@ class Hymn_Client{
 			throw new RuntimeException( 'PDO driver "'.$this->dba->driver.'" is not available' );
 		}
 		while( empty( $this->dba->name ) ){
-			$this->dba->name		= Hymn_Client::getInput( "Database Name:" );
+			$this->dba->name		= $this->client->getInput( "Database Name:" );
 		}
 		while( empty( $this->dba->username ) ){
-			$this->dba->username	= Hymn_Client::getInput( "Database Username:" );
+			$this->dba->username	= $this->client->getInput( "Database Username:" );
 		}
 		while( empty( $this->dba->password ) ){
-			$this->dba->password	= Hymn_Client::getInput( "Database Password:" );
+			$this->dba->password	= $this->client->getInput( "Database Password:" );
 		}
 		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= Hymn_Client::getInput( "Table Prefix:" );
+			$this->dba->prefix		= $this->client->getInput( "Table Prefix:" );
 		}
 
 		if( $this->dba->name && !$usesDatabaseModule ){
@@ -466,24 +495,24 @@ class Hymn_Client{
 //			"dbname=".$this->dba->name,
 		) );
 		if( $this->flags &= self::FLAG_VERBOSE )
-			Hymn_Client::out( "Connecting database ...", FALSE );
+			$this->out( "Connecting database ...", FALSE );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		if( $this->flags &= self::FLAG_VERBOSE )
-			Hymn_Client::out( "OK" );
+			$this->out( "OK" );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
 			if( $this->flags &= self::FLAG_VERBOSE )
-				Hymn_Client::out( 'Creating database "'.$this->dba->name.'" ...', FALSE );
+				$this->out( 'Creating database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "CREATE DATABASE `".$this->dba->name."`" );
 			if( $this->flags &= self::FLAG_VERBOSE )
-				Hymn_Client::out( "OK" );
+				$this->out( "OK" );
 		}
 		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
 			if( $this->flags &= self::FLAG_VERBOSE )
-				Hymn_Client::out( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
+				$this->out( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "USE `".$this->dba->name."`" );
 			if( $this->flags &= self::FLAG_VERBOSE )
-				Hymn_Client::out( "OK" );
+				$this->out( "OK" );
 		}
 	}
 }

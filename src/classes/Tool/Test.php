@@ -37,6 +37,8 @@
  */
 class Hymn_Tool_Test {
 
+	protected $client;
+
 	static protected $shellCommands	= array(
 		'graphviz'	=> array(
 			'command'	=> "dot -V",
@@ -44,7 +46,11 @@ class Hymn_Tool_Test {
 		),
 	);
 
-	static public function checkShellCommand( $key ){
+	public function __construct( Hymn_Client $client ){
+		$this->client		= $client;
+	}
+
+	public function checkShellCommand( $key ){
 		if( !array_key_exists( $key, self::$shellCommands ) )
 			throw new InvalidArgumentException( "No shell command test available for '".$key."'" );
 		$command	= self::$shellCommands[$key]['command']." >/dev/null 2>&1";
@@ -53,7 +59,7 @@ class Hymn_Tool_Test {
 			throw new RuntimeException( self::$shellCommands[$key]['error'] );
 	}
 
-	static public function checkPhpfileSyntax( $filePath ){
+	public function checkPhpfileSyntax( $filePath ){
 		$code		= 0;
 		$output		= array();
 		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
@@ -71,10 +77,10 @@ class Hymn_Tool_Test {
 		);
 	}
 
-	static public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
+	public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
 		$indent	= str_repeat( ". ", $level );
 //		if( $verbose )
-//			Hymn_Client::out( $indent."Folder: ".$path );
+//			$this->client->out( $indent."Folder: ".$path );
 		$index	= new DirectoryIterator( $path );
 		$valid	= TRUE;
 		foreach( $index as $entry ){
@@ -86,13 +92,13 @@ class Hymn_Tool_Test {
 				if( !preg_match( '/\.php[0-9]*$/', $entry->getFilename() ) )
 					continue;
 				if( $verbose )
-					Hymn_Client::out( $indent.". File: ".$entry->getPathname() );
+					$this->client->out( $indent.". File: ".$entry->getPathname() );
 
-				$syntax	= self::checkPhpfileSyntax( $entry->getPathname() );
+				$syntax	= $this->checkPhpfileSyntax( $entry->getPathname() );
 				if( !$syntax->valid ){
-					Hymn_Client::out( "Invalid PHP code found in ".$entry->getPathname() );
+					$this->client->out( "Invalid PHP code found in ".$entry->getPathname() );
 					if( $syntax->output )
-						Hymn_Client::out( join( PHP_EOL, $syntax->output ) );
+						$this->client->out( join( PHP_EOL, $syntax->output ) );
 				}
 			}
 		}

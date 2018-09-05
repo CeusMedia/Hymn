@@ -51,15 +51,15 @@ class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hy
 		if( $shelfId ){
 			$modules	= $library->listInstalledModules( $shelfId );
 			ksort( $modules );
-			Hymn_Client::out( count( $modules )." modules of shelf ".$shelfId." installed:" );
+			$this->client->out( count( $modules )." modules of shelf ".$shelfId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();
 			ksort( $modules );
-			Hymn_Client::out( count( $modules )." modules installed:" );
+			$this->client->out( count( $modules )." modules installed:" );
 		}
 		foreach( $modules as $module ){
-			Hymn_Client::out( "- ".$module->id.' ('.$module->version.')' );
+			$this->client->out( "- ".$module->id.' ('.$module->version.')' );
 		}
 	}
 }

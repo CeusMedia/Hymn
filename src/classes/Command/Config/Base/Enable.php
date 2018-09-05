@@ -45,7 +45,7 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 	 *	@return		void
 	 */
 	public function run(){
-		Hymn_Client::outDeprecation( array(														//  output deprecation
+		$this->client->outDeprecation( array(														//  output deprecation
 			"Please use command 'app-base-config-enable' instead!",								//  death or substitute notice
 			"This fallback will be removed in v0.9.8.",											//  announce removal in version
 		) );
@@ -60,7 +60,7 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		if( $editor->isActiveProperty( $key ) ){
 			if( !$this->flags->quiet )
-				Hymn_Client::out( 'Base config key "'.$key.'" already is enabled' );
+				$this->client->out( 'Base config key "'.$key.'" already is enabled' );
 			return;
 		}
 		if( !$this->flags->dry ){
@@ -68,6 +68,6 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 			clearstatcache();
 		}
 		if( $this->flags->verbose )
-			Hymn_Client::out( 'Base config key "'.$key.'" disabled' );
+			$this->client->out( 'Base config key "'.$key.'" disabled' );
 	}
 }

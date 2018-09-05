@@ -40,7 +40,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	protected $installType	= "link";
 
 	protected function __onInit(){
-		$this->library		= $this->getLibrary();												//  get module library instance
+		$this->library		= $this->getLibrary();													//  get module library instance
 	}
 
 	/**
@@ -50,23 +50,24 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run(){
 		$config				= $this->client->getConfig();
+		$this->client->setupDatabaseConnection();													//  setup connection to database
 		$relation			= new Hymn_Module_Graph( $this->client, $this->library );
 
 		if( $this->flags->dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$listInstalled		= $this->library->listInstalledModules();							//  get list of installed modules
-		if( !$listInstalled )																	//  application has no installed modules
-			return Hymn_Client::out( "No installed modules found" );							//  not even one module is installed, no update
+		$listInstalled		= $this->library->listInstalledModules();								//  get list of installed modules
+		if( !$listInstalled )																		//  application has no installed modules
+			return $this->client->out( "No installed modules found" );								//  not even one module is installed, no update
 
 		/*  fetch arguments  */
-		$moduleIds			= $this->client->arguments->getArguments();							//  get all arguments as one or more module IDs
+		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
 		if( $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
-			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );	//  replace wildcarded modules
+			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcarded modules
 			foreach( $moduleIds as $moduleId ){
 				if( !array_key_exists( $moduleId, $listInstalled ) ){
-					Hymn_Client::out( "Module '".$moduleId."' is not installed." );
+					$this->client->out( "Module '".$moduleId."' is not installed." );
 					continue;
 				}
 				$this->uninstallModuleById( $moduleId, $listInstalled );
@@ -74,7 +75,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 		else{
 			if( !( $answer = (boolean) $this->flags->force ) )
-				$answer	= Hymn_Client::getInput( "Do you really want to uninstall ALL installed modules?", 'boolean', 'no' );
+				$answer	= $this->client->getInput( "Do you really want to uninstall ALL installed modules?", 'boolean', 'no' );
 			if( !$answer )
 				return;
 			$this->uninstallAllModules( $listInstalled );
@@ -91,7 +92,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		foreach( $orderedInstalledModules as $orderedModule ){
 			if( array_key_exists( $orderedModule->id, $listInstalled ) ){
 				$this->uninstallModuleById( $orderedModule->id, $listInstalled );
-				$listInstalled		= $this->library->listInstalledModules();					//  get list of installed modules
+				$listInstalled		= $this->library->listInstalledModules();						//  get list of installed modules
 			}
 		}
 	}
@@ -106,13 +107,13 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		if( $neededBy && !$this->flags->force ) {
 			$list	= implode( ', ', $neededBy );
 			$msg	= "Module '%s' is needed by %d other modules (%s)";
-			Hymn_Client::out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
+			$this->client->out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
 		}
 		else{
 			$module->path	= 'not_relevant/';
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			if( !$this->flags->quiet ) {
-				Hymn_Client::out( sprintf(
+				$this->client->out( sprintf(
 					'%sUninstalling module %s ...',
 					$this->flags->dry ? 'Dry: ' : '',
 					$module->id

@@ -1,0 +1,7 @@
+
+Outch! Help on this command is not available, yet. I am sorry :-/
+
+But YOU can improve this situation :-)
+- make a fork or patch on: https://github.com/CeusMedia/Hymn
+- translate, commit and set pull request
+- get more information on: https://ceusmedia.de/

@@ -81,7 +81,7 @@ class Hymn_Module_Config{
 //			$dom->nodeValue = $configValue;														//  set new value on DOM node
 			$node->setValue( (string) $configValue );
 			if( $this->flags->verbose && !$this->flags->quiet )									//  verbose mode is on
-				Hymn_Client::out( "  … configured ".$key );										//  inform about configures config pair
+				$this->client->out( "  … configured ".$key );										//  inform about configures config pair
 		}
 		if( $this->flags->dry )
 			return;

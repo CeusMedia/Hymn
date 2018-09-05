@@ -53,12 +53,12 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 		if( $shelfId ){
 			$modules	= $library->listInstalledModules( $shelfId );
 			$fileName	= $pathDump.'stamp_'.$shelfId.'_'.$datetime.'.json';
-			Hymn_Client::out( count( $modules )." modules of shelf ".$shelfId." installed:" );
+			$this->client->out( count( $modules )." modules of shelf ".$shelfId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();
 			$fileName	= $pathDump.'stamp_'.$datetime.'.json';
-			Hymn_Client::out( count( $modules )." modules installed:" );
+			$this->client->out( count( $modules )." modules installed:" );
 		}
 		if( dirname( $fileName) )																//  path is not existing
 			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
@@ -75,6 +75,6 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 		}
 		file_put_contents( $fileName, json_encode( $data/*, JSON_PRETTY_PRINT*/ ) );
 
-		Hymn_Client::out( 'Saved app stamp to '.$fileName.'.' );
+		$this->client->out( 'Saved app stamp to '.$fileName.'.' );
 	}
 }

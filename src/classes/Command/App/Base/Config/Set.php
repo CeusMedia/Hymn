@@ -56,7 +56,7 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 		$current	= $editor->getProperty( $key, FALSE );
 
 		if( !strlen( trim( $value ) ) )
-			$value	= trim( Hymn_Client::getInput(
+			$value	= trim( $this->client->getInput(
 				"Value for '".$key."'",
 				'string',
 				$current,
@@ -69,6 +69,6 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 			clearstatcache();
 		}
 		if( $this->flags->verbose && !$this->flags->quiet )
-			Hymn_Client::out( 'Base config key "'.$key.'" set to "'.$value.'"' );
+			$this->client->out( 'Base config key "'.$key.'" set to "'.$value.'"' );
 	}
 }

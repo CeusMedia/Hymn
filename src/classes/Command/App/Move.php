@@ -49,7 +49,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 	 */
 	public function run(){
 		if( $this->flags->dry )
-			Hymn_Client::out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$dest	= trim( $this->client->arguments->getArgument( 0 ) );
 		$url	= trim( $this->client->arguments->getArgument( 1 ) );
@@ -68,15 +68,15 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 			throw new RuntimeException( 'No application URI configured.' );
 		$source	= rtrim( $config->application->uri, '/' ).'/';
 
-		Hymn_Client::out( "Move application" );
-		Hymn_Client::out( "- from: ".$source );
-		Hymn_Client::out( "- to:   ".$dest );
+		$this->client->out( "Move application" );
+		$this->client->out( "- from: ".$source );
+		$this->client->out( "- to:   ".$dest );
 		if( strlen( $url ) )
-			Hymn_Client::out( "- URL:  ".$url );
+			$this->client->out( "- URL:  ".$url );
 		if( !$this->flags->dry ){
 			if( strlen( $url ) ){
 				if( $this->flags->verbose )
-					Hymn_Client::out( "- setting URL in config file" );
+					$this->client->out( "- setting URL in config file" );
 				$pathConfig	= $this->client->getConfigPath();
 				$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
 				if( $editor->hasProperty( 'app.base.url', FALSE ) ){
@@ -86,25 +86,25 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 					}
 				}
 				if( $this->flags->verbose )
-					Hymn_Client::out( "- setting URL in hymn file" );
+					$this->client->out( "- setting URL in hymn file" );
 				$config->application->url	= $url;
 				$json	= json_encode( $config, JSON_PRETTY_PRINT );
 				file_put_contents( Hymn_Client::$fileName, $json );
 			}
 			if( $this->flags->verbose )
-				Hymn_Client::out( "- setting URI in hymn file" );
+				$this->client->out( "- setting URI in hymn file" );
 			$config->application->uri	= $dest;
 			$json	= json_encode( $config, JSON_PRETTY_PRINT );
 			file_put_contents( Hymn_Client::$fileName, $json );
 
 			if( $this->flags->verbose )
-				Hymn_Client::out( "- moving folders, files and links" );
+				$this->client->out( "- moving folders, files and links" );
 			rename( $source, $dest );
 			if( $this->flags->verbose )
-				Hymn_Client::out( "- fixing links" );
+				$this->client->out( "- fixing links" );
 			$this->fixLinks( $source, $dest );
-			Hymn_Client::out( "DONE!" );
-			Hymn_Client::out( "Now run: cd ".$dest." && make set-permissions" );
+			$this->client->out( "DONE!" );
+			$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 		}
 	}
 

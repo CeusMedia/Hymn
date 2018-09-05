@@ -46,12 +46,12 @@ class Hymn_Command_App_Sources extends Hymn_Command_Abstract implements Hymn_Com
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$shelves	= $library->getShelves();
-		Hymn_Client::out( count( $shelves )." installed module source(s) detected:" );
+		$this->client->out( count( $shelves )." installed module source(s) detected:" );
 		foreach( $shelves as $shelf ){
-			Hymn_Client::out( '* '.$shelf->id);
-			Hymn_Client::out( '  - Active: '.( $shelf->active ? 'yes' : 'no' ) );
-			Hymn_Client::out( '  - Type: '.$shelf->type );
-			Hymn_Client::out( '  - Path: '.$shelf->path );
+			$this->client->out( '* '.$shelf->id);
+			$this->client->out( '  - Active: '.( $shelf->active ? 'yes' : 'no' ) );
+			$this->client->out( '  - Type: '.$shelf->type );
+			$this->client->out( '  - Path: '.$shelf->path );
 		}
 	}
 }

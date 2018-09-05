@@ -50,7 +50,7 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_C
 			$config->sources	= (object) array();
 
 		if( !isset( $config->sources->{$key} ) ){
-			Hymn_Client::out( 'Source with ID "'.$key.'" is not registered.' );
+			$this->client->out( 'Source with ID "'.$key.'" is not registered.' );
 			return;
 		}
 		unset( $config->sources->{$key} );

@@ -61,18 +61,18 @@ class Hymn_Module_Installer{
 		);
 
 /*		if( isset( $this->app->installMode ) )
-			Hymn_Client::out( "Install Mode: ".$this->app->installMode );
+			$this->client->out( "Install Mode: ".$this->app->installMode );
 		if( isset( $this->app->installType ) )
-			Hymn_Client::out( "Install Type: ".$this->app->installType );*/
+			$this->client->out( "Install Type: ".$this->app->installType );*/
 
 		if( isset( $this->app->installType ) && $this->app->installType === "copy" )			//  installation is a copy
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )		//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy ){
-			Hymn_Client::out( "" );
-			Hymn_Client::out( "ATTENTION: This build is a live installation in copy mode." );
-			Hymn_Client::out( "There is not uplink to commit file changes to source repository." );
-			Hymn_Client::out( "" );
+			$this->client->out( "" );
+			$this->client->out( "ATTENTION: This build is a live installation in copy mode." );
+			$this->client->out( "There is not uplink to commit file changes to source repository." );
+			$this->client->out( "" );
 		}
 	}
 
@@ -147,7 +147,7 @@ class Hymn_Module_Installer{
 						$moduleConfigKey,
 					) ) );
 				}
-				$configValue	= Hymn_Client::getInput(										//  get new value from console
+				$configValue	= $this->client->getInput(										//  get new value from console
 					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
 						$module->id,
 						$moduleConfigKey,
@@ -169,7 +169,7 @@ class Hymn_Module_Installer{
 				$node->setValue( (string) $changeSet[$moduleConfigKey] );
 				if( $this->flags->verbose && !$this->flags->quiet ){							//  verbose mode is on
 					$message	= '    - configured %s:%s';										//  ...
-					Hymn_Client::out( sprintf( $message, $module->id, $key ) );					//  inform about configured config pair
+					$this->client->out( sprintf( $message, $module->id, $key ) );				//  inform about configured config pair
 				}
 			}
 		}

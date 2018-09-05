@@ -1,5 +1,7 @@
 
 PATH_FRONTEND	= %appName%
+PERMS_DIR		= 755
+PERMS_FILE		= 644
 
 PWD				= $(shell pwd)
 DATE			= `date +'%Y-%m-%d'`
@@ -25,8 +27,6 @@ build:
 	@$(MAKE) -s set-rights
 	@echo "Installing modules:"
 	@hymn app-install
-	@$(MAKE) -s .backend-install
-#	@$(MAKE) -s .backend-secure
 	@hymn database-load
 	@hymn database-dump install.sql
 	@$(MAKE) -s set-rights
@@ -68,14 +68,15 @@ update:
 set-permissions:
 	@$(MAKE) -s set-ownage
 	@$(MAKE) -s set-rights
+	@test -f job.php && chmod +x job.php || true
 
 set-ownage:
 	@sudo chown -R ${shell hymn config-get system.user} .
 	@sudo chgrp -R ${shell hymn config-get system.group} .
 
 set-rights:
-	@find . -type d -not -path "./vendor*" -print0 | xargs -0 xargs chmod 775
-	@find . -type f -not -path "./vendor*" -print0 | xargs -0 xargs chmod 664
+	@find . -type d -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_DIR}
+	@find . -type f -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_FILE}
 
 
 ##  PUBLIC: SETTERS
@@ -153,11 +154,11 @@ ask-database:
 ##  COMPOSER
 #------------------------
 composer-install:
-	@test vendor && echo && echo Updating libraries: && composer update || true
-	@test ! vendor && echo && echo Loading libraries: && composer install || true
+	@test -d vendor && echo && echo "Updating libraries:" && composer update || true
+	@test ! -d vendor && echo && echo "Loading libraries:" && composer install || true
 
 composer-install-force:
-	@test vendor && rm -Rf vendor
+	@test -d vendor && echo && echo "Removing current libraries..." && rm -Rf vendor || true
 	@composer install
 
 composer-update:

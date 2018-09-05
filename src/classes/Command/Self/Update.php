@@ -70,10 +70,10 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 		$pathFile	= $this->getHymnFilePath();
 		if( !$pathFile )
 			throw new Exception( "Hymn not found" );
-		Hymn_Client::out( "Download: ".$urlHymn );
+		$this->client->out( "Download: ".$urlHymn );
 		$this->downloadFile( $urlHymn, $pathFile );
-		Hymn_Client::out( "Saved to: ".$pathFile );
-		Hymn_Client::out( "Version installed: ", FALSE );
+		$this->client->out( "Saved to: ".$pathFile );
+		$this->client->out( "Version installed: ", FALSE );
 		passthru( "hymn version" );
 	}
 }

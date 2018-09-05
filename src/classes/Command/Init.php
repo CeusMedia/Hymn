@@ -41,12 +41,12 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	protected $pathPhar	= "phar://hymn.phar/";
 
 	protected function answer( $key, $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
-		$question	= new Hymn_Tool_Question( $message, $type, $default, $options, $break );
+		$question	= new Hymn_Tool_Question( $this->client, $$message, $type, $default, $options, $break );
 		$this->answers[$key]	= $question->ask();
 	}
 
 	protected function configureDatabase(){
-		Hymn_Client::out( "Please enter database information:" );
+		$this->client->out( "Please enter database information:" );
 		$this->answer( 'database.driver', "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE );
 		$this->answer( 'database.host', "- Host", 'string', "localhost", NULL, FALSE );
 		$this->answer( 'database.port', "- Port", 'string', "3306", NULL, FALSE );
@@ -57,7 +57,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	}
 
 	protected function createComposerFile(){
-		Hymn_Client::out( "Please enter more Application information:" );
+		$this->client->out( "Please enter more Application information:" );
 		$this->answer( 'app.author.name', "- Author Name", 'string', "John Doe", NULL, FALSE );
 		$this->answer( 'app.author.email', "- Author Email", 'string', "<john.doe@example.com>", NULL, FALSE );
 		$command	= 'composer init --name %s --author "%s %s"';
@@ -67,11 +67,11 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			$this->answers['app.author.email']
 		);
 		exec( $command );
-		Hymn_Client::out( "Composer file has been created." );
+		$this->client->out( "Composer file has been created." );
 	}
 
 	protected function createConfigFile(){
-		Hymn_Client::out( "Please enter more Application information:" );
+		$this->client->out( "Please enter more Application information:" );
 		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
 		$this->answer( 'app.language', "- Language", 'string', "de", array( 'en', 'de' ), FALSE );
 		$useModuleCache	= in_array( $this->answers['app.install.mode'], array( 'live' ) );
@@ -86,7 +86,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$content	= str_replace( "%localeDefault%", $this->answers['app.language'], $content );
 		$content	= str_replace( "%systemModuleCache%", $useModuleCache ? 'yes' : 'no', $content );
 		file_put_contents( 'config/config.ini', $content );
-		Hymn_Client::out( "Config file has been created." );
+		$this->client->out( "Config file has been created." );
 	}
 
 	protected function createMakeFile(){
@@ -95,7 +95,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$content	= str_replace( "%appName%", $this->answers['app.name'], $content );
 		$content	= str_replace( "%appVersion%", $this->answers['app.version'], $content );
 		file_put_contents( 'Makefile', $content );
-		Hymn_Client::out( "Make file has been created." );
+		$this->client->out( "Make file has been created." );
 	}
 
 	protected function createUnitFile(){
@@ -111,8 +111,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$content	= str_replace( "%pathSource%", $pathSource, $content );
 		$content	= str_replace( "%pathTarget%", $pathTarget, $content );
 		file_put_contents( 'phpunit.xml', $content );
-		Hymn_Client::out( "Configuration file for PHPUnit has been created." );
-		Hymn_Client::out( "Empty bootstrap file for PHPUnit test classes has been created." );
+		$this->client->out( "Configuration file for PHPUnit has been created." );
+		$this->client->out( "Empty bootstrap file for PHPUnit test classes has been created." );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	public function run(){
 
 		/*  --  CREATE HYMN FILE  --  */
-		Hymn_Client::out( "Please enter application information:" );
+		$this->client->out( "Please enter application information:" );
 		$this->answer( 'app.title', "- Application Title", 'string', "My Project", NULL, FALSE );
 		$this->answer( 'app.key', "- Application Key Name", 'string', "MyCompany/MyProject", NULL, FALSE );
 		$this->answer( 'app.uri', "- Installation Path", 'string', getcwd().'/', NULL, FALSE );
@@ -141,11 +141,11 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$package	= strtolower( preg_replace( '/([A-Z])/', '-\\1', $this->answers['app.key'] ) );
 		$this->answers['app.package']	= ltrim( str_replace( '/-', '/', $package ), '-' );
 
-		Hymn_Client::out( "" );
-		Hymn_Client::out( "Please enter Filesystem information:" );
+		$this->client->out( "" );
+		$this->client->out( "Please enter Filesystem information:" );
 		$this->answer( 'system.user', "- System User", 'string', get_current_user(), NULL, FALSE );
 		$this->answer( 'system.group', "- System Group", 'string', "www-data", NULL, FALSE );
-		Hymn_Client::out( "" );
+		$this->client->out( "" );
 		if( $this->ask( "Configure database?", 'boolean', "yes", NULL, FALSE ) )
 			$this->configureDatabase();
 
@@ -178,35 +178,35 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 
 		}
 		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
-		Hymn_Client::out( "Hymn configuration file ".Hymn_Client::$fileName." has been created." );
-		Hymn_Client::out( "" );
+		$this->client->out( "Hymn configuration file ".Hymn_Client::$fileName." has been created." );
+		$this->client->out( "" );
 
 		/*  --  CREATE PHPUNIT FILE  --  */
 		if( $this->ask( "Configure PHPUnit?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createUnitFile();
-			Hymn_Client::out( "" );
+			$this->client->out( "" );
 		}
 
 		/*  --  CREATE COMPOSER FILE  --  */
 		if( $this->ask( "Configure composer?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createComposerFile();
-			Hymn_Client::out( "" );																//  print empty line as optical separator
+			$this->client->out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE APP BASE CONFIG FILE  --  */
 		if( $this->ask( "Create base config file?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createConfigFile();
-			Hymn_Client::out( "" );																//  print empty line as optical separator
+			$this->client->out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE MAKE FILE  --  */
 		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
 			$this->createMakeFile();
-			Hymn_Client::out( "" );																//  print empty line as optical separator
+			$this->client->out( "" );																//  print empty line as optical separator
 		}
 
-		Hymn_Client::out( "Done." );
-		Hymn_Client::out( "Now you can execute commands like install module sources using 'hymn source-add'." );
-		Hymn_Client::out( "" );																	//  print empty line as optical separator
+		$this->client->out( "Done." );
+		$this->client->out( "Now you can execute commands like install module sources using 'hymn source-add'." );
+		$this->client->out( "" );																	//  print empty line as optical separator
 	}
 }

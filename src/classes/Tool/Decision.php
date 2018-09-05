@@ -1,5 +1,7 @@
 <?php
 class Hymn_Tool_Decision{
+
+	protected $client;
 	protected $message;
 	protected $default		= 'y';
 	protected $options		= array(
@@ -7,7 +9,8 @@ class Hymn_Tool_Decision{
 		'n'	=> 'no',
 	);
 
-	public function __construct( $message, $default = NULL, $options = array(), $break = TRUE ){
+	public function __construct( Hymn_Client $client, $message, $default = NULL, $options = array(), $break = TRUE ){
+		$this->client	= $client;
 		$this->message	= $message;
 		if( $options )
 			$this->setOptions( $options );
@@ -27,7 +30,7 @@ class Hymn_Tool_Decision{
 		if( !$this->break )
 			$message	.= ": ";
 		do{
-			Hymn_Client::out( $message, $this->break );
+			$this->client->out( $message, $this->break );
 			$handle	= fopen( "php://stdin","r" );
 			$input	= trim( fgets( $handle ) );
 			if( !strlen( $input ) && $this->default )
@@ -35,11 +38,6 @@ class Hymn_Tool_Decision{
 		}
 		while( $options && !array_key_exists( $input, $this->options ) );
 		return $input;
-	}
-
-	static public function askStatic( $message, $default = NULL, $options = array(), $break = TRUE ){
-		$input	= new self( $message, $default, $options, $break );
-		return $input->ask();
 	}
 
 	public function setBreak( $break = TRUE ){
