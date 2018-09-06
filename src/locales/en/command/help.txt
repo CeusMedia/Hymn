@@ -99,8 +99,7 @@ C1. Self Management
 - help                                        Show this help screen
 - version                                     Show current hymn version
 - self-update                                 Replace global hymn installation by latest download
-- reflect-options                             Show parsable arguments and options
-- test-syntax                                 Test syntax of Hymn PHP classes
+- test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
 
 Options:
 ------------------------------------------------------------------------------

@@ -39,6 +39,8 @@ abstract class Hymn_Command_Abstract{
 	protected $client;
 	protected $library	= NULL;
 	protected $flags;
+	protected $locale;
+	protected $words;
 
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
@@ -48,6 +50,12 @@ abstract class Hymn_Command_Abstract{
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 		);
+		$this->locale	= $this->client->getLocale();
+		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
+		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
+		$this->words	= (object) array();
+		if( $this->locale->hasWords( $localeKey ) )
+			$this->words	= $this->locale->loadWords( $localeKey );
 		$this->__onInit();
 	}
 

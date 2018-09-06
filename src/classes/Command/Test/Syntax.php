@@ -50,6 +50,11 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 		$path	= $this->client->arguments->getArgument( 0 );
 		if( !$path )
 			$path	= ".";
+		if( !file_exists( $path ) )
+			$this->client->outError( sprintf(
+				$this->words->errorPathInvalid,
+				$path
+			), Hymn_Client::EXIT_ON_INPUT );
 
 		$toolTest	= new Hymn_Tool_Test( $this->client );
 		$toolTest->checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );

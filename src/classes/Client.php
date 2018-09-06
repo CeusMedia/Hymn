@@ -44,6 +44,14 @@ class Hymn_Client{
 	const FLAG_NO_DB			= 16;
 	const FLAG_NO_FILES			= 32;
 
+	const EXIT_ON_END			= 0;
+	const EXIT_ON_LOAD			= 1;
+	const EXIT_ON_SETUP			= 2;
+	const EXIT_ON_RUN			= 4;
+	const EXIT_ON_INPUT			= 8;
+	const EXIT_ON_EXEC			= 16;
+	const EXIT_ON_OUTPUT		= 32;
+
 	protected $application;
 
 	protected $baseArgumentOptions	= array(
@@ -182,16 +190,11 @@ class Hymn_Client{
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			$this->dispatch();
-			if( self::$outputMethod !== "print" )
-				return ob_get_clean();
-			exit( 0 );
 		}
 		catch( Exception $e ){
-			$this->outError( $e->getMessage()."." );
-			if( self::$outputMethod !== "print" )
-				return ob_get_clean();
-			exit( 1 );
+			$this->outError( $e->getMessage().".", Hymn_Client::EXIT_ON_SETUP );
 		}
+		exit( Hymn_Client::EXIT_ON_END );
 	}
 
 	protected function dispatch(){
@@ -218,7 +221,7 @@ class Hymn_Client{
 				$reflectedMethod->invokeArgs( $commandObject, (array) $this->arguments );			//  call reflected object method
 			}
 			catch( Exception $e ){
-				$this->outError( $e->getMessage()."." );
+				$this->outError( $e->getMessage().".", Hymn_Client::EXIT_ON_RUN );
 			}
 		}
 		else																						//  no command string given
@@ -372,10 +375,16 @@ class Hymn_Client{
 	 *	Prints out error message.
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
+	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
-	public function outError( $message ){
+	public function outError( $message, $exitCode = NULL ){
 		$this->out( $this->words->outPrefixError.$message );
+		if( is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
+			if( self::$outputMethod !== "print" && ob_get_level() )
+				print( ob_get_clean() );
+			exit( $exitCode );
+		}
 	}
 
 	protected function readConfig( $forceReload = FALSE ){
