@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -41,11 +41,14 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags:
+	 *	Missing flags: database-no, dry, force, quiet, verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
-		if( $this->flags->dry )
+		if( $this->flags->dry && !$this->flags->quiet )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
@@ -87,7 +90,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$this->client->out( "Module '".$module->id."' is already installed" );
 			}
 			else{
-				if( !$this->flags->quiet ){
+				if( !$this->flags->quiet )
 					$this->client->out( sprintf(
 						"%sInstalling module '%s' version %s as %s ...",
 						$this->flags->dry ? 'Dry: ' : '',
@@ -95,7 +98,23 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 						$module->version,
 						$installType
 					) );
+				$defaultShelfId	= $library->getDefaultShelf();
+				$selfModules	= array();
+				foreach( array_keys( $library->getShelves() ) as $shelfId  ){
+					$shelfModule	= $library->getModule( $module->id, $shelfId, FALSE );
+					if( $shelfModule )
+						$selfModules[$shelfId]	= $shelfModule;
 				}
+
+				if( count( $selfModules ) > 1 ){													//  module exists in several shelfs
+					$installShelfId	= $this->client->getModuleInstallShelf(							//  get shelf ID to install from
+						$module->id,																//  ID of module to install
+						array_keys( $selfModules ),													//  list shelf IDs having requested module
+						$defaultShelfId																//  default shelf ID (first active added shelf)
+					);
+					$module	= $selfModules[$installShelfId];										//  get module from shelf
+				}
+
 				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
 				if( !$this->flags->dry )
 					$installer->install( $module, $installType );
