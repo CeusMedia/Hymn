@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -39,30 +39,34 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags:
+	 *	Missing flags: force?(ignore disabled), verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
 		$config	= $this->client->getConfig();
-		$app	= $this->config->application;														//  shortcut to application config
 
-		if( !isset( $config->sources ) )
-			$config->sources	= (object) array();
-
-		$this->client->out( sprintf( "Found %d source(s):", count( (array) $config->sources ) ) );
-		foreach( $config->sources as $sourceId => $source ){
-			$status		= 'not defined';
-			if( isset( $source->path ) && strlen( trim ( $source->path ) ) )
-			 	$status	= 'not existing';
-			if( isset( $source->path ) && file_exists( $source->path ) )
-			 	$status	= 'defined and existing';
-			$active	= isset( $source->path ) && file_exists( $source->path ) && $source->active;
-			$this->client->out( "* ".$sourceId.":" );
-			$this->client->out( "  - Status: ".$status );
-			$this->client->out( "  - Active: ".( $active ? 'yes' : 'no' ) );
-			$this->client->out( "  - Type: ".$source->type );
-			$this->client->out( "  - Path: ".$source->path );
+		//  version 2: use library with loaded shelves
+		//  comparison to replaced version 1:
+		//  - more stable, OOP, less code, sources already evaluated
+		//  - 50% slower than version 1 (180µs)
+		#$start	= microtime( TRUE );
+		$shelves		= $this->getLibrary()->getActiveShelves();
+		$this->client->out( sprintf( "Found %d source(s):", count( $shelves ) ) );
+		foreach( $shelves as $shelfId => $shelf ){
+			$this->client->out();
+			$this->client->out( "* ".$shelfId.":" );
+			if( $shelf->title )
+				$this->client->out( "  - Title:   ".$shelf->title );
+			$this->client->out( "  - Type:    ".ucfirst( $shelf->type ) );
+			$this->client->out( "  - Path:    ".$shelf->path );
+			$this->client->out( "  - Active:  ".( $shelf->active ? 'yes' : 'no' ) );
+			if( $shelf->default )
+				$this->client->out( "  - Default: ".( $shelf->default ? 'yes' : 'no' ) );
 		}
+		#$this->client->outVerbose( 'Time: '.round( ( microtime( TRUE ) - $start ) * 1000 * 1000 ).'µs' );
 	}
 }
 ?>

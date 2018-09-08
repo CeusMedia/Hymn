@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -45,6 +45,9 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags: database-no
+	 *	Missing flags: dry, quiet, verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
@@ -104,14 +107,12 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 				escapeshellarg( $tempName ),														//  temp file name as escaped shell arg
 			) );
 
-			if( $this->flags->verbose ){
-				$this->client->out( "Import file:  ".$fileName );
-				$this->client->out( "File size:    ".$fileSize );
-				$this->client->out( "DB Server:    ".$host."@".$port );
-				$this->client->out( "Database:     ".$name );
-				$this->client->out( "Table prefix: ".( $prefix ? $prefix : "- (none)" ) );
-				$this->client->out( "Access as:    ".$username );
-			}
+			$this->client->outVerbose( "Import file:  ".$fileName );
+			$this->client->outVerbose( "File size:    ".$fileSize );
+			$this->client->outVerbose( "DB Server:    ".$host."@".$port );
+			$this->client->outVerbose( "Database:     ".$name );
+			$this->client->outVerbose( "Table prefix: ".( $prefix ? $prefix : "- (none)" ) );
+			$this->client->outVerbose( "Access as:    ".$username );
 			if( $this->flags->dry )
 				return $this->client->out( "Database setup okay - import itself not simulated." );
 
@@ -130,15 +131,13 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig."sql/";
 		if( !file_exists( $path ) )
 			throw new RuntimeException( 'Path is not existing: '.$path );
-		if( $this->flags->verbose )
-			$this->client->out( "Scanning folder ".$path."..." );
+		$this->client->outVerbose( "Scanning folder ".$path."..." );
 		$list	= array();
 		$index	= new DirectoryIterator( $path );
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
 				continue;
-			if( $this->flags->verbose )
-				$this->client->out( "Found: ".$entry->getFilename() );
+			$this->client->outVerbose( "Found: ".$entry->getFilename() );
 			if( !preg_match( '/^dump_[0-9:_-]+\.sql$/', $entry->getFilename() ) )
 				continue;
 			$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );

@@ -39,6 +39,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags:
+	 *	Missing flags: quiet, verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */

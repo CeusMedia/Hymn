@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -41,6 +41,9 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags: database-no
+	 *	Missing flags: dry, quiet, verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
@@ -91,12 +94,10 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			escapeshellarg( $fileName ),															//  dump output filename
 		) );
 
-		if( $this->flags->verbose ){
-			$this->client->out( "DB Server:    ".$host."@".$port );
-			$this->client->out( "Database:     ".$name );
-			$this->client->out( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
-			$this->client->out( "Access as:    ".$username );
-		}
+		$this->client->outVerbose( "DB Server:    ".$host."@".$port );
+		$this->client->outVerbose( "Database:     ".$name );
+		$this->client->outVerbose( "Table Prefix: ".( $prefix ? $prefix : "- (none)" ) );
+		$this->client->outVerbose( "Access as:    ".$username );
 
 		$resultCode		= 0;
 		$resultOutput	= array();

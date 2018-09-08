@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Test
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,38 +28,56 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.Test
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: quiet, verbose
-	 *	@todo		implement missing flags
+	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
-		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE );
-		$this->client->arguments->parse();
-		$this->flags->recursive	= $this->client->arguments->getOption( 'recursive' );
+		$config		= $this->client->getConfig();
+		$shelfId	= $this->client->arguments->getArgument( 0 );
 
-		$path	= $this->client->arguments->getArgument( 0 );
-		if( !$path )
-			$path	= ".";
-		if( !file_exists( $path ) )
-			$this->client->outError( sprintf(
-				$this->words->errorPathInvalid,
-				$path
-			), Hymn_Client::EXIT_ON_INPUT );
+		if( !strlen( trim( $shelfId ) ) ){
+			if( $this->flags->force )
+				return;
+			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
+		}
 
-		$toolTest	= new Hymn_Tool_Test( $this->client );
-		$toolTest->checkPhpClasses( $path, $this->flags->recursive, $this->flags->verbose );
+		$shelves	= $this->getLibrary()->getShelves();
+		if( !array_key_exists( $shelfId, $shelves ) ){
+			if( $this->flags->force )
+				return;
+			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
+		}
+
+		$shelf	= $shelves[$shelfId];
+		if( $shelf->active && !$this->flags->force ){
+			$this->client->outVerbose( 'Shelf "'.$shelfId.'" already enabled.' );
+			return;
+		}
+
+		if( $this->flags->dry ){
+			if( !$this->flags->quiet )
+				$this->client->out( 'Shelf "'.$shelfId.'" would have been enabled.' );
+		}
+		else{
+			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+			$json->sources->{$shelfId}->active	= TRUE;
+			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+			if( !$this->flags->quiet )
+				$this->client->out( 'Shelf "'.$shelfId.'" has been enabled.' );
+		}
+
 	}
 }
+?>

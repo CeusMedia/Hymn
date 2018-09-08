@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -132,8 +132,9 @@ abstract class Hymn_Command_Abstract{
 				}
 				else{
 					$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
-					$type	= isset( $source->type ) ? $source->type : 'folder';					//  set default source type is not defined
-					$this->library->addShelf( $sourceId, $source->path, $type, $active );			//  add source as shelf in library
+					$type	= isset( $source->type ) ? $source->type : 'folder';					//  set default source type if not defined
+					$title	= isset( $source->title ) ? $source->title : '';						//  set source title
+					$this->library->addShelf( $sourceId, $source->path, $type, $active, $title );	//  add source as shelf in library
 				}
 			}
 		}
@@ -150,16 +151,13 @@ abstract class Hymn_Command_Abstract{
 				continue;
 			}
 			$pattern	= str_replace( '\*', '.+', preg_quote( $givenModuleId, '/' ) );
-			if( $this->flags->verbose ){
-				$this->client->out( sprintf(
-					'Looking for suitable modules for module group: %s ...',
-					$givenModuleId
-				) );
-			}
+			$this->client->outVerbose( sprintf(
+				'Looking for suitable modules for module group: %s ...',
+				$givenModuleId
+			) );
 			foreach( $availableModuleIds as $availableModuleId ){
 				if( preg_match( '/^'.$pattern.'$/i', $availableModuleId ) ){
-					if( $this->flags->verbose )
-						$this->client->out( ' - found module '.$availableModuleId );
+					$this->client->outVerbose( ' - found module '.$availableModuleId );
 					$list[]	= $availableModuleId;
 				}
 			}

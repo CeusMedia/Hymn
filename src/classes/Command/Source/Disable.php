@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Source_Disable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -62,23 +62,32 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_C
 
 		$shelf	= $shelves[$shelfId];
 		if( !$shelf->active && !$this->flags->force ){
-			if( $this->flags->verbose && !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" is active and needs to be disabled, first.' );
+			$this->client->outVerbose( 'Shelf "'.$shelfId.'" already disabled.' );
 			return;
+		}
+
+		$installedShelfModules	= $this->getLibrary()->listInstalledModules( $shelfId );
+		if( count( $installedShelfModules ) && !$this->flags->force ){
+			$this->client->outError( sprintf(
+				'Source cannot be disabled since %d installed modules are related.',
+				count( $installedShelfModules )
+			), Hymn_Client::EXIT_ON_EXEC );
 		}
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" would have been removed.' );
+				$this->client->out( 'Shelf "'.$shelfId.'" would have been disabled.' );
 		}
 		else{
-			unset( $config->sources->{$shelfId} );
 			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-			$json->sources	= $config->sources;
+			$json->sources->{$shelfId}->active	= FALSE;
+			if( isset( $json->sources->{$shelfId}->default ) )
+				unset( $json->sources->{$shelfId}->default );
 			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" has been removed.' );
+				$this->client->out( 'Shelf "'.$shelfId.'" has been disabled.' );
 		}
+
 	}
 }
 ?>

@@ -18,11 +18,11 @@ For creating and extending an App's Hymn config file, you execute these commands
 A1. Project Creation and Source Management
 ------------------------------------------------------------------------------
 - init                                        Create initial Hymn file for this project
-- source-list                                 List registered library sources
+- source-list                                 List library sources registered in Hymn file
 - source-add                                  Add module source of modules to Hymn file
 - source-remove KEY                           Remove module source from Hymn file
-- source-enable                               (not implemented yet)
-- source-disable                              (not implemented yet)
+- source-enable [-dfqv] SOURCE                Enable source in Hymn file
+- source-disable [-dfqv] SOURCE               Disable source in Hymn file
 
 A2. Project Setup and Information
 ------------------------------------------------------------------------------

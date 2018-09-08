@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -39,6 +39,9 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/**
 	 *	Execute this command.
+	 *	Implements flags:
+	 *	Missing flags: dry, force, quiet, verbose
+	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
@@ -57,6 +60,10 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$questions	= array(
 			(object) array(
+				'key'		=> 'key',
+				'label'		=> "- Source ID",
+			),
+			(object) array(
 				'key'		=> 'type',
 				'label'		=> "- Source type",
 				'options'	=> array( "folder" ),
@@ -64,10 +71,6 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			(object) array(
 				'key'		=> 'path',
 				'label'		=> "- Source path",
-			),
-			(object) array(
-				'key'		=> 'key',
-				'label'		=> "- Source ID",
 			),
 			(object) array(
 				'key'		=> 'title',
@@ -95,17 +98,26 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 				$connectable	= TRUE;																//  note connectability for loop break
 		}
 		while( !$connectable );																		//  repeat until connectable
+		$shelfId		= $data->key;
 		$data->title	= $data->title ? $data->title : $data->key;
-		$config->sources->{$data->key} = (object) array(
-			'active'	=> TRUE,
-			'title'		=> $data->title,
-			'type'		=> $data->type,
-			'path'		=> $data->path,
-		);
 
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources	= $config->sources;
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		if( $this->flags->dry ){
+			if( !$this->flags->quiet )
+				$this->client->out( 'Shelf "'.$shelfId.'" would have been added.' );
+		}
+		else{
+			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+			$json->sources->{$shelfId} = (object) array(
+				'active'	=> TRUE,
+				'title'		=> $data->title,
+				'type'		=> $data->type,
+				'path'		=> $data->path,
+			);
+			$json->sources	= $config->sources;
+			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+			if( !$this->flags->quiet )
+				$this->client->out( 'Shelf "'.$shelfId.'" has been removed.' );
+		}
 	}
 }
 ?>
