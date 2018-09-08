@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -48,34 +48,27 @@ class Hymn_Module_Library{
 		$this->client		= $client;
 	}
 
-	public function addShelf( $id, $path, $type, $active = TRUE ){
+	public function addShelf( $id, $path, $type, $active = TRUE, $title = NULL ){
 		if( in_array( $id, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Shelf already set by ID: '.$id );
+		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
+		$isDefault		= $active && !count( $activeShelves );
 		$this->shelves[$id]	= (object) array(
 			'id'		=> $id,
 			'path'		=> $path,
 			'type'		=> $type,
 			'active'	=> $active,
+			'default'	=> $isDefault,
+			'title'		=> $title,
 		);
 		ksort( $this->shelves );
 	}
 
-	protected function loadModulesInShelves( $force = FALSE ){
-		if( count( $this->modules ) && !$force )
-			return;
-		foreach( $this->shelves as $shelf ){
-			if( !$shelf->active )
-				continue;
-			$this->modules[$shelf->id]	= array();
-			foreach( self::listModulesInPath( $shelf->path ) as $module ){
-				$module->sourceId	= $shelf->id;
-				$module->sourcePath	= $shelf->path;
-				$module->sourceType	= $shelf->type;
-				$this->modules[$shelf->id][$module->id] = $module;
-				ksort( $this->modules[$shelf->id] );
-			}
-		}
-		ksort( $this->modules );
+	public function getDefaultShelf(){
+		foreach( $this->shelves as $shelfId => $shelf )
+			if( $shelf->default )
+				return $shelfId;
+		throw new RuntimeException( 'No default shelf available' );
 	}
 
 	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
@@ -131,12 +124,20 @@ class Hymn_Module_Library{
 		return $shelf;
 	}
 
-	public function getShelves( $withModules = FALSE ){
-		$list	= array();
-		foreach( $this->shelves as $shelfId => $shelf ){
-			$list[$shelfId]	= $this->getShelf( $shelfId, $withModules );
+	public function getActiveShelves( $withModules = FALSE ){
+		return $this->getShelves( array( 'active' => TRUE ), $withModules );
+	}
+
+	public function getShelves( $filters = array(), $withModules = FALSE ){
+		$list	= array();																			//  prepare empty shelf list
+		foreach( $this->shelves as $shelfId => $shelf ){											//  iterate known shelves
+			foreach( $filters as $filterKey => $filterValue )										//  iterate given filters
+				if( property_exists( $shelf, $filterKey ) )											//  filter key is shelf property
+					if( $shelf->{$filterKey} !== $filterValue )										//  shelf property value mismatches filter value
+						continue 2;																	//  skip this shelf
+			$list[$shelfId]	= $this->getShelf( $shelfId, $withModules );							//  enlist shelf
 		}
-		return $list;
+		return $list;																				//  return list of found shelves
 	}
 
 	public function isInstalledModule( $moduleId ){
@@ -185,6 +186,24 @@ class Hymn_Module_Library{
 		ksort( $list );
 //		self::$listModulesInstalled	= $list;									//  @todo realize shelves in cache
 		return $list;
+	}
+
+	protected function loadModulesInShelves( $force = FALSE ){
+		if( count( $this->modules ) && !$force )
+			return;
+		foreach( $this->shelves as $shelf ){
+			if( !$shelf->active )
+				continue;
+			$this->modules[$shelf->id]	= array();
+			foreach( self::listModulesInPath( $shelf->path ) as $module ){
+				$module->sourceId	= $shelf->id;
+				$module->sourcePath	= $shelf->path;
+				$module->sourceType	= $shelf->type;
+				$this->modules[$shelf->id][$module->id] = $module;
+				ksort( $this->modules[$shelf->id] );
+			}
+		}
+		ksort( $this->modules );
 	}
 
 	static public function readModule( $path, $id ){

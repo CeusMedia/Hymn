@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2017 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2017 Christian Würker
+ *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -125,7 +125,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.5';
+	static public $version	= '0.9.7.6';
 
 	static public $language	= 'en';
 
@@ -203,7 +203,7 @@ class Hymn_Client{
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
 			try{
 				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
-					if( $this->flags &= self::FLAG_VERBOSE )										//  verbose mode
+					if( $this->flags & self::FLAG_VERBOSE && !( $this->flags & self::FLAG_QUIET ) )	//  verbose mode
 						$this->out( 'Reading application configuration ...' );						//  note reading of application configuration
 					$this->readConfig();															//  read application configuration from hymn file
 				}
@@ -329,10 +329,29 @@ class Hymn_Client{
 		return $type;
 	}
 
+	public function getModuleInstallShelf( $moduleId, $availableShelfIds, $defaultInstallShelfId ){
+		if( !array( $availableShelfIds ) )
+			throw new InvalidArgumentException( 'Available shelf IDs must be an array' );
+		if( !count( $availableShelfIds ) )
+			throw new InvalidArgumentException( 'No available shelf IDs given' );
+
+		$modules	= $this->config->modules;													//  shortcut configured modules
+		if( isset( $modules->$moduleId ) )														//  module is configured in hymn file
+			if( isset( $modules->$moduleId->{"source"} ) )										//  module has configured source shelf
+				if( in_array( $modules->$moduleId->{"source"}, $availableShelfIds ) )			//  configured shelf source has requested module
+					return $modules->$moduleId->{"source"};										//  return configured source shelf
+
+		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )							//  default shelf has requested module
+			return $defaultInstallShelfId;														//  return default shelf
+
+		return current( $availableShelfIds );													//  return first available shelf
+	}
+
 	/**
 	 *	Prints out message of one ore more lines.
 	 *	@access		public
 	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
 	public function out( $lines = NULL, $newLine = TRUE ){
@@ -387,6 +406,19 @@ class Hymn_Client{
 		}
 	}
 
+	/**
+	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVerbose( $lines, $newLine = TRUE ){
+		if( $this->flags & self::FLAG_VERBOSE )														//  verbose mode is on
+			if( !( $this->flags & self::FLAG_QUIET ) )												//  quiet mode is off
+				$this->out( $lines, $newLine );
+	}
+
 	protected function readConfig( $forceReload = FALSE ){
 		if( $this->config && !$forceReload )
 			return;
@@ -439,7 +471,7 @@ class Hymn_Client{
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
 		if( $this->dbc && !$forceReset ){
-			if( $this->flags &= self::FLAG_VERBOSE )
+			if( $this->flags & self::FLAG_VERBOSE )
 				$this->out( "Database already set up." );
 			return;
 		}
@@ -491,7 +523,7 @@ class Hymn_Client{
 			foreach( $this->dba as $key => $value )
 				$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
 		}
-		if( $this->flags &= self::FLAG_NO_DB )
+		if( $this->flags & self::FLAG_NO_DB )
 			return;
 
 		if( strtolower( $this->dba->driver ) !== "mysql" )										//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
@@ -504,24 +536,24 @@ class Hymn_Client{
 			"port=".$this->dba->port,
 //			"dbname=".$this->dba->name,
 		) );
-		if( $this->flags &= self::FLAG_VERBOSE )
+		if( $this->flags & self::FLAG_VERBOSE )
 			$this->out( "Connecting database ...", FALSE );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
-		if( $this->flags &= self::FLAG_VERBOSE )
+		if( $this->flags & self::FLAG_VERBOSE )
 			$this->out( "OK" );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			if( $this->flags &= self::FLAG_VERBOSE )
+			if( $this->flags & self::FLAG_VERBOSE )
 				$this->out( 'Creating database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "CREATE DATABASE `".$this->dba->name."`" );
-			if( $this->flags &= self::FLAG_VERBOSE )
+			if( $this->flags & self::FLAG_VERBOSE )
 				$this->out( "OK" );
 		}
 		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			if( $this->flags &= self::FLAG_VERBOSE )
+			if( $this->flags & self::FLAG_VERBOSE )
 				$this->out( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
 			$this->dbc->query( "USE `".$this->dba->name."`" );
-			if( $this->flags &= self::FLAG_VERBOSE )
+			if( $this->flags & self::FLAG_VERBOSE )
 				$this->out( "OK" );
 		}
 	}
