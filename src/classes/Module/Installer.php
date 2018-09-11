@@ -169,7 +169,7 @@ class Hymn_Module_Installer{
 				$node->setValue( (string) $changeSet[$moduleConfigKey] );
 				if( $this->flags->verbose && !$this->flags->quiet ){							//  verbose mode is on
 					$message	= '    - configured %s:%s';										//  ...
-					$this->client->out( sprintf( $message, $module->id, $key ) );				//  inform about configured config pair
+					$this->client->out( sprintf( $message, $module->id, $moduleConfigKey ) );	//  inform about configured config pair
 				}
 			}
 		}
