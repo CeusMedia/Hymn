@@ -60,7 +60,7 @@ foreach( $iterator as $entry ){
 			str_pad( ceil( $count / $nrFiles * 100 ), 3, ' ', STR_PAD_LEFT ),
  		) );
 		print( str_pad( $message, $cols - 2, ' ' ) );
-		$syntax	= Hymn_Tool_Test::checkPhpFileSyntax( $filePath );
+		$syntax	= Hymn_Tool_Test::staticCheckPhpFileSyntax( $filePath );
 		if( !$syntax->valid ){
 			$message	= str_replace( $rootPath.'/build/', 'src/', $syntax->message );
 			print( "\r".str_pad( 'FAIL: '.$message, $cols - 2, ' ' ).PHP_EOL );
