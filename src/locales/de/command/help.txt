@@ -1,4 +1,17 @@
-Hymn - Hydrogen Framework Console Tool v%version% (%language%)
+ _                 
+| |_ _ _ _____ ___ 
+|   | | |     |   |
+|_|_|_  |_|_|_|_|_|
+    |___|
+
+hymn - Hydrogen Management
+
+CLI tool for applications built on Hydrogen framework
+
+See: https://github.com/CeusMedia/Hymn
+     https://github.com/CeusMedia/HydrogenFramework
+
+Version: %version% (%language%)
 
 Usage: hymn KOMMANDO [ARG]*
 

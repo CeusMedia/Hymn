@@ -1,3 +1,12 @@
+ _                 
+| |_ _ _ _____ ___ 
+|   | | |     |   |
+|_|_|_  |_|_|_|_|_|
+    |___|
+
+hymn - Hydrogen Management
+
+
 # Hymn
 Console tool for installing Hydrogen applications.
 
@@ -91,3 +100,8 @@ Console tool for installing Hydrogen applications.
 	-v | --verbose                   Be verbose about taken steps
 	--file=[.hymn]                   Alternative path of Hymn file
 	--prefix=[<%prefix%>]            Set database table prefix in dump
+
+
+### Disclaimer
+
+Logo rendered using [patorjk.com](http://patorjk.com/software/taag/#p=display&f=Rectangles&t=hymn)

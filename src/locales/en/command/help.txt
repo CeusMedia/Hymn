@@ -1,4 +1,17 @@
-Hymn - Hydrogen Framework Console Tool v%v%
+ _                 
+| |_ _ _ _____ ___ 
+|   | | |     |   |
+|_|_|_  |_|_|_|_|_|
+    |___|
+
+hymn - Hydrogen Management
+
+CLI Werkzeug für Anwendungen mit basierend auf dem Hydrogen Framework
+
+Mehr: https://github.com/CeusMedia/Hymn
+      https://github.com/CeusMedia/HydrogenFramework
+
+Version: %version% (%language%)
 
 Usage: hymn COMMAND [ARG]*
 
@@ -69,8 +82,8 @@ B2. App Instance & Module Management
 
 B3. App Module Management
 ------------------------------------------------------------------------------
-- app-install [-dqv] [MODULE]                 Install modules (or one specific)
-- app-uninstall [-dfqv] MODULE                Uninstall one specific installed module
+- app-install [-dqv] [MODULE]                 Install one specific available module (or all)
+- app-uninstall [-dfqv] [MODULE]              Uninstall one specific installed module (or all)
 - app-update [-dqv] [MODULE] [MODULE]         Updated installed modules (or one specific)
 - app-reconfigure [-dqv] [MODULE]             Reinstall module configuration
 - app-module-config-get MODULE.KEY            Get config value of installed module by config key
