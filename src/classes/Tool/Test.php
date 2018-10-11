@@ -60,21 +60,7 @@ class Hymn_Tool_Test {
 	}
 
 	public function checkPhpfileSyntax( $filePath ){
-		$code		= 0;
-		$output		= array();
-		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
-		@exec( $command, $output, $code );
-		$message	= 'Syntax error in file '.$filePath;
-		if( isset( $output[0] ) && strlen( trim( $output[0] ) ) )
-			$message	= $output[0];
-		if( isset( $output[2] ) && strlen( trim( $output[2] ) ) )
-			$message	= $output[2];
-		return (object) array(
-			'valid'		=> $code === 0 ? TRUE : FALSE,
-			'code'		=> $code,
-			'message'	=> $message,
-			'output'	=> $output,
-		);
+		return static::staticCheckPhpfileSyntax( $filePath );
 	}
 
 	public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
@@ -104,6 +90,24 @@ class Hymn_Tool_Test {
 		}
 		if( !$valid )
 			throw new RuntimeException( "Invalid PHP code has been found. Please check syntax!" );
+	}
+
+	public static function staticCheckPhpfileSyntax( $filePath ){
+		$code		= 0;
+		$output		= array();
+		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
+		@exec( $command, $output, $code );
+		$message	= 'Syntax error in file '.$filePath;
+		if( isset( $output[0] ) && strlen( trim( $output[0] ) ) )
+			$message	= $output[0];
+		if( isset( $output[2] ) && strlen( trim( $output[2] ) ) )
+			$message	= $output[2];
+		return (object) array(
+			'valid'		=> $code === 0 ? TRUE : FALSE,
+			'code'		=> $code,
+			'message'	=> $message,
+			'output'	=> $output,
+		);
 	}
 }
 ?>
