@@ -85,10 +85,10 @@ B3. App Module Management
 - app-install [-dqv] [MODULE]                 Install one specific available module (or all)
 - app-uninstall [-dfqv] [MODULE]              Uninstall one specific installed module (or all)
 - app-update [-dqv] [MODULE] [MODULE]         Updated installed modules (or one specific)
-- app-reconfigure [-dqv] [MODULE]             Reinstall module configuration
 - app-module-config-get MODULE.KEY            Get config value of installed module by config key
 - app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 - app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
+- app-module-reconfigure [-dqv] MODULE        Configure installed module
 - app-stamp-dump [SOURCE]                     Export current module settings into a stamp file
 - app-stamp-diff [PATH|FILE] [SOURCE] [TYPE]  Show changes between installed modules and stamp
     Source:                    "all" or specific source name

@@ -76,36 +76,92 @@ class Hymn_Module_Updater{
 		}
 	}
 
-	public function reconfigure( $module ){
-		$moduleInstalled	= $this->library->readInstalledModule( $module->id  );
+	public function reconfigure( $module, $changedOnly = FALSE ){
+		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource )
 			throw new RuntimeException( sprintf( 'Module "%" is not available', $module->id ) );
 
+		$hymnModuleConfig	= array();
+		if( isset( $this->config->modules->{$module->id}->config ) )
+			$hymnModuleConfig	= $this->config->modules->{$module->id}->config;
+
 		$values				= array();
 		foreach( $moduleSource->config as $configKey => $configData ){
-			if( !isset( $moduleInstalled->config[$configKey] ) )
-				continue;
+			$hasModuleValue	= isset( $moduleInstalled->config[$configKey] );
+			$hasConfigValue	= isset( $hymnModuleConfig->{$configKey} );
 			$currentValue	= $moduleInstalled->config[$configKey]->value;
 			$sourceValue	= $configData->value;
-			if( $sourceValue === $currentValue )
+			$configValue	= $hasConfigValue ? $hymnModuleConfig->{$configKey} : NULL;
+			$realValue		= $configValue ? $configValue : $sourceValue;
+
+			if( !$hasModuleValue )																	//  config pair not set anymore
+				continue;																			//  skip to next
+
+			if( $changedOnly && $realValue === $currentValue )										//  current value not differs from source module value
+				continue;																			//  skip to next since force is disabled
+
+			$changedFromModule	= $currentValue !== $sourceValue;
+			$changedFromConfig	= $hasConfigValue && $currentValue !== $configValue;
+
+			if( $changedOnly && !( $changedFromModule || $changedFromConfig ) )
 				continue;
-			if( $this->flags->quiet )
-				$values[$configKey]	= $installed->value;
-			else{
-				$this->client->out( '- Config key "'.$configKey.'" differs. Source: '.$sourceValue.' | Installed: '.$currentValue );
-				$toolDecision	= new Hymn_Tool_Decision( $this->client, "Keep custom value?", NULL, NULL, FALSE );
-				$answer			= $toolDecision->ask();
-				if( $answer === "y" )
+
+			$values[$configKey]	= $currentValue;
+			$questionAnswers	= array();
+			$questionAnswers[]	= 'k';
+			$this->client->out( '- Config key "'.$configKey.'":' );
+			$this->client->out( '  - [k] keep current: '.$currentValue );
+			if( $changedFromConfig ){
+				$questionAnswers[]	= 'c';
+				$this->client->out( '  - [c] config value: '.$configValue );
+			}
+			if( $changedFromModule ){
+				$this->client->out( '  - [m] module value: '.$sourceValue );
+				$questionAnswers[]	= 'm';
+			}
+			$this->client->out( '  - [e] enter value' );
+			$questionAnswers[]	= 'e';
+
+			$toolDecision	= new Hymn_Tool_Question(
+				$this->client,
+				"  = Which config value?",
+				'string',
+				'k',
+				$questionAnswers,
+				FALSE
+			);
+			$answer			= $toolDecision->ask();
+			switch( $answer ){
+				case "e":
+					$question	= new Hymn_Tool_Question(
+						$this->client,
+						"  > Enter new value:",
+						'string',
+						$currentValue,
+						array(),
+						FALSE
+					);
+					$values[$configKey] = $question->ask();
+					break;
+				case "c":
+					$values[$configKey]	= $configValue;
+					break;
+				case "m":
+					$values[$configKey]	= $sourceValue;
+					break;
+				case "k":
+				default:
 					$values[$configKey]	= $currentValue;
 			}
 		}
-		$pathConfig	= $this->client->getConfigPath();
-		$target		= $pathConfig.'modules/'.$module->id.'.xml';
+
+		// @todo WHY THIS BLOCK?
 		if( !$this->flags->dry ){
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			$installer->configure( $moduleSource );
 		}
+
 		if( !$values )
 			return;
 		$configurator	= new Hymn_Module_Config( $this->client, $this->library );
@@ -150,7 +206,7 @@ class Hymn_Module_Updater{
 				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 			}
 			$this->files->copyFiles( $module, $installType );										//  copy module files
-			$this->reconfigure( $module );															//  configure module
+			$this->reconfigure( $module, TRUE );													//  configure module skipping unchanged values
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
 				$this->sql->runModuleUpdateSql( $localModule, $module );							//  run SQL scripts
 			return TRUE;

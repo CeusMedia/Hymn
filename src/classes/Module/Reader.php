@@ -158,8 +158,6 @@ class Hymn_Module_Reader{
 			$type		= self::getAttribute( $pair, 'type', 'string' );
 			$values		= self::getAttribute( $pair, 'values', '' );
 			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
-			$mandatory	= self::getAttribute( $pair, 'mandatory', FALSE );
-			$protected	= self::getAttribute( $pair, 'protected', FALSE );
 			$title		= self::getAttribute( $pair, 'title' );
 			if( !$title && self::hasAttribute( $pair, 'info' ) )
 				$title	= self::getAttribute( $pair, 'info' );
@@ -167,13 +165,14 @@ class Hymn_Module_Reader{
 			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
-				'key'		=> trim( $key ),
-				'type'		=> trim( strtolower( $type ) ),
-				'value'		=> $value,
-				'values'	=> $values,
-				'mandatory'	=> $mandatory,
-				'protected'	=> $protected,
-				'title'		=> $title,
+				'key'			=> trim( $key ),
+				'type'			=> trim( strtolower( $type ) ),
+				'value'			=> $value,
+				'values'		=> $values,
+				'mandatory'		=> self::getAttribute( $pair, 'mandatory', FALSE ),
+				'protected'		=> self::getAttribute( $pair, 'protected', FALSE ),
+				'title'			=> $title,
+//				'original'		=> self::getAttribute( $pair, 'original', NULL ),
 			);
 		}
 		if( $xml->relations ){

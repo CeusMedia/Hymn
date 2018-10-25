@@ -60,8 +60,8 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 		else{
 			$moduleLocal	= $library->readInstalledModule( $moduleId );
 			$moduleSource	= $library->getModule( $moduleId, $moduleLocal->installSource );
-			$installer	= new Hymn_Module_Updater( $this->client, $library );
-			$installer->reconfigure( $moduleSource );
+			$updater		= new Hymn_Module_Updater( $this->client, $library );
+			$updater->reconfigure( $moduleSource, FALSE );
 		}
 	}
 }

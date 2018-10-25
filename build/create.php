@@ -40,6 +40,7 @@ $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFile
 foreach( $filesToAdd as $item )
 	$archive->addFile( $rootPath.'/src/'.$item, $item );
 
+shell_exec( "test -d ".$rootPath."/build/classes && rm -rf ".$rootPath."/build/classes || true" );
 shell_exec( "cp -r ".$rootPath."/src/classes ".$rootPath."/build/" );
 $directory	= new RecursiveDirectoryIterator( $rootPath."/build/classes", RecursiveDirectoryIterator::SKIP_DOTS );
 $iterator	= new RecursiveIteratorIterator( $directory, RecursiveIteratorIterator::CHILD_FIRST );

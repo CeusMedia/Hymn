@@ -113,18 +113,19 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 							'source'	=> $installedModule->installSource,
 						);
 					}
-					else
+					else{
 						$this->client->out( sprintf(
 							"Module '%s' is not outdated and cannot be updated",
 							$moduleId
 						) );
+					}
 				}
 				else																				//  module is updatable
 					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
 			}
 		}
 
-		$installer	= new Hymn_Module_Updater( $this->client, $library );
+		$updater	= new Hymn_Module_Updater( $this->client, $library );
 		foreach( $modulesToUpdate as $update ){
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
@@ -141,7 +142,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			);
 			$this->client->out( $message );
 			if( !$this->flags->dry )
-				$installer->update( $module, $installType );
+				$updater->update( $module, $installType );
 		}
 	}
 }
