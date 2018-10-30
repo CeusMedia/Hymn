@@ -61,8 +61,8 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 				continue;
 			if( !isset( $module->active ) || $module->active ){
 				$module			= $library->getModule( $moduleId );
-				$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
-				$relation->addModule( $module, $installType );
+			//	$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
+				$relation->addModule( $module );
 			}
 		}
 

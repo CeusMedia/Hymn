@@ -125,7 +125,7 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.7';
+	static public $version	= '0.9.7.8a';
 
 	static public $language	= 'en';
 
@@ -141,7 +141,9 @@ class Hymn_Client{
 
 	protected $isLiveCopy	= FALSE;
 
-	public $flags			= 0;
+    protected $words;
+
+    public $flags			= 0;
 
 	public $locale;
 
@@ -209,7 +211,7 @@ class Hymn_Client{
 				}
 				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
 				$reflectedClass		= new ReflectionClass( $className );							//  reflect class
-				$classInterfaces	= $reflectedClass->getInterfaceNames();							//  get interfaces implemented by class
+			//	$classInterfaces	= $reflectedClass->getInterfaceNames();							//  get interfaces implemented by class
 				if( !$reflectedClass->implementsInterface( 'Hymn_Command_Interface' ) )
 					throw new RuntimeException( sprintf(
 						$this->words->errorCommandClassNotImplementingInterface,
@@ -384,7 +386,7 @@ class Hymn_Client{
 				throw new InvalidArgumentException( 'Argument must not be empty.' );			//  ...
 			$lines	= array( $lines );
 		}
-		$lines[0]	= $this->words->outPrefixDeprecation.$prefix.$lines[0];
+		$lines[0]	= $this->words->outPrefixDeprecation.$lines[0];
 		array_unshift( $lines, '' );
 		array_push( $lines, '' );
 		$this->out( $lines );
@@ -505,16 +507,16 @@ class Hymn_Client{
 			throw new RuntimeException( 'PDO driver "'.$this->dba->driver.'" is not available' );
 		}
 		while( empty( $this->dba->name ) ){
-			$this->dba->name		= $this->client->getInput( "Database Name:" );
+			$this->dba->name		= $this->getInput( "Database Name:" );
 		}
 		while( empty( $this->dba->username ) ){
-			$this->dba->username	= $this->client->getInput( "Database Username:" );
+			$this->dba->username	= $this->getInput( "Database Username:" );
 		}
 		while( empty( $this->dba->password ) ){
-			$this->dba->password	= $this->client->getInput( "Database Password:" );
+			$this->dba->password	= $this->getInput( "Database Password:" );
 		}
 		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= $this->client->getInput( "Table Prefix:" );
+			$this->dba->prefix		= $this->getInput( "Table Prefix:" );
 		}
 
 		if( $this->dba->name && !$usesDatabaseModule ){

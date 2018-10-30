@@ -89,7 +89,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		$relation	= new Hymn_Module_Graph( $this->client, $this->library );
 		foreach( $listInstalled as $installedModuleId => $installedModule ){
 			$module	= $this->library->getModule( $installedModuleId );
-			$relation->addModule( $module, $installedModule->installType );
+			$relation->addModule( $module );
 		}
 		$orderedInstalledModules	= array_reverse( $relation->getOrder(), TRUE );
 		foreach( $orderedInstalledModules as $orderedModule ){

@@ -82,7 +82,7 @@ class Hymn_Tool_XmlValidator{
 	 */
 	public function validate( $xml ){
 		$parser	= xml_parser_create();
-		$dummy	= create_function( '', '' );
+		$dummy	= function(){};
 		xml_set_element_handler( $parser, $dummy, $dummy );
 		xml_set_character_data_handler( $parser, $dummy );
 		if( !xml_parse( $parser, $xml ) ){

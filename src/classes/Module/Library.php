@@ -33,7 +33,7 @@
  *	@copyright		2014-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Library{
 
@@ -75,7 +75,7 @@ class Hymn_Module_Library{
 		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) )
-				throw new Exception( 'Invalid shelf ID: '.$shelfId );
+				throw new DomainException( 'Invalid shelf ID: '.$shelfId );
 			foreach( $this->modules[$shelfId] as $module )
 				if( $module->id === $id )
 					return $module;
@@ -95,7 +95,7 @@ class Hymn_Module_Library{
 		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
-				throw new Exception( 'Invalid shelf ID: '.$shelfId );
+				throw new DomainException( 'Invalid shelf ID: '.$shelfId );
 			$modules	= array();
 			foreach( $this->modules[$shelfId] as $module ){
 				$module->sourceId	= $shelfId;
@@ -117,7 +117,7 @@ class Hymn_Module_Library{
 
 	public function getShelf( $id, $withModules = FALSE ){
 		if( !in_array( $id, array_keys( $this->shelves ) ) )
-			throw new Exception( 'Invalid shelf ID: '.$id );
+			throw new DomainException( 'Invalid shelf ID: '.$id );
 		$shelf	= $this->shelves[$id];
 		if( !$withModules )
 			unset( $shelf->modules );
@@ -210,7 +210,7 @@ class Hymn_Module_Library{
 		$pathname	= str_replace( "_", "/", $id ).'/';
 		$filename	= $path.$pathname.'module.xml';
 		if( !file_exists( $filename ) )
-			throw new Exception( 'Module "'.$id.'" not found in '.$pathname );
+			throw new RuntimeException( 'Module "'.$id.'" not found in '.$pathname );
 		$module		= Hymn_Module_Reader::load( $filename, $id );
 		$module->absolutePath	= realpath( $pathname )."/";
 		$module->pathname		= $pathname;
@@ -222,7 +222,7 @@ class Hymn_Module_Library{
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		$filename		= $pathModules.$id.'.xml';
 		if( !file_exists( $filename ) )
-			throw new Exception( 'Module "'.$id.'" not installed in '.$pathModules );
+			throw new RuntimeException( 'Module "'.$id.'" not installed in '.$pathModules );
 		return Hymn_Module_Reader::load( $filename, $id );
 	}
 }

@@ -2,7 +2,9 @@
     "name": "ceus-media/hymn",
     "description": "Console tool for installing Hydrogen applications.",
     "require": {
-        "php": "~5.3 || ~7"
+        "php": "~5.3 || ~7",
+        "ext-json": "^1.6",
+        "ext-PDO": "^7.2"
     },
     "license": "GPL-3.0-or-later",
     "authors": [

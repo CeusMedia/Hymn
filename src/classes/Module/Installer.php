@@ -82,11 +82,11 @@ class Hymn_Module_Installer{
 	 *	2. look for mandatory but empty config pairs in original module
 	 *	3. get value for these missing pairs from console if also not set in hymn file
 	 *	4. combine values from hymn file and console input and apply to module file
-	 *	@access		public
+	 *	@access		protected
 	 *	@param		object		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( $module ){
+	protected function configure( $module ){
 		$source		= $module->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
