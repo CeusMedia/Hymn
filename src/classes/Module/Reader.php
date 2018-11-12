@@ -172,7 +172,8 @@ class Hymn_Module_Reader{
 				'mandatory'		=> self::getAttribute( $pair, 'mandatory', FALSE ),
 				'protected'		=> self::getAttribute( $pair, 'protected', FALSE ),
 				'title'			=> $title,
-//				'original'		=> self::getAttribute( $pair, 'original', NULL ),
+				'default'		=> self::getAttribute( $pair, 'default', NULL ),
+				'original'		=> self::getAttribute( $pair, 'original', NULL ),
 			);
 		}
 		if( $xml->relations ){

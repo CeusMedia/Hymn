@@ -74,8 +74,11 @@ class Hymn_Module_Library{
 	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
 		$this->loadModulesInShelves();
 		if( $shelfId ){
-			if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) )
-				throw new DomainException( 'Invalid shelf ID: '.$shelfId );
+			if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
+				if( $strict )
+					throw new DomainException( 'Shelf "'.$shelfId.'" is not active' );
+				return NULL;
+			}
 			foreach( $this->modules[$shelfId] as $module )
 				if( $module->id === $id )
 					return $module;
@@ -95,7 +98,7 @@ class Hymn_Module_Library{
 		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
-				throw new DomainException( 'Invalid shelf ID: '.$shelfId );
+				throw new DomainException( '__Invalid shelf ID: '.$shelfId );
 			$modules	= array();
 			foreach( $this->modules[$shelfId] as $module ){
 				$module->sourceId	= $shelfId;
@@ -117,7 +120,7 @@ class Hymn_Module_Library{
 
 	public function getShelf( $id, $withModules = FALSE ){
 		if( !in_array( $id, array_keys( $this->shelves ) ) )
-			throw new DomainException( 'Invalid shelf ID: '.$id );
+			throw new DomainException( '_Invalid shelf ID: '.$id );
 		$shelf	= $this->shelves[$id];
 		if( !$withModules )
 			unset( $shelf->modules );
