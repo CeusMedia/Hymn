@@ -164,14 +164,18 @@ class Hymn_Module_Installer{
 
 		foreach( $xml->config as $nr => $node ){												//  iterate original module config pairs
 			$moduleConfigKey	= (string) $node['name'];										//  shortcut config pair key
-			$moduleConfigValue	= $node->getValue();
+			$moduleConfigValue	= $node->getValue();											//  get default config value of module
+			$installationValue	= $moduleConfigValue;											//  assume installation value from default value
 			if( array_key_exists( $moduleConfigKey, $changeSet ) ){
-				$node->setValue( (string) $changeSet[$moduleConfigKey] );
+				$installationValue	= (string) $changeSet[$moduleConfigKey];					//  replace installation value by hymn config value
+				$node->setValue( $installationValue );											//  set value from hymn config on XML node
 				if( $this->flags->verbose && !$this->flags->quiet ){							//  verbose mode is on
 					$message	= '    - configured %s:%s';										//  ...
 					$this->client->out( sprintf( $message, $module->id, $moduleConfigKey ) );	//  inform about configured config pair
 				}
 			}
+			$node->setAttribute( 'default', $moduleConfigValue );								//  add attribute to note module default value
+			$node->setAttribute( 'original', $installationValue );								//  add attribute to note value during installation
 		}
 		if( !$this->flags->dry ){																//  no a dry run
 			$xml->saveXml( $target );															//  save changed DOM to module file

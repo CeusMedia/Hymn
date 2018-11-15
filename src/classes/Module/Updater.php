@@ -79,14 +79,19 @@ class Hymn_Module_Updater{
 	public function reconfigure( $module, $changedOnly = FALSE ){
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );
-		if( !$moduleSource )
-			throw new RuntimeException( sprintf( 'Module "%" is not available', $module->id ) );
+		if( !$moduleSource ){
+			$message	= vsprintf( 'Module "%" is not available in source "%"', array(
+				$module->id,
+				$moduleInstalled->installSource
+			) );
+			throw new RuntimeException( $message );
+		}
 
 		$hymnModuleConfig	= array();
 		if( isset( $this->config->modules->{$module->id}->config ) )
 			$hymnModuleConfig	= $this->config->modules->{$module->id}->config;
 
-		$values				= array();
+		$inputValues		= array();																//  prepare list of values to change
 		foreach( $moduleSource->config as $configKey => $configData ){
 			$hasModuleValue	= isset( $moduleInstalled->config[$configKey] );
 			$hasConfigValue	= isset( $hymnModuleConfig->{$configKey} );
@@ -95,39 +100,83 @@ class Hymn_Module_Updater{
 			$configValue	= $hasConfigValue ? $hymnModuleConfig->{$configKey} : NULL;
 			$realValue		= $configValue ? $configValue : $sourceValue;
 
-			if( !$hasModuleValue )																	//  config pair not set anymore
+/*
+remark( 'hasModuleValue: '.(int)$hasModuleValue );
+remark( 'hasConfigValue: '.(int)$hasConfigValue );
+remark( 'currentValue: '.$currentValue );
+remark( 'sourceValue: '.$sourceValue );
+remark( 'configValue: '.$configValue );
+remark( 'realValue: '.$realValue );
+*/
+			$valueConfig			= new Hymn_Tool_ConfigValue();//@type
+			$valueCurrent			= new Hymn_Tool_ConfigValue();
+			$valueCurrentDefault	= new Hymn_Tool_ConfigValue();
+			$valueCurrentOriginal	= new Hymn_Tool_ConfigValue();
+			if( isset( $moduleInstalled->config[$configKey] ) ){
+				$valueCurrent->set(
+					$moduleInstalled->config[$configKey]->value,
+					$moduleInstalled->config[$configKey]->type
+				);
+				$valueCurrentDefault->set(
+					$moduleInstalled->config[$configKey]->default,
+					$moduleInstalled->config[$configKey]->type
+				);
+				$valueCurrentOriginal->set(
+					$moduleInstalled->config[$configKey]->original,
+					$moduleInstalled->config[$configKey]->type
+				);
+			}
+			if( isset( $hymnModuleConfig->{$configKey} ) )
+				$valueConfig->set( $hymnModuleConfig->{$configKey} );
+			$valueUpdateModule		= new Hymn_Tool_ConfigValue(
+				$configData->value,
+				$configData->type
+			);
+
+			$valueAssumed	= $valueUpdateModule;													//  assume current module default as valid
+			$valueAssumed	= $valueConfig->is() ? $valueConfig : $valueAssumed;					//  if hymn config is set, take this as default
+
+			$valueSuggest	= $valueUpdateModule;													//  assume ...
+			$valueSuggest	= $valueConfig->is() ? $valueConfig : $valueAssumed;					//  if hymn config is set, take this as default
+			if( $valueCurrentOriginal->differsFromIfBothSet( $valueUpdateModule ) )					//  if module default has changed since installation
+				$valueSuggest	= $valueUpdateModule;
+
+			if( !$valueUpdateModule->is() )															//  config pair not used anymore
 				continue;																			//  skip to next
 
-			if( $changedOnly && $realValue === $currentValue )										//  current value not differs from source module value
-				continue;																			//  skip to next since force is disabled
+			if( $changedOnly && !$valueCurrent->differsFromIfBothSet( $valueSuggest ) )				//  module value is not newer than config
+				continue;																			//  skip to next
 
-			$changedFromModule	= $currentValue !== $sourceValue;
-			$changedFromConfig	= $hasConfigValue && $currentValue !== $configValue;
-
-			if( $changedOnly && !( $changedFromModule || $changedFromConfig ) )
-				continue;
-
-			$values[$configKey]	= $currentValue;
 			$questionAnswers	= array();
-			$questionAnswers[]	= 'k';
 			$this->client->out( '- Config key "'.$configKey.'":' );
-			$this->client->out( '  - [k] keep current: '.$currentValue );
-			if( $changedFromConfig ){
+			$questionDefault	= 'd';
+			$questionAnswers[]	= 'd';
+			$this->client->out( '  - [d] default of module : '.$valueUpdateModule->get( TRUE ) );
+			if( $valueCurrent->is() ){
+				$questionDefault	= 'k';
+				$questionAnswers[]	= 'k';
+				$this->client->out( '  - [k] keep current: '.$valueCurrent->get( TRUE ) );
+			}
+			if( $valueCurrent->differsFromIfBothSet( $valueSuggest ) ){
+				$questionAnswers[]	= 's';
+				$this->client->out( '  - [s] suggested: '.$valueSuggest->get( TRUE ) );
+			}
+			if( $valueConfig->differsFromIfBothSet( $valueSuggest ) ){
 				$questionAnswers[]	= 'c';
-				$this->client->out( '  - [c] config value: '.$configValue );
+				$this->client->out( '  - [c] config value: '.$valueConfig->get( TRUE ) );
 			}
-			if( $changedFromModule ){
-				$this->client->out( '  - [m] module value: '.$sourceValue );
+			if( $valueUpdateModule->differsFromIfBothSet( $valueSuggest ) ){
 				$questionAnswers[]	= 'm';
+				$this->client->out( '  - [m] module value: '.$valueUpdateModule->get( TRUE ) );
 			}
-			$this->client->out( '  - [e] enter value' );
 			$questionAnswers[]	= 'e';
+			$this->client->out( '  - [e] enter value' );
 
 			$toolDecision	= new Hymn_Tool_Question(
 				$this->client,
 				"  = Which config value?",
 				'string',
-				'k',
+				$questionDefault,
 				$questionAnswers,
 				FALSE
 			);
@@ -138,21 +187,24 @@ class Hymn_Module_Updater{
 						$this->client,
 						"  > Enter new value:",
 						'string',
-						$currentValue,
+						$valueCurrent->get(),
 						array(),
 						FALSE
 					);
-					$values[$configKey] = $question->ask();
+					$inputValues[$configKey] = $question->ask();
 					break;
 				case "c":
-					$values[$configKey]	= $configValue;
+					$inputValues[$configKey]	= $valueConfig->get( TRUE );
 					break;
 				case "m":
-					$values[$configKey]	= $sourceValue;
+					$inputValues[$configKey]	= $valueUpdateModule->get( TRUE );
+					break;
+				case "s":
+					$inputValues[$configKey]	= $valueSuggest->get( TRUE );
 					break;
 				case "k":
 				default:
-					$values[$configKey]	= $currentValue;
+					$inputValues[$configKey]	= $valueCurrent->get( TRUE );
 			}
 		}
 
@@ -162,12 +214,11 @@ class Hymn_Module_Updater{
 			$installer->configure( $moduleSource );
 		}
 
-		if( !$values )
+		if( !$inputValues )
 			return;
 		$configurator	= new Hymn_Module_Config( $this->client, $this->library );
-		foreach( $values as $configKey => $configValue ){
-			$configurator->set( $module->id, $configKey, $configValue );
-		}
+		foreach( $inputValues as $configKey => $inputConfigValue )
+			$configurator->set( $module->id, $configKey, $inputConfigValue );
 	}
 
 	public function update( $module, $installType ){

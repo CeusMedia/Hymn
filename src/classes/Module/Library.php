@@ -192,33 +192,33 @@ class Hymn_Module_Library{
 	}
 
 	protected function loadModulesInShelves( $force = FALSE ){
-		if( count( $this->modules ) && !$force )
-			return;
-		foreach( $this->shelves as $shelf ){
-			if( !$shelf->active )
-				continue;
-			$this->modules[$shelf->id]	= array();
-			foreach( self::listModulesInPath( $shelf->path ) as $module ){
-				$module->sourceId	= $shelf->id;
-				$module->sourcePath	= $shelf->path;
-				$module->sourceType	= $shelf->type;
-				$this->modules[$shelf->id][$module->id] = $module;
-				ksort( $this->modules[$shelf->id] );
+		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
+			return;																					//  skip this rerun
+		foreach( $this->shelves as $shelf ){														//  iterate sources
+			if( !$shelf->active )																	//  if source if deactivated
+				continue;																			//  skip this source
+			$this->modules[$shelf->id]	= array();													//  prepare empty module list for source
+			foreach( self::listModulesInPath( $shelf->path ) as $module ){							//  iterate modules in source path
+				$module->sourceId	= $shelf->id;													//  extend found module by source ID
+				$module->sourcePath	= $shelf->path;													//  extend found module by source path
+				$module->sourceType	= $shelf->type;													//  extend found module by source type
+				$this->modules[$shelf->id][$module->id] = $module;									//  add found module to general module map
+				ksort( $this->modules[$shelf->id] );												//  sort source modules in general module map
 			}
 		}
-		ksort( $this->modules );
+		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
 
 	static public function readModule( $path, $id ){
-		$pathname	= str_replace( "_", "/", $id ).'/';
-		$filename	= $path.$pathname.'module.xml';
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'Module "'.$id.'" not found in '.$pathname );
-		$module		= Hymn_Module_Reader::load( $filename, $id );
-		$module->absolutePath	= realpath( $pathname )."/";
-		$module->pathname		= $pathname;
-		$module->path			= $path.$pathname;
-		return $module;
+		$pathname	= str_replace( "_", "/", $id ).'/';												//  assume source module path from module ID
+		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
+		if( !file_exists( $filename ) )																//  assume module config file is not existing
+			throw new RuntimeException( 'Module "'.$id.'" not found in '.$pathname );				//  throw exception
+		$module		= Hymn_Module_Reader::load( $filename, $id );									//  otherwise load module configuration from source XML file
+		$module->absolutePath	= realpath( $pathname )."/";										//  extend found module by real source path
+		$module->pathname		= $pathname;														//  extend found module by relative path
+		$module->path			= $path.$pathname;													//  extebd found module by pseudo real path
+		return $module;																				//  return module
 	}
 
 	public function readInstalledModule( $id ){
