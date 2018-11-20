@@ -76,6 +76,30 @@ class Hymn_Module_Updater{
 		}
 	}
 
+	/**
+	 *	Return list of outdated modules within current application.
+	 *	@access		public
+	 *	@return		array		List of outdated modules
+	 */
+	public function getUpdatableModules(){
+		$outdated		= array();																	//  prepare list of outdated modules
+		foreach( $this->library->listInstalledModules() as $installed ){							//  iterate installed modules
+			$source		= $installed->installSource;												//  get source of installed module
+			$available	= $this->library->getModule( $installed->id, $source, FALSE );				//  get available module within source of installed module
+			if( !$available )																		//  module is not existing in source anymore
+				continue;																			//  skip this module @todo remove gone modules ?!?
+			if( version_compare( $installed->version, $available->version, '>=' ) )					//  installed module is up-to-date
+				continue;																			//  skip this module
+			$outdated[$installed->id]	= (object) array(											//	note outdated module and note:
+				'id'		=> $installed->id,														//  - module ID
+				'source'	=> $installed->installSource,											//  - source of current module installation
+				'installed'	=> $installed->version,													//  - currently installed module version
+				'available'	=> $available->version,													//  - available module version
+			);
+		}
+		return $outdated;																			//  return list of outdated modules
+	}
+
 	public function reconfigure( $module, $changedOnly = FALSE ){
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );

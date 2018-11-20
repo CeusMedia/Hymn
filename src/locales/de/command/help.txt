@@ -1,5 +1,5 @@
- _                 
-| |_ _ _ _____ ___ 
+ _
+| |_ _ _ _____ ___
 |   | | |     |   |
 |_|_|_  |_|_|_|_|_|
     |___|
@@ -79,6 +79,7 @@ B2. App Instance & Module Management
 - app-sources                                 List installed library sources
 - app-info                                    (not implemented yet)
 - app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
+- app-status                                  Show status of app and its modules
 
 B3. App Module Management
 ------------------------------------------------------------------------------
@@ -88,7 +89,7 @@ B3. App Module Management
 - app-module-config-get MODULE.KEY            Get config value of installed module by config key
 - app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 - app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
-- app-module-reconfigure [-dqv] MODULE        Configure installed module  
+- app-module-reconfigure [-dqv] MODULE        Configure installed module
 - app-stamp-dump [SOURCE]                     Export current module settings into a stamp file
 - app-stamp-diff [PATH|FILE] [SOURCE] [TYPE]  Show changes between installed modules and stamp
     Source:                    "all" or specific source name

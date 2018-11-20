@@ -1,5 +1,5 @@
- _                 
-| |_ _ _ _____ ___ 
+ _
+| |_ _ _ _____ ___
 |   | | |     |   |
 |_|_|_  |_|_|_|_|_|
     |___|
@@ -79,6 +79,7 @@ B2. App Instance & Module Management
 - app-sources                                 List installed library sources
 - app-info                                    (not implemented yet)
 - app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
+- app-status                                  Show status of app and its modules
 
 B3. App Module Management
 ------------------------------------------------------------------------------

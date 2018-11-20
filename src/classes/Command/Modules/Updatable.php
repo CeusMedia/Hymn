@@ -47,35 +47,28 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 	 *	@return		void
 	 */
 	public function run(){
-		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary();
-		$relation	= new Hymn_Module_Graph( $this->client, $library );
+//		$config		= $this->client->getConfig();
+//		$relation	= new Hymn_Module_Graph( $this->client, $this->getLibrary() );					//  @todo use to find new required modules
 
-		$modules		= array();																	//  prepare list of modules to update
-		$listInstalled	= $library->listInstalledModules();											//  get list of installed modules
-		if( !$listInstalled )																		//  application has no installed modules
+		/* @todo	find a better solution
+					this is slow, because:
+					- list* methods read from disk
+ 					- list* methods do not use a cache atm (this is prepared but disable)
+ 					- the module updater will read the list AGAIN
+					solutions:
+					- have a disk reading "count installed modules" method
+					- let module updater cache list on first listing, use cache later
+		*/
+		if( !$this->getLibrary()->listInstalledModules() )											//  application has no installed modules
 			return $this->client->out( "No installed modules found" );
 
-		$outdatedModules	= array();																//
-		foreach( $listInstalled as $installedModule ){
-			$source				= $installedModule->installSource;
-			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );
-			if( $availableModule ){
-				if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
-					$outdatedModules[$installedModule->id]	= (object) array(
-						'id'		=> $installedModule->id,
-						'installed'	=> $installedModule->version,
-						'available'	=> $availableModule->version,
-						'source'	=> $installedModule->installSource,
-					);
-				}
-			}
-		}
-
-		foreach( $outdatedModules as $update ){
-			$message	= "- %s: %s -> %s";
-			$message	= sprintf( $message, $update->id, $update->installed, $update->available );
-			$this->client->out( $message );
+		$moduleUpdater	= new Hymn_Module_Updater( $this->client, $this->getLibrary() );			//  use module updater on current application installation
+		foreach( $moduleUpdater->getUpdatableModules() as $update ){								//  iterate list of outdated modules
+			$this->client->out( vsprintf( "- %s: %s -> %s", array(									//  print outdated module and:
+				$update->id,																		//  - module ID
+				$update->installed,																	//  - currently installed version
+				$update->available																	//  - available version
+			) ) );
 		}
 	}
 }
