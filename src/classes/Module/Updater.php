@@ -93,21 +93,6 @@ class Hymn_Module_Updater{
 
 		$inputValues		= array();																//  prepare list of values to change
 		foreach( $moduleSource->config as $configKey => $configData ){
-			$hasModuleValue	= isset( $moduleInstalled->config[$configKey] );
-			$hasConfigValue	= isset( $hymnModuleConfig->{$configKey} );
-			$currentValue	= $moduleInstalled->config[$configKey]->value;
-			$sourceValue	= $configData->value;
-			$configValue	= $hasConfigValue ? $hymnModuleConfig->{$configKey} : NULL;
-			$realValue		= $configValue ? $configValue : $sourceValue;
-
-/*
-remark( 'hasModuleValue: '.(int)$hasModuleValue );
-remark( 'hasConfigValue: '.(int)$hasConfigValue );
-remark( 'currentValue: '.$currentValue );
-remark( 'sourceValue: '.$sourceValue );
-remark( 'configValue: '.$configValue );
-remark( 'realValue: '.$realValue );
-*/
 			$valueConfig			= new Hymn_Tool_ConfigValue();//@type
 			$valueCurrent			= new Hymn_Tool_ConfigValue();
 			$valueCurrentDefault	= new Hymn_Tool_ConfigValue();
