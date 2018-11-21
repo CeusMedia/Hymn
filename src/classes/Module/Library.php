@@ -94,6 +94,19 @@ class Hymn_Module_Library{
 		return NULL;
 	}
 
+	public function getModuleChanges( $id, $shelfId, $versionInstalled, $versionAvailable ){
+		$module	= $this->getModule( $id, $shelfId );
+		$list	= array();
+		foreach( $module->versionLog as $change ){
+			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is to lower than installed
+				continue;
+			if( version_compare( $change->version, $versionAvailable, '>' ) )					//  log version is to higher than available
+				continue;
+			$list[]	= $change;
+		}
+		return $list;
+	}
+
 	public function getModules( $shelfId = NULL ){
 		$this->loadModulesInShelves();
 		if( $shelfId ){

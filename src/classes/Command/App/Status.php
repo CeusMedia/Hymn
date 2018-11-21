@@ -75,10 +75,14 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$code		= static::CODE_NONE;
 		$moduleId	= trim( $this->client->arguments->getArgument( 0 ) );
 		if( strlen( trim( $moduleId ) ) ){
-			//  @todo implement
-			if( $this->flags->quiet )
-				throw new RuntimeException( 'Sorry, this function is not implemented, yet.' );		//  quit with sorry exception
-			return $this->client->out( 'Sorry, this function is not implemented, yet.' );			//  quit with sorry message
+			if( !array_key_exists( $moduleId, $listInstalled ) )
+				return $this->client->out( 'Module is not installed.' );
+			if( !array_key_exists( $moduleId, $outdatedModules ) )
+				return $this->client->out( 'Module is up-to-date.' );
+			$update	= $outdatedModules[$moduleId];
+			$this->client->out( 'Version installed: '.$update->installed );
+			$this->client->out( 'Version available: '.$update->available );
+			$this->printModuleUpdateChangelog( $update );
 		}
 		else{
 			if( !$this->flags->quiet ){
@@ -100,6 +104,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 							$update->installed,														//  - currently installed version
 							$update->available														//  - available version
 						) ) );
+						if( $this->flags->verbose )
+							$this->printModuleUpdateChangelog( $update, '  ' );
 					}
 				}
 			}
@@ -108,5 +114,21 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 		return $code;
+	}
+
+	protected function printModuleUpdateChangelog( $update, $indent = '' ){
+		$changes	= $this->getLibrary()->getModuleChanges(
+			$update->id,
+			$update->source,
+			$update->installed,
+			$update->available
+		);
+		if( !count( $changes ) )
+			return;
+		$this->client->out( $indent.'Changes:' );
+		foreach( $changes as $change ){
+			$version	= str_pad( $change->version, 9, ' ', STR_PAD_RIGHT );
+			$this->client->out( sprintf( $indent.' - %s %s', $version, $change->note ) );
+		}
 	}
 }
