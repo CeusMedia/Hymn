@@ -9,6 +9,9 @@ hymn - Hydrogen Management
 
 
 # Hymn
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/be9c412fce124997ac7f6b3bf08675be)](https://app.codacy.com/app/kriss0r/Hymn?utm_source=github.com&utm_medium=referral&utm_content=CeusMedia/Hymn&utm_campaign=Badge_Grade_Dashboard)
+
 Console tool for installing Hydrogen applications.
 
 ## Keywords:
