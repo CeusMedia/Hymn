@@ -85,7 +85,9 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
 			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
-					$this->client->out( "Module '".$module->id."' is already installed" );
+					if( $this->flags->verbose )
+						$this->client->out( "Module '".$module->id."' is already installed" );
+
 			}
 			else{
 				if( !$this->flags->quiet )

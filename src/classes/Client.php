@@ -323,8 +323,8 @@ class Hymn_Client{
 		$type	= $defaultInstallType;
 		if( isset( $this->config->application->{"installType"} ) )
 			$type	= $this->config->application->{"installType"};
-		else if( isset( $this->config->modules->{"@installType"} ) )							//  @deprecated: use application->type instead
-			$type	= $this->config->modules->{"@installType"};									//  @todo to be removed in 1.0
+		else if( isset( $this->config->modules->{"@installType"} ) )								//  @deprecated: use application->type instead
+			$type	= $this->config->modules->{"@installType"};										//  @todo to be removed in 1.0
 		else if( isset( $this->config->modules->$moduleId ) )
 			if( isset( $this->config->modules->$moduleId->{"installType"} ) )
 				$type	= $this->config->modules->$moduleId->{"installType"};
@@ -337,16 +337,16 @@ class Hymn_Client{
 		if( !count( $availableShelfIds ) )
 			throw new InvalidArgumentException( 'No available shelf IDs given' );
 
-		$modules	= $this->config->modules;													//  shortcut configured modules
-		if( isset( $modules->$moduleId ) )														//  module is configured in hymn file
-			if( isset( $modules->$moduleId->{"source"} ) )										//  module has configured source shelf
-				if( in_array( $modules->$moduleId->{"source"}, $availableShelfIds ) )			//  configured shelf source has requested module
-					return $modules->$moduleId->{"source"};										//  return configured source shelf
+		$modules	= $this->config->modules;														//  shortcut configured modules
+		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
+			if( isset( $modules->$moduleId->{"source"} ) )											//  module has configured source shelf
+				if( in_array( $modules->$moduleId->{"source"}, $availableShelfIds ) )				//  configured shelf source has requested module
+					return $modules->$moduleId->{"source"};											//  return configured source shelf
 
-		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )							//  default shelf has requested module
-			return $defaultInstallShelfId;														//  return default shelf
+		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )								//  default shelf has requested module
+			return $defaultInstallShelfId;															//  return default shelf
 
-		return current( $availableShelfIds );													//  return first available shelf
+		return current( $availableShelfIds );														//  return first available shelf
 	}
 
 	/**
@@ -359,15 +359,21 @@ class Hymn_Client{
 	public function out( $lines = NULL, $newLine = TRUE ){
 		if( is_null( $lines ) )
 			$lines	= array();
-		if( !is_array( $lines ) ){
-			if( !is_string( $lines ) )
-				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
-			$lines	= array( $lines );
+		if( !is_array( $lines ) ){																	//  output content is not a list
+			if( is_bool( $lines ) )																	//  output is booleann
+				$lines	= $lines ? 'yes' : 'no';													//  convert to string
+			if( !is_string( $lines ) && !is_numeric( $lines ) ){									//  output content is neither a string nor numeric
+				throw new InvalidArgumentException( sprintf(										//  quit with exception
+					'Argument must be a list, string or numeric (got: %s)',							//  ... complain about invalid argument
+					gettype( $lines )																//  ... display argument type
+				) );
+			}
+			$lines	= array( $lines );																//  collect output content as list
 		}
-		foreach( $lines as $line )
-			print( $line );
-		if( $newLine )
-			print( PHP_EOL );
+		foreach( $lines as $line )																	//  iterate output lines
+			print( $line );																			//  display each line
+		if( $newLine )																				//  output should be closed by newline character
+			print( PHP_EOL );																		//  print newline character
 	}
 
 	/**
@@ -381,9 +387,9 @@ class Hymn_Client{
 	public function outDeprecation( $lines = array() ){
 		if( !is_array( $lines ) ){
 			if( !is_string( $lines ) )
-				throw new InvalidArgumentException( 'Argument must be array or string.' );		//  ...
+				throw new InvalidArgumentException( 'Argument must be array or string.' );			//  ...
 			if( !strlen( trim( $lines ) ) )
-				throw new InvalidArgumentException( 'Argument must not be empty.' );			//  ...
+				throw new InvalidArgumentException( 'Argument must not be empty.' );				//  ...
 			$lines	= array( $lines );
 		}
 		$lines[0]	= $this->words->outPrefixDeprecation.$lines[0];
@@ -463,12 +469,12 @@ class Hymn_Client{
 			}
 		}
 
-		if( isset( $app->installMode ) && isset( $app->installType ) )							//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";	//  this installation is a build for a live copy
+		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
 #		if( $this->isLiveCopy )
 #			self::out( "This is a live copy build. Most hymn functions are not available." );
-		if( isset( $app->installMode ) && isset( $app->installType ) )							//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";	//  this installation is a build for a live copy
+		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
+			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
 	}
 
 	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
@@ -528,7 +534,7 @@ class Hymn_Client{
 		if( $this->flags & self::FLAG_NO_DB )
 			return;
 
-		if( strtolower( $this->dba->driver ) !== "mysql" )										//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
+		if( strtolower( $this->dba->driver ) !== "mysql" )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
 			throw new OutOfRangeException( sprintf(
 				'PDO driver "%s" is not supported at the moment',
 				$this->dba->driver

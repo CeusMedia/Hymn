@@ -38,13 +38,35 @@
 class Hymn_Tool_Cache_AppModules{
 
 	protected $client;
+	protected $flags;
 
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
+		$this->flags	= (object) array(
+			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+		);
 	}
 
-	public function invalidate(){
-		return static::staticInvalidate( $this->client );
+	/**
+	 *	Remove app module cache file.
+	 *	@access		public
+	 *	@param		bool		$outputPrefix		Perfix of verbose message
+	 *	@return		bool|NULL
+	 */
+	public function invalidate( $outputPrefix = '' ){
+		$filePath	= $this->client->getConfigPath().'modules.cache.serial';
+		if( !$this->flags->quiet && $this->flags->verbose )
+			$this->client->out( $outputPrefix.'Invalidate modules cache file ... ', FALSE  );
+		if( !file_exists( $filePath ) ){
+			if( !$this->flags->quiet && $this->flags->verbose )
+				$this->client->out( 'not existing'  );
+			return NULL;
+		}
+		if( !$this->flags->quiet && $this->flags->verbose )
+			$this->client->out( 'OK'  );
+		return @\unlink( $filePath );
 	}
 
 	/**
@@ -55,10 +77,8 @@ class Hymn_Tool_Cache_AppModules{
 	 *	@param		Hymn_Client		$hymnClient		Hymn client instance
 	 *	@return		bool|NULL		Result of cache invalidation, NULL if not cached
 	 */
-	static public function staticInvalidate( Hymn_Client $hymnClient ){
-		$filePath	= $hymnClient->getConfigPath().'modules.cache.serial';
-		if( !file_exists( $filePath ) )
-			return NULL;
-		return @\unlink( $filePath );
+	static public function staticInvalidate( Hymn_Client $hymnClient, $outputPrefix = '' ){
+		$tool	= new Hymn_Tool_Cache_AppModules( $hymnClient );
+		return $tool->invalidate( $outputPrefix );
 	}
 }

@@ -51,10 +51,6 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 */
 	public function run(){
 		$config			= $this->client->getConfig();
-		$this->flags	= (object) array(
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
 
 		/* @todo	find a better solution
 					this is slow, because:

@@ -149,7 +149,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->answer( 'system.user', "- System User", 'string', get_current_user(), NULL, FALSE );
 		$this->answer( 'system.group', "- System Group", 'string', "www-data", NULL, FALSE );
 		$this->client->out( "" );
-		if( $this->ask( "Configure database?", 'boolean', "yes", NULL, FALSE ) )
+		if( $this->ask( "Configure database?", 'boolean', 'yes', NULL, FALSE ) )
 			$this->configureDatabase();
 
 		$data	= array(
@@ -185,25 +185,25 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "" );
 
 		/*  --  CREATE PHPUNIT FILE  --  */
-		if( $this->ask( "Configure PHPUnit?", 'boolean', "yes", NULL, FALSE ) ){
+		if( $this->ask( "Configure PHPUnit?", 'boolean', 'yes', NULL, FALSE ) ){
 			$this->createUnitFile();
 			$this->client->out( "" );
 		}
 
 		/*  --  CREATE COMPOSER FILE  --  */
-		if( $this->ask( "Configure composer?", 'boolean', "yes", NULL, FALSE ) ){
+		if( $this->ask( "Configure composer?", 'boolean', 'yes', NULL, FALSE ) ){
 			$this->createComposerFile();
 			$this->client->out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE APP BASE CONFIG FILE  --  */
-		if( $this->ask( "Create base config file?", 'boolean', "yes", NULL, FALSE ) ){
+		if( $this->ask( "Create base config file?", 'boolean', 'yes', NULL, FALSE ) ){
 			$this->createConfigFile();
 			$this->client->out( "" );																//  print empty line as optical separator
 		}
 
 		/*  --  CREATE MAKE FILE  --  */
-		if( $this->ask( "Create make file?", 'boolean', "yes", NULL, FALSE ) ){
+		if( $this->ask( "Create make file?", 'boolean', 'yes', NULL, FALSE ) ){
 			$this->createMakeFile();
 			$this->client->out( "" );																//  print empty line as optical separator
 		}

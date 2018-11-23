@@ -126,7 +126,7 @@ class Hymn_Tool_BaseConfigEditor{
 	private function buildLine( $key, $value, $comment ){
 		$content	= '"'.addslashes( $value ).'"';
 		if( $this->reservedWords && is_bool( $value ) )
-			$content	= $value ? "yes" : "no";
+			$content	= $value ? 'yes' : 'no';
 		$breaksKey		= 4 - floor( strlen( $key ) / 8 );
 		$breaksValue	= 4 - floor( strlen( $content ) / 8 );
 		if( $breaksKey < 1 )
