@@ -97,13 +97,17 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			fclose( $fpOut );																		//  close target file
 			fclose( $fpIn );																		//  close source file
 
+			$command	= "cat /proc/cpuinfo | grep processor | wc -l";
+			$cores		= (int) shell_exec( $command );
+
 			$command	= call_user_func_array( "sprintf", array(									//  call sprintf with arguments list
-				"mysql -h%s -P%s -u%s -p%s %s < %s",												//  command to replace within
+				"mysqlimport -h%s -P%s -u%s -p%s %s --force --replace --use-threads=%d < %s",												//  command to replace within
 				escapeshellarg( $host ),															//  configured host as escaped shell arg
 				escapeshellarg( $port ),															//  configured port as escaped shell arg
 				escapeshellarg( $username ),														//  configured username as escaped shell arg
 				escapeshellarg( $password ),														//  configured pasword as escaped shell arg
 				escapeshellarg( $name ),															//  configured database name as escaped shell arg
+				max( 1, $cores - 1 ),																//  how many threads to use (number of cores - 1)
 				escapeshellarg( $tempName ),														//  temp file name as escaped shell arg
 			) );
 
