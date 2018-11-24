@@ -43,7 +43,7 @@ class Hymn_Module_Reader{
 	}
 
 	static function getAttribute( $xmlNode, $attributeName, $default = NULL, $nsPrefix = NULL ){
-		$attributes	= self::getAttributes( $xmlNode );
+		$attributes	= self::getAttributes( $xmlNode, $nsPrefix );
 		if( isset( $attributes[$attributeName] ) )
 			return $attributes[$attributeName];
 		return $default;

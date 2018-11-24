@@ -66,7 +66,7 @@ abstract class Hymn_Command_Abstract{
 		return $this->client->getInput( $message, $type, $default, $options, $break );
 	}
 
-	protected function deprecate( $messageLines, $exit = FALSE ){
+	protected function deprecate( $messageLines ){
 		$this->client->outDeprecation( $messageLines );
 	}
 

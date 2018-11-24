@@ -1,6 +1,6 @@
 ````
  _                 
-| |_ _ _ _____ ___ 
+| |_ _ _ _____ ___
 |   | | |     |   |
 |_|_|_  |_|_|_|_|_|
     |___|
@@ -14,13 +14,13 @@ hymn - Hydrogen Management
 
 Console tool for installing Hydrogen applications.
 
-## Keywords:
+## Keywords
 
 - Project = Blueprint for an App installation configured by Hymn file
 - App     = Set if installed modules, built or installed by project configuration
 - Source  = Shelf within the library of available modules
 
-## Commands:
+## Commands
 
 ### A. For creating and extending a project Hymn config file, you execute these commands:
 
@@ -96,7 +96,7 @@ Console tool for installing Hydrogen applications.
 	- self-update                    Replace global hymn installation by latest download
 	- reflect-options                Show parsable arguments and options
 
-## Options:
+## Options
 
 	-d | --dry                       Actions are simulated only
 	-f | --force                     Continue actions on error or warnings

@@ -259,7 +259,7 @@ class Hymn_Module_Files{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_FILES )
 			return TRUE;
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
-		foreach( $fileMap as $source => $target ){													//  iterate file list
+		foreach( array_values( $fileMap ) as $target ){												//  iterate target file list
 			if( !file_exists( $target ) )
 				continue;
 			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable

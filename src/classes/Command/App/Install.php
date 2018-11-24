@@ -58,19 +58,17 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 
 		$moduleId	= trim( $this->client->arguments->getArgument() );
 		if( $moduleId ){
-			$module			= $library->getModule( $moduleId );
+			$module		= $library->getModule( $moduleId );
 			if( $module ){
 				$relation->addModule( $module );
 			}
 		}
 		else{
 			foreach( $config->modules as $moduleId => $module ){
-				if( preg_match( "/^@/", $moduleId ) )
+				if( !$module->isActive || preg_match( "/^@/", $moduleId ) )
 					continue;
-				if( !isset( $module->active ) || $module->active ){
-					$module			= $library->getModule( $moduleId );
-					$relation->addModule( $module );
-				}
+				$module			= $library->getModule( $moduleId );
+				$relation->addModule( $module );
 			}
 		}
 
@@ -85,8 +83,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
 			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
-					if( $this->flags->verbose )
-						$this->client->out( "Module '".$module->id."' is already installed" );
+					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
 
 			}
 			else{

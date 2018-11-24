@@ -173,7 +173,7 @@ class Hymn_Module_Graph{
 			$this->client->out( "Found ".count( $this->nodes )." modules." );
 	}
 
-	public function renderGraphFile( $targetFile = NULL, $type = 'needs' ){							//  @todo	make indepentent from need/support
+	public function renderGraphFile( $targetFile = NULL/*, $type = 'needs'*/ ){							//  @todo	make indepentent from need/support
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';

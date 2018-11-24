@@ -58,7 +58,7 @@ class Hymn_Command_App_Module_Config_Set extends Hymn_Command_Abstract implement
 		$configKey	= join( ".", $parts );
 
 		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
-		$config			= $configurator->set( $moduleId, $configKey, $value );
+		$configurator->set( $moduleId, $configKey, $value );
 //		Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );
 	}
 }

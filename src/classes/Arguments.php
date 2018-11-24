@@ -50,9 +50,9 @@ class Hymn_Arguments{
 		$this->parse( $arguments );
 	}
 
-	public function getArgument( $nr = 0 ){
-		if( isset( $this->arguments[$nr] ) )
-			return $this->arguments[$nr];
+	public function getArgument( $index = 0 ){
+		if( isset( $this->arguments[$index] ) )
+			return $this->arguments[$index];
 		return NULL;
 	}
 
@@ -152,7 +152,7 @@ class Hymn_Arguments{
 		unset( $this->options[$key] );
 	}
 
-	public function unregisterOptions( $key ){
+	public function unregisterOptions( $keys ){
 		foreach( $keys as $key )
 			$this->unregisterOption( $key );
 	}

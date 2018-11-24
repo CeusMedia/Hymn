@@ -62,8 +62,7 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_C
 
 		$shelf	= $shelves[$shelfId];
 		if( !$shelf->active && !$this->flags->force ){
-			if( $this->flags->verbose && !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" is active and needs to be disabled, first.' );
+			$this->client->outVerbose( 'Shelf "'.$shelfId.'" is active and needs to be disabled, first.' );
 			return;
 		}
 

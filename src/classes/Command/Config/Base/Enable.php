@@ -67,7 +67,6 @@ class Hymn_Command_Config_Base_Enable extends Hymn_Command_Abstract implements H
 			$editor->activateProperty( $key );
 			clearstatcache();
 		}
-		if( $this->flags->verbose )
-			$this->client->out( 'Base config key "'.$key.'" disabled' );
+		$this->client->outVerbose( 'Base config key "'.$key.'" disabled' );
 	}
 }

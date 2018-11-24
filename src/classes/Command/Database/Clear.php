@@ -51,11 +51,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return $this->client->out( "Database can NOT be connected." );
 
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-
-		$dbc	= $this->client->getDatabase();
-		$result	= $dbc->query( "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" ) );
-		$tables	= $result->fetchAll();
+		$tables	= $this->getTables();
 		if( !$tables ){
 			if( !$this->flags->quiet )
 				$this->client->out( "Database is empty" );
@@ -66,22 +62,27 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 				return $this->client->out( "Quiet mode needs force mode (-f|--force)" );
 			$this->client->out( "Database tables:" );
 			foreach( $tables as $table )
-				$this->client->out( "- ".$table[0] );
+				$this->client->out( "- ".$table );
 			$answer	= $this->client->getInput( "Do you really want to drop these tables?", 'boolean', 'no' );
 			if( $answer !== TRUE )
 				return;
 		}
 
 		foreach( $tables as $table ){
-			if( !$this->flags->quiet && $this->flags->verbose )
-				$this->client->out( "- Drop table '".$table[0]."'" );
-			$dbc->query( "DROP TABLE ".$table[0] );
+			$this->client->outVerbose( "- Drop table '".$table."'" );
+			$this->client->getDatabase()->query( "DROP TABLE ".$table );
 		}
 		if( !$this->flags->quiet )
 			$this->client->out( "Database cleared" );
 	}
 
-	static public function getTables( $client ){
-		return array();
+	protected function getTables(){
+		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+		$query		= "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" );
+		$result		= $this->client->getDatabase()->query( $query );
+		$list		= array();
+		foreach( $result->fetchAll() as $entry )
+			$list[]	= $entry[0];
+		return $list;
 	}
 }

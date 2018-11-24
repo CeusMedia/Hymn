@@ -50,7 +50,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@return		void
 	 */
 	public function run(){
-		$config			= $this->client->getConfig();
+	//	$config			= $this->client->getConfig();
 
 		/* @todo	find a better solution
 					this is slow, because:
@@ -79,34 +79,28 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 			$this->client->out( 'Version installed: '.$update->installed );
 			$this->client->out( 'Version available: '.$update->available );
 			$this->printModuleUpdateChangelog( $update );
+			return $code;
 		}
-		else{
+		$message	= 'Modules: Installed: %d installed modules found.';
+		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
+		if( !$outdatedModules ){																	//  there are outdated modules
+			$this->client->outVerbose( 'Modules: Outdated: No updatable modules found.' );			//  print status topic: Modules > Outdated
+			return $code;
+		}
+		$code		|= static::CODE_MODULES_OUTDATED;
+		if( !$this->flags->quiet ){
+			$message	= 'Modules: Outdated: %d updatable modules found:';
+			$this->client->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
+		}
+		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
 			if( !$this->flags->quiet ){
-				if( $this->flags->verbose ){
-					$message	= 'Modules: Installed: %d installed modules found.';
-					$this->client->out( sprintf( $message, count( $listInstalled ) ) );				//  print status topic: Modules > Installed
-				}
-			}
-			if( $outdatedModules ){																	//  there are outdated modules
-				$code		|= static::CODE_MODULES_OUTDATED;
-				if( !$this->flags->quiet ){
-					$message	= 'Modules: Outdated: %d updatable modules found:';
-					$this->client->out( sprintf( $message, count( $outdatedModules ) ) );			//  print status topic: Modules > Outdated
-				}
-				foreach( $outdatedModules as $update ){												//  iterate list of outdated modules
-					if( !$this->flags->quiet ){
-						$this->client->out( vsprintf( "- %s: %s -> %s", array(						//  print outdated module and:
-							$update->id,															//  - module ID
-							$update->installed,														//  - currently installed version
-							$update->available														//  - available version
-						) ) );
-						if( $this->flags->verbose )
-							$this->printModuleUpdateChangelog( $update, '  ' );
-					}
-				}
-			}
-			else{
-				$this->client->out( 'Modules: Outdated: No updatable modules found.' );				//  print status topic: Modules > Outdated
+				$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
+					$update->id,																	//  - module ID
+					$update->installed,																//  - currently installed version
+					$update->available																//  - available version
+				) ) );
+				if( $this->flags->verbose )
+					$this->printModuleUpdateChangelog( $update, '  ' );
 			}
 		}
 		return $code;

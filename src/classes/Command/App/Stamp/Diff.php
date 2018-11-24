@@ -90,17 +90,15 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				if( $sql ){
 					if( !$this->flags->quiet )
 						$this->client->out( '   SQL: '.count( $scripts ).' updates:' );
-					if( $this->flags->verbose )
-						$this->client->out( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
+					$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 					$version	= $change->source->version;
 					foreach( $scripts as $script ){
 						$query	= $helperSql->realizeTablePrefix( $script->sql );
-						if( $this->flags->verbose ){
-							$this->client->out( sprintf(
-								'--  UPDATE %s: '.$version.' -> '.$script->version.'',
-								strtoupper( $moduleNew->id )
-							) );
-						}
+						$this->client->outVerbose( vsprintf( '--  UPDATE %s: %s-> %s', array(
+							strtoupper( $moduleNew->id ),
+							$version,
+							$script->version
+						) ) );
 						$this->client->out( trim( $query ) );
 						$version	= $script->version;
 					}
@@ -137,12 +135,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function getAvailableModules( $shelfId = NULL ){
 		$library	= $this->getLibrary();
 		$modules	= $library->listInstalledModules( $shelfId );
-		if( $this->flags->verbose && !$this->flags->quiet ){
+		$message	= 'Found '.count( $modules ).' installed modules.';
+		if( $shelfId )
 			$message	= 'Found '.count( $modules ).' installed modules in source '.$shelfId.'.';
-			if( !$shelfId )
-				$message	= 'Found '.count( $modules ).' installed modules.';
-			$this->client->out( $message );
-		}
+		$this->client->outVerbose( $message );
 		return $modules;
 	}
 
@@ -151,8 +147,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$path		= preg_replace( '@\.+/@', '', $path );
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
-		if( $this->flags->verbose && !$this->flags->quiet )
-			$this->client->out( "Scanning folder ".$path." ..." );
+		$this->client->outVerbose( "Scanning folder ".$path." ..." );
 		if( file_exists( $path ) ){
 			$list	= array();
 			$index	= new DirectoryIterator( $path );
@@ -192,8 +187,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$this->client->out( "No comparable stamp file found." );
 			exit( 0 );
 		}
-		if( $this->flags->verbose && !$this->flags->quiet )
-			$this->client->out( 'Loading stamp: '.$fileName );
+		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
 	}
 }

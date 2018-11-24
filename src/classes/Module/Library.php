@@ -48,13 +48,13 @@ class Hymn_Module_Library{
 		$this->client		= $client;
 	}
 
-	public function addShelf( $id, $path, $type, $active = TRUE, $title = NULL ){
-		if( in_array( $id, array_keys( $this->shelves ) ) )
-			throw new Exception( 'Shelf already set by ID: '.$id );
+	public function addShelf( $moduleId, $path, $type, $active = TRUE, $title = NULL ){
+		if( in_array( $moduleId, array_keys( $this->shelves ) ) )
+			throw new Exception( 'Shelf already set by ID: '.$moduleId );
 		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
 		$isDefault		= $active && !count( $activeShelves );
-		$this->shelves[$id]	= (object) array(
-			'id'		=> $id,
+		$this->shelves[$moduleId]	= (object) array(
+			'id'		=> $moduleId,
 			'path'		=> $path,
 			'type'		=> $type,
 			'active'	=> $active,
@@ -71,31 +71,21 @@ class Hymn_Module_Library{
 		throw new RuntimeException( 'No default shelf available' );
 	}
 
-	public function getModule( $id, $shelfId = NULL, $strict = TRUE ){
+	public function getModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
 		$this->loadModulesInShelves();
-		if( $shelfId ){
-			if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
-				if( $strict )
-					throw new DomainException( 'Shelf "'.$shelfId.'" is not active' );
-				return NULL;
-			}
-			foreach( $this->modules[$shelfId] as $module )
-				if( $module->id === $id )
+		if( $shelfId )
+			return $this->getModuleIdFromShelf( $moduleId, $shelfId, $strict );
+		foreach( $this->modules as $modules )
+			foreach( $modules as $module )
+				if( $module->id === $moduleId )
 					return $module;
-		}
-		else{
-			foreach( $this->modules as $shelf => $modules )
-				foreach( $modules as $module )
-					if( $module->id === $id )
-						return $module;
-		}
 		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$id );
+			throw new Exception( 'Invalid module ID: '.$moduleId );
 		return NULL;
 	}
 
-	public function getModuleChanges( $id, $shelfId, $versionInstalled, $versionAvailable ){
-		$module	= $this->getModule( $id, $shelfId );
+	public function getModuleChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
+		$module	= $this->getModule( $moduleId, $shelfId );
 		$list	= array();
 		foreach( $module->versionLog as $change ){
 			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is to lower than installed
@@ -105,6 +95,21 @@ class Hymn_Module_Library{
 			$list[]	= $change;
 		}
 		return $list;
+	}
+
+	public function getModuleFromShelf( $moduleId, $shelfId, $strict = TRUE ){
+		$this->loadModulesInShelves();
+		if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
+			if( $strict )
+				throw new DomainException( 'Shelf "'.$shelfId.'" is not active' );
+			return NULL;
+		}
+		foreach( $this->modules[$shelfId] as $module )
+			if( $module->id === $moduleId )
+				return $module;
+		if( $strict )
+			throw new Exception( 'Invalid module ID: '.$moduleId );
+		return NULL;
 	}
 
 	public function getModules( $shelfId = NULL ){
@@ -131,10 +136,10 @@ class Hymn_Module_Library{
 		return array_values( $list );
 	}
 
-	public function getShelf( $id, $withModules = FALSE ){
-		if( !in_array( $id, array_keys( $this->shelves ) ) )
-			throw new DomainException( '_Invalid shelf ID: '.$id );
-		$shelf	= $this->shelves[$id];
+	public function getShelf( $moduleId, $withModules = FALSE ){
+		if( !in_array( $moduleId, array_keys( $this->shelves ) ) )
+			throw new DomainException( '_Invalid shelf ID: '.$moduleId );
+		$shelf	= $this->shelves[$moduleId];
 		if( !$withModules )
 			unset( $shelf->modules );
 		return $shelf;
@@ -222,23 +227,23 @@ class Hymn_Module_Library{
 		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
 
-	static public function readModule( $path, $id ){
-		$pathname	= str_replace( "_", "/", $id ).'/';												//  assume source module path from module ID
+	static public function readModule( $path, $moduleId ){
+		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RuntimeException( 'Module "'.$id.'" not found in '.$pathname );				//  throw exception
-		$module		= Hymn_Module_Reader::load( $filename, $id );									//  otherwise load module configuration from source XML file
+			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
+		$module		= Hymn_Module_Reader::load( $filename, $moduleId );								//  otherwise load module configuration from source XML file
 		$module->absolutePath	= realpath( $pathname )."/";										//  extend found module by real source path
 		$module->pathname		= $pathname;														//  extend found module by relative path
 		$module->path			= $path.$pathname;													//  extebd found module by pseudo real path
 		return $module;																				//  return module
 	}
 
-	public function readInstalledModule( $id ){
+	public function readInstalledModule( $moduleId ){
 		$pathModules	= $this->client->getConfigPath().'modules/';
-		$filename		= $pathModules.$id.'.xml';
+		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'Module "'.$id.'" not installed in '.$pathModules );
-		return Hymn_Module_Reader::load( $filename, $id );
+			throw new RuntimeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
+		return Hymn_Module_Reader::load( $filename, $moduleId );
 	}
 }

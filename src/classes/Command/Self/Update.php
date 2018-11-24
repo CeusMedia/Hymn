@@ -49,11 +49,11 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 	}
 
 	protected function getHymnFilePath(){
-		exec( "whereis hymn", $a, $b );
-		if( is_array( $a ) && count( $a ) ){
-			foreach( $a as $item ){
-				if( preg_match( '/^hymn: (.+)$/', $item ) ){
-					return preg_replace( '/^hymn: /', '', $item );
+		exec( "whereis hymn", $output/*, $b*/ );
+		if( is_array( $output ) && count( $output ) ){
+			foreach( $output as $line ){
+				if( preg_match( '/^hymn: (.+)$/', $line ) ){
+					return preg_replace( '/^hymn: /', '', $line );
 				}
 			}
 		}

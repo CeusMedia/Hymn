@@ -46,7 +46,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@return		void
 	 */
 	public function run(){
-		$config	= $this->client->getConfig();
+	//	$config	= $this->client->getConfig();
 
 		//  version 2: use library with loaded shelves
 		//  comparison to replaced version 1:

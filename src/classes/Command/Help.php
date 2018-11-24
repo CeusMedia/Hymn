@@ -47,7 +47,7 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	public function run(){
 		$command	= $this->client->arguments->getArgument( 0 );				//  get first argument as command
 		$locale		= $this->client->getLocale();								//  shortcut client locale handler
-		$words		= $locale->loadWords( 'command/help' );
+//		$words		= $locale->loadWords( 'command/help' );
 
 		$command	= strlen( trim( $command ) ) ? $command : 'help';			//  set default command to show help index
 		$path		= str_replace( '-', '/', strtolower( trim( $command ) ) );	//  realize locale file path

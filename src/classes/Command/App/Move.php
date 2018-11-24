@@ -78,8 +78,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 			$this->client->out( "- URL:  ".$url );
 		if( !$this->flags->dry ){
 			if( strlen( $url ) ){
-				if( $this->flags->verbose )
-					$this->client->out( "- setting URL in config file" );
+				$this->client->outVerbose( "- setting URL in config file" );
 				$pathConfig	= $this->client->getConfigPath();
 				$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
 				if( $editor->hasProperty( 'app.base.url', FALSE ) ){
@@ -88,23 +87,19 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 						clearstatcache();
 					}
 				}
-				if( $this->flags->verbose )
-					$this->client->out( "- setting URL in hymn file" );
+				$this->client->outVerbose( "- setting URL in hymn file" );
 				$config->application->url	= $url;
 				$json	= json_encode( $config, JSON_PRETTY_PRINT );
 				file_put_contents( Hymn_Client::$fileName, $json );
 			}
-			if( $this->flags->verbose )
-				$this->client->out( "- setting URI in hymn file" );
+			$this->client->outVerbose( "- setting URI in hymn file" );
 			$config->application->uri	= $dest;
 			$json	= json_encode( $config, JSON_PRETTY_PRINT );
 			file_put_contents( Hymn_Client::$fileName, $json );
 
-			if( $this->flags->verbose )
-				$this->client->out( "- moving folders, files and links" );
+			$this->client->outVerbose( "- moving folders, files and links" );
 			rename( $source, $dest );
-			if( $this->flags->verbose )
-				$this->client->out( "- fixing links" );
+			$this->client->outVerbose( "- fixing links" );
 			$this->fixLinks( $source, $dest );
 			$this->client->out( "DONE!" );
 			$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
