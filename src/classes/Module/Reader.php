@@ -37,38 +37,14 @@
  */
 class Hymn_Module_Reader{
 
-	static function hasAttribute( $xmlNode, $attributeName, $nsPrefix = NULL ){
-		$attributes	= self::getAttributes( $xmlNode );
-		return isset( $attributes[$attributeName] );
-	}
-
-	static function getAttribute( $xmlNode, $attributeName, $default = NULL, $nsPrefix = NULL ){
-		$attributes	= self::getAttributes( $xmlNode, $nsPrefix );
-		if( isset( $attributes[$attributeName] ) )
-			return $attributes[$attributeName];
-		return $default;
-	}
-
-	static function getAttributes( $xmlNode, $nsPrefix = NULL ){
-		$list	= array();
-		foreach( $xmlNode->attributes( $nsPrefix, TRUE ) as $name => $value )
-			$list[$name]	= (string) $value;
-		return $list;
-	}
-
-	static public function loadStatic( $filePath, $id ){
-		$reader	= new Hymn_Module_Reader();
-		return $reader->load( $filePath, $id );
-	}
-
-	public function load( $filePath, $id ){
+	public function load( $filePath, $moduleId ){
 		$validator	= new Hymn_Tool_XmlValidator();
 		if( !$validator->validateFile( $filePath ) )
-			throw new RuntimeException( 'XML file of module "'.$id.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
+			throw new RuntimeException( 'XML file of module "'.$moduleId.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
 
 		$xml	= new SimpleXMLElement( file_get_contents( $filePath ) );
 		$obj	= new stdClass();
-		$obj->id					= $id;
+		$obj->id					= $moduleId;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
@@ -117,17 +93,42 @@ class Hymn_Module_Reader{
 		return $obj;
 	}
 
+	public static function loadStatic( $filePath, $moduleId ){
+		$reader	= new Hymn_Module_Reader();
+		return $reader->load( $filePath, $moduleId );
+	}
+
+	/*  --  PROTECTED  --  */
+	protected function getAttribute( $xmlNode, $attributeName, $default = NULL, $nsPrefix = NULL ){
+		$attributes	= $this->getAttributes( $xmlNode, $nsPrefix );
+		if( isset( $attributes[$attributeName] ) )
+			return $attributes[$attributeName];
+		return $default;
+	}
+
+	protected function getAttributes( $xmlNode, $nsPrefix = NULL ){
+		$list	= array();
+		foreach( $xmlNode->attributes( $nsPrefix, TRUE ) as $name => $value )
+			$list[$name]	= (string) $value;
+		return $list;
+	}
+
+	protected function hasAttribute( $xmlNode, $attributeName, $nsPrefix = NULL ){
+		$attributes	= $this->getAttributes( $xmlNode, $nsPrefix );
+		return isset( $attributes[$attributeName] );
+	}
+
 	protected function readInstallation( $obj, $xml ){
-		$obj->installType	= (int) self::getAttribute( $xml->version, 'install-type' );				//  note install type
-		$obj->installDate	= strtotime( self::getAttribute( $xml->version, 'install-date' ) );		//  note install date
-		$obj->installSource	= self::getAttribute( $xml->version, 'install-source' );					//  note install source
+		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );				//  note install type
+		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );		//  note install date
+		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );					//  note install source
 	}
 
 	protected function readLog( $obj, $xml ){
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) array(													//  append version log entry
 				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> self::getAttribute( $entry, 'version' ),									//  extract entry version
+				'version'	=> $this->getAttribute( $entry, 'version' ),									//  extract entry version
 			);
 		}
 	}
@@ -147,7 +148,7 @@ class Hymn_Module_Reader{
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
 				$object	= (object) array( 'file' => (string) $file );
-				foreach( self::getAttributes( $file ) as $key => $value )
+				foreach( $this->getAttributes( $file ) as $key => $value )
 					$object->$key	= $value;
 				$obj->files->{$target}[]	= $object;
 			}
@@ -156,7 +157,7 @@ class Hymn_Module_Reader{
 
 	protected function readLicenses( $obj, $xml ){
 		foreach( $xml->license as $license ){
-			$source	= self::getAttribute( $license, 'source' );
+			$source	= $this->getAttribute( $license, 'source' );
 			$obj->licenses[]	= (object) array(
 				'label'		=> (string) $license,
 				'source'	=> $source
@@ -166,7 +167,7 @@ class Hymn_Module_Reader{
 
 	protected function readCompanies( $obj, $xml ){
 		foreach( $xml->company as $company ){
-			$site	= self::getAttribute( $company, 'site', '' );
+			$site	= $this->getAttribute( $company, 'site', '' );
 			$obj->companies[]	= (object) array(
 				'name'		=> (string) $company,
 				'site'		=> $site
@@ -176,8 +177,8 @@ class Hymn_Module_Reader{
 
 	protected function readAuthors( $obj, $xml ){
 		foreach( $xml->author as $author ){
-			$email	= self::getAttribute( $author, 'email', '' );
-			$site	= self::getAttribute( $author, 'site', '' );
+			$email	= $this->getAttribute( $author, 'email', '' );
+			$site	= $this->getAttribute( $author, 'site', '' );
 			$obj->authors[]	= (object) array(
 				'name'	=> (string) $author,
 				'email'	=> $email,
@@ -188,13 +189,13 @@ class Hymn_Module_Reader{
 
 	protected function readConfig( $obj, $xml ){
 		foreach( $xml->config as $pair ){
-			$key		= self::getAttribute( $pair, 'name' );
-			$type		= self::getAttribute( $pair, 'type', 'string' );
-			$values		= self::getAttribute( $pair, 'values', '' );
+			$key		= $this->getAttribute( $pair, 'name' );
+			$type		= $this->getAttribute( $pair, 'type', 'string' );
+			$values		= $this->getAttribute( $pair, 'values', '' );
 			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
-			$title		= self::getAttribute( $pair, 'title' );
-			if( !$title && self::hasAttribute( $pair, 'info' ) )
-				$title	= self::getAttribute( $pair, 'info' );
+			$title		= $this->getAttribute( $pair, 'title' );
+			if( !$title && $this->hasAttribute( $pair, 'info' ) )
+				$title	= $this->getAttribute( $pair, 'info' );
 			$value		= trim( (string) $pair );
 			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
@@ -203,11 +204,11 @@ class Hymn_Module_Reader{
 				'type'			=> trim( strtolower( $type ) ),
 				'value'			=> $value,
 				'values'		=> $values,
-				'mandatory'		=> self::getAttribute( $pair, 'mandatory', FALSE ),
-				'protected'		=> self::getAttribute( $pair, 'protected', FALSE ),
+				'mandatory'		=> $this->getAttribute( $pair, 'mandatory', FALSE ),
+				'protected'		=> $this->getAttribute( $pair, 'protected', FALSE ),
 				'title'			=> $title,
-				'default'		=> self::getAttribute( $pair, 'default', NULL ),
-				'original'		=> self::getAttribute( $pair, 'original', NULL ),
+				'default'		=> $this->getAttribute( $pair, 'default', NULL ),
+				'original'		=> $this->getAttribute( $pair, 'original', NULL ),
 			);
 		}
 	}
@@ -223,10 +224,10 @@ class Hymn_Module_Reader{
 
 	protected function readSql( $obj, $xml ){
 		foreach( $xml->sql as $sql ){
-			$event		= self::getAttribute( $sql, 'on' );
-			$to			= self::getAttribute( $sql, 'version-to', NULL );
-			$version	= self::getAttribute( $sql, 'version', $to );
-			$type		= self::getAttribute( $sql, 'type', '*' );
+			$event		= $this->getAttribute( $sql, 'on' );
+			$to			= $this->getAttribute( $sql, 'version-to', NULL );
+			$version	= $this->getAttribute( $sql, 'version', $to );
+			$type		= $this->getAttribute( $sql, 'type', '*' );
 
 			if( $event == "update" )
 				if( !$version )
@@ -248,13 +249,13 @@ class Hymn_Module_Reader{
 
 	protected function readLinks( $obj, $xml ){
 		foreach( $xml->link as $link ){
-			$access		= self::getAttribute( $link, 'access' );
-			$language	= self::getAttribute( $link, 'lang', NULL, 'xml' );
+			$access		= $this->getAttribute( $link, 'access' );
+			$language	= $this->getAttribute( $link, 'lang', NULL, 'xml' );
 			$label		= (string) $link;
-			$path		= self::getAttribute( $link, 'path', $label );
-			$rank		= self::getAttribute( $link, 'rank', 10 );
-			$parent		= self::getAttribute( $link, 'parent' );
-			$link		= self::getAttribute( $link, 'link' );
+			$path		= $this->getAttribute( $link, 'path', $label );
+			$rank		= $this->getAttribute( $link, 'rank', 10 );
+			$parent		= $this->getAttribute( $link, 'parent' );
+			$link		= $this->getAttribute( $link, 'link' );
 			$obj->links[]	= (object) array(
 				'parent'	=> $parent,
 				'access'	=> $access,
@@ -270,8 +271,8 @@ class Hymn_Module_Reader{
 
 	protected function readHooks( $obj, $xml ){
 		foreach( $xml->hook as $hook ){
-			$resource	= self::getAttribute( $hook, 'resource' );
-			$event		= self::getAttribute( $hook, 'event' );
+			$resource	= $this->getAttribute( $hook, 'resource' );
+			$event		= $this->getAttribute( $hook, 'event' );
 			$obj->hooks[$resource][$event][]	= (string) $hook;
 		}
 	}

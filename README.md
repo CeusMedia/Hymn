@@ -15,9 +15,9 @@ Console tool for installing Hydrogen applications.
 
 ## Keywords
 
-  - Project = Blueprint for an App installation configured by Hymn file
-  - App     = Set if installed modules, built or installed by project configuration
-  - Source  = Shelf within the library of available modules
+	- Project = Blueprint for an App installation configured by Hymn file
+	- App     = Set if installed modules, built or installed by project configuration
+	- Source  = Shelf within the library of available modules
 
 ## Commands
 
