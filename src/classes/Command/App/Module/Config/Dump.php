@@ -55,6 +55,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		$knownModules	= array_keys( (array) $hymnFile->modules );
 
 		$index	= new DirectoryIterator( $pathConfig."modules" );
+		$reader	= new Hymn_Module_Reader();
 		$list	= array();
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -62,7 +63,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 			if( !preg_match( "/\.xml$/", $entry->getFilename() ) )
 				continue;
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
+			$module	= $reader->load( $entry->getPathname(), $id );
 			if( $module->config || in_array( $id, $knownModules ) ){
 				$list[$id]	= array( 'config' => (object) array() );
 				foreach( $module->config as $pair )

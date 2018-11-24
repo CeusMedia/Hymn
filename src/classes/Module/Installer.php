@@ -112,14 +112,6 @@ class Hymn_Module_Installer{
 			if( isset( $this->config->modules->{$module->id}->config ) )
 				$configModule	= $this->config->modules->{$module->id}->config;
 
-		//  determine if module is active
-		$isActive	= TRUE;																		//  module without main switch are active by default
-		if( isset( $module->config['active'] ) ){												//  switch is defined in module config
-			$isActive	= $module->config['active']->value;										//  take switch value from module config
-			if( isset( $configModule->active ) )												//  switch is also defined in hymn file
-				$isActive	= in_array( $configModule->active, array( 'yes', 'true', '1' ) );	//  take switch value from hymn file
-		}
-
 		$changeSet	= array();
 		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
 			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type

@@ -7,7 +7,6 @@
 ````
 hymn - Hydrogen Management
 
-
 # Hymn
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/be9c412fce124997ac7f6b3bf08675be)](https://app.codacy.com/app/kriss0r/Hymn?utm_source=github.com&utm_medium=referral&utm_content=CeusMedia/Hymn&utm_campaign=Badge_Grade_Dashboard)
@@ -16,13 +15,15 @@ Console tool for installing Hydrogen applications.
 
 ## Keywords
 
-- Project = Blueprint for an App installation configured by Hymn file
-- App     = Set if installed modules, built or installed by project configuration
-- Source  = Shelf within the library of available modules
+  - Project = Blueprint for an App installation configured by Hymn file
+  - App     = Set if installed modules, built or installed by project configuration
+  - Source  = Shelf within the library of available modules
 
 ## Commands
 
-### A. For creating and extending a project Hymn config file, you execute these commands:
+### A. Configuration Management
+
+For creating and extending a project Hymn config file, you execute these commands:
 
 #### 1. Project Creation and Source Management
 
@@ -59,7 +60,9 @@ Console tool for installing Hydrogen applications.
 	- modules-search                 List modules found by name part
 	- modules-updatable              List modules with available updates
 
-### B. Having a valid Hymn config file, you execute these commands:
+### B. Application Management
+
+Having a valid Hymn config file, you execute these commands:
 
 #### 1. App Base Configuration Management
 
@@ -72,16 +75,17 @@ Console tool for installing Hydrogen applications.
 
 	- app-graph                      Render module relations graph
 	- app-sources                    List installed library sources
+	- app-info                       (not implemented yet)
+	- app-move DESTINATION [URL]     Move app to another folder (and adjust app base URL)
+	- app-status                     Show status of app and its modules
+
+#### 3. App Module Management
+
 	- app-install [-dqv] [MODULE]    Install modules (or one specific)
 	- app-uninstall [-dfqv] MODULE   Uninstall one specific installed module
 	- app-update [-dqv] [MODULE]     Updated installed modules (or one specific)
-	- app-info                       (not implemented yet)
-	- app-config-get                 (not implemented yet)
-	- app-config-set                 (not implemented yet)
-	- app-config-module-get          (not implemented yet)
-	- app-config-module-set          (not implemented yet)
 
-#### 3. App Database Management
+#### 4. App Database Management
 
 	- database-clear [-fqv]          Drop database tables (force, verbose, quiet)
 	- database-dump [PATH]           Export database to SQL file

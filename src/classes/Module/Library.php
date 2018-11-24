@@ -39,7 +39,7 @@ class Hymn_Module_Library{
 
 	static protected $listModulesAvailable	= NULL;
 	static protected $listModulesInstalled	= NULL;
-	static protected $useCache		= FALSE;
+	static protected $useCache				= FALSE;
 
 	protected $modules		= array();
 	protected $shelves		= array();
@@ -232,7 +232,8 @@ class Hymn_Module_Library{
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
 			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
-		$module		= Hymn_Module_Reader::load( $filename, $moduleId );								//  otherwise load module configuration from source XML file
+		$reader		= new Hymn_Module_Reader();
+		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
 		$module->absolutePath	= realpath( $pathname )."/";										//  extend found module by real source path
 		$module->pathname		= $pathname;														//  extend found module by relative path
 		$module->path			= $path.$pathname;													//  extebd found module by pseudo real path
@@ -244,6 +245,7 @@ class Hymn_Module_Library{
 		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		return Hymn_Module_Reader::load( $filename, $moduleId );
+		$reader			= new Hymn_Module_Reader();
+		return $reader->load( $filename, $moduleId );
 	}
 }

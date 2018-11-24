@@ -127,7 +127,6 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
 			$message		= vsprintf( 'Updating module "%s" from %s to %s as %s ...', array(
-				$message,
 				$module->id,
 				$update->installed,
 				$update->available,

@@ -56,12 +56,17 @@ class Hymn_Module_Reader{
 		return $list;
 	}
 
-	static public function load( $fileName, $id ){
+	static public function loadStatic( $filePath, $id ){
+		$reader	= new Hymn_Module_Reader();
+		return $reader->load( $filePath, $id );
+	}
+
+	public function load( $filePath, $id ){
 		$validator	= new Hymn_Tool_XmlValidator();
-		if( !$validator->validateFile( $fileName ) )
+		if( !$validator->validateFile( $filePath ) )
 			throw new RuntimeException( 'XML file of module "'.$id.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
 
-		$xml	= new SimpleXMLElement( file_get_contents( $fileName ) );
+		$xml	= new SimpleXMLElement( file_get_contents( $filePath ) );
 		$obj	= new stdClass();
 		$obj->id					= $id;
 		$obj->title					= (string) $xml->title;
@@ -72,6 +77,7 @@ class Hymn_Module_Reader{
 		$obj->versionInstalled		= NULL;
 		$obj->versionLog			= array();
 		$obj->isInstalled			= FALSE;
+		$obj->isActive				= TRUE;
 		$obj->companies				= array();
 		$obj->authors				= array();
 		$obj->licenses				= array();
@@ -95,38 +101,60 @@ class Hymn_Module_Reader{
 		$obj->installType			= 0;
 		$obj->installDate			= NULL;
 		$obj->installSource			= NULL;
+		$this->readInstallation( $obj, $xml );
+		$this->readLog( $obj, $xml );
+		$this->readFiles( $obj, $xml );
+		$this->readLicenses( $obj, $xml );
+		$this->readCompanies( $obj, $xml );
+		$this->readAuthors( $obj, $xml );
+		$this->readConfig( $obj, $xml );
+		$this->readRelations( $obj, $xml );
+		$this->readSql( $obj, $xml );
+		$this->readLinks( $obj, $xml );
+		$this->readHooks( $obj, $xml );
+		if( isset( $obj->config['active'] ) )
+			$obj->isActive	= $obj->config['active']->value;
+		return $obj;
+	}
 
-		/*	--  LOCALLY INSTALLED MODULE  --  */
+	protected function readInstallation( $obj, $xml ){
 		$obj->installType	= (int) self::getAttribute( $xml->version, 'install-type' );				//  note install type
 		$obj->installDate	= strtotime( self::getAttribute( $xml->version, 'install-date' ) );		//  note install date
 		$obj->installSource	= self::getAttribute( $xml->version, 'install-source' );					//  note install source
+	}
 
+	protected function readLog( $obj, $xml ){
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) array(													//  append version log entry
 				'note'		=> (string) $entry,														//  extract entry note
 				'version'	=> self::getAttribute( $entry, 'version' ),									//  extract entry version
 			);
 		}
-		if( $xml->files ){																			//  iterate files
-			$map	= array(																		//  ...
-				'class'		=> 'classes',
-				'locale'	=> 'locales',
-				'template'	=> 'templates',
-				'style'		=> 'styles',
-				'script'	=> 'scripts',
-				'image'		=> 'images',
-				'file'		=> 'files',
-			);
-			foreach( $map as $source => $target ){
-				foreach( $xml->files->$source as $file ){
-					$object	= (object) array( 'file' => (string) $file );
-					foreach( self::getAttributes( $file ) as $key => $value )
-						$object->$key	= $value;
-					$obj->files->{$target}[]	= $object;
-				}
+	}
+
+	protected function readFiles( $obj, $xml ){
+		if( !$xml->files )
+			return;
+		$map	= array(
+			'class'		=> 'classes',
+			'locale'	=> 'locales',
+			'template'	=> 'templates',
+			'style'		=> 'styles',
+			'script'	=> 'scripts',
+			'image'		=> 'images',
+			'file'		=> 'files',
+		);
+		foreach( $map as $source => $target ){														//  iterate files
+			foreach( $xml->files->$source as $file ){
+				$object	= (object) array( 'file' => (string) $file );
+				foreach( self::getAttributes( $file ) as $key => $value )
+					$object->$key	= $value;
+				$obj->files->{$target}[]	= $object;
 			}
 		}
+	}
 
+	protected function readLicenses( $obj, $xml ){
 		foreach( $xml->license as $license ){
 			$source	= self::getAttribute( $license, 'source' );
 			$obj->licenses[]	= (object) array(
@@ -134,7 +162,9 @@ class Hymn_Module_Reader{
 				'source'	=> $source
 			);
 		}
+	}
 
+	protected function readCompanies( $obj, $xml ){
 		foreach( $xml->company as $company ){
 			$site	= self::getAttribute( $company, 'site', '' );
 			$obj->companies[]	= (object) array(
@@ -142,7 +172,9 @@ class Hymn_Module_Reader{
 				'site'		=> $site
 			);
 		}
+	}
 
+	protected function readAuthors( $obj, $xml ){
 		foreach( $xml->author as $author ){
 			$email	= self::getAttribute( $author, 'email', '' );
 			$site	= self::getAttribute( $author, 'site', '' );
@@ -152,7 +184,9 @@ class Hymn_Module_Reader{
 				'site'	=> $site
 			);
 		}
+	}
 
+	protected function readConfig( $obj, $xml ){
 		foreach( $xml->config as $pair ){
 			$key		= self::getAttribute( $pair, 'name' );
 			$type		= self::getAttribute( $pair, 'type', 'string' );
@@ -176,12 +210,18 @@ class Hymn_Module_Reader{
 				'original'		=> self::getAttribute( $pair, 'original', NULL ),
 			);
 		}
+	}
+
+	protected function readRelations( $obj, $xml ){
 		if( $xml->relations ){
 			foreach( $xml->relations->needs as $moduleName )
 				$obj->relations->needs[]	= (string) $moduleName;
 			foreach( $xml->relations->supports as $moduleName )
 				$obj->relations->supports[]	= (string) $moduleName;
 		}
+	}
+
+	protected function readSql( $obj, $xml ){
 		foreach( $xml->sql as $sql ){
 			$event		= self::getAttribute( $sql, 'on' );
 			$to			= self::getAttribute( $sql, 'version-to', NULL );
@@ -204,7 +244,9 @@ class Hymn_Module_Reader{
 				);
 			}
 		}
+	}
 
+	protected function readLinks( $obj, $xml ){
 		foreach( $xml->link as $link ){
 			$access		= self::getAttribute( $link, 'access' );
 			$language	= self::getAttribute( $link, 'lang', NULL, 'xml' );
@@ -224,13 +266,14 @@ class Hymn_Module_Reader{
 			);
 			(string) $link;
 		}
+	}
 
+	protected function readHooks( $obj, $xml ){
 		foreach( $xml->hook as $hook ){
 			$resource	= self::getAttribute( $hook, 'resource' );
 			$event		= self::getAttribute( $hook, 'event' );
 			$obj->hooks[$resource][$event][]	= (string) $hook;
 		}
-		return $obj;
 	}
 }
 ?>
