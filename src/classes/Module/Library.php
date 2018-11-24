@@ -74,7 +74,7 @@ class Hymn_Module_Library{
 	public function getModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
 		$this->loadModulesInShelves();
 		if( $shelfId )
-			return $this->getModuleIdFromShelf( $moduleId, $shelfId, $strict );
+			return $this->getModuleFromShelf( $moduleId, $shelfId, $strict );
 		foreach( $this->modules as $modules )
 			foreach( $modules as $module )
 				if( $module->id === $moduleId )
