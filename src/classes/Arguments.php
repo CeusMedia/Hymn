@@ -84,7 +84,6 @@ class Hymn_Arguments{
 
 	public function parse( $arguments = NULL ){
 		$arguments	= is_null( $arguments ) ? $this->arguments : $arguments;
-		$list	= array();
 		foreach( $arguments as $nr => $argument ){
 			foreach( $this->options as $key => $option ){
 				if( preg_match( $option['pattern'], $argument ) ){

@@ -162,7 +162,7 @@ class Hymn_Module_Installer{
 				$changeSet[$moduleConfigKey]	= $configValue;
 		}
 
-		foreach( $xml->config as $nr => $node ){												//  iterate original module config pairs
+		foreach( $xml->config as $node ){														//  iterate original module config pairs
 			$moduleConfigKey	= (string) $node['name'];										//  shortcut config pair key
 			$moduleConfigValue	= $node->getValue();											//  get default config value of module
 			$installationValue	= $moduleConfigValue;											//  assume installation value from default value

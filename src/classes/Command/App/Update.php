@@ -53,7 +53,6 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		$config				= $this->client->getConfig();											//
 		$library			= $this->getLibrary();													//  get module library instance
 		$this->client->setupDatabaseConnection();													//  setup connection to database
-		$relation			= new Hymn_Module_Graph( $this->client, $library );
 		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 
 		if( $this->flags->dry )
@@ -88,9 +87,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 
-		$modules			= array();																//  prepare list of modules to update
 		$modulesToUpdate	= $outdatedModules;														//  updatable modules are all outdated modules
-
 		$moduleIds			= $this->client->arguments->getArguments();
 		if( $moduleIds ){
 			$outdatedModuleIds	= array_keys( $outdatedModules );
@@ -129,17 +126,13 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		foreach( $modulesToUpdate as $update ){
 			$module			= $library->getModule( $update->id );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-//			$installMode	= $this->client->getModuleInstallMode( $module->id, $this->installMode );
-/*			$relation->addModule( $module, $installType );
-*/
-			$message	= "Updating module '%s' from %s to %s as %s ...";
-			$message	= sprintf(
+			$message		= vsprintf( 'Updating module "%s" from %s to %s as %s ...', array(
 				$message,
 				$module->id,
 				$update->installed,
 				$update->available,
 				$installType
-			);
+			) );
 			$this->client->out( $message );
 			if( !$this->flags->dry )
 				$updater->update( $module, $installType );

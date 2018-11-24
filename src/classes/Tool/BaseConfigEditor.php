@@ -253,13 +253,13 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@return		array
 	 */
 	public function getPropertyList( $activeOnly = TRUE ){
-		$properties = array();
-		foreach( $this->properties as $key => $value ){
+		$list = array();
+		foreach( array_keys( $this->properties ) as $key ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
 				continue;
-			$properties[] = $key;
+			$list[] = $key;
 		}
-		return $properties;
+		return $list;
 	}
 
 	/**

@@ -120,9 +120,8 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 					}
 					else if( $item != $moduleConfigOld->{$item->key} ){
 						foreach( $item as $property => $value ){
-							$propValOld	= $moduleConfigOld->{$item->key}->{$property};
-							$propValNew	= $item->{$property};
-							if( $propValOld !== $propValNew ){
+							$valueOld	= $moduleConfigOld->{$item->key}->{$property};
+							if( $valueOld !== $value ){
 								$this->client->out( '   - '.$item->key.': '.$property.' has changed from '.$propValOld.' to '.$propValNew );
 							}
 						}

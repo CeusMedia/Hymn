@@ -38,13 +38,11 @@
 class Hymn_Module_SQL{
 
 	protected $client;
-//	protected $config;
 	protected $quiet;
 	protected $flags;
 
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
-//		$this->config	= $this->client->getConfig();
 		$this->flags	= (object) array(
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
@@ -93,7 +91,6 @@ class Hymn_Module_SQL{
 			if( !count( $lines ) && $buffer )
 				$statements[]	= join( "\n", $buffer ).';';
 		}
-		$errors	= 0;
 		foreach( $statements as $statement ){
 			try{
 				$result	= $dbc->exec( $statement );

@@ -47,7 +47,7 @@ class Hymn_Command_App_Sources extends Hymn_Command_Abstract implements Hymn_Com
 			"Please use command 'source-list' instead!",											//  death or substitute notice
 			"This fallback will be removed in v0.9.8.",												//  announce removal in version
 		) );
-		$config		= $this->client->getConfig();
+	//	$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$shelves	= $library->getShelves();
 		$this->client->out( count( $shelves )." installed module source(s) detected:" );

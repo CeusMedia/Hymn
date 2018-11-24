@@ -52,7 +52,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
-		$config				= $this->client->getConfig();
+	//	$config				= $this->client->getConfig();
 		$this->client->setupDatabaseConnection();													//  setup connection to database
 		$relation			= new Hymn_Module_Graph( $this->client, $this->library );
 

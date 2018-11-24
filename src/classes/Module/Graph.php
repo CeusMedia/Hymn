@@ -100,7 +100,7 @@ class Hymn_Module_Graph{
 			);
 		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
 		if( count( $node->in ) ){																	//  there are relations
-			foreach( $node->in as $nr => $parent ){													//  iterate these relations
+			foreach( $node->in as $parent ){														//  iterate these relations
 				$parent	= $this->nodes[$parent->id];												//  shortcut parent module
 				$loop	= $this->checkForLoop( $parent, $level + 1, $steps );						//  recurse for related node
 				if( $loop )																			//  found loop
@@ -114,8 +114,8 @@ class Hymn_Module_Graph{
 		$count	= $level;
 		if( count( $node->in ) ){
 			$ways	= array();
-			foreach( $node->in as $nr => $parent )
-				$ways[$nr]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
+			foreach( $node->in as $parent )
+				$ways[]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
 			$count	= max( $ways );
 		}
 		return $count;

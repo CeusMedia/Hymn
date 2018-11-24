@@ -49,7 +49,7 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 		if( $this->client->flags && Hymn_Client::FLAG_DRY )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$config			= $this->client->getConfig();
+	//	$config			= $this->client->getConfig();
 		$library		= $this->getLibrary();
 		$moduleId		= trim( $this->client->arguments->getArgument() );
 

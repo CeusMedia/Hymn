@@ -52,8 +52,6 @@ class Hymn_Client{
 	const EXIT_ON_EXEC			= 16;
 	const EXIT_ON_OUTPUT		= 32;
 
-	protected $application;
-
 	protected $baseArgumentOptions	= array(
 		'db'		=> array(
 			'pattern'	=> '/^--db=(\S+)$/',
@@ -118,6 +116,7 @@ class Hymn_Client{
 
 	static public $pathDefaults	= array(
 		'config'		=> 'config/',
+		'classes'		=> 'classes/',
 		'images'		=> 'images/',
 		'locales'		=> 'locales/',
 		'scripts'		=> 'scripts/',
@@ -125,9 +124,9 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $version	= '0.9.7.9c';
-
 	static public $language	= 'en';
+
+	static public $version	= '0.9.7.9c';
 
 	public $arguments;
 
@@ -136,8 +135,6 @@ class Hymn_Client{
 	protected $dba;
 
 	protected $dbc;
-
-	protected $instance;
 
 	protected $isLiveCopy	= FALSE;
 

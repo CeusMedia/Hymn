@@ -44,7 +44,6 @@ class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
-		$config		= $this->client->getConfig();
 		$shelfId	= $this->client->arguments->getArgument( 0 );
 
 		if( !strlen( trim( $shelfId ) ) ){
