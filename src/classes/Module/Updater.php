@@ -54,13 +54,13 @@ class Hymn_Module_Updater{
 		);
 
 		$app		= $this->config->application;												//  shortcut to application config
-/*		if( isset( $this->app->installMode ) )
-			$this->client->out( "Install Mode: ".$this->app->installMode );
-		if( isset( $this->app->installType ) )
-			$this->client->out( "Install Type: ".$this->app->installType );*/
+/*		if( isset( $app->installMode ) )
+			$this->client->out( "Install Mode: ".$app->installMode );
+		if( isset( $app->installType ) )
+			$this->client->out( "Install Type: ".$app->installType );*/
 
-		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
-			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
+		if( isset( $app->installType ) && $app->installType === "copy" )				//  installation is a copy
+			if( isset( $app->installMode ) && $app->installMode === "live" )			//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy )
 			$this->client->out( array(

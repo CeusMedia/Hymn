@@ -126,7 +126,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.7.9d';
+	static public $version	= '0.9.7.9';
 
 	public $arguments;
 
@@ -441,12 +441,11 @@ class Hymn_Client{
 					$key	= ucwords( str_replace( ".", " ", $key ) );
 					$key	= str_replace( " ", "", lcfirst( $key ) );
 					$this->config->paths->{$key}	= $value;
+					continue;
 				}
-				else{
-					$key	= ucwords( str_replace( ".", " ", $key ) );
-					$key	= str_replace( " ", "", lcfirst( $key ) );
-					$this->config->{$key}	= $value;
-				}
+				$key	= ucwords( str_replace( ".", " ", $key ) );
+				$key	= str_replace( " ", "", lcfirst( $key ) );
+				$this->config->{$key}	= $value;
 			}
 		}
 

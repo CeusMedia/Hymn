@@ -38,16 +38,12 @@
 class Hymn_Module_Config{
 
 	protected $client;
-	protected $config;
 	protected $library;
-	protected $isLiveCopy	= FALSE;
 	protected $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
-		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->app		= $this->config->application;											//  shortcut to application config
 		$this->flags	= (object) array(
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
@@ -81,7 +77,7 @@ class Hymn_Module_Config{
 //			$dom->nodeValue = $configValue;														//  set new value on DOM node
 			$node->setValue( (string) $configValue );
 			if( $this->flags->verbose && !$this->flags->quiet )									//  verbose mode is on
-				$this->client->out( "  … configured ".$key );										//  inform about configures config pair
+				$this->client->out( "  … configured ".$key );									//  inform about configures config pair
 		}
 		if( $this->flags->dry )
 			return;

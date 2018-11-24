@@ -42,6 +42,7 @@ class Hymn_Module_Installer{
 	protected $library;
 	protected $isLiveCopy	= FALSE;
 	protected $flags;
+	protected $app;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
 		$this->client	= $client;
