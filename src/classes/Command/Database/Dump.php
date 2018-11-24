@@ -82,16 +82,16 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$username	= $this->client->getDatabaseConfiguration( 'username' );						//  get username from config
 		$password	= $this->client->getDatabaseConfiguration( 'password' );						//  get password from config
 		$name		= $this->client->getDatabaseConfiguration( 'name' );							//  get database name from config
-
-		$command	= call_user_func_array( "sprintf", array(										//  call sprintf with arguments list
-			"mysqldump -h%s -P%s -u%s -p%s %s %s > %s",												//  command to replace within
-			escapeshellarg( $host ),																//  configured host name as escaped shell arg
-			escapeshellarg( $port ),																//  configured port as escaped shell arg
-			escapeshellarg( $username ),															//  configured username as escaped shell arg
-			escapeshellarg( $password ),															//  configured password as escaped shell arg
+		$command	= vsprintf( "mysqldump %s %s %s", array(										//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+			join( ' ', array(
+				'--host='.escapeshellarg( $host ),													//  configured host name as escaped shell arg
+				'--port='.escapeshellarg( $port ),													//  configured port as escaped shell arg
+				'--user='.escapeshellarg( $username ),												//  configured username as escaped shell arg
+				'--password='.escapeshellarg( $password ),											//  configured password as escaped shell arg
+				'--result-file='.escapeshellarg( $fileName ),
+			) ),
 			escapeshellarg( $name ),																//  configured database name as escaped shell arg
 			$tables,																				//  collected found tables
-			escapeshellarg( $fileName ),															//  dump output filename
 		) );
 
 		$this->client->outVerbose( "DB Server:    ".$host."@".$port );
@@ -101,7 +101,6 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 		$resultCode		= 0;
 		$resultOutput	= array();
-
 		exec( $command, $resultOutput, $resultCode );
 		if( $resultCode !== 0 )
 			return $this->client->out( "Database dump failed." );
@@ -109,8 +108,11 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			unlink( $fileName );
 			return $this->client->out( "Simulated database dump has been successful." );
 		}
+		$this->insertPrefixInFile( $fileName, $prefix );
+		return $this->client->out( "Database dumped to ".$fileName );
+	}
 
-		/*  --  REPLACE PREFIX  --  */
+	protected function insertPrefixInFile( $fileName, $prefix ){
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$prefix.")(.+)(`)@U";		//  build regular expression
 		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
 
@@ -127,8 +129,6 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		fclose( $fpOut );																			//  close target file
 		fclose( $fpIn );																			//  close source file
 		unlink( $fileName."_" );																	//  remove source file
-
-		return $this->client->out( "Database dumped to ".$fileName );
 	}
 
 	protected function _callbackReplacePrefix( $matches ){
