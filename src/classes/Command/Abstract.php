@@ -63,7 +63,15 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
-		return $this->client->getInput( $message, $type, $default, $options, $break );
+		$question	= new Hymn_Tool_Question(
+			$this->client,
+			$message,
+			$type,
+			$default,
+			$options,
+			$break
+		);
+		return $question->ask();
 	}
 
 	protected function deprecate( $messageLines ){
@@ -90,12 +98,11 @@ abstract class Hymn_Command_Abstract{
 	 *	Reduce all available modules in library (from all source) to map by module ID.
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
-	 *	@param		...			$config		...
 	 *	@param		...			$shelfId	...
 	 *	@return		array					Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
-	protected function getAvailableModulesMap( $config, $shelfId = NULL ){
+	protected function getAvailableModulesMap( $shelfId = NULL ){
 		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= array();																		//  prepare empty list of available modules
 		foreach( $library->getModules( $shelfId ) as $module )										//  iterate available modules in library
@@ -105,7 +112,7 @@ abstract class Hymn_Command_Abstract{
 
 	/**
 	 *	Returns library of available modules in found sources.
-	 *	Note: Several sources are stored as shelfes, so same module IDs are allowed.
+	 *	Note: Several sources are stored as shelves, so same module IDs are allowed.
 	 *	Loads library sources on first call, returns already loaded library on second call.
 	 *	Reloading library is possible with flag 'forceReload'.
 	 *	@access		protected

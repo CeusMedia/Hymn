@@ -61,7 +61,7 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Abstract implements Hymn_
 
 		$shelf	= $shelves[$shelfId];
 		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Shelf "'.$shelfId.'" already disabled.' );
+			$this->client->outVerbose( 'Source "'.$shelfId.'" already disabled.' );
 			return;
 		}
 
@@ -75,7 +75,7 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Abstract implements Hymn_
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" would have been disabled.' );
+				$this->client->out( 'Source "'.$shelfId.'" would have been disabled.' );
 		}
 		else{
 			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
@@ -84,7 +84,7 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Abstract implements Hymn_
 				unset( $json->sources->{$shelfId}->default );
 			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" has been disabled.' );
+				$this->client->out( 'Source "'.$shelfId.'" has been disabled.' );
 		}
 
 	}

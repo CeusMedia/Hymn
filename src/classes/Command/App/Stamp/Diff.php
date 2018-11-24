@@ -116,13 +116,23 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 					if( in_array( $item->key, array( 'title', 'values' ) ) )
 						continue;
 					if( !isset( $moduleConfigOld->{$item->key} ) ){
-						$this->client->out( '   - '.$item->key.' has beend added with default value: '.$item->value );
+						$message	= '   - %s has beend added with default value: %s';
+						$this->client->out( vsprintf( $message, array(
+							$item->key,
+							$item->value
+						) ) );
 					}
 					else if( $item != $moduleConfigOld->{$item->key} ){
 						foreach( $item as $property => $value ){
 							$valueOld	= $moduleConfigOld->{$item->key}->{$property};
 							if( $valueOld !== $value ){
-								$this->client->out( '   - '.$item->key.': '.$property.' has changed from '.$propValOld.' to '.$propValNew );
+								$message	= '   - %s: %s has changed from %s to %s';
+								$this->client->out( vsprintf( $message, array(
+									$item->key,
+									$property,
+									$valueOld,
+									$value
+								) ) );
 							}
 						}
 					}
@@ -181,11 +191,8 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		}
 		else
 			$fileName		= $this->getLatestStamp( NULL, $shelfId );
-		if( !( $fileName && file_exists( $fileName ) ) ){
-			if( !$this->flags->quiet )
-				$this->client->out( "No comparable stamp file found." );
-			exit( 0 );
-		}
+		if( !( $fileName && file_exists( $fileName ) ) )
+			$this->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
 	}

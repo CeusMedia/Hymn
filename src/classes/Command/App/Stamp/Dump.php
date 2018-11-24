@@ -56,7 +56,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 		if( $shelfId ){
 			$modules	= $library->listInstalledModules( $shelfId );
 			$fileName	= $pathDump.'stamp_'.$shelfId.'_'.$datetime.'.json';
-			$this->client->out( count( $modules )." modules of shelf ".$shelfId." installed:" );
+			$this->client->out( count( $modules )." modules of source ".$shelfId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();

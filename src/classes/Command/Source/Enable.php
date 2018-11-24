@@ -61,20 +61,20 @@ class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_C
 
 		$shelf	= $shelves[$shelfId];
 		if( $shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Shelf "'.$shelfId.'" already enabled.' );
+			$this->client->outVerbose( 'Source "'.$shelfId.'" already enabled.' );
 			return;
 		}
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" would have been enabled.' );
+				$this->client->out( 'Source "'.$shelfId.'" would have been enabled.' );
 		}
 		else{
 			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
 			$json->sources->{$shelfId}->active	= TRUE;
 			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" has been enabled.' );
+				$this->client->out( 'Source "'.$shelfId.'" has been enabled.' );
 		}
 
 	}

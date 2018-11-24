@@ -102,9 +102,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
 		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
 		$pathSource	= rtrim( trim( $pathSource ), '/' );
-		$bootstrap	= $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE );
 		Hymn_Module_Files::createPath( $pathSource );
-		copy( $this->pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
 		copy( $this->pathPhar."templates/phpunit.xml", 'phpunit.xml' );
 		$content	= file_get_contents( 'phpunit.xml' );
 		$content	= str_replace( "%appKey%", $this->answers['app.key'], $content );
@@ -112,7 +110,10 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$content	= str_replace( "%pathTarget%", $pathTarget, $content );
 		file_put_contents( 'phpunit.xml', $content );
 		$this->client->out( "Configuration file for PHPUnit has been created." );
-		$this->client->out( "Empty bootstrap file for PHPUnit test classes has been created." );
+		if( $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE ) ){
+			copy( $this->pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
+			$this->client->out( "Empty bootstrap file for PHPUnit test classes has been created." );
+		}
 	}
 
 	/**

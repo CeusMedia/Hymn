@@ -58,7 +58,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 		if( $shelfId ){
 			$msgTotal	= '%d module(s) found in module source "%s":';
 			$msgEntry	= '- %s (%s)';
-			$availableModules	= $this->getAvailableModulesMap( $config, $shelfId );
+			$availableModules	= $this->getAvailableModulesMap( $shelfId );
 			foreach( $availableModules as $moduleId => $module ){
 				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
 					$foundModules[$moduleId]	= $module;
@@ -66,7 +66,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 			}
 		}
 		else{
-			$availableModules	= $this->getAvailableModulesMap( $config );
+			$availableModules	= $this->getAvailableModulesMap();
 			foreach( $availableModules as $moduleId => $module ){
 				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
 					$foundModules[$moduleId]	= $module;

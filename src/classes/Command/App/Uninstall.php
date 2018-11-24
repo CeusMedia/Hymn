@@ -54,7 +54,6 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	public function run(){
 	//	$config				= $this->client->getConfig();
 		$this->client->setupDatabaseConnection();													//  setup connection to database
-		$relation			= new Hymn_Module_Graph( $this->client, $this->library );
 
 		if( $this->flags->dry )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
@@ -77,8 +76,16 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			}
 		}
 		else{
-			if( !( $answer = (boolean) $this->flags->force ) )
-				$answer	= $this->client->getInput( "Do you really want to uninstall ALL installed modules?", 'boolean', 'no' );
+			$answer = TRUE;
+			if( !$this->flags->force ){
+				$question	= new Nymn_Tool_Question(
+					$this->client,
+					"Do you really want to uninstall ALL installed modules?",
+					'boolean',
+					'no'
+				);
+				$answer	= $question->ask();
+			}
 			if( !$answer )
 				return;
 			$this->uninstallAllModules( $listInstalled );

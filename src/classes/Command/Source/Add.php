@@ -37,6 +37,35 @@
  */
 class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+		protected $questions	= array(
+			array(
+				'key'		=> 'key',
+				'label'		=> "- Source ID",
+				'type'		=> 'string',
+				'default'	=> 'Local_Modules',
+			),
+			array(
+				'key'		=> 'type',
+				'label'		=> "- Source type",
+				'type'		=> 'string',
+				'default'	=> 'folder',
+				'options'	=> array( "folder" ),
+			),
+			array(
+				'key'		=> 'path',
+				'label'		=> "- Source path",
+				'type'		=> 'string',
+				'default'	=> NULL,
+			),
+			array(
+				'key'		=> 'title',
+				'label'		=> "- Source description",
+				'type'		=> 'string',
+				'default'	=> NULL,
+			),
+		);
+
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -51,72 +80,49 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !isset( $config->sources ) )
 			$config->sources	= (object) array();
 
-		$data	= (object) array(
-			'key'	=> 'Local_Modules',
-			'type'	=> 'folder',
-			'path'	=> NULL,
-			'title'	=> NULL,
-		);
-
-		$questions	= array(
-			(object) array(
-				'key'		=> 'key',
-				'label'		=> "- Source ID",
-			),
-			(object) array(
-				'key'		=> 'type',
-				'label'		=> "- Source type",
-				'options'	=> array( "folder" ),
-			),
-			(object) array(
-				'key'		=> 'path',
-				'label'		=> "- Source path",
-			),
-			(object) array(
-				'key'		=> 'title',
-				'label'		=> "- Source description",
-			),
-		);
-
+		$shelf			= array();
 		$connectable	= FALSE;
 		do{
-			foreach( $questions as $question ){														//  iterate questions
-				$input		= $this->client->getInput(												//  ask for value
-					$question->label,
-					'string',
-					$data->{$question->key},														//  shortcut default value
-					isset( $question->options ) ? $question->options : array(),						//  realize options
+			foreach( $this->questions as $question ){														//  iterate questions
+				if( !isset( $shelf[$question['key']] ) )
+					$shelf[$question['key']]	= $question['default'];
+				$input	= new Hymn_Tool_Question(													//  ask for value
+					$this->client,
+					$question['label'],
+					$question['type'],
+					$shelf[$question['key']],														//  preset default or custom value
+					isset( $question['options'] ) ? $question['options'] : array(),					//  realize options
 					FALSE																			//  no break = inline question
 				);
-				$data->{$question->key}	= $input;													//  assign given value
+				$shelf[$question['key']]	= $input->ask();										//  assign given value
 			}
-			if( isset( $config->sources->{$data->key} ) )
-				$this->client->outError( 'Source with ID "'.$data->key.'" is already registered.' );
-			else if( $data->type === "folder" && !file_exists( $data->path ) )
+			if( isset( $config->sources->{$shelf['key']} ) )
+				$this->client->outError( 'Source with ID "'.$shelf['key'].'" is already registered.' );
+			else if( $shelf['type'] === "folder" && !file_exists( $shelf['path'] ) )
 				$this->client->outError( 'Path to module library source is not existing.' );
 			else
 				$connectable	= TRUE;																//  note connectability for loop break
 		}
 		while( !$connectable );																		//  repeat until connectable
-		$shelfId		= $data->key;
-		$data->title	= $data->title ? $data->title : $data->key;
+		$shelfId		= $shelf['key'];
+		$shelf['title']	= $shelf['title'] ? $shelf['title'] : $shelf['key'];
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" would have been added.' );
+				$this->client->out( 'Source "'.$shelfId.'" would have been added.' );
 		}
 		else{
 			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
 			$json->sources->{$shelfId} = (object) array(
 				'active'	=> TRUE,
-				'title'		=> $data->title,
-				'type'		=> $data->type,
-				'path'		=> $data->path,
+				'title'		=> $shelf['title'],
+				'type'		=> $shelf['type'],
+				'path'		=> $shelf['path'],
 			);
 			$json->sources	= $config->sources;
 			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" has been removed.' );
+				$this->client->out( 'Source "'.$shelfId.'" has been removed.' );
 		}
 	}
 }

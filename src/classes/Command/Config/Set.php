@@ -80,14 +80,17 @@ class Hymn_Command_Config_Set extends Hymn_Command_Abstract implements Hymn_Comm
 		else
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
 
-		if( !strlen( trim( $value ) ) )
-			$value	= trim( $this->client->getInput(
+		if( !strlen( trim( $value ) ) ){
+			$question	= new Hymn_Tool_Question(
+				$this->client,
 				"Value for '".$key."'",
 				'string',
 				$current,
 				array(),
 				FALSE																				//  no break = inline question
-			) );
+			);
+			$value	= trim( $question->ask() );
+		}
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 

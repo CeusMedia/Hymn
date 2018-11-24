@@ -50,7 +50,7 @@ class Hymn_Module_Library{
 
 	public function addShelf( $moduleId, $path, $type, $active = TRUE, $title = NULL ){
 		if( in_array( $moduleId, array_keys( $this->shelves ) ) )
-			throw new Exception( 'Shelf already set by ID: '.$moduleId );
+			throw new Exception( 'Source already set by ID: '.$moduleId );
 		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
 		$isDefault		= $active && !count( $activeShelves );
 		$this->shelves[$moduleId]	= (object) array(
@@ -68,7 +68,7 @@ class Hymn_Module_Library{
 		foreach( $this->shelves as $shelfId => $shelf )
 			if( $shelf->default )
 				return $shelfId;
-		throw new RuntimeException( 'No default shelf available' );
+		throw new RuntimeException( 'No default source available' );
 	}
 
 	public function getModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
@@ -101,7 +101,7 @@ class Hymn_Module_Library{
 		$this->loadModulesInShelves();
 		if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
 			if( $strict )
-				throw new DomainException( 'Shelf "'.$shelfId.'" is not active' );
+				throw new DomainException( 'Source "'.$shelfId.'" is not active' );
 			return NULL;
 		}
 		foreach( $this->modules[$shelfId] as $module )
@@ -116,7 +116,7 @@ class Hymn_Module_Library{
 		$this->loadModulesInShelves();
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
-				throw new DomainException( '__Invalid shelf ID: '.$shelfId );
+				throw new DomainException( 'Invalid source ID: '.$shelfId );
 			$modules	= array();
 			foreach( $this->modules[$shelfId] as $module ){
 				$module->sourceId	= $shelfId;
@@ -138,7 +138,7 @@ class Hymn_Module_Library{
 
 	public function getShelf( $moduleId, $withModules = FALSE ){
 		if( !in_array( $moduleId, array_keys( $this->shelves ) ) )
-			throw new DomainException( '_Invalid shelf ID: '.$moduleId );
+			throw new DomainException( 'Invalid source ID: '.$moduleId );
 		$shelf	= $this->shelves[$moduleId];
 		if( !$withModules )
 			unset( $shelf->modules );

@@ -145,7 +145,7 @@ class Hymn_Module_Graph{
 				$this->client->outError( 'Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );
 				foreach( array_values( $loop->modules ) as $nr => $item )
 					$this->client->out( ' '.str_pad( $nr + 1, 3, ' ', STR_PAD_LEFT ).'. '.$item->id.' @ '.$item->sourceId );
-				exit;
+				$this->client->outError( 'Please resolve loop, first!', Hymn_Client::EXIT_ON_RUN );
 			}
 			$edges	= $this->countModuleEdgesToRoot( $node );
 			$rand	= str_pad( rand( 0, $max ), 8, '0', STR_PAD_LEFT );

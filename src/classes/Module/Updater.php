@@ -181,7 +181,7 @@ class Hymn_Module_Updater{
 			$questionAnswers[]	= 'e';
 			$this->client->out( '  - [e] enter value' );
 
-			$toolDecision	= new Hymn_Tool_Question(
+			$decision	= new Hymn_Tool_Question(
 				$this->client,
 				"  = Which config value?",
 				'string',
@@ -189,7 +189,7 @@ class Hymn_Module_Updater{
 				$questionAnswers,
 				FALSE
 			);
-			$answer			= $toolDecision->ask();
+			$answer			= $decision->ask();
 			switch( $answer ){
 				case "e":
 					$question	= new Hymn_Tool_Question(
@@ -212,8 +212,8 @@ class Hymn_Module_Updater{
 					$inputValues[$configKey]	= $valueSuggest->get( TRUE );
 					break;
 				case "k":
-				default:
 					$inputValues[$configKey]	= $valueCurrent->get( TRUE );
+					break;
 			}
 		}
 

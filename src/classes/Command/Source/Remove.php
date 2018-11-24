@@ -62,13 +62,13 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_C
 
 		$shelf	= $shelves[$shelfId];
 		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Shelf "'.$shelfId.'" is active and needs to be disabled, first.' );
+			$this->client->outVerbose( 'Source "'.$shelfId.'" is active and needs to be disabled, first.' );
 			return;
 		}
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" would have been removed.' );
+				$this->client->out( 'Source "'.$shelfId.'" would have been removed.' );
 		}
 		else{
 			unset( $config->sources->{$shelfId} );
@@ -76,7 +76,7 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Abstract implements Hymn_C
 			$json->sources	= $config->sources;
 			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 			if( !$this->flags->quiet )
-				$this->client->out( 'Shelf "'.$shelfId.'" has been removed.' );
+				$this->client->out( 'Source "'.$shelfId.'" has been removed.' );
 		}
 	}
 }

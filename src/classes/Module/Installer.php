@@ -139,7 +139,8 @@ class Hymn_Module_Installer{
 						$moduleConfigKey,
 					) ) );
 				}
-				$configValue	= $this->client->getInput(										//  get new value from console
+				$question	= new Hymn_Tool_Question(											//  get new value from console
+					$this->client,
 					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
 						$module->id,
 						$moduleConfigKey,
@@ -149,6 +150,7 @@ class Hymn_Module_Installer{
 					$moduleConfigData->values,													//  get suggested values if set
 					FALSE																		//  no break = inline question
 				);
+				$configValue	= $question->ask();
 			}
 			if( $moduleConfigData->value !== $configValue )
 				$changeSet[$moduleConfigKey]	= $configValue;

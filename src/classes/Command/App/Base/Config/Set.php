@@ -58,15 +58,17 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		$current	= $editor->getProperty( $key, FALSE );
 
-		if( !strlen( trim( $value ) ) )
-			$value	= trim( $this->client->getInput(
+		if( !strlen( trim( $value ) ) ){
+			$question	= new Hymn_Tool_Question(
+				$this->client,
 				"Value for '".$key."'",
 				'string',
 				$current,
 				array(),
 				FALSE																				//  no break = inline question
-			) );
-
+			);
+			$value	= trim( $question->ask() );
+		}
 		if( !$this->flags->dry ){
 			$editor->setProperty( $key, $value );
 			clearstatcache();

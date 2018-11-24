@@ -57,7 +57,7 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		if( isset( $config->modules->{$moduleId} ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is already registered' );
 
-		$availableModules	= $this->getAvailableModulesMap( $config );
+		$availableModules	= $this->getAvailableModulesMap();
 
 		if( !array_key_exists( $moduleId, $availableModules ) )
 			throw new RuntimeException( sprintf( 'Module "%s" is not available', $moduleId ) );
@@ -69,13 +69,15 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$moduleConfigValues	= array();
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
-			$actualValue	= trim( $this->client->getInput(
+			$question		= new Hymn_Tool_Question(
+				$this->client,
 				sprintf( 'Value for "%s:%s"', $module->id, $moduleConfig->key ),
 				$moduleConfig->type,
 				$moduleConfig->value,
 				$moduleConfig->values,
 				FALSE																				//  no break = inline question
-			) );
+			);
+			$actualValue	= trim( $question->ask() );
 			if( in_array( $moduleConfig->type, array( 'bool', 'boolean' ) ) ){
 				$actualValue	= $actualValue ? 'yes' : 'no';
 				$defaultValue	= 'no';

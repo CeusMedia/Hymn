@@ -57,7 +57,7 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
 
-		$availableModules	= $this->getAvailableModulesMap( $config );
+		$availableModules	= $this->getAvailableModulesMap();
 
 		if( !isset( $config->modules->{$module} ) && !isset( $availableModules[$module] ) )
 			throw new InvalidArgumentException( 'Module "'.$module.'" not installed and not configured' );

@@ -126,7 +126,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8';
+	static public $version	= '0.9.7.9d';
 
 	public $arguments;
 
@@ -274,35 +274,19 @@ class Hymn_Client{
 	}
 
 	public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
-		$typeIsBoolean	= in_array( $type, array( 'bool', 'boolean' ) );
-		$typeIsInteger	= in_array( $type, array( 'int', 'integer' ) );
-		$typeIsNumber	= in_array( $type, array( 'float', 'double', 'decimal' ) );
-		if( $typeIsBoolean ){
-			$options		= array( 'y', 'n' );
-			$defaultIsYes	= in_array( strtolower( $default ), array( 'y', 'yes', '1' ) );
-			$default		= $defaultIsYes ? 'yes' : 'no';
-		}
-		if( strlen( trim( $default ) ) )
-			$message	.= " [".$default."]";
-		if( is_array( $options ) && count( $options ) )
-			$message	.= " (".implode( "|", $options ).")";
-		if( !$break )
-			$message	.= ": ";
-		do{
-			$this->out( $message, $break );
-			$handle	= fopen( "php://stdin","r" );
-			$input	= trim( fgets( $handle ) );
-			if( !strlen( $input ) && $default )
-				$input	= $default;
-		}
-		while( $options && is_null( $default ) && !in_array( $input, $options ) );
-		if( $typeIsBoolean )
-			$input	= in_array( strtolower( $input ), array( 'y', 'yes' ) );
-		if( $typeIsInteger )
-			$input	= (int) $input;
-		if( $typeIsNumber )
-			$input	= (float) $input;
-		return $input;
+		$this->outDeprecation( array(
+			'Deprecated - please use Hymn_Command_*::ask instead!',
+			'Method will be removed in v0.9.9.',
+		) );
+		$question	= new Hymn_Tool_Question(
+			$this->client,
+			$message,
+			$type,
+			$default,
+			$options,
+			$break
+		);
+		return $question->ask();
 	}
 
 	public function getLocale(){
@@ -330,9 +314,9 @@ class Hymn_Client{
 
 	public function getModuleInstallShelf( $moduleId, $availableShelfIds, $defaultInstallShelfId ){
 		if( !array( $availableShelfIds ) )
-			throw new InvalidArgumentException( 'Available shelf IDs must be an array' );
+			throw new InvalidArgumentException( 'Available source IDs must be an array' );
 		if( !count( $availableShelfIds ) )
-			throw new InvalidArgumentException( 'No available shelf IDs given' );
+			throw new InvalidArgumentException( 'No available source IDs given' );
 
 		$modules	= $this->config->modules;														//  shortcut configured modules
 		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
@@ -510,16 +494,16 @@ class Hymn_Client{
 			throw new RuntimeException( 'PDO driver "'.$this->dba->driver.'" is not available' );
 		}
 		while( empty( $this->dba->name ) ){
-			$this->dba->name		= $this->getInput( "Database Name:" );
+			$this->dba->name		= $this->ask( 'Database Name:' );
 		}
 		while( empty( $this->dba->username ) ){
-			$this->dba->username	= $this->getInput( "Database Username:" );
+			$this->dba->username	= $this->ask( 'Database Username:' );
 		}
 		while( empty( $this->dba->password ) ){
-			$this->dba->password	= $this->getInput( "Database Password:" );
+			$this->dba->password	= $this->ask( 'Database Password:' );
 		}
 		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= $this->getInput( "Table Prefix:" );
+			$this->dba->prefix		= $this->ask( 'Table Prefix:' );
 		}
 
 		if( $this->dba->name && !$usesDatabaseModule ){

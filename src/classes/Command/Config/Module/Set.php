@@ -58,7 +58,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 		$configKey	= join( ".", $parts );
 		$value	= $this->client->arguments->getArgument( 1 );
 
-		$availableModules	= $this->getAvailableModulesMap( $config );
+		$availableModules	= $this->getAvailableModulesMap();
 
 		if( !isset( $config->modules->{$moduleId} ) )
 			$config->modules->{$moduleId}	= (object) array();
@@ -81,14 +81,17 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 			}
 		}
 
-		if( !strlen( trim( $value ) ) )
-			$value	= trim( $this->client->getInput(
+		if( !strlen( trim( $value ) ) ){
+			$question	= new Hymn_Tool_Question(
+				$this->client,
 				'Value for "'.$moduleId.':'.$configKey.'"',
 				$configType,
 				$configDefault,
 				$configValues,
 				FALSE																				//  no break = inline question
-			) );
+			);
+			$value	= trim( $question->ask() );
+		}
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 

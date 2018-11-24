@@ -37,6 +37,45 @@
  */
 class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	protected 		$questions	= array(
+		'driver'	=> array(
+			'key'		=> 'driver',
+			'label'		=> "- PDO Driver",
+			'type'		=> 'string',
+			'options'	=> array(),
+		),
+		array(
+			'key'		=> 'host',
+			'label'		=> "- Server Host",
+			'type'		=> 'string',
+		),
+		array(
+			'key'		=> 'port',
+			'label'		=> "- Server Port",
+			'type'		=> 'integer',
+		),
+		array(
+			'key'		=> 'name',
+			'label'		=> "- Database Name",
+			'type'		=> 'string',
+		),
+		array(
+			'key'		=> 'username',
+			'label'		=> "- Username",
+			'type'		=> 'string',
+		),
+		array(
+			'key'		=> 'password',
+			'label'		=> "- Password",
+			'type'		=> 'string',
+		),
+		array(
+			'key'		=> 'prefix',
+			'label'		=> "- Table Prefix",
+			'type'		=> 'string',
+		)
+	);
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -62,47 +101,21 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		$dba->username	= isset( $dba->username ) ? $dba->username : NULL;
 		$dba->password	= isset( $dba->password ) ? $dba->password : NULL;
 
-		$drivers		= PDO::getAvailableDrivers();
-
-		$questions	= array(
-			(object) array(
-				'key'		=> 'driver',
-				'label'		=> "- PDO Driver",
-				'options'	=> $drivers
-			),
-			(object) array(
-				'key'		=> 'host',
-				'label'		=> "- Server Host"
-			),
-			(object) array(
-				'key'		=> 'port',
-				'label'		=> "- Server Port"
-			),
-			(object) array(
-				'key'		=> 'name',
-				'label'		=> "- Database Name"
-			),
-			(object) array(
-				'key'		=> 'username',
-				'label'		=> "- Username"
-			),
-			(object) array(
-				'key'		=> 'password',
-				'label'		=> "- Password"
-			),
-			(object) array(
-				'key'		=> 'prefix',
-				'label'		=> "- Table Prefix"
-			)
-		);
-
+		$this->questions['driver']['options']	= pdo_drivers();//PDO::getAvailableDrivers();
 		$connectable	= FALSE;
 		do{																							//  do in loop
-			foreach( $questions as $question ){														//  iterate questions
-				$default	= $dba->{$question->key};												//  shortcut default
-				$options	= isset( $question->options ) ? $question->options : array();			//  realize options
-				$input		= $this->client->getInput( $question->label, 'string', $default, $options, FALSE );	//  ask for value
-				$dba->{$question->key}	= $input;													//  assign given value
+			foreach( $this->questions as $question ){														//  iterate questions
+				$default	= $dba->{$question['key']};												//  shortcut default
+				$options	= isset( $question['options'] ) ? $question['options'] : array();		//  realize options
+				$input		= new Hymn_Tool_Question(												//  ask for value
+					$this->client,
+					$question['label'],
+					$question['type'],
+					$default,
+					$options,
+					FALSE
+				);
+				$dba->{$question['key']}	= $input->ask();											//  assign given value
 			}
 			$dsn			= $dba->driver.':'.implode( ";", array(									//  render PDO DSN
 				"host=".$dba->host,

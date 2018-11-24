@@ -25,14 +25,10 @@ class Hymn_Tool_Question{
 		$message		= $this->message;
 		$options		= $this->options;
 		if( $typeIsBoolean ){
-			if( in_array( strtolower( $this->default ), array( 'y', 'yes', '1' ) ) ){
-				$options	= array( 'y', 'n' );
+			$options	= array( 'y', 'n' );
+			$default	= 'no';
+			if( in_array( strtolower( $this->default ), array( 'y', 'yes', '1' ) ) )
 				$default	= 'yes';
-			}
-			else {
-				$options	= array( 'y', 'n' );
-				$default	= 'no';
-			}
 		}
 		if( /*!$typeIsBoolean && */strlen( trim( $default ) ) )
 			$message	.= " [".$default."]";
@@ -49,22 +45,13 @@ class Hymn_Tool_Question{
 		}
 		while( $options && is_null( $default ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
-			$input	= in_array( $input, array( 'y', 'yes', '1' ) ) ? TRUE : FALSE;
+			$input	= in_array( strtolower( $input ), array( 'y', 'yes', '1' ) );
 		if( $typeIsInteger )
 			$input	= (int) $input;
 		if( $typeIsNumber )
 			$input	= (float) $input;
 		return $input;
 	}
-
-	/**
-	 *	@deprecated
-	 *	@todo			to be removed in v0.9.8
-	 */
-/*	static public function askStatic( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
-		$input	= new self( $message, $type, $default, $options, $break );
-		return $input->ask();
-	}*/
 
 	public function setBreak( $break = TRUE ){
 		$this->break	= $break;
