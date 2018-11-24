@@ -110,20 +110,19 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
 				$this->client->out( 'Source "'.$shelfId.'" would have been added.' );
+			return;
 		}
-		else{
-			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-			$json->sources->{$shelfId} = (object) array(
-				'active'	=> TRUE,
-				'title'		=> $shelf['title'],
-				'type'		=> $shelf['type'],
-				'path'		=> $shelf['path'],
-			);
-			$json->sources	= $config->sources;
-			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
-			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" has been removed.' );
-		}
+		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+		$json->sources->{$shelfId} = (object) array(
+			'active'	=> TRUE,
+			'title'		=> $shelf['title'],
+			'type'		=> $shelf['type'],
+			'path'		=> $shelf['path'],
+		);
+		$json->sources	= $config->sources;
+		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Source "'.$shelfId.'" has been removed.' );
 	}
 }
 ?>

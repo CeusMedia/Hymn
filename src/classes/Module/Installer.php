@@ -40,9 +40,6 @@ class Hymn_Module_Installer{
 	protected $client;
 	protected $config;
 	protected $library;
-	protected $dbc;
-	protected $files;
-	protected $sql;
 	protected $isLiveCopy	= FALSE;
 	protected $flags;
 
@@ -50,9 +47,6 @@ class Hymn_Module_Installer{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->dbc		= $client->setupDatabaseConnection();
-		$this->files	= new Hymn_Module_Files( $client );
-		$this->sql		= new Hymn_Module_SQL( $client );
 		$this->app		= $this->config->application;											//  shortcut to application config
 		$this->flags	= (object) array(
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
@@ -68,12 +62,13 @@ class Hymn_Module_Installer{
 		if( isset( $this->app->installType ) && $this->app->installType === "copy" )			//  installation is a copy
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )		//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
-		if( $this->isLiveCopy ){
-			$this->client->out( "" );
-			$this->client->out( "ATTENTION: This build is a live installation in copy mode." );
-			$this->client->out( "There is not uplink to commit file changes to source repository." );
-			$this->client->out( "" );
-		}
+		if( $this->isLiveCopy )
+			$this->client->out( array(
+				'',
+				'ATTENTION: This build is a live installation in copy mode.',
+				'There is not uplink to commit file changes to source repository.',
+				'',
+			) );
 	}
 
 	/**
@@ -178,13 +173,15 @@ class Hymn_Module_Installer{
 	}
 
 	public function install( $module, $installType = "link" ){
+		$files	= new Hymn_Module_Files( $client );
+		$sql	= new Hymn_Module_SQL( $client );
 		try{
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_FILES ) ){
-				$this->files->copyFiles( $module, $installType );								//  copy module files
+				$files->copyFiles( $module, $installType );										//  copy module files
 			}
 			$this->configure( $module );														//  configure module
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
-				$this->sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );				//  run SQL scripts, not for live copy builds
+				$sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );					//  run SQL scripts, not for live copy builds
 			return TRUE;
 		}
 		catch( Exception $e ){
@@ -194,19 +191,21 @@ class Hymn_Module_Installer{
 	}
 
 	public function uninstall( $module ){
+		$files	= new Hymn_Module_Files( $client );
+		$sql	= new Hymn_Module_SQL( $client );
 		try{
 			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$pathConfig			= $this->client->getConfigPath();
 
 			$localModule->path	= $appUri;
-			$this->files->removeFiles( $localModule );											//  remove module files
+			$files->removeFiles( $localModule );											//  remove module files
 			if( !$this->flags->dry ){															//  not a dry run
 				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );							//  remove module configuration file
 				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );					//  remove modules cache file
 			}
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )							//  database actions are enabled
-				$this->sql->runModuleUninstallSql( $localModule );								//  run SQL scripts
+				$sql->runModuleUninstallSql( $localModule );								//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){

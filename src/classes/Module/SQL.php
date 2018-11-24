@@ -38,7 +38,6 @@
 class Hymn_Module_SQL{
 
 	protected $client;
-	protected $quiet;
 	protected $flags;
 
 	public function __construct( Hymn_Client $client ){

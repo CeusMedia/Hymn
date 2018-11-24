@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2018 Christian Würker
+ *	@copyright		2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,40 +30,29 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2018 Christian Würker
+ *	@copyright		2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface{
+ abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract{
 
-	/**
-	 *	Execute this command.
-	 *	Implements flags: dry, force, quiet, verbose
-	 *	@access		public
-	 *	@return		void
-	 */
-	public function run(){
-		$config		= $this->client->getConfig();
-		if( !( $shelf = $this->getShelfByArgument() ) )
-			return;
+	protected function getShelfByArgument(){
+		$shelfId	= $this->client->arguments->getArgument( 0 );
 
-		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Source "'.$shelfId.'" is active and needs to be disabled, first.' );
-			return;
+		if( !strlen( trim( $shelfId ) ) ){
+			if( $this->flags->force )
+				return;
+			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
 		}
 
-		if( $this->flags->dry ){
-			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" would have been removed.' );
-			return;
+		$shelves	= $this->getLibrary()->getShelves();
+		if( !array_key_exists( $shelfId, $shelves ) ){
+			if( $this->flags->force )
+				return;
+			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
 		}
-		unset( $config->sources->{$shelfId} );
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources	= $config->sources;
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
-		if( !$this->flags->quiet )
-			$this->client->out( 'Source "'.$shelfId.'" has been removed.' );
+		return $shelves[$shelfId];
 	}
 }
 ?>

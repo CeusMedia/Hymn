@@ -46,27 +46,18 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@return		void
 	 */
 	public function run(){
-	//	$config	= $this->client->getConfig();
-
-		//  version 2: use library with loaded shelves
-		//  comparison to replaced version 1:
-		//  - more stable, OOP, less code, sources already evaluated
-		//  - 50% slower than version 1 (180µs)
-		#$start	= microtime( TRUE );
 		$shelves		= $this->getLibrary()->getActiveShelves();
-		$this->client->out( sprintf( "Found %d source(s):", count( $shelves ) ) );
+		$this->client->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
 		foreach( $shelves as $shelfId => $shelf ){
-			$this->client->out();
-			$this->client->out( "* ".$shelfId.":" );
-			if( $shelf->title )
-				$this->client->out( "  - Title:   ".$shelf->title );
-			$this->client->out( "  - Type:    ".ucfirst( $shelf->type ) );
-			$this->client->out( "  - Path:    ".$shelf->path );
-			$this->client->out( "  - Active:  ".( $shelf->active ? 'yes' : 'no' ) );
-			if( $shelf->default )
-				$this->client->out( "  - Default: ".( $shelf->default ? 'yes' : 'no' ) );
+			$this->client->out( array(
+				'* '.$shelfId.':',
+				'  - Title:   '.$shelf->title,
+				'  - Type:    '.ucfirst( $shelf->type ),
+				'  - Path:    '.$shelf->path,
+				'  - Active:  '.( $shelf->active ? 'yes' : 'no' ),
+				'  - Default: '.( $shelf->default ? 'yes' : 'no' )
+			) );
 		}
-		#$this->client->outVerbose( 'Time: '.round( ( microtime( TRUE ) - $start ) * 1000 * 1000 ).'µs' );
 	}
 }
 ?>

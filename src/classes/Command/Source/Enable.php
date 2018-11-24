@@ -44,22 +44,9 @@ class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_C
 	 *	@return		void
 	 */
 	public function run(){
-		$shelfId	= $this->client->arguments->getArgument( 0 );
+		if( !( $shelf = $this->getShelfByArgument() ) )
+			return;
 
-		if( !strlen( trim( $shelfId ) ) ){
-			if( $this->flags->force )
-				return;
-			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
-		}
-
-		$shelves	= $this->getLibrary()->getShelves();
-		if( !array_key_exists( $shelfId, $shelves ) ){
-			if( $this->flags->force )
-				return;
-			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
-		}
-
-		$shelf	= $shelves[$shelfId];
 		if( $shelf->active && !$this->flags->force ){
 			$this->client->outVerbose( 'Source "'.$shelfId.'" already enabled.' );
 			return;
@@ -68,15 +55,13 @@ class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_C
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
 				$this->client->out( 'Source "'.$shelfId.'" would have been enabled.' );
+			return;
 		}
-		else{
-			$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-			$json->sources->{$shelfId}->active	= TRUE;
-			file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
-			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" has been enabled.' );
-		}
-
+		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+		$json->sources->{$shelfId}->active	= TRUE;
+		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Source "'.$shelfId.'" has been enabled.' );
 	}
 }
 ?>

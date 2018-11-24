@@ -46,17 +46,16 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@return		void
 	 */
 	public function run(){
-		$filename	= Hymn_Client::$fileName;
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'File "'.$filename.'" is missing' );
-		$config	= json_decode( file_get_contents( $filename ) );
-		if( is_null( $config ) )
-			throw new RuntimeException( 'Configuration file "'.$filename.'" is not valid JSON' );
-
-		$key	= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
+		$config		= $this->loadConfig();
+		$current	= $this->getCurrentValue( $config, $key );
+		$this->client->out( $current );
+	}
 
+	/*  --  PROTECTED  --  */
+	protected function getCurrentValue( $config, $key ){
 		$parts	= explode( ".", $key );
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
@@ -65,17 +64,30 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 				$config->{$parts[0]}->{$parts[1]}	= (object) array();
 			if( !isset( $config->{$parts[0]}->{$parts[1]}->{$parts[2]} ) )
 				$config->{$parts[0]}->{$parts[1]}->{$parts[2]}	= NULL;
-			$current	= $config->{$parts[0]}->{$parts[1]}->{$parts[2]};
+			return $config->{$parts[0]}->{$parts[1]}->{$parts[2]};
 		}
 		else if( count( $parts ) === 2 ){
 			if( !isset( $config->{$parts[0]} ) )
 				$config->{$parts[0]}	= (object) array();
 			if( !isset( $config->{$parts[0]}->{$parts[1]} ) )
 				$config->{$parts[0]}->{$parts[1]}	= NULL;
-			$current	= $config->{$parts[0]}->{$parts[1]};
+			return $config->{$parts[0]}->{$parts[1]};
 		}
-		else
-			throw new InvalidArgumentException( 'Invalid key - must be of syntax "path.(subpath.)key"' );
-		$this->client->out( $current );
+		$this->client->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
+	}
+
+	protected function loadConfig(){
+		$filePath	= Hymn_Client::$fileName;
+		if( !file_exists( $filePath ) )
+			throw new RuntimeException( 'File "'.$filePath.'" is missing' );
+		$config	= json_decode( file_get_contents( $filePath ) );
+		if( json_last_error() ){
+			$message	= 'Configuration file "%s" is not valid JSON: %s';
+			$this->client->outError(
+				vsprintf( $message, array( $filePath, json_last_error_msg() ) ),
+				Hymn_Client::EXIT_ON_RUN
+			);
+		}
+		return $config;
 	}
 }

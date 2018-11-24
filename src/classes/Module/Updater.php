@@ -40,9 +40,6 @@ class Hymn_Module_Updater{
 	protected $client;
 	protected $config;
 	protected $library;
-	protected $dbc;
-	protected $files;
-	protected $sql;
 	protected $isLiveCopy	= FALSE;
 	protected $flags;
 
@@ -50,16 +47,13 @@ class Hymn_Module_Updater{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->dbc		= $client->setupDatabaseConnection();
-		$this->files	= new Hymn_Module_Files( $client );
-		$this->sql		= new Hymn_Module_SQL( $client );
-		$this->app		= $this->config->application;												//  shortcut to application config
 		$this->flags	= (object) array(
 			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $client->flags & Hymn_Client::FLAG_VERBOSE,
 		);
 
+		$app		= $this->config->application;												//  shortcut to application config
 /*		if( isset( $this->app->installMode ) )
 			$this->client->out( "Install Mode: ".$this->app->installMode );
 		if( isset( $this->app->installType ) )
@@ -68,12 +62,13 @@ class Hymn_Module_Updater{
 		if( isset( $this->app->installType ) && $this->app->installType === "copy" )				//  installation is a copy
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )			//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
-		if( $this->isLiveCopy ){
-			$this->client->out( "" );
-			$this->client->out( "ATTENTION: This build is a live installation in copy mode." );
-			$this->client->out( "There is not uplink to commit file changes to source repository." );
-			$this->client->out( "" );
-		}
+		if( $this->isLiveCopy )
+			$this->client->out( array(
+				'',
+				'ATTENTION: This build is a live installation in copy mode.',
+				'There is not uplink to commit file changes to source repository.',
+				'',
+			) );
 	}
 
 	/**
@@ -231,8 +226,10 @@ class Hymn_Module_Updater{
 	}
 
 	public function update( $module, $installType ){
+		$files	= new Hymn_Module_Files( $client );
+		$sql	= new Hymn_Module_SQL( $client );
 		try{
-			$appUri				= $this->app->uri;
+			$appUri				= $this->config->application->uri;
 			$localModules		= $this->library->listInstalledModules();
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$localModule->path	= $appUri;
@@ -255,20 +252,20 @@ class Hymn_Module_Updater{
 					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}
-			$this->files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
-			$this->sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
-			$this->files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
+			$files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
+			$sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
+			$files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
 
-			$this->files->removeFiles( $localModule );												//  remove module files
+			$files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){
 //				$pathConfig	= $this->client->getConfigPath();
 //				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
 				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 			}
-			$this->files->copyFiles( $module, $installType );										//  copy module files
+			$files->copyFiles( $module, $installType );										//  copy module files
 			$this->reconfigure( $module, TRUE );													//  configure module skipping unchanged values
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
-				$this->sql->runModuleUpdateSql( $localModule, $module );							//  run SQL scripts
+				$sql->runModuleUpdateSql( $localModule, $module );							//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){
