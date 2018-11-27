@@ -40,7 +40,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	protected $defaultPath;
 
 	protected function __onInit(){
-		$this->defaultPath		= $this->client->getConfigPath()."sql/";
+		$this->defaultPath		= $this->client->getConfigPath().'sql/';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return $this->client->out( "Database can NOT be connected." );
+			return $this->client->out( 'Database can NOT be connected.' );
 
 		$pathName		= $this->client->arguments->getArgument( 0 );
 		if( $pathName && file_exists( $pathName ) ){
@@ -68,83 +68,72 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		else if( file_exists( $this->defaultPath ) )
 			$fileName		= $this->getLatestDump( NULL, TRUE );
 		else
-			return $this->client->out( "No loadable database file or folder found." );
+			$this->client->outError( 'No loadable database file or folder found.', Hymn_Client::EXIT_ON_RUN );
 
-		$this->client->out( "File: ".$fileName );
+//		$this->client->outVerbose( 'File: '.$fileName );
 		if( !( $fileName && file_exists( $fileName ) ) )
-			return $this->client->out( "No loadable database file found." );
+			return $this->client->out( 'No loadable database file found.' );
 
+		if( !is_readable( $fileName ) )
+			$this->client->outError( 'Missing read access to SQL script: '.$fileName );
 		try{
-			if( !is_readable( $fileName ) )
-				throw new RuntimeException( 'Missing read access to SQL script' );
-
 			$host		= $this->client->getDatabaseConfiguration( 'host' );						//  get server host from config
 			$port		= $this->client->getDatabaseConfiguration( 'port' );						//  get server port from config
 			$username	= $this->client->getDatabaseConfiguration( 'username' );					//  get username from config
 			$password	= $this->client->getDatabaseConfiguration( 'password' );					//  get password from config
 			$name		= $this->client->getDatabaseConfiguration( 'name' );						//  get database name from config
 			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );						//  get table prefix from config
-			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
-			$tempName	= $fileName.".tmp";
+			$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );			//  get file with applied table prefix
+			$fileSize	= Hymn_Tool_FileSize::get( $importFile );									//  format file size
 
-			$this->client->outVerbose( 'Applying table prefix ...' );
-			$fpIn		= fopen( $fileName, "r" );													//  open source file
-			$fpOut		= fopen( $tempName, "a" );													//  prepare empty target file
-			while( !feof( $fpIn ) ){																//  read input file until end
-				$line	= fgets( $fpIn );															//  read line buffer
-				$line	= str_replace( "<%?prefix%>", $prefix, $line );								//  replace table prefix placeholder
-				fwrite( $fpOut, $line );															//  write buffer to target file
-			}
-			fclose( $fpOut );																		//  close target file
-			fclose( $fpIn );																		//  close source file
-
-			$command	= "cat /proc/cpuinfo | grep processor | wc -l";
-			$cores		= (int) shell_exec( $command );
-			$command	= vsprintf( "mysqlimport %s %s %s", array(
+			$cores		= (int) shell_exec( 'cat /proc/cpuinfo | grep processor | wc -l' );			//  get number of CPU cores
+			$command	= vsprintf( 'mysql %s %s < %s', array(
 				join( ' ', array(
 					'--host='.escapeshellarg( $host ),												//  configured host as escaped shell arg
 					'--port='.escapeshellarg( $port ),												//  configured port as escaped shell arg
 					'--user='.escapeshellarg( $username ),											//  configured username as escaped shell arg
 					'--password='.escapeshellarg( $password ),										//  configured pasword as escaped shell arg
-					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
+//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
 					'--force',																		//  continue if error eccoured
-					'--replace',																	//  replace it already existing
+//					'--replace',																	//  replace it already existing
 				) ),
 				escapeshellarg( $name ),															//  configured database name as escaped shell arg
-				escapeshellarg( $tempName ),														//  temp file name as escaped shell arg
+				escapeshellarg( $importFile ),														//  temp file name as escaped shell arg
 			) );
 
-			$this->client->outVerbose( "Import file:  ".$fileName );
-			$this->client->outVerbose( "File size:    ".$fileSize );
-			$this->client->outVerbose( "DB Server:    ".$host."@".$port );
-			$this->client->outVerbose( "Database:     ".$name );
-			$this->client->outVerbose( "Table prefix: ".( $prefix ? $prefix : "- (none)" ) );
-			$this->client->outVerbose( "Access as:    ".$username );
-			if( $this->flags->dry )
-				return $this->client->out( "Database setup okay - import itself not simulated." );
-
-			$this->client->out( "Importing ".$fileName." (".$fileSize.") ..." );
-			exec( $command );
-			unlink( $tempName );
-//			return $this->client->out( "Database loaded from ".$fileName );
+			$this->client->outVerbose( 'Import file:  '.$fileName );
+			$this->client->outVerbose( 'File size:    '.$fileSize );
+			$this->client->outVerbose( 'DB Server:    '.$host.'@'.$port );
+			$this->client->outVerbose( 'Database:     '.$name );
+			$this->client->outVerbose( 'Table prefix: '.( $prefix ? $prefix : '- (none)' ) );
+			$this->client->outVerbose( 'Access as:    '.$username );
+			if( $this->flags->dry ){
+				return $this->client->out( 'Database setup okay - import itself not executed.' );
+			}
+			else {
+				$this->client->outVerbose( 'Command:      '.$command );
+				$this->client->out( 'Importing '.$fileName.' ('.$fileSize.') ...' );
+				exec( $command );
+			}
+			@unlink( $importFile );
 		}
 		catch( Exception $e ){
-			$this->client->out( "Importing ".$fileName." failed: ".$e->getMessage() );
+			$this->client->out( 'Importing '.$fileName.' failed: '.$e->getMessage() );
 		}
 	}
 
 	protected function getLatestDump( $path = NULL ){
 		$pathConfig	= $this->client->getConfigPath();
-		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig."sql/";
+		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig.'sql/';
 		if( !file_exists( $path ) )
 			throw new RuntimeException( 'Path is not existing: '.$path );
-		$this->client->outVerbose( "Scanning folder ".$path."..." );
+		$this->client->outVerbose( 'Scanning folder '.$path.'...' );
 		$list	= array();
 		$index	= new DirectoryIterator( $path );
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
 				continue;
-			$this->client->outVerbose( "Found: ".$entry->getFilename() );
+			$this->client->outVerbose( 'Found: '.$entry->getFilename() );
 			if( !preg_match( '/^dump_[0-9:_-]+\.sql$/', $entry->getFilename() ) )
 				continue;
 			$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
@@ -155,5 +144,21 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			return $path.array_shift( $list );
 		}
 		return NULL;
+	}
+
+	protected function getTempFileWithAppliedTablePrefix( $sourceFile, $prefix ){
+		$this->client->outVerbose( 'Applying table prefix to import file ...' );
+//		$this->client->outVerbose( 'Applying table prefix ...' );
+		$tempName	= $sourceFile.'.tmp';
+		$fpIn		= fopen( $sourceFile, 'r' );													//  open source file
+		$fpOut		= fopen( $tempName, 'a' );													//  prepare empty target file
+		while( !feof( $fpIn ) ){																//  read input file until end
+			$line	= fgets( $fpIn );															//  read line buffer
+			$line	= str_replace( '<%?prefix%>', $prefix, $line );								//  replace table prefix placeholder
+			fwrite( $fpOut, $line );															//  write buffer to target file
+		}
+		fclose( $fpOut );																		//  close target file
+		fclose( $fpIn );																		//  close source file
+		return $tempName;
 	}
 }

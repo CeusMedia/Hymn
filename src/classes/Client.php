@@ -101,9 +101,9 @@ class Hymn_Client{
 		)
 	);
 
-	static public $fileName	= ".hymn";
+	static public $fileName	= '.hymn';
 
-	static public $outputMethod	= "print";
+	static public $outputMethod	= 'print';
 
 	static protected $commandWithoutConfig	= array(
 		'default',
@@ -156,7 +156,7 @@ class Hymn_Client{
 		$this->locale	= new Hymn_Tool_Locale( Hymn_Client::$language );
 		$this->words	= $this->locale->loadWords( 'client' );
 
-		if( self::$outputMethod !== "print" )
+		if( self::$outputMethod !== 'print' )
 			ob_start();
 
 		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
@@ -181,70 +181,19 @@ class Hymn_Client{
 				throw new RuntimeException( 'Access denied' );
 			$action	= $this->arguments->getArgument();
 			if( !$action && $this->arguments->getOption( 'help' ) ){
-				array_unshift( $arguments, "help" );
+				array_unshift( $arguments, 'help' );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			else if( $this->arguments->getOption( 'version' ) ){
-				array_unshift( $arguments, "version" );
+				array_unshift( $arguments, 'version' );
 				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			$this->dispatch();
 		}
 		catch( Exception $e ){
-			$this->outError( $e->getMessage().".", Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_SETUP );
 		}
 		exit( Hymn_Client::EXIT_ON_END );
-	}
-
-	protected function dispatch(){
-		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
-		if( strlen( $calledAction ) ){																//  command string given
-			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
-			try{
-				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
-					if( $this->flags & self::FLAG_VERBOSE && !( $this->flags & self::FLAG_QUIET ) )	//  verbose mode
-						$this->out( 'Reading application configuration ...' );						//  note reading of application configuration
-					$this->readConfig();															//  read application configuration from hymn file
-				}
-				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
-				$reflectedClass		= new ReflectionClass( $className );							//  reflect class
-			//	$classInterfaces	= $reflectedClass->getInterfaceNames();							//  get interfaces implemented by class
-				if( !$reflectedClass->implementsInterface( 'Hymn_Command_Interface' ) )
-					throw new RuntimeException( sprintf(
-						$this->words->errorCommandClassNotImplementingInterface,
-						$className
-					) );
-				$commandObject		= $reflectedClass->newInstanceArgs( array( $this ) );			//  create object of reflected class
-				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
-				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
-				$reflectedMethod->invokeArgs( $commandObject, (array) $this->arguments );			//  call reflected object method
-			}
-			catch( Exception $e ){
-				$this->outError( $e->getMessage().".", Hymn_Client::EXIT_ON_RUN );
-			}
-		}
-		else																						//  no command string given
-			$this->out( $this->locale->loadText( 'command/index' ) );								//  print index text
-	}
-
-	/**
-	 *	Tries to find and return command class name for a called command.
-	 *	@access		protected
-	 *	@param		string			$command			Called command
-	 *	@return		string								Command class name
-	 *	@throws		InvalidArgumentException			if no command class is available for called command
-	 */
-	protected function getCommandClassFromCommand( $command ){
-		if( !strlen( trim( $command ) ) )
-			throw new InvalidArgumentException( 'No command given' );
-		$commandWords	= ucwords( preg_replace( "/-+/", " ", $command ) );
-		$className		= "Hymn_Command_".preg_replace( "/ +/", "_", $commandWords );
-		if( !class_exists( $className ) )
-			throw new RangeException( sprintf(
-				$this->words->errorCommandUnknown,
-				$command
-			) );
-		return $className;
 	}
 
 	public function getConfig(){
@@ -293,22 +242,22 @@ class Hymn_Client{
 		return $this->locale;
 	}
 
-/*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = "dev" ){
+/*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = 'dev' ){
 		$mode	= $defaultInstallMode;
-		if( isset( $this->config->application->{"installMode"} ) )
-			$mode	= $this->config->application->{"installMode"};
+		if( isset( $this->config->application->{'installMode'} ) )
+			$mode	= $this->config->application->{'installMode'};
 		return $mode;
 	}*/
 
-	public function getModuleInstallType( $moduleId, $defaultInstallType = "copy" ){
+	public function getModuleInstallType( $moduleId, $defaultInstallType = 'copy' ){
 		$type	= $defaultInstallType;
-		if( isset( $this->config->application->{"installType"} ) )
-			$type	= $this->config->application->{"installType"};
-		else if( isset( $this->config->modules->{"@installType"} ) )								//  @deprecated: use application->type instead
-			$type	= $this->config->modules->{"@installType"};										//  @todo to be removed in 1.0
+		if( isset( $this->config->application->{'installType'} ) )
+			$type	= $this->config->application->{'installType'};
+		else if( isset( $this->config->modules->{'@installType'} ) )								//  @deprecated: use application->type instead
+			$type	= $this->config->modules->{'@installType'};										//  @todo to be removed in 1.0
 		else if( isset( $this->config->modules->$moduleId ) )
-			if( isset( $this->config->modules->$moduleId->{"installType"} ) )
-				$type	= $this->config->modules->$moduleId->{"installType"};
+			if( isset( $this->config->modules->$moduleId->{'installType'} ) )
+				$type	= $this->config->modules->$moduleId->{'installType'};
 		return $type;
 	}
 
@@ -320,9 +269,9 @@ class Hymn_Client{
 
 		$modules	= $this->config->modules;														//  shortcut configured modules
 		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
-			if( isset( $modules->$moduleId->{"source"} ) )											//  module has configured source shelf
-				if( in_array( $modules->$moduleId->{"source"}, $availableShelfIds ) )				//  configured shelf source has requested module
-					return $modules->$moduleId->{"source"};											//  return configured source shelf
+			if( isset( $modules->$moduleId->{'source'} ) )											//  module has configured source shelf
+				if( in_array( $modules->$moduleId->{'source'}, $availableShelfIds ) )				//  configured shelf source has requested module
+					return $modules->$moduleId->{'source'};											//  return configured source shelf
 
 		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )								//  default shelf has requested module
 			return $defaultInstallShelfId;															//  return default shelf
@@ -389,7 +338,7 @@ class Hymn_Client{
 	public function outError( $message, $exitCode = NULL ){
 		$this->out( $this->words->outPrefixError.$message );
 		if( is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
-			if( self::$outputMethod !== "print" && ob_get_level() )
+			if( self::$outputMethod !== 'print' && ob_get_level() )
 				print( ob_get_clean() );
 			exit( $exitCode );
 		}
@@ -408,89 +357,45 @@ class Hymn_Client{
 				$this->out( $lines, $newLine );
 	}
 
-	protected function readConfig( $forceReload = FALSE ){
-		if( $this->config && !$forceReload )
+	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
+		if( $this->flags & self::FLAG_NO_DB )
 			return;
-		if( !file_exists( self::$fileName ) )
-			throw new RuntimeException( "File '".self::$fileName."' is missing. Please use command 'init'" );
-		$this->config	= json_decode( file_get_contents( self::$fileName ) );
-		if( is_null( $this->config ) )
-			throw new RuntimeException( 'Configuration file "'.self::$fileName.'" is not valid JSON' );
-		if( is_string( $this->config->sources ) ){
-			if( !file_exists( $this->config->sources ) )
-				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is missing' );
-			$sources	= json_decode( file_get_contents( $this->config->sources ) );
-			if( is_null( $sources ) )
-				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is not valid JSON' );
-			$this->config->sources = $sources;
+		if( $this->dbc && !$forceReset )
+			return;
+
+//		$this->dbc			= NULL;
+
+		$dbaDefaults	= array(
+			'driver'		=> 'mysql',
+			'host'			=> 'localhost',
+			'port'			=> '3306',
+			'name'			=> NULL,
+			'prefix'		=> NULL,
+			'username'		=> NULL,
+			'password'		=> NULL,
+			'modules'		=> '',
+		);
+
+		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
+		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
+		if( $usesGlobalDbAccess && !empty( $this->config->database->name ) ){
+			$this->dba		= (object) array_merge( $dbaDefaults, (array) $this->config->database );
 		}
-		$app	= $this->config->application;
-		if( isset( $app->configPath ) )
-			self::$pathDefaults['config'] = $app->configPath;
-
-		$this->config->paths	= (object) array();
-		foreach( self::$pathDefaults as $pathKey => $pathValue )
-			if( !isset( $this->config->paths->{$pathKey} ) )
-				$this->config->paths->{$pathKey}	= $pathValue;
-
-		if( file_exists( $this->config->paths->config.'config.ini' ) ){
-			$data	= parse_ini_file( $this->config->paths->config.'config.ini' );
-			foreach( $data as $key => $value ){
-				if( preg_match( "/^path\./", $key ) ){
-					$key	= preg_replace( "/^path\./", "", $key );
-					$key	= ucwords( str_replace( ".", " ", $key ) );
-					$key	= str_replace( " ", "", lcfirst( $key ) );
-					$this->config->paths->{$key}	= $value;
-					continue;
-				}
-				$key	= ucwords( str_replace( ".", " ", $key ) );
-				$key	= str_replace( " ", "", lcfirst( $key ) );
-				$this->config->{$key}	= $value;
+		else if( $usesDatabaseModule ){
+			$this->dba	= (object) array_merge( $dbaDefaults, array_map( function( $item ){
+				return preg_replace( '/^access\./', '', $item );
+			}, $this->config->modules->Resource_Database->config ) );
+		}
+		else{
+			if( $this->flags & self::FLAG_QUIET ){
+				if( $force )
+					$this->outError( 'Database access needed but not configured', Hymn_Client::EXIT_ON_SETUP );
+				return;
 			}
 		}
 
-		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
-#		if( $this->isLiveCopy )
-#			self::out( "This is a live copy build. Most hymn functions are not available." );
-		if( isset( $app->installMode ) && isset( $app->installType ) )								//  installation type and mode are set
-			$this->isLiveCopy = $app->installMode === "live" && $app->installType === "copy";		//  this installation is a build for a live copy
-	}
-
-	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
-		if( $this->dbc && !$forceReset ){
-			if( $this->flags & self::FLAG_VERBOSE )
-				$this->out( "Database already set up." );
-			return;
-		}
-//		$this->dbc			= NULL;
-		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
-		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
-		if( $usesGlobalDbAccess ){
-			$this->dba		= $this->config->database;
-		}
-		else if( $usesDatabaseModule ){
-			$config		= array();
-			foreach( $this->config->modules->Resource_Database->config as $key => $value )
-				$config[preg_replace("/^access\./", "", $key)]	= $value;
-			$this->dba	= (object) $config;
-		}
-
-		if( empty( $this->dba ) ){
-			if( $force )
-				throw new RuntimeException( 'Database access needed but not configured' );
-			return;
-		}
-		$this->dba->driver		= isset( $this->dba->driver ) ? $this->dba->driver : "mysql";
-		$this->dba->host		= isset( $this->dba->host ) ? $this->dba->host : "localhost";
-		$this->dba->port		= isset( $this->dba->port ) ? $this->dba->port : "3306";
-		$this->dba->name		= isset( $this->dba->name ) ? $this->dba->name : NULL;
-		$this->dba->prefix		= isset( $this->dba->prefix ) ? $this->dba->prefix : NULL;
-		$this->dba->username	= isset( $this->dba->username ) ? $this->dba->username : NULL;
-		$this->dba->password	= isset( $this->dba->password ) ? $this->dba->password : NULL;
-
 		if( !in_array( $this->dba->driver, PDO::getAvailableDrivers() ) ){
-			throw new RuntimeException( 'PDO driver "'.$this->dba->driver.'" is not available' );
+			$this->outError( 'PDO driver "'.$this->dba->driver.'" is not available', Hymn_Client::EXIT_ON_SETUP );
 		}
 		while( empty( $this->dba->name ) ){
 			$this->dba->name		= $this->ask( 'Database Name:' );
@@ -505,45 +410,158 @@ class Hymn_Client{
 			$this->dba->prefix		= $this->ask( 'Table Prefix:' );
 		}
 
-		if( $this->dba->name && !$usesDatabaseModule ){
-			$this->config->modules->Resource_Database	= (object) array();
-			$this->config->modules->Resource_Database->config	= (object) array();
-			foreach( $this->dba as $key => $value )
-				$this->config->modules->Resource_Database->config->{"access.".$key}	= $value;
-		}
-		if( $this->flags & self::FLAG_NO_DB )
-			return;
-
-		if( strtolower( $this->dba->driver ) !== "mysql" )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
-			throw new OutOfRangeException( sprintf(
-				'PDO driver "%s" is not supported at the moment',
+		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
+			$this->outError( vsprintf( 'PDO driver "%s" is not supported at the moment', array(
 				$this->dba->driver
-			) );
-		$dsn			= $this->dba->driver.':'.implode( ";", array(
-			"host=".$this->dba->host,
-			"port=".$this->dba->port,
-//			"dbname=".$this->dba->name,
+			) ), Hymn_Client::EXIT_ON_SETUP );
+		$dsn			= $this->dba->driver.':'.implode( ';', array(
+			'host='.$this->dba->host,
+			'port='.$this->dba->port,
+//			'dbname='.$this->dba->name,
 		) );
-		if( $this->flags & self::FLAG_VERBOSE )
-			$this->out( "Connecting database ...", FALSE );
+		$this->outVerbose( 'Connecting database ... ', FALSE );
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
-		if( $this->flags & self::FLAG_VERBOSE )
-			$this->out( "OK" );
+		$this->outVerbose( 'OK' );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		if( !$this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			if( $this->flags & self::FLAG_VERBOSE )
-				$this->out( 'Creating database "'.$this->dba->name.'" ...', FALSE );
-			$this->dbc->query( "CREATE DATABASE `".$this->dba->name."`" );
-			if( $this->flags & self::FLAG_VERBOSE )
-				$this->out( "OK" );
+		if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+			$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
+			$this->dbc->query( 'CREATE DATABASE "'.$this->dba->name.'"' );
+			$this->outVerbose( 'OK' );
 		}
-		if( $this->dbc->query( "SHOW DATABASES LIKE '".$this->dba->name."'" )->fetch() ){
-			if( $this->flags & self::FLAG_VERBOSE )
-				$this->out( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
-			$this->dbc->query( "USE `".$this->dba->name."`" );
-			if( $this->flags & self::FLAG_VERBOSE )
-				$this->out( "OK" );
+		if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+			$this->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
+			$this->dbc->query( 'USE "'.$this->dba->name.'"' );
+			$this->outVerbose( 'OK' );
 		}
+	}
+
+	/*  --  PROTECTED  --  */
+
+	protected function applyDatabaseConfigToModules(){
+		if( !isset( $this->config->database ) )
+			return FALSE;
+		if( !isset( $this->config->database->modules ) )
+			$this->config->database->modules	= 'Resource_Database:access.';
+		foreach( preg_split( '/\s*,\s*/', $this->config->database->modules ) as $applyTo ){
+			$applyId		= $applyTo;
+			$applyPrefix	= '';
+			if( preg_match( '/:/', $applyTo ) ){
+				list( $applyId, $applyPrefix ) = preg_split( '/:/', $applyTo, 2 );
+			}
+//			$this->outVerbose( 'Applying database config to module '.$applyId.' ...' );
+			if( !isset( $this->config->modules->{$applyId} ) )
+				$this->config->modules->{$applyId}	= (object) array();
+			$module	= $this->config->modules->{$applyId};										//  shortcut module configuration
+			if( !isset( $module->config ) )
+				$module->config	= (object) array();
+			foreach( $this->config->database as $key => $value )
+				if( !in_array( $key, array( 'modules' ) ) )
+					$module->config->{$applyPrefix.$key}	= $value;
+		}
+		return TRUE;
+	}
+
+	protected function applyPathsToConfig(){
+		$this->config->paths	= (object) array();
+		foreach( self::$pathDefaults as $pathKey => $pathValue )
+			if( !isset( $this->config->paths->{$pathKey} ) )
+				$this->config->paths->{$pathKey}	= $pathValue;
+
+		if( file_exists( $this->config->paths->config.'config.ini' ) ){
+			$data	= parse_ini_file( $this->config->paths->config.'config.ini' );
+			foreach( $data as $key => $value ){
+				if( preg_match( '/^path\./', $key ) ){
+					$key	= preg_replace( '/^path\./', '', $key );
+					$key	= ucwords( str_replace( '.', ' ', $key ) );
+					$key	= str_replace( ' ', '', lcfirst( $key ) );
+					$this->config->paths->{$key}	= $value;
+					continue;
+				}
+				$key	= ucwords( str_replace( '.', ' ', $key ) );
+				$key	= str_replace( ' ', '', lcfirst( $key ) );
+				$this->config->{$key}	= $value;
+			}
+		}
+	}
+
+	protected function dispatch(){
+		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
+		if( strlen( $calledAction ) ){																//  command string given
+			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
+			try{
+				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
+					if( $this->flags & self::FLAG_VERBOSE && !( $this->flags & self::FLAG_QUIET ) )	//  verbose mode
+						$this->out( 'Reading application configuration ...' );						//  note reading of application configuration
+					$this->readConfig();															//  read application configuration from hymn file
+				}
+				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
+				$reflectedClass		= new ReflectionClass( $className );							//  reflect class
+			//	$classInterfaces	= $reflectedClass->getInterfaceNames();							//  get interfaces implemented by class
+				if( !$reflectedClass->implementsInterface( 'Hymn_Command_Interface' ) )
+					throw new RuntimeException( sprintf(
+						$this->words->errorCommandClassNotImplementingInterface,
+						$className
+					) );
+				$commandObject		= $reflectedClass->newInstanceArgs( array( $this ) );			//  create object of reflected class
+				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
+				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
+				$reflectedMethod->invokeArgs( $commandObject, (array) $this->arguments );			//  call reflected object method
+			}
+			catch( Exception $e ){
+				$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_RUN );
+			}
+		}
+		else																						//  no command string given
+			$this->out( $this->locale->loadText( 'command/index' ) );								//  print index text
+	}
+
+	/**
+	 *	Tries to find and return command class name for a called command.
+	 *	@access		protected
+	 *	@param		string			$command			Called command
+	 *	@return		string								Command class name
+	 *	@throws		InvalidArgumentException			if no command class is available for called command
+	 */
+	protected function getCommandClassFromCommand( $command ){
+		if( !strlen( trim( $command ) ) )
+			throw new InvalidArgumentException( 'No command given' );
+		$commandWords	= ucwords( preg_replace( '/-+/', ' ', $command ) );
+		$className		= 'Hymn_Command_'.preg_replace( '/ +/', '_', $commandWords );
+		if( !class_exists( $className ) )
+			throw new RangeException( sprintf(
+				$this->words->errorCommandUnknown,
+				$command
+			) );
+		return $className;
+	}
+
+	protected function readConfig( $forceReload = FALSE ){
+		if( $this->config && !$forceReload )
+			return;
+		if( !file_exists( self::$fileName ) )
+			throw new RuntimeException( 'File "'.self::$fileName.'" is missing. Please use command "init"' );
+		$this->config	= json_decode( file_get_contents( self::$fileName ) );
+		if( is_null( $this->config ) )
+			throw new RuntimeException( 'Configuration file "'.self::$fileName.'" is not valid JSON' );
+
+/*		if( is_string( $this->config->sources ) ){
+			if( !file_exists( $this->config->sources ) )
+				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is missing' );
+			$sources	= json_decode( file_get_contents( $this->config->sources ) );
+			if( is_null( $sources ) )
+				throw new RuntimeException( 'Sources file "'.$this->config->sources.'" is not valid JSON' );
+			$this->config->sources = $sources;
+		}*/
+
+		$app	= $this->config->application;
+		if( isset( $app->configPath ) )
+			self::$pathDefaults['config'] = $app->configPath;
+
+		$this->applyPathsToConfig();
+		$this->applyDatabaseConfigToModules();
+		if( isset( $app->installMode ) && $app->installMode === 'live' )							//  is live installation
+			if( isset( $app->installType ) && $app->installType === 'copy' )						//  is installation copy
+				$this->isLiveCopy = TRUE;															//  this installation is a build for a live copy
 	}
 }
 ?>

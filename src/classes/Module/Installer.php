@@ -129,6 +129,8 @@ class Hymn_Module_Installer{
 				$hasValue	= $configValue !== NULL;
 			if( $isMandatory && !$hasValue ){
 				if( $this->flags->quiet ){														//  in quiet mode no input is allowed
+					if( $this->flags->force )													//  dont quit (with exception) in force mode
+						continue;
 					$message	= 'Missing module config value %s:%s';							//  build exception message
 					throw new RuntimeException( vsprintf( $message, array(						//  throw exception
 						$module->id,
@@ -174,8 +176,8 @@ class Hymn_Module_Installer{
 	}
 
 	public function install( $module, $installType = "link" ){
-		$files	= new Hymn_Module_Files( $client );
-		$sql	= new Hymn_Module_SQL( $client );
+		$files	= new Hymn_Module_Files( $this->client );
+		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
 			if( !( $this->client->flags & Hymn_Client::FLAG_NO_FILES ) ){
 				$files->copyFiles( $module, $installType );										//  copy module files
@@ -192,8 +194,8 @@ class Hymn_Module_Installer{
 	}
 
 	public function uninstall( $module ){
-		$files	= new Hymn_Module_Files( $client );
-		$sql	= new Hymn_Module_SQL( $client );
+		$files	= new Hymn_Module_Files( $this->client );
+		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
 			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $module->id );

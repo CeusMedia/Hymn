@@ -64,10 +64,12 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 		else{
-			foreach( $config->modules as $moduleId => $module ){
-				if( !$module->isActive || preg_match( "/^@/", $moduleId ) )
+			foreach( $config->modules as $moduleId => $moduleConfig ){
+				if( preg_match( "/^@/", $moduleId ) )
 					continue;
 				$module			= $library->getModule( $moduleId );
+				if( !$module->isActive )
+					continue;
 				$relation->addModule( $module );
 			}
 		}

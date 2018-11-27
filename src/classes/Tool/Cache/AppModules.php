@@ -57,15 +57,11 @@ class Hymn_Tool_Cache_AppModules{
 	 */
 	public function invalidate( $outputPrefix = '' ){
 		$filePath	= $this->client->getConfigPath().'modules.cache.serial';
-		if( !$this->flags->quiet && $this->flags->verbose )
-			$this->client->out( $outputPrefix.'Invalidate modules cache file ... ', FALSE  );
-		if( !file_exists( $filePath ) ){
-			if( !$this->flags->quiet && $this->flags->verbose )
-				$this->client->out( 'not existing'  );
+		$exists		= file_exists( $filePath );
+		if( !$exists )
 			return NULL;
-		}
-		if( !$this->flags->quiet && $this->flags->verbose )
-			$this->client->out( 'OK'  );
+		if( !$this->flags->quiet )
+			$this->client->outVerbose( $outputPrefix.'Clearing cache of installed modules ...' );
 		return @\unlink( $filePath );
 	}
 
