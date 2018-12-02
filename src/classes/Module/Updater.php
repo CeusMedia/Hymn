@@ -226,8 +226,8 @@ class Hymn_Module_Updater{
 	}
 
 	public function update( $module, $installType ){
-		$files	= new Hymn_Module_Files( $client );
-		$sql	= new Hymn_Module_SQL( $client );
+		$files	= new Hymn_Module_Files( $this->client );
+		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
 			$appUri				= $this->config->application->uri;
 			$localModules		= $this->library->listInstalledModules();
