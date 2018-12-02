@@ -423,15 +423,20 @@ class Hymn_Client{
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		$this->outVerbose( 'OK' );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
-			$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
-			$this->dbc->query( 'CREATE DATABASE "'.$this->dba->name.'"' );
-			$this->outVerbose( 'OK' );
+		try{
+			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+				$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
+				$this->dbc->query( 'CREATE DATABASE "'.$this->dba->name.'"' );
+				$this->outVerbose( 'OK' );
+			}
+			if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+				$this->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
+				$this->dbc->query( 'USE '.$this->dba->name.';' );
+				$this->outVerbose( 'OK' );
+			}
 		}
-		if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
-			$this->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
-			$this->dbc->query( 'USE "'.$this->dba->name.'"' );
-			$this->outVerbose( 'OK' );
+		catch( Exception $e ){
+			$this->outError( 'SQL setup failed: '.$e->getMessage() );
 		}
 	}
 
