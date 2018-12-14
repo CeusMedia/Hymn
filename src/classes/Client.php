@@ -126,7 +126,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.7.9';
+	static public $version	= '0.9.8a';
 
 	public $arguments;
 
@@ -426,7 +426,7 @@ class Hymn_Client{
 		try{
 			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
 				$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
-				$this->dbc->query( 'CREATE DATABASE "'.$this->dba->name.'"' );
+				$this->dbc->query( 'CREATE DATABASE '.$this->dba->name.';' );
 				$this->outVerbose( 'OK' );
 			}
 			if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
