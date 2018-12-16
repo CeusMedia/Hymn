@@ -126,7 +126,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8a';
+	static public $version	= '0.9.8b';
 
 	public $arguments;
 
@@ -382,9 +382,10 @@ class Hymn_Client{
 			$this->dba		= (object) array_merge( $dbaDefaults, (array) $this->config->database );
 		}
 		else if( $usesDatabaseModule ){
-			$this->dba	= (object) array_merge( $dbaDefaults, array_map( function( $item ){
-				return preg_replace( '/^access\./', '', $item );
-			}, $this->config->modules->Resource_Database->config ) );
+			$this->dba	= (object) $dbaDefaults;
+			foreach( $this->config->modules->Resource_Database->config as $key => $value )
+				if( preg_match( '/^access\./', $key ) )
+					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;
 		}
 		else{
 			if( $this->flags & self::FLAG_QUIET ){
