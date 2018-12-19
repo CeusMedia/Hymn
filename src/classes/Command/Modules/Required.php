@@ -48,9 +48,24 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 	 */
 	public function run(){
 		$modules	= (array) $this->client->getConfig()->modules;
+		$library	= $this->getLibrary();
+		$relation	= new Hymn_Module_Graph( $this->client, $library );
+
+		foreach( $modules as $moduleId => $moduleConfig ){
+			$module		= $library->getModule( $moduleId, NULL, FALSE );
+			if( !$module ){
+				$this->client->out( "! ".$moduleId.' MISSING' );
+				continue;
+			}
+			$relation->addModule( $module );
+		}
+		$modules	= $relation->getOrder();
 		$this->client->out( count( $modules )." modules required:" );
 		foreach( $modules as $module ){
-			$this->client->out( "- ".$module->id );
+			if( $library->isInstalledModule( $module->id ) )
+				$this->client->out( "- ".$module->id.'' );
+			else
+				$this->client->out( "+ ".$module->id.': NOT INSTALLED' );
 		}
 	}
 }
