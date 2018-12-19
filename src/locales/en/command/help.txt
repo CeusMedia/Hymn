@@ -83,9 +83,9 @@ B2. App Instance & Module Management
 
 B3. App Module Management
 ------------------------------------------------------------------------------
-- app-install [-dqv] [MODULE]                 Install one specific available module (or all)
-- app-uninstall [-dfqv] [MODULE]              Uninstall one specific installed module (or all)
-- app-update [-dqv] [MODULE] [MODULE]         Updated installed modules (or one specific)
+- app-install [-dqv] [MODULE] [MODULE]        Install specific available module(s) (or all)
+- app-uninstall [-dfqv] [MODULE] [MODULE]     Uninstall specific installed module(s) (or all)
+- app-update [-dqv] [MODULE] [MODULE]         Updated specific installed modules(s) (or all)
 - app-module-config-get MODULE.KEY            Get config value of installed module by config key
 - app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 - app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file

@@ -56,12 +56,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
-		$moduleId	= trim( $this->client->arguments->getArgument() );
-		if( $moduleId ){
-			$module		= $library->getModule( $moduleId );
-			if( $module ){
-				$relation->addModule( $module );
-			}
+		$moduleIds			= $this->client->arguments->getArguments();
+		if( $moduleIds ){
+			foreach( $moduleIds as $moduleId )
+				$relation->addModule( $library->getModule( $moduleId ) );
 		}
 		else{
 			foreach( $config->modules as $moduleId => $moduleConfig ){
