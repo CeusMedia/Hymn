@@ -111,6 +111,17 @@ Having a valid Hymn config file, you execute these commands:
 
 ## Commands of `make`
 
+	create [MODE=(prod|dev)]   Create Phar file `hymn.phar` in PROD or DEV mode (default: PROD)
+	create-phar                Create Phar file `hymn.phar` in PROD mode (default)
+	create-phar-dev            Create Phar file `hymn.phar` in DEV mode
+	install                    Alias for install-link
+	install-copy               Install hymn.phar as copy in /usr/local/bin/hymn
+	install-link               Install hymn.phar as symlink in /usr/local/bin/hymn
+	test-syntax                Test syntax of local PHP class files (using hymn test-syntax)
+	test-units                 Run PhpUnit (if installed) to test source files
+	uninstall                  Remove global file or symlink /usr/local/bin/hymn
+	update                     Apply remote updates to local installation
+
 ### create / create-phar
 
 Creates Phar file `hymn.phar` in default LIVE mode.
@@ -185,4 +196,3 @@ Will:
 ### Disclaimer
 
 Logo rendered using [patorjk.com](http://patorjk.com/software/taag/#p=display&f=Rectangles&t=hymn)
-
