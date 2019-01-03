@@ -40,4 +40,5 @@ test-syntax:
 	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED"
 
 update:
-	@git fetch && git rebase && $(MAKE) -s create-phar
+	@echo "Currently installed: \c" && hymn version
+	@git fetch && git checkout hymn.phar && git stash -q && git rebase && git stash pop -q && $(MAKE) -s create-phar
