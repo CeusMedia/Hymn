@@ -41,4 +41,4 @@ test-syntax:
 
 update:
 	@echo "Currently installed: \c" && hymn version
-	@git fetch && git checkout hymn.phar && touch stashing -q && git stash --include-untracked && git rebase && git stash pop -q && rm stashing && $(MAKE) -s create-phar
+	@git fetch && git checkout hymn.phar && touch stashing && git stash --include-untracked -q && git rebase && git stash pop -q && rm stashing && $(MAKE) -s create-phar
