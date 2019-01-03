@@ -113,3 +113,46 @@ Having a valid Hymn config file, you execute these commands:
 ### Disclaimer
 
 Logo rendered using [patorjk.com](http://patorjk.com/software/taag/#p=display&f=Rectangles&t=hymn)
+
+## Commands of `make`
+
+### create
+
+### create-phar
+
+Creates Phar file `hymn.phar` in default LIVE mode.
+
+The resulting file:
+
+- contains reduced PHP files (e.G. comments are stipped out)
+- is compressed
+- will show bogus info on internal exceptions (use DEV mode for debugging)
+
+### create-phar-dev
+
+Creates Phar file `hymn.phar` in DEV mode.
+
+The resulting file:
+
+- contains original PHP files
+- is not compressed
+- is usable debugging internal errors
+
+### help
+
+
+### install
+
+### install-link
+
+### link
+
+### test-syntax
+
+### test-units
+
+### uninstall
+
+### unlink
+
+### update
