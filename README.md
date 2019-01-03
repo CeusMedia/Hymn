@@ -109,16 +109,9 @@ Having a valid Hymn config file, you execute these commands:
 	--file=[.hymn]                   Alternative path of Hymn file
 	--prefix=[<%prefix%>]            Set database table prefix in dump
 
-
-### Disclaimer
-
-Logo rendered using [patorjk.com](http://patorjk.com/software/taag/#p=display&f=Rectangles&t=hymn)
-
 ## Commands of `make`
 
-### create
-
-### create-phar
+### create / create-phar
 
 Creates Phar file `hymn.phar` in default LIVE mode.
 
@@ -136,23 +129,60 @@ The resulting file:
 
 - contains original PHP files
 - is not compressed
-- is usable debugging internal errors
-
-### help
-
+- is usable for debugging internal errors
 
 ### install
 
+Will use `install-link` to symlink hymn.phar to global scope.
+
+### install-copy
+
+Installs `hymn.phar` to global scope by creating a copy in `/usr/local/bin/hymn`.
+
+Will:
+
+- remove `/usr/local/bin/hymn`
+- copy local `hymn.phar` to `/usr/local/bin/hymn` 
+
 ### install-link
 
-### link
+Installs `hymn.phar` to global scope by creating a symlink in `/usr/local/bin/hymn`.
+
+Will:
+
+- remove `/usr/local/bin/hymn`
+- link local `hymn.phar` to `/usr/local/bin/hymn` 
 
 ### test-syntax
 
+Will test syntax of local PHP class files using `hymn test-syntax`. 
+
 ### test-units
+
+Will run PhpUnit (if installed) to test source files.
 
 ### uninstall
 
-### unlink
+Will remove global file or symlink `/usr/local/bin/hymn`.
 
 ### update
+
+Applies remote updates to local installation.
+
+Will:
+
+- print out current version
+- revert local changes to `hymn.phar`
+- stash local changes
+- fetch updates
+- merge updates and local commits using `rebase`
+- apply stashed local changes
+- make create-phar
+
+
+## Appendix
+
+### Disclaimer
+
+Logo rendered using [patorjk.com](http://patorjk.com/software/taag/#p=display&f=Rectangles&t=hymn)
+

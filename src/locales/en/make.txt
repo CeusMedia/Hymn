@@ -1,0 +1,14 @@
+make COMMAND
+
+Commands:
+  create [MODE=(prod|dev)]   Alias for create-phar
+  create-phar                Creates Phar file `hymn.phar` in default LIVE mode
+  create-phar-dev            Creates Phar file `hymn.phar` in DEV mode
+  install                    Alias for install-link
+  install-copy               Installs hymn.phar as copy in /usr/local/bin/hymn
+  install-link               Installs hymn.phar as symlink in /usr/local/bin/hymn
+  test-syntax                Tests syntax of local PHP class files (using hymn test-syntax)
+  test-units                 Runs PhpUnit (if installed) to test source files
+  uninstall                  Remove global file or symlink /usr/local/bin/hymn
+  update                     Applies remote updates to local installation
+

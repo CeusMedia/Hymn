@@ -1,7 +1,9 @@
 export PWD	:= $(shell pwd)
 
+
 help:
-	@echo "make create-phar [MODE=(prod|dev)]"
+#	@echo "make create-phar [MODE=(prod|dev)]"
+	@cat src/locales/en/make.txt
 
 create: create-phar
 
@@ -13,23 +15,19 @@ create-phar-dev:
 	@test -f hymn.phar && rm hymn.phar || true
 	@$(MAKE) -s create-phar MODE=dev
 
-install: uninstall create-phar
+install: install-link
+
+install-copy: uninstall unlink
 	@echo "Installing hymn to /usr/local/bin"
-	@sudo cp hymn.phar /usr/local/bin/hymn
+	@sudo cp $(shell pwd)/hymn.phar /usr/local/bin/hymn
 
-install-link: uninstall create-phar unlink link
-
-link: unlink
+install-link: uninstall
 	@echo "Installing hymn symlink to /usr/local/bin"
 	@sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn
 
 uninstall:
-	@test -f /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" || true
-	@test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn || true
-
-unlink:
-	@test -f /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" || true
-	@test -f /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn || true
+	@test -f /usr/local/bin/hymn && echo "Removing hymn in /usr/local/bin" && sudo rm -f /usr/local/bin/hymn || true
+	@test -l /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
 
 test-units:
 	@phpunit
