@@ -126,7 +126,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8c';
+	static public $version	= '0.9.8';
 
 	public $arguments;
 
@@ -424,6 +424,7 @@ class Hymn_Client{
 		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
 		$this->outVerbose( 'OK' );
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+		$this->dbc->query( 'SET CHARSET utf8' );
 		try{
 			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
 				$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
