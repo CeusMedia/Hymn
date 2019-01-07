@@ -106,12 +106,13 @@ class Hymn_Client{
 	static public $outputMethod	= 'print';
 
 	static protected $commandWithoutConfig	= array(
-		'default',
-		'help',
-		'create',																					//  @deprecated
+		//  APP CREATION
 		'init',
-		'version',
+		//  SELF MANAGEMENT
+		'help',
+		'self-update',
 		'test-syntax',
+		'version',
 	);
 
 	static public $pathDefaults	= array(
@@ -126,7 +127,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8';
+	static public $version	= '0.9.8.1a';
 
 	public $arguments;
 
