@@ -101,7 +101,7 @@ B3. App Module Management
 
 B4. App Database Management
 ------------------------------------------------------------------------------
-- database-clear [-fqv]                       Drop database tables (force, verbose, quiet)
+- database-clear [-dfqv]                      Drop database tables
 - database-dump [PATH]                        Export database to SQL file
 - database-load [PATH|FILE]                   Import (specific or latest) SQL file
 

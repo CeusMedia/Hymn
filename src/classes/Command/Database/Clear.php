@@ -40,7 +40,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 	/**
 	 *	Execute this command.
 	 *	Implements flags: database-no
-	 *	Missing flags: dry, force?, quiet, verbose
+	 *	Missing flags: force?, quiet, verbose
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
@@ -75,7 +75,8 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 
 		foreach( $tables as $table ){
 			$this->client->outVerbose( "- Drop table '".$table."'" );
-			$this->client->getDatabase()->query( "DROP TABLE ".$table );
+			if( !$this->flags->dry )
+				$this->client->getDatabase()->query( "DROP TABLE ".$table );
 		}
 		if( !$this->flags->quiet )
 			$this->client->out( "Database cleared" );
