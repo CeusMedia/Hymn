@@ -51,7 +51,9 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return $this->client->out( "Database can NOT be connected." );
 
-		$tables	= $this->getTables();
+		$dbc	= $this->client->getDatabase();
+		$prefix	= $dbc->getConfig( 'prefix' );
+		$tables	= $dbc->getTables( $prefix );
 		if( !$tables ){
 			if( !$this->flags->quiet )
 				$this->client->out( "Database is empty" );
@@ -76,19 +78,9 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		foreach( $tables as $table ){
 			$this->client->outVerbose( "- Drop table '".$table."'" );
 			if( !$this->flags->dry )
-				$this->client->getDatabase()->query( "DROP TABLE ".$table );
+				$dbc->query( "DROP TABLE ".$table );
 		}
 		if( !$this->flags->quiet )
 			$this->client->out( "Database cleared" );
-	}
-
-	protected function getTables(){
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
-		$query		= "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" );
-		$result		= $this->client->getDatabase()->query( $query );
-		$list		= array();
-		foreach( $result->fetchAll() as $entry )
-			$list[]	= $entry[0];
-		return $list;
 	}
 }

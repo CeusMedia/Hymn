@@ -52,7 +52,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
-//		$this->client->setupDatabaseConnection();													//  setup connection to database
+//		$this->client->getDatabase()->connect();													//  setup connection to database
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 

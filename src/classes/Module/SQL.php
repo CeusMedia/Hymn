@@ -50,17 +50,28 @@ class Hymn_Module_SQL{
 	}
 
 	/**
+	 *	Returns statically built instance.
+	 *	@access		public
+	 *	@param		Hymn_Client		$client		Instance of hymn client
+	 *	@return		self
+	 */
+	public function getInstance( Hymn_Client $client ){
+		return new static( $client );
+	}
+
+	/**
 	 *	Checks for database connection and returns used PDO driver.
 	 *	@access		protected
 	 *	@return		string							PDO driver used by database connection
 	 *	@throws		RuntimeException				if no database connection is available
 	 */
 	protected function checkDriver(){
-		if( !$this->client->getDatabase() )															//  database connection is not established yet
-			$this->client->setupDatabaseConnection( TRUE );											//  setup database connection
-		$driver	= $this->client->getDatabaseConfiguration( 'driver' );								//  get database driver
+		$dbc	= $this->client->getDatabase();
+		if( !$dbc->isConnected() )																	//  database connection is not established yet
+			$dbc->connect( TRUE );																	//  setup database connection
+		$driver	= $dbc->getConfig( 'driver' );														//  get database driver
 		if( !$driver )																				//  no database driver set
-			throw new RuntimeException( 'No database connection available' );
+			throw new RuntimeException( 'No database connection driver set' );
 		return $driver;
 	}
 
@@ -72,9 +83,9 @@ class Hymn_Module_SQL{
 	 *	@throws		RuntimeException				if execution fails
 	 */
 	protected function executeSql( $sql ){
-		$dbc		= $this->client->setupDatabaseConnection( TRUE );
 		$dbc		= $this->client->getDatabase();
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+		$dbc->connect( TRUE );
+		$prefix		= $dbc->getConfig( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
 		$statements = array();
 		$buffer		= array();
@@ -222,7 +233,7 @@ class Hymn_Module_SQL{
 
 	public function realizeTablePrefix( $sql, $prefix = NULL ){
 		if( is_null( $prefix ) )
-			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+			$prefix		= $this->client->getDatabase()->getConfig( 'prefix' );
 		return str_replace( "<%?prefix%>", $prefix, $sql );
 	}
 

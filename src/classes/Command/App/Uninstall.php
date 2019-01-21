@@ -53,7 +53,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run(){
 	//	$config				= $this->client->getConfig();
-		$this->client->setupDatabaseConnection();													//  setup connection to database
+	//	$this->client->getDatabase()->connect();													//  setup connection to database
 
 		if( $this->flags->dry )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );

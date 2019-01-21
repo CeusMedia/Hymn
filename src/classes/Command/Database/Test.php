@@ -54,9 +54,9 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 	}
 
 	static public function test( $client ){
-		if( !$client->getDatabase() )
-			$client->setupDatabaseConnection( TRUE );												//  force setup of new connection to database
 		$dbc		= $client->getDatabase();
+		if( !$dbc->isConnected() )
+			$dbc->connect( TRUE );												//  force setup of new connection to database
 		$result	= $dbc->query( "SHOW TABLES" );
 		if( is_object( $result ) && is_array( $result->fetchAll() ) )
 			return TRUE;

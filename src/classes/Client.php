@@ -127,15 +127,13 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.1';
+	static public $version	= '0.9.8.2a';
 
 	public $arguments;
 
 	protected $config;
 
-	protected $dba;
-
-	protected $dbc;
+	protected $database;
 
 	protected $isLiveCopy	= FALSE;
 
@@ -154,6 +152,7 @@ class Hymn_Client{
 			if( in_array( $language, array( 'en', 'de' ) ) )
 				self::$language	= $language;
 		}
+		$this->database	= new Hymn_Tool_Database( $this );
 		$this->locale	= new Hymn_Tool_Locale( Hymn_Client::$language );
 		$this->words	= $this->locale->loadWords( 'client' );
 
@@ -211,16 +210,7 @@ class Hymn_Client{
 	}
 
 	public function getDatabase(){
-		return $this->dbc;
-	}
-
-	public function getDatabaseConfiguration( $key = NULL ){
-		if( is_null( $key ) )
-			return $this->dba;
-		if( isset( $this->dba->$key ) )
-			return $this->dba->$key;
-		else
-			throw new InvalidArgumentException( 'Invalid database access property key "'.$key.'"' );
+		return $this->database;
 	}
 
 	public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
@@ -356,91 +346,6 @@ class Hymn_Client{
 		if( $this->flags & self::FLAG_VERBOSE )														//  verbose mode is on
 			if( !( $this->flags & self::FLAG_QUIET ) )												//  quiet mode is off
 				$this->out( $lines, $newLine );
-	}
-
-	public function setupDatabaseConnection( $force = FALSE, $forceReset = FALSE ){
-		if( $this->flags & self::FLAG_NO_DB )
-			return;
-		if( $this->dbc && !$forceReset )
-			return;
-
-//		$this->dbc			= NULL;
-
-		$dbaDefaults	= array(
-			'driver'		=> 'mysql',
-			'host'			=> 'localhost',
-			'port'			=> '3306',
-			'name'			=> NULL,
-			'prefix'		=> NULL,
-			'username'		=> NULL,
-			'password'		=> NULL,
-			'modules'		=> '',
-		);
-
-		$usesGlobalDbAccess	= isset( $this->config->database ) && $this->config->database;
-		$usesDatabaseModule	= isset( $this->config->modules->Resource_Database->config );
-		if( $usesGlobalDbAccess && !empty( $this->config->database->name ) ){
-			$this->dba		= (object) array_merge( $dbaDefaults, (array) $this->config->database );
-		}
-		else if( $usesDatabaseModule ){
-			$this->dba	= (object) $dbaDefaults;
-			foreach( $this->config->modules->Resource_Database->config as $key => $value )
-				if( preg_match( '/^access\./', $key ) )
-					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;
-		}
-		else{
-			if( $this->flags & self::FLAG_QUIET ){
-				if( $force )
-					$this->outError( 'Database access needed but not configured', Hymn_Client::EXIT_ON_SETUP );
-				return;
-			}
-		}
-
-		if( !in_array( $this->dba->driver, PDO::getAvailableDrivers() ) ){
-			$this->outError( 'PDO driver "'.$this->dba->driver.'" is not available', Hymn_Client::EXIT_ON_SETUP );
-		}
-		while( empty( $this->dba->name ) ){
-			$this->dba->name		= $this->ask( 'Database Name:' );
-		}
-		while( empty( $this->dba->username ) ){
-			$this->dba->username	= $this->ask( 'Database Username:' );
-		}
-		while( empty( $this->dba->password ) ){
-			$this->dba->password	= $this->ask( 'Database Password:' );
-		}
-		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= $this->ask( 'Table Prefix:' );
-		}
-
-		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
-			$this->outError( vsprintf( 'PDO driver "%s" is not supported at the moment', array(
-				$this->dba->driver
-			) ), Hymn_Client::EXIT_ON_SETUP );
-		$dsn			= $this->dba->driver.':'.implode( ';', array(
-			'host='.$this->dba->host,
-			'port='.$this->dba->port,
-//			'dbname='.$this->dba->name,
-		) );
-		$this->outVerbose( 'Connecting database ... ', FALSE );
-		$this->dbc		= new PDO( $dsn, $this->dba->username, $this->dba->password );
-		$this->outVerbose( 'OK' );
-		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-		$this->dbc->query( 'SET CHARSET utf8' );
-		try{
-			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
-				$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
-				$this->dbc->query( 'CREATE DATABASE `'.$this->dba->name.'`;' );
-				$this->outVerbose( 'OK' );
-			}
-			if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
-				$this->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
-				$this->dbc->query( 'USE `'.$this->dba->name.'`;' );
-				$this->outVerbose( 'OK' );
-			}
-		}
-		catch( Exception $e ){
-			$this->outError( 'SQL setup failed: '.$e->getMessage() );
-		}
 	}
 
 	/*  --  PROTECTED  --  */

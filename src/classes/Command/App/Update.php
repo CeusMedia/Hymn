@@ -44,15 +44,15 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
-	 *	Missing flags: database-no, dry, force, quiet, verbose
+	 *	Missing flags: database-no, force, quiet, verbose
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
-		$config				= $this->client->getConfig();											//
+		$config				= $this->client->getConfig();											//  shortcut hymn config
 		$library			= $this->getLibrary();													//  get module library instance
-		$this->client->setupDatabaseConnection();													//  setup connection to database
+	//	$this->client->getDatabase()->connect();													//  setup connection to database
 		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 
 		if( $this->flags->dry )

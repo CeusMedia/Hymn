@@ -77,12 +77,12 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !is_readable( $fileName ) )
 			$this->client->outError( 'Missing read access to SQL script: '.$fileName );
 		try{
-			$host		= $this->client->getDatabaseConfiguration( 'host' );						//  get server host from config
-			$port		= $this->client->getDatabaseConfiguration( 'port' );						//  get server port from config
-			$username	= $this->client->getDatabaseConfiguration( 'username' );					//  get username from config
-			$password	= $this->client->getDatabaseConfiguration( 'password' );					//  get password from config
-			$name		= $this->client->getDatabaseConfiguration( 'name' );						//  get database name from config
-			$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );						//  get table prefix from config
+			$dbc		= $this->client->getDatabase();
+			$host		= $dbc->getConfig( 'host' );												//  get server host from config
+			$port		= $dbc->getConfig( 'port' );												//  get server port from config
+			$username	= $dbc->getConfig( 'username' );											//  get username from config
+			$name		= $dbc->getConfig( 'name' );												//  get database name from config
+			$prefix		= $dbc->getConfig( 'prefix' );												//  get table prefix from config
 			$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );			//  get file with applied table prefix
 			$fileSize	= Hymn_Tool_FileSize::get( $importFile );									//  format file size
 
@@ -92,7 +92,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 					'--host='.escapeshellarg( $host ),												//  configured host as escaped shell arg
 					'--port='.escapeshellarg( $port ),												//  configured port as escaped shell arg
 					'--user='.escapeshellarg( $username ),											//  configured username as escaped shell arg
-					'--password='.escapeshellarg( $password ),										//  configured pasword as escaped shell arg
+					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
 //					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
 					'--force',																		//  continue if error eccoured
 //					'--replace',																	//  replace it already existing

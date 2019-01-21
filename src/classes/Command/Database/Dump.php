@@ -65,23 +65,21 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( dirname( $fileName) )																	//  path is not existing
 			exec( "mkdir -p ".dirname( $fileName ) );												//  create path
 
-		$prefix		= $this->client->getDatabaseConfiguration( 'prefix' );
+		$prefix		= $dbc->getConfig( 'prefix' );
 		if( $this->prefix	= $arguments->getOption( 'prefix' ) )
 			$this->prefixPlaceholder	= $arguments->getOption( 'prefix' );
 
 		$tables		= '';																			//  no table selection by default
 		if( $prefix ){																				//  prefix has been set
-			$tables		= array();																	//  prepare list of tables matching prefix
-			foreach( $dbc->query( "SHOW TABLES LIKE '".$prefix."%'" ) as $table )					//  iterate found tables with prefix
-				$tables[]	= escapeshellarg( $table[0] );											//  collect table as escaped shell arg
-			$tables	= join( ' ', $tables );															//  reduce tables list to tables arg
+			foreach( $dbc->getTables( $prefix ) as $table )											//  iterate found tables with prefix
+				$tables	.= ' '.escapeshellarg( $table );											//  collect table as escaped shell arg
 		}
 
-		$host		= $this->client->getDatabaseConfiguration( 'host' );							//  get host name from config
-		$port		= $this->client->getDatabaseConfiguration( 'port' );							//  get port from config
-		$username	= $this->client->getDatabaseConfiguration( 'username' );						//  get username from config
-		$password	= $this->client->getDatabaseConfiguration( 'password' );						//  get password from config
-		$name		= $this->client->getDatabaseConfiguration( 'name' );							//  get database name from config
+		$host		= $dbc->getConfig( 'host' );													//  get host name from config
+		$port		= $dbc->getConfig( 'port' );													//  get port from config
+		$username	= $dbc->getConfig( 'username' );												//  get username from config
+		$password	= $dbc->getConfig( 'password' );												//  get password from config
+		$name		= $dbc->getConfig( 'name' );													//  get database name from config
 		$command	= vsprintf( "mysqldump %s %s %s", array(										//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
 			join( ' ', array(
 				'--host='.escapeshellarg( $host ),													//  configured host name as escaped shell arg
