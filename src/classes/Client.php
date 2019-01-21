@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2018 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2019 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2018 Christian Würker
+ *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2018 Christian Würker
+ *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -127,7 +127,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.1b';
+	static public $version	= '0.9.8.1';
 
 	public $arguments;
 
@@ -429,12 +429,12 @@ class Hymn_Client{
 		try{
 			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
 				$this->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
-				$this->dbc->query( 'CREATE DATABASE '.$this->dba->name.';' );
+				$this->dbc->query( 'CREATE DATABASE `'.$this->dba->name.'`;' );
 				$this->outVerbose( 'OK' );
 			}
 			if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
 				$this->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
-				$this->dbc->query( 'USE '.$this->dba->name.';' );
+				$this->dbc->query( 'USE `'.$this->dba->name.'`;' );
 				$this->outVerbose( 'OK' );
 			}
 		}

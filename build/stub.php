@@ -7,4 +7,3 @@ try {
 //	die("Cannot initialize Phar");
 }
 __HALT_COMPILER();
-?>
