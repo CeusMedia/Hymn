@@ -43,8 +43,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: database-no?(if new 3rd arg would be target database), dry, force, quiet, verbose
+	 *	Implements flags: quiet?
+	 *	Missing flags: database-no?(if new 3rd arg would be target database), quiet?
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void

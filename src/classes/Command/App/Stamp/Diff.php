@@ -192,7 +192,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		else
 			$fileName		= $this->getLatestStamp( NULL, $shelfId );
 		if( !( $fileName && file_exists( $fileName ) ) )
-			$this->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
+			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
 	}

@@ -34,8 +34,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
+ *	@todo    		implement option includes and excludes (using inference and recursion)
  */
-class Hymn_Arguments{
+class Hymn_Tool_Cli_Arguments{
 
 	protected $arguments	= array();
 
@@ -108,30 +109,53 @@ class Hymn_Arguments{
 			}
 		}
 		$this->arguments	= array_values( $arguments );
+/* todo implement */
+//		$this->validateOptionClusions();
 	}
 
-	public function registerOption( $key, $pattern, $resolve, $default = NULL, $values = NULL ){
+//	protected function validateOptionClusions(){
+//	}
+
+	/** @todo change behavior of values (string) while includes and excludes are array, already */
+	public function registerOption( $key, $pattern, $resolve, $default = NULL, $values = NULL, $includes = array(), $excludes = array() ){
 		$this->options[$key]	= array(
 			'pattern'	=> $pattern,
 			'resolve'	=> $resolve,
 			'default'	=> $default,
 			'values'	=> $values,
 			'value'		=> $default,
+			'includes'	=> $includes,
+			'excludes'	=> $excludes,
 		);
 	}
 
+	/** @todo change behavior of values (string) while includes and excludes are array, already */
 	public function registerOptions( $options ){
 		foreach( $options as $key => $rules ){
 			if( !isset( $rules['pattern']  ) )
 				throw new RangeException( 'Option "'.$key.'" is missing rule "pattern"' );
 			if( !isset( $rules['resolve']  ) )
 				throw new RangeException( 'Option "'.$key.'" is missing rule "resolve"' );
-			if( !isset( $rules['default']  ) )
-				$rules['default']	= NULL;
-			if( !( isset( $rules['values'] ) && count( $rules['values'] ) ) )
-				$rules['values']	= array();
-			$this->registerOption( $key, $rules['pattern'], $rules['resolve'], $rules['default'], $rules['values'] );
+			$this->registerOption(
+				$key,
+				$rules['pattern'],
+				$rules['resolve'],
+				$rules['default'],
+				$this->getEnumerationFromArrayKeyIfSet( $rules, 'values' ),
+				$this->getEnumerationFromArrayKeyIfSet( $rules, 'includes' ),
+				$this->getEnumerationFromArrayKeyIfSet( $rules, 'excludes' )
+			);
 		}
+	}
+
+	protected function getEnumerationFromArrayKeyIfSet( $array, $key ){
+		$list	= array();
+		if( array_key_exists( $key, $array ) && !is_null( $array[$key] ) ){
+			$list	= $array[$key];
+			if( !is_array( $list ) )
+				$list	= preg_split( '/\s*,\s*/', $list );
+		}
+		return $list;
 	}
 
 	public function removeArgument( $nr ){

@@ -45,12 +45,14 @@ abstract class Hymn_Command_Abstract{
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
 		$this->flags	= (object) array(
-			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
+			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
 		);
 		$this->locale	= $this->client->getLocale();
+
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
 		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
 		$this->words	= (object) array();
@@ -63,7 +65,7 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
-		$question	= new Hymn_Tool_Question(
+		$question	= new Hymn_Tool_Cli_Question(
 			$this->client,
 			$message,
 			$type,

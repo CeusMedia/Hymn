@@ -107,7 +107,7 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 			foreach( $this->questions as $question ){														//  iterate questions
 				$default	= $dba->{$question['key']};												//  shortcut default
 				$options	= isset( $question['options'] ) ? $question['options'] : array();		//  realize options
-				$input		= new Hymn_Tool_Question(												//  ask for value
+				$input		= new Hymn_Tool_Cli_Question(												//  ask for value
 					$this->client,
 					$question['label'],
 					$question['type'],

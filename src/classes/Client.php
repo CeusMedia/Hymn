@@ -37,12 +37,12 @@
  */
 class Hymn_Client{
 
-	const FLAG_VERBOSE			= 1;
-	const FLAG_QUIET			= 2;
-	const FLAG_DRY				= 4;
-	const FLAG_FORCE			= 8;
-	const FLAG_NO_DB			= 16;
-	const FLAG_NO_FILES			= 32;
+	const FLAG_VERY_VERBOSE		= 1;
+	const FLAG_VERBOSE			= 2;
+	const FLAG_QUIET			= 4;
+	const FLAG_DRY				= 8;
+	const FLAG_FORCE			= 16;
+	const FLAG_NO_DB			= 32;
 
 	const EXIT_ON_END			= 0;
 	const EXIT_ON_LOAD			= 1;
@@ -88,11 +88,18 @@ class Hymn_Client{
 			'pattern'	=> '/^-q|--quiet$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
+			'excludes'	=> 'verbose',
 		),
 		'verbose'	=> array(
 			'pattern'	=> '/^-v|--verbose$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
+		),
+		'very-verbose'	=> array(
+			'pattern'	=> '/^-vv|--very-verbose$/',
+			'resolve'	=> TRUE,
+			'default'	=> NULL,
+			'includes'	=> 'verbose',
 		),
 		'version'	=> array(
 			'pattern'	=> '/^--version/',
@@ -127,7 +134,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.2a';
+	static public $version	= '0.9.8.2b';
 
 	public $arguments;
 
@@ -137,9 +144,9 @@ class Hymn_Client{
 
 	protected $isLiveCopy	= FALSE;
 
-    protected $words;
+	protected $words;
 
-    public $flags			= 0;
+	public $flags			= 0;
 
 	public $locale;
 
@@ -159,7 +166,7 @@ class Hymn_Client{
 		if( self::$outputMethod !== 'print' )
 			ob_start();
 
-		$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+		$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
 		if( $this->arguments->getOption( 'dry' ) )
 			$this->flags	|= self::FLAG_DRY;
 		if( $this->arguments->getOption( 'force' ) )
@@ -168,6 +175,8 @@ class Hymn_Client{
 			$this->flags	|= self::FLAG_QUIET;
 		if( $this->arguments->getOption( 'verbose' ) )
 			$this->flags	|= self::FLAG_VERBOSE;
+		if( $this->arguments->getOption( 'very-verbose' ) )
+			$this->flags	|= self::FLAG_VERY_VERBOSE;
 		if( $this->arguments->getOption( 'force' ) )
 			$this->flags	|= self::FLAG_FORCE;
 		if( $this->arguments->getOption( 'db' ) === 'no' )
@@ -182,11 +191,11 @@ class Hymn_Client{
 			$action	= $this->arguments->getArgument();
 			if( !$action && $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, 'help' );
-				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			else if( $this->arguments->getOption( 'version' ) ){
 				array_unshift( $arguments, 'version' );
-				$this->arguments	= new Hymn_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			$this->dispatch();
 		}
@@ -218,7 +227,7 @@ class Hymn_Client{
 			'Deprecated - please use Hymn_Command_*::ask instead!',
 			'Method will be removed in v0.9.9.',
 		) );
-		$question	= new Hymn_Tool_Question(
+		$question	= new Hymn_Tool_Cli_Question(
 			$this->client,
 			$message,
 			$type,
@@ -350,7 +359,7 @@ class Hymn_Client{
 
 	/*  --  PROTECTED  --  */
 
-	protected function applyDatabaseConfigToModules(){
+	protected function applyAppConfiguredDatabaseConfigToModules(){
 		if( !isset( $this->config->database ) )
 			return FALSE;
 		if( !isset( $this->config->database->modules ) )
@@ -374,7 +383,7 @@ class Hymn_Client{
 		return TRUE;
 	}
 
-	protected function applyPathsToConfig(){
+	protected function applyBaseConfiguredPathsToAppConfig(){
 		$this->config->paths	= (object) array();
 		foreach( self::$pathDefaults as $pathKey => $pathValue )
 			if( !isset( $this->config->paths->{$pathKey} ) )
@@ -470,8 +479,8 @@ class Hymn_Client{
 		if( isset( $app->configPath ) )
 			self::$pathDefaults['config'] = $app->configPath;
 
-		$this->applyPathsToConfig();
-		$this->applyDatabaseConfigToModules();
+		$this->applyBaseConfiguredPathsToAppConfig();
+		$this->applyAppConfiguredDatabaseConfigToModules();
 		if( isset( $app->installMode ) && $app->installMode === 'live' )							//  is live installation
 			if( isset( $app->installType ) && $app->installType === 'copy' )						//  is installation copy
 				$this->isLiveCopy = TRUE;															//  this installation is a build for a live copy

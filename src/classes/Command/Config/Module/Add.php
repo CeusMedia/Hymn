@@ -69,7 +69,7 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$moduleConfigValues	= array();
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
-			$question		= new Hymn_Tool_Question(
+			$question		= new Hymn_Tool_Cli_Question(
 				$this->client,
 				sprintf( 'Value for "%s:%s"', $module->id, $moduleConfig->key ),
 				$moduleConfig->type,

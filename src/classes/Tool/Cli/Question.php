@@ -1,5 +1,5 @@
 <?php
-class Hymn_Tool_Question{
+class Hymn_Tool_Cli_Question{
 
 	protected $client;
 	protected $message;

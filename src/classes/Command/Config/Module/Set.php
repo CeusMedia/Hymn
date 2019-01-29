@@ -82,7 +82,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 		}
 
 		if( !strlen( trim( $value ) ) ){
-			$question	= new Hymn_Tool_Question(
+			$question	= new Hymn_Tool_Cli_Question(
 				$this->client,
 				'Value for "'.$moduleId.':'.$configKey.'"',
 				$configType,

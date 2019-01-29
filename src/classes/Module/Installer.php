@@ -137,7 +137,7 @@ class Hymn_Module_Installer{
 						$moduleConfigKey,
 					) ) );
 				}
-				$question	= new Hymn_Tool_Question(											//  get new value from console
+				$question	= new Hymn_Tool_Cli_Question(											//  get new value from console
 					$this->client,
 					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
 						$module->id,

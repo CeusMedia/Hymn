@@ -57,6 +57,15 @@ class Hymn_Tool_Locale{
 	}
 
 	/**
+	 *	Returns language currently set for locale.
+	 *	@access		public
+	 *	@return		string		Language currently set for locale
+	 */
+	public function getLanguage(){
+		return $this->language;
+	}
+
+	/**
 	 *	Indicates whether locale file exists by path and type.
 	 *	@access		public
 	 *	@param		string		$path		Path of file
@@ -144,5 +153,16 @@ class Hymn_Tool_Locale{
 		$text		= str_replace( "%language%", $this->language, $text );		//  insert client language
 		$words		= parse_ini_string( $text, FALSE );							//  parse ini structure in plain mode
 		return (object) $words;													//  return words map as object
+	}
+
+	/**
+	 *	Sets language of locale.
+	 *	@access		public
+	 *	@param		string		$language	Language to set for locale
+	 *	@return		self					for chainability
+	 */
+	public function setLanguage( $language ){
+		$this->language		= $language;
+		return $this;
 	}
 }
