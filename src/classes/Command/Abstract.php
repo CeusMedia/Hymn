@@ -81,10 +81,17 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	/**
-	 *	@throws
+	 *	...
+	 *	@access		protected
+	 *	@param		string		$shelfId		ID of shelf or all [all,*] (default)
+	 *	@param		boolean		$strict			Flag: throw exception if shelf ID is not existing
+	 *	@return		???
+	 *	@throws		\RangeException				if shelf ID is given and not existing
+	 *	@todo		sharpen return value
+	 *	@todo		finish code doc
 	 */
 	protected function evaluateShelfId( $shelfId = NULL, $strict = TRUE ){
-		$all	= array( 'all' );
+		$all	= array( 'all', '*' );
 		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
 			return NULL;
 		$library	= $this->getLibrary();

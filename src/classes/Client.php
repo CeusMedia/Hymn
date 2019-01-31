@@ -43,6 +43,7 @@ class Hymn_Client{
 	const FLAG_DRY				= 8;
 	const FLAG_FORCE			= 16;
 	const FLAG_NO_DB			= 32;
+	const FLAG_NO_FILES			= 64;
 
 	const EXIT_ON_END			= 0;
 	const EXIT_ON_LOAD			= 1;
@@ -134,7 +135,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.2b';
+	static public $version	= '0.9.8.2c';
 
 	public $arguments;
 
