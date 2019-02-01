@@ -62,49 +62,21 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 					- let module updater cache list on first listing, use cache later
 		*/
 		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
-		if( !$listInstalled )																		//  application has no installed modules
-			return $this->client->out( 'No installed modules found' );								//  quit with message
+		if( !$listInstalled ){																		//  application has no installed modules
+			$this->client->out( 'No installed modules found' );										//  quit with message
+			return static::CODE_NONE;
+		}
 
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
-		$code		= static::CODE_NONE;
-		$moduleId	= trim( $this->client->arguments->getArgument( 0 ) );
-		if( strlen( trim( $moduleId ) ) ){
-			if( !array_key_exists( $moduleId, $listInstalled ) )
-				return $this->client->out( 'Module is not installed.' );
-			if( !array_key_exists( $moduleId, $outdatedModules ) )
-				return $this->client->out( 'Module is up-to-date.' );
-			$update	= $outdatedModules[$moduleId];
-			$this->client->out( 'Version installed: '.$update->installed );
-			$this->client->out( 'Version available: '.$update->available );
-			$this->printModuleUpdateChangelog( $update );
-			return $code;
-		}
-		$message	= 'Modules: Installed: %d installed modules found.';
-		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
-		if( !$outdatedModules ){																	//  there are outdated modules
-			$this->client->outVerbose( 'Modules: Outdated: No updatable modules found.' );			//  print status topic: Modules > Outdated
-			return $code;
-		}
-		$code		|= static::CODE_MODULES_OUTDATED;
-		if( !$this->flags->quiet ){
-			$message	= 'Modules: Outdated: %d updatable modules found:';
-			$this->client->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
-		}
-		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
-			if( !$this->flags->quiet ){
-				$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
-					$update->id,																	//  - module ID
-					$update->installed,																//  - currently installed version
-					$update->available																//  - available version
-				) ) );
-				if( $this->flags->verbose )
-					$this->printModuleUpdateChangelog( $update, '  ' );
-			}
-		}
-		return $code;
+		$moduleId	= trim( $this->client->arguments->getArgument( 0 ) );							//  get module id as first argument
+		if( ( $moduleId = strlen( trim( $moduleId ) ) ) )											//  a module ID has been given
+			return $this->runForSingleModule( $listInstalled, $outdatedModules, $moduleId );		//  run status for single module
+		return $this->runForAllModules( $listInstalled, $outdatedModules );							//  run status for all (outdated) modules
 	}
+
+	/*  --  PROTECTED  --  */
 
 	protected function printModuleUpdateChangelog( $update, $indent = '' ){
 		$changes	= $this->getLibrary()->getModuleChanges(
@@ -120,5 +92,46 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 			$version	= str_pad( $change->version, 9, ' ', STR_PAD_RIGHT );
 			$this->client->out( sprintf( $indent.' - %s %s', $version, $change->note ) );
 		}
+	}
+
+	protected function runForAllModules( $listInstalled, $outdatedModules ){
+		$message	= 'Modules: Installed: %d installed modules found.';
+		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
+		if( !$outdatedModules ){																	//  there are outdated modules
+			$this->client->outVerbose( 'Modules: Outdated: No updatable modules found.' );			//  print status topic: Modules > Outdated
+			return static::CODE_NONE;
+		}
+		if( !$this->flags->quiet ){
+			$message	= 'Modules: Outdated: %d updatable modules found:';
+			$this->client->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
+		}
+		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
+			if( !$this->flags->quiet ){
+				$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
+					$update->id,																	//  - module ID
+					$update->installed,																//  - currently installed version
+					$update->available																//  - available version
+				) ) );
+				if( $this->flags->verbose )
+					$this->printModuleUpdateChangelog( $update, '  ' );
+			}
+		}
+		return static::CODE_MODULES_OUTDATED;
+	}
+
+	protected function runForSingleModule( $listInstalled, $outdatedModules, $moduleId ){
+		if( !array_key_exists( $moduleId, $listInstalled ) ){
+			$this->client->out( 'Module is not installed.' );
+			return static::CODE_NONE;
+		}
+		if( !array_key_exists( $moduleId, $outdatedModules ) ){
+			$this->client->out( 'Module is up-to-date.' );
+			return static::CODE_NONE;
+		}
+		$update	= $outdatedModules[$moduleId];
+		$this->client->out( 'Version installed: '.$update->installed );
+		$this->client->out( 'Version available: '.$update->available );
+		$this->printModuleUpdateChangelog( $update );
+		return CODE_MODULES_OUTDATED;
 	}
 }

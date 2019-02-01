@@ -90,20 +90,29 @@ B3. App Module Management
 - app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 - app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
 - app-module-reconfigure [-dqv] MODULE        Configure installed module
-- app-stamp-dump [SOURCE]                     Export current module settings into a stamp file
-- app-stamp-diff [PATH|FILE] [SOURCE] [TYPE]  Show changes between installed modules and stamp
-    Source:                    "all" or specific source name
-    Types:
-      - * | all                All changes
-      - config                 Configuration changes, only
-      - file | files           File changes, only (not implemented yet)
-      - sql                    Database changes, only
 
 B4. App Database Management
 ------------------------------------------------------------------------------
 - database-clear [-dfqv]                      Drop database tables
 - database-dump [PATH]                        Export database to SQL file
 - database-load [PATH|FILE]                   Import (specific or latest) SQL file
+
+B5. App Module Management: Stamps
+------------------------------------------------------------------------------
+- app-stamp-dump [SOURCE]                     Export current module settings into a stamp file
+- app-stamp-diff [PATH|FILE] [SOURCE] [TYPE]  Show changes between installed modules and stamp
+- app-stamp-load [PATH|FILE] [SOURCE] [TYPE]  Restore module settings of stamp (not implemented yet)
+- app-stamp-prospect [SOURCE] TYPE            Show changes when updating outdated modules
+
+Source:
+  - * | all                all sources (default on empty)
+  - SOURCE_ID              focus on specific source by its ID
+
+Type:
+  - * | all                All changes
+  - config                 Configuration changes, only
+  - file | files           File changes, only (not implemented yet)
+  - sql                    Database changes, only
 
 C. Additional Functions
 ==============================================================================

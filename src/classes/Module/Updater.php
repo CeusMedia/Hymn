@@ -74,11 +74,12 @@ class Hymn_Module_Updater{
 	/**
 	 *	Return list of outdated modules within current application.
 	 *	@access		public
+	 *	@param		string		$shelfId		ID of shelf to reduce to
 	 *	@return		array		List of outdated modules
 	 */
-	public function getUpdatableModules(){
+	public function getUpdatableModules( $shelfId = NULL ){
 		$outdated		= array();																	//  prepare list of outdated modules
-		foreach( $this->library->listInstalledModules() as $installed ){							//  iterate installed modules
+		foreach( $this->library->listInstalledModules( $shelfId ) as $installed ){					//  iterate installed modules
 			$source		= $installed->installSource;												//  get source of installed module
 			$available	= $this->library->getModule( $installed->id, $source, FALSE );				//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore

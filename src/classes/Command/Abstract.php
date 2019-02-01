@@ -42,6 +42,12 @@ abstract class Hymn_Command_Abstract{
 	protected $locale;
 	protected $words;
 
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		Hymn_Client		$client		Hymn client instance
+	 *	@return		void
+	 */
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
 		$this->flags	= (object) array(

@@ -60,61 +60,6 @@ class Hymn_Module_SQL{
 	}
 
 	/**
-	 *	Checks for database connection and returns used PDO driver.
-	 *	@access		protected
-	 *	@return		string							PDO driver used by database connection
-	 *	@throws		RuntimeException				if no database connection is available
-	 */
-	protected function checkDriver(){
-		$dbc	= $this->client->getDatabase();
-		if( !$dbc->isConnected() )																	//  database connection is not established yet
-			$dbc->connect( TRUE );																	//  setup database connection
-		$driver	= $dbc->getConfig( 'driver' );														//  get database driver
-		if( !$driver )																				//  no database driver set
-			throw new RuntimeException( 'No database connection driver set' );
-		return $driver;
-	}
-
-	/**
-	 *	Executes single SQL script against database connection.
-	 *	@access		protected
-	 *	@param		string 		$sql				SQL script to execute
-	 *	@return		void
-	 *	@throws		RuntimeException				if execution fails
-	 */
-	protected function executeSql( $sql ){
-		$dbc		= $this->client->getDatabase();
-		$dbc->connect( TRUE );
-		$prefix		= $dbc->getConfig( 'prefix' );
-		$lines		= explode( "\n", trim( $sql ) );
-		$statements = array();
-		$buffer		= array();
-		while( count( $lines ) ){
-			$line = array_shift( $lines );
-			if( !trim( $line ) )
-				continue;
-			$buffer[]	= $this->realizeTablePrefix( trim( $line ), $prefix );
-			if( preg_match( '/;$/', trim( $line ) ) ){
-				$statements[]	= join( "\n", $buffer );
-				$buffer			= array();
-			}
-			if( !count( $lines ) && $buffer )
-				$statements[]	= join( "\n", $buffer ).';';
-		}
-		foreach( $statements as $statement ){
-			try{
-				$result	= $dbc->exec( $statement );
-				if( $result	=== FALSE )
-					throw new RuntimeException( 'SQL execution failed for: '.$statement );
-			}
-			catch( Exception $e ){
-				error_log( date( "Y-m-d H:i:s" ).' '.$e->getMessage()."\n", 3, 'hymn.db.error.log' );
-				throw new RuntimeException( 'SQL error - see hymn.db.error.log' );
-			}
-		}
-	}
-
-	/**
 	 *	Return list of SQL statements to execute on module update.
 	 *	@access		public
 	 *	@param		object 		$module				Object of library module to install
@@ -231,12 +176,6 @@ class Hymn_Module_SQL{
 		return $scripts;
 	}
 
-	public function realizeTablePrefix( $sql, $prefix = NULL ){
-		if( is_null( $prefix ) )
-			$prefix		= $this->client->getDatabase()->getConfig( 'prefix' );
-		return str_replace( "<%?prefix%>", $prefix, $sql );
-	}
-
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	@access		public
@@ -296,6 +235,61 @@ class Hymn_Module_SQL{
 				catch( Exception $e ){
 					$this->client->out( 'Problem occured: '.$e->getMessage() );						//  ...
 				}
+			}
+		}
+	}
+
+	/*  --  PROTECTED  --  */
+
+	/**
+	 *	Returns PDO driver used or to be used for database connection.
+	 *	@access		protected
+	 *	@return		string							PDO driver used by database connection
+	 *	@throws		\RuntimeException				if no database connection driver is set
+	 */
+	protected function checkDriver(){
+		$dbc	= $this->client->getDatabase();														//  shortcut database resource of client
+		$driver	= $dbc->getConfig( 'driver' );														//  get configured database driver
+		if( !$driver )																				//  no database driver set
+			throw new \RuntimeException( 'No database connection driver set' );						//  quit with exception
+		return $driver;																				//  otherwise return configured driver
+	}
+
+	/**
+	 *	Executes single SQL script against database connection.
+	 *	@access		protected
+	 *	@param		string 		$sql				SQL script to execute
+	 *	@return		void
+	 *	@throws		RuntimeException				if execution fails
+	 */
+	protected function executeSql( $sql ){
+		$dbc		= $this->client->getDatabase();
+		$dbc->connect( TRUE );
+		$prefix		= $dbc->getConfig( 'prefix' );
+		$lines		= explode( "\n", trim( $sql ) );
+		$statements = array();
+		$buffer		= array();
+		while( count( $lines ) ){
+			$line = array_shift( $lines );
+			if( !trim( $line ) )
+				continue;
+			$buffer[]	= $dbc->applyTablePrefixToSql( trim( $line ), $prefix );
+			if( preg_match( '/;$/', trim( $line ) ) ){
+				$statements[]	= join( "\n", $buffer );
+				$buffer			= array();
+			}
+			if( !count( $lines ) && $buffer )
+				$statements[]	= join( "\n", $buffer ).';';
+		}
+		foreach( $statements as $statement ){
+			try{
+				$result	= $dbc->exec( $statement );
+				if( $result	=== FALSE )
+					throw new RuntimeException( 'SQL execution failed for: '.$statement );
+			}
+			catch( Exception $e ){
+				error_log( date( "Y-m-d H:i:s" ).' '.$e->getMessage()."\n", 3, 'hymn.db.error.log' );
+				throw new RuntimeException( 'SQL error - see hymn.db.error.log' );
 			}
 		}
 	}

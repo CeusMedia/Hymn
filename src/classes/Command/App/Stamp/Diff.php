@@ -79,61 +79,52 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		if( !$this->flags->quiet )
 			$this->client->out( 'Found '.count( $changes ).' modules have changed:' );
 
-		$helperSql	= new Hymn_Module_SQL( $this->client );
+		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		foreach( $changes as $change ){
-			if( !$this->flags->quiet )
-				$this->client->out( ' - Module: '.$change->target->id );
 			$moduleOld		= $change->source;
 			$moduleNew		= $change->target;
+			if( !$this->flags->quiet )
+				$this->client->out( ' - Module: '.$moduleNew->id );
 			if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
-				$sql	= $scripts = $helperSql->getModuleUpdateSql( $change->source, $moduleNew );
-				if( $sql ){
+				if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
 					if( !$this->flags->quiet )
 						$this->client->out( '   SQL: '.count( $scripts ).' updates:' );
 					$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
-					$version	= $change->source->version;
+					$version	= $moduleOld->version;
 					foreach( $scripts as $script ){
-						$query	= $helperSql->realizeTablePrefix( $script->sql );
 						$this->client->outVerbose( vsprintf( '--  UPDATE %s: %s-> %s', array(
 							strtoupper( $moduleNew->id ),
 							$version,
 							$script->version
 						) ) );
-						$this->client->out( trim( $query ) );
+						$this->client->out( trim( $script->query ) );
 						$version	= $script->version;
 					}
 				}
 			}
 			if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
-				$moduleConfigOld	= (object) $moduleOld->config;
-				$moduleConfigNew	= (object) $moduleNew->config;
-				foreach( $moduleConfigOld as $item ){
-					if( !isset( $moduleConfigNew->{$item->key} ) ){
-						$this->client->out( '   - '.$item->key.' has been removed.' );
+				$changes	= $keys = $diff->compareConfigByModules( $moduleOld, $moduleNew );
+				foreach( $changes as $change ){
+					if( $change->status === 'removed' ){
+						$message	= '   - %s has been removed.';
+						$this->client->out( vsprintf( $message, array( $change->key ) ) );
 					}
-				}
-				foreach( $moduleConfigNew as $item ){
-					if( in_array( $item->key, array( 'title', 'values' ) ) )
-						continue;
-					if( !isset( $moduleConfigOld->{$item->key} ) ){
+					else if( $change->status === 'added' ){
 						$message	= '   - %s has beend added with default value: %s';
 						$this->client->out( vsprintf( $message, array(
-							$item->key,
-							$item->value
+							$change->key,
+							$change->value
 						) ) );
 					}
-					else if( $item != $moduleConfigOld->{$item->key} ){
-						foreach( $item as $property => $value ){
-							$valueOld	= $moduleConfigOld->{$item->key}->{$property};
-							if( $valueOld !== $value ){
-								$message	= '   - %s: %s has changed from %s to %s';
-								$this->client->out( vsprintf( $message, array(
-									$item->key,
-									$property,
-									$valueOld,
-									$value
-								) ) );
-							}
+					else if( $change->status === 'changed' ){
+						foreach( $change->properties as $property ){
+							$message	= '   - %s: %s has changed from %s to %s';
+							$this->client->out( vsprintf( $message, array(
+								$change->key,
+								$property->key,
+								$property->valueOld,
+								$property->valueNew
+							) ) );
 						}
 					}
 				}
@@ -141,9 +132,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		}
 	}
 
+
 	protected function getAvailableModules( $shelfId = NULL ){
-		$library	= $this->getLibrary();
-		$modules	= $library->listInstalledModules( $shelfId );
+		$modules	= $this->getLibrary()->listInstalledModules( $shelfId );
 		$message	= 'Found '.count( $modules ).' installed modules.';
 		if( $shelfId )
 			$message	= 'Found '.count( $modules ).' installed modules in source '.$shelfId.'.';
