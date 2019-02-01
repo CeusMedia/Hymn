@@ -106,7 +106,7 @@ class Hymn_Module_Diff{
 		$helperSql	= new Hymn_Module_SQL( $this->client );
 		$scripts	= $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
 		foreach( $scripts as $script )
-			$script->sql	= $this->client->getDatabase()->applyTablePrefixToSql( $script->sql );
+			$script->query	= $this->client->getDatabase()->applyTablePrefixToSql( $script->sql );
 		return $scripts;
 	}
 
