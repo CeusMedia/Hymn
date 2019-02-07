@@ -71,9 +71,9 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
 		$moduleId	= trim( $this->client->arguments->getArgument( 0 ) );							//  get module id as first argument
-		if( ( $moduleId = strlen( trim( $moduleId ) ) ) )											//  a module ID has been given
-			return $this->runForSingleModule( $listInstalled, $outdatedModules, $moduleId );		//  run status for single module
-		return $this->runForAllModules( $listInstalled, $outdatedModules );							//  run status for all (outdated) modules
+		if( strlen( $moduleId = trim( $moduleId ) ) )												//  a module ID has been given
+			return $this->runForSingleModule( $outdatedModules, $moduleId );						//  run status for single module
+		return $this->runForAllModules( $outdatedModules );											//  run status for all (outdated) modules
 	}
 
 	/*  --  PROTECTED  --  */
@@ -94,8 +94,9 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 	}
 
-	protected function runForAllModules( $listInstalled, $outdatedModules ){
-		$message	= 'Modules: Installed: %d installed modules found.';
+	protected function runForAllModules( $outdatedModules ){
+		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
+		$message		= 'Modules: Installed: %d installed modules found.';
 		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
 		if( !$outdatedModules ){																	//  there are outdated modules
 			$this->client->outVerbose( 'Modules: Outdated: No updatable modules found.' );			//  print status topic: Modules > Outdated
@@ -119,9 +120,9 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		return static::CODE_MODULES_OUTDATED;
 	}
 
-	protected function runForSingleModule( $listInstalled, $outdatedModules, $moduleId ){
-		if( !array_key_exists( $moduleId, $listInstalled ) ){
-			$this->client->out( 'Module is not installed.' );
+	protected function runForSingleModule( $outdatedModules, $moduleId ){
+		if( !$this->getLibrary()->isInstalledModule( $moduleId ) ){
+			$this->client->out( 'Module '.$moduleId.' is not installed.' );
 			return static::CODE_NONE;
 		}
 		if( !array_key_exists( $moduleId, $outdatedModules ) ){
@@ -131,7 +132,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$update	= $outdatedModules[$moduleId];
 		$this->client->out( 'Version installed: '.$update->installed );
 		$this->client->out( 'Version available: '.$update->available );
-		$this->printModuleUpdateChangelog( $update );
-		return CODE_MODULES_OUTDATED;
+		if( $this->flags->verbose )
+			$this->printModuleUpdateChangelog( $update );
+		return static::CODE_MODULES_OUTDATED;
 	}
 }

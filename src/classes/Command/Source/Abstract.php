@@ -37,8 +37,9 @@
  */
  abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract{
 
-	protected function getShelfByArgument(){
-		$shelfId	= $this->client->arguments->getArgument( 0 );
+	protected function getShelfByArgument( $position = 0, $arguments = NULL ){
+		$arguments  = $arguments ? $arguments : $this->client->arguments;
+		$shelfId	= $arguments->getArgument( $position );
 
 		if( !strlen( trim( $shelfId ) ) ){
 			if( $this->flags->force )

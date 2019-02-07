@@ -135,7 +135,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.2e';
+	static public $version	= '0.9.8.3';
 
 	public $arguments;
 
@@ -151,7 +151,8 @@ class Hymn_Client{
 
 	public $locale;
 
-	public function __construct( $arguments ){
+	public function __construct( $arguments, $exit = TRUE ){
+		$this->exit	= $exit;
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
@@ -172,18 +173,20 @@ class Hymn_Client{
 			$this->flags	|= self::FLAG_DRY;
 		if( $this->arguments->getOption( 'force' ) )
 			$this->flags	|= self::FLAG_FORCE;
-		if( $this->arguments->getOption( 'quiet' ) )
-			$this->flags	|= self::FLAG_QUIET;
-		if( $this->arguments->getOption( 'verbose' ) )
-			$this->flags	|= self::FLAG_VERBOSE;
-		if( $this->arguments->getOption( 'very-verbose' ) )
-			$this->flags	|= self::FLAG_VERY_VERBOSE;
 		if( $this->arguments->getOption( 'force' ) )
 			$this->flags	|= self::FLAG_FORCE;
 		if( $this->arguments->getOption( 'db' ) === 'no' )
 			$this->flags	|= self::FLAG_NO_DB;
 		if( $this->arguments->getOption( 'db' ) === 'only' )
 			$this->flags	|= self::FLAG_NO_FILES;
+		if( $this->arguments->getOption( 'quiet' ) )
+			$this->flags	|= self::FLAG_QUIET;
+		if( $this->arguments->getOption( 'verbose' ) )
+			$this->flags	|= self::FLAG_VERBOSE;
+		if( $this->arguments->getOption( 'very-verbose' ) ){
+			$this->flags	|= self::FLAG_VERBOSE;
+			$this->flags	|= self::FLAG_VERY_VERBOSE;
+		}
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
 		try{
@@ -203,7 +206,8 @@ class Hymn_Client{
 		catch( Exception $e ){
 			$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_SETUP );
 		}
-		exit( Hymn_Client::EXIT_ON_END );
+		if( $this->exit )
+			exit( Hymn_Client::EXIT_ON_END );
 	}
 
 	public function getConfig(){
@@ -301,10 +305,11 @@ class Hymn_Client{
 			}
 			$lines	= array( $lines );																//  collect output content as list
 		}
-		foreach( $lines as $line )																	//  iterate output lines
+		foreach( $lines as $line ){																	//  iterate output lines
 			print( $line );																			//  display each line
-		if( $newLine )																				//  output should be closed by newline character
-			print( PHP_EOL );																		//  print newline character
+			if( $newLine )																				//  output should be closed by newline character
+				print( PHP_EOL );																		//  print newline character
+		}
 	}
 
 	/**
@@ -338,7 +343,7 @@ class Hymn_Client{
 	 */
 	public function outError( $message, $exitCode = NULL ){
 		$this->out( $this->words->outPrefixError.$message );
-		if( is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
+		if( $this->exit && is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
 			if( self::$outputMethod !== 'print' && ob_get_level() )
 				print( ob_get_clean() );
 			exit( $exitCode );
@@ -358,6 +363,47 @@ class Hymn_Client{
 				$this->out( $lines, $newLine );
 	}
 
+	/**
+	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVeryVerbose( $lines, $newLine = TRUE ){
+		if( $this->flags & self::FLAG_VERY_VERBOSE )												//  very verbose mode is on
+			$this->outVerbose( $lines, $newLine );
+	}
+
+	public function runCommand( $command, $arguments = array(), $addOptions = array(), $ignoreOptions = array() ){
+		$args	= array( $command );
+		foreach( $arguments as $argument )
+			$args[]	= $argument;
+
+		foreach( $this->arguments->getOptions() as $key => $value ){
+			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+				continue;
+			if( in_array( $key, $ignoreOptions ) )
+				continue;
+			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
+				$args[]	= '--'.$key;
+			else
+				$args[]	= '--'.$key.'='.$value;
+		}
+		foreach( $addOptions as $key => $value ){
+			if( array_key_exists( $key, $args ) )
+				continue;
+			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+				continue;
+			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
+				$args[]	= '--'.$key;
+			else
+				$args[]	= '--'.$key.'='.$value;
+		}
+		$this->outVeryVerbose( 'Running sub command: '.join( ' ', $args ) );
+		$client = new Hymn_Client( $args, FALSE );
+	}
+
 	/*  --  PROTECTED  --  */
 
 	protected function applyAppConfiguredDatabaseConfigToModules(){
@@ -371,7 +417,7 @@ class Hymn_Client{
 			if( preg_match( '/:/', $applyTo ) ){
 				list( $applyId, $applyPrefix ) = preg_split( '/:/', $applyTo, 2 );
 			}
-//			$this->outVerbose( 'Applying database config to module '.$applyId.' ...' );
+			$this->outVeryVerbose( 'Applying database config to module '.$applyId.' ...' );
 			if( !isset( $this->config->modules->{$applyId} ) )
 				$this->config->modules->{$applyId}	= (object) array();
 			$module	= $this->config->modules->{$applyId};										//  shortcut module configuration
@@ -413,8 +459,7 @@ class Hymn_Client{
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
 			try{
 				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
-					if( $this->flags & self::FLAG_VERBOSE && !( $this->flags & self::FLAG_QUIET ) )	//  verbose mode
-						$this->out( 'Reading application configuration ...' );						//  note reading of application configuration
+					$this->outVeryVerbose( 'Reading application configuration ...' );				//  note reading of application configuration
 					$this->readConfig();															//  read application configuration from hymn file
 				}
 				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command

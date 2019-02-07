@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_App_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -50,42 +50,23 @@ class Hymn_Command_Info extends Hymn_Command_Abstract implements Hymn_Command_In
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
 		$config		= $this->client->getConfig();
-		$moduleId	= $this->client->arguments->getArgument( 0 );
-//		$shelfId	= $this->client->arguments->getArgument( 1 );
-//		$shelfId	= $this->evaluateShelfId( $shelfId );
 
-		if( $moduleId ){
-			$library			= $this->getLibrary();
-			$modulesAvailable	= $library->getModules();
-			$modulesInstalled	= $library->listInstalledModules();								//  get list of installed modules
-			foreach( $modulesAvailable as $availableModule ){
-				if( $moduleId !== $availableModule->id )
-					continue;
-				$this->client->out( 'Module: '.$availableModule->title );
-				if( $availableModule->description )
-					$this->client->out( $availableModule->description );
-				$this->client->out( 'Category: '.$availableModule->category );
-				$this->client->out( 'Source: '.$availableModule->sourceId );
-				$this->client->out( 'Version: '.$availableModule->version );
-				if( array_key_exists( $moduleId, $modulesInstalled ) ){
-					$installedModule	= $modulesInstalled[$moduleId];
-					$this->client->out( 'Installed: '.$installedModule->version );
-					if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
-						$message	= 'Update available: %s -> %s';
-						$message	= sprintf( $message, $installedModule->version, $availableModule->version );
-						$this->client->out( $message );
-					}
-				}
-				return;
-			}
-			$this->client->out( 'Module '.$moduleId.' not available.' );
-			return;
-		}
 		$this->client->out( "Application Settings:" );
 		foreach( $config->application as $key => $value ){
 			if( is_object( $value ) )
 				$value	= json_encode( $value, JSON_PRETTY_PRINT );
 			$this->client->out( "- ".$key." => ".$value );
+		}
+		if( $this->flags->verbose ){
+			$this->client->out( '' );
+			$this->client->runCommand( 'source-list' );
+			$this->client->out( '' );
+			$this->client->runCommand( 'modules-installed' );
+			$this->client->out( '' );
+			$this->client->runCommand( 'modules-updatable' );
+//			$this->client->runCommand( 'app-status', array(), array(), array( 'verbose', 'very-verbose' ) );
+			$this->client->out( '' );
+			$this->client->runCommand( 'modules-required', array(), array(), array( 'verbose', 'very-verbose' ) );
 		}
 	}
 }

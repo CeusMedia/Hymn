@@ -63,11 +63,18 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 			return $this->client->out( "No installed modules found" );
 
 		$moduleUpdater	= new Hymn_Module_Updater( $this->client, $this->getLibrary() );			//  use module updater on current application installation
-		foreach( $moduleUpdater->getUpdatableModules() as $update ){								//  iterate list of outdated modules
-			$this->client->out( vsprintf( "- %s: %s -> %s", array(									//  print outdated module and:
-				$update->id,																		//  - module ID
-				$update->installed,																	//  - currently installed version
-				$update->available																	//  - available version
+		$modulesUpdatable	= $moduleUpdater->getUpdatableModules();
+		if( !$modulesUpdatable ){
+			$this->client->out( 'No modules outdated.' );
+			return;
+		}
+
+		$this->client->out( count( $modulesUpdatable ).' module(s) outdated:' );
+		foreach( $modulesUpdatable as $update ){												//  iterate list of outdated modules
+			$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
+				$update->id,																	//  - module ID
+				$update->installed,																//  - currently installed version
+				$update->available																//  - available version
 			) ) );
 		}
 	}

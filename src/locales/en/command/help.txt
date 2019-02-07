@@ -39,7 +39,6 @@ A1. Project Creation and Source Management
 
 A2. Project Setup and Information
 ------------------------------------------------------------------------------
-- info                                        Show project configuration from Hymn file
 - config-get KEY                              Get setting from Hymn file
 - config-set KEY [VALUE]                      Enter and save setting in Hymn file
 - database-config                             Enter and save database connection details
@@ -54,7 +53,7 @@ A3. Project Module Management
 
 A4. Project Module Information
 ------------------------------------------------------------------------------
-- info MODULE                                 Show information about module
+- module-info MODULE                          Show information about module
 - modules-available [SOURCE]                  List modules available (in library source)
 - modules-installed [SOURCE]                  List modules installed within application (from library source)
 - modules-required                            List modules required for application
@@ -75,11 +74,11 @@ B1. App Base Configuration Management
 
 B2. App Instance & Module Management
 ------------------------------------------------------------------------------
+- app-info [-v]                               Show app setup
+- app-status [-v]                             Show status of app and its modules
 - app-graph                                   Render module relations graph (see config/modules.graph.png)
 - app-sources                                 List installed library sources
-- app-info                                    (not implemented yet)
 - app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
-- app-status                                  Show status of app and its modules
 
 B3. App Module Management
 ------------------------------------------------------------------------------

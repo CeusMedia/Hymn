@@ -170,7 +170,7 @@ class Hymn_Module_Graph{
 		}
 		$this->status	= self::STATUS_LINKED;
 		if( $this->flags->verbose && !$this->flags->quiet )
-			$this->client->out( "Found ".count( $this->nodes )." modules." );
+			$this->client->outVeryVerbose( "Found ".count( $this->nodes )." modules." );
 	}
 
 	public function renderGraphFile( $targetFile = NULL/*, $type = 'needs'*/ ){							//  @todo	make indepentent from need/support

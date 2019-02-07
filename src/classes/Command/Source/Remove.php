@@ -43,9 +43,11 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run( $arguments = NULL ){
+		if( !( $arguments instanceof Hymn_Tool_Cli_Arguments ) )
+			$arguments	= $this->client->arguments;
 		$config		= $this->client->getConfig();
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $shelf = $this->getShelfByArgument( 0, $arguments ) ) )
 			return;
 
 		if( !$shelf->active && !$this->flags->force ){

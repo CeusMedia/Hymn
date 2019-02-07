@@ -59,13 +59,32 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 			}
 			$relation->addModule( $module );
 		}
+		$listInstalled	= array();
+		$listRequired	= array();
 		$modules	= $relation->getOrder();
-		$this->client->out( count( $modules )." modules required:" );
+//		$this->client->out( count( $modules )." modules required:" );
 		foreach( $modules as $module ){
 			if( $library->isInstalledModule( $module->id ) )
-				$this->client->out( "- ".$module->id.'' );
+				$listInstalled[]	= $module;
 			else
-				$this->client->out( "+ ".$module->id.': NOT INSTALLED' );
+				$listRequired[]	= $module;
+		}
+
+		if( !count( $listRequired ) ){
+			if( !$this->flags->verbose )
+				$this->client->out( 'All '.count( $listInstalled ).' required module(s) installed' );
+		}
+		if( count( $listInstalled ) ){
+			$this->client->outVerbose( count( $listInstalled ).' required module(s) installed:' );
+			foreach( $listInstalled as $module ){
+				$this->client->outVerbose( "- ".$module->id.'' );
+			}
+		}
+		if( count( $listRequired ) ){
+			$this->client->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
+			foreach( $listRequired as $module ){
+				$this->client->out( "- ".$module->id.'' );
+			}
 		}
 	}
 }

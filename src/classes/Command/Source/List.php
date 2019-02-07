@@ -55,7 +55,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 				'  - Type:    '.ucfirst( $shelf->type ),
 				'  - Path:    '.$shelf->path,
 				'  - Active:  '.( $shelf->active ? 'yes' : 'no' ),
-				'  - Default: '.( $shelf->default ? 'yes' : 'no' )
+				'  - Default: '.( $shelf->default ? 'yes' : 'no' ),
 			) );
 		}
 	}
