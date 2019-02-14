@@ -41,7 +41,7 @@ class Hymn_Module_Diff{
 
 		$list	= array();
 		foreach( $sourceModule->config as $item ){
-			if( !isset( $targetModule->config[$item->key] ) ){
+			if( !isset( $targetModule->config->{$item->key} ) ){
 				$list[]	= (object) array(
 					'status'		=> 'removed',
 					'type'			=> $item->type,
@@ -51,7 +51,7 @@ class Hymn_Module_Diff{
 			}
 		}
 		foreach( $targetModule->config as $item ){
-			if( !isset( $sourceModule->config[$item->key] ) ){
+			if( !isset( $sourceModule->config->{$item->key} ) ){
 				$list[]	= (object) array(
 					'status'		=> 'added',
 					'type'			=> $item->type,
@@ -59,7 +59,7 @@ class Hymn_Module_Diff{
 					'value'			=> $item->value,
 				);
 			}
-			else if( $item != $sourceModule->config[$item->key] ){
+			else if( $item != $sourceModule->config->{$item->key} ){
 				$changes	= array();
 				foreach( $item as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
@@ -67,8 +67,8 @@ class Hymn_Module_Diff{
 					if( !$targetModule->isInstalled && !$value )
 						continue;
 					$valueOld	= $value;
-					if( isset( $sourceModule->config[$item->key]->{$property} ) )
-						$valueOld	= $sourceModule->config[$item->key]->{$property};
+					if( isset( $sourceModule->config->{$item->key}->{$property} ) )
+						$valueOld	= $sourceModule->config->{$item->key}->{$property};
 					if( $valueOld !== $value ){
 						$changes[]	= (object) array(
 							'key'		=> $property,
@@ -106,7 +106,8 @@ class Hymn_Module_Diff{
 		$helperSql	= new Hymn_Module_SQL( $this->client );
 		$scripts	= $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
 		foreach( $scripts as $script )
-			$script->query	= $this->client->getDatabase()->applyTablePrefixToSql( $script->sql );
+//			$script->query	= $this->client->getDatabase()->applyTablePrefixToSql( $script->sql );
+			$script->query	= $script->sql;
 		return $scripts;
 	}
 

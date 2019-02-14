@@ -96,14 +96,14 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	protected function runForAllModules( $outdatedModules ){
 		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
-		$message		= 'Modules: Installed: %d installed modules found.';
+		$message		= '%d installed modules found.';
 		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
 		if( !$outdatedModules ){																	//  there are outdated modules
-			$this->client->outVerbose( 'Modules: Outdated: No updatable modules found.' );			//  print status topic: Modules > Outdated
+			$this->client->outVerbose( 'No updatable modules found.' );								//  print status topic: Modules > Outdated
 			return static::CODE_NONE;
 		}
 		if( !$this->flags->quiet ){
-			$message	= 'Modules: Outdated: %d updatable modules found:';
+			$message	= '%d updatable modules found:';
 			$this->client->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
 		}
 		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
