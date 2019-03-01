@@ -59,8 +59,8 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		foreach( $config->modules as $moduleId => $module ){
 			if( preg_match( "/^@/", $moduleId ) )
 				continue;
+			$module	= $library->getModule( $moduleId );
 			if( $module->isActive ){
-				$module			= $library->getModule( $moduleId );
 			//	$installType	= $this->client->getModuleInstallType( $moduleId, $this->installType );
 				$relation->addModule( $module );
 			}
