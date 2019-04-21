@@ -253,20 +253,19 @@ class Hymn_Module_Updater{
 					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}
-			$files->removeFiles( $localModule, FALSE, TRUE );									//  dry run of: remove module files
-			$sql->runModuleUpdateSql( $localModule, $module, FALSE, TRUE );					//  dry run of: run SQL scripts
-			$files->copyFiles( $module, $installType, FALSE, TRUE );							//  dry run of: copy module files
+			$files->removeFiles( $localModule, TRUE );												//  try run of: remove module files
+			$sql->runModuleUpdateSql( $localModule, $module, TRUE );								//  try run of: run SQL scripts
+			$files->copyFiles( $module, $installType, TRUE );										//  try run of: copy module files
 
-			$files->removeFiles( $localModule );												//  remove module files
+			$files->removeFiles( $localModule );													//  remove module files, this time for real
 			if( !$this->flags->dry ){
 //				$pathConfig	= $this->client->getConfigPath();
 //				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );								//  remove module configuration file
 				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 			}
-			$files->copyFiles( $module, $installType );										//  copy module files
+			$files->copyFiles( $module, $installType );												//  copy module files, this time for real
 			$this->reconfigure( $module, TRUE );													//  configure module skipping unchanged values
-			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
-				$sql->runModuleUpdateSql( $localModule, $module );							//  run SQL scripts
+			$sql->runModuleUpdateSql( $localModule, $module );										//  run SQL scripts, this time for real
 			return TRUE;
 		}
 		catch( Exception $e ){

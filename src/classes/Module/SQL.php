@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Manager for module SQL scripts.
  *
  *	Copyright (c) 2014-2019 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Manager for module SQL scripts.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
@@ -43,30 +43,22 @@ class Hymn_Module_SQL{
 	public function __construct( Hymn_Client $client ){
 		$this->client	= $client;
 		$this->flags	= (object) array(
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'noDatabase'	=> $this->client->flags & Hymn_Client::FLAG_NO_DB,
 		);
 	}
 
 	/**
-	 *	Returns statically built instance.
-	 *	@access		public
-	 *	@param		Hymn_Client		$client		Instance of hymn client
-	 *	@return		self
-	 */
-	public function getInstance( Hymn_Client $client ){
-		return new static( $client );
-	}
-
-	/**
 	 *	Return list of SQL statements to execute on module update.
+	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object 		$module				Object of library module to install
 	 *	@return		array		List of SQL statements to execute on module installation
 	 */
 	public function getModuleInstallSql( $module ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )										//  flag to skip database operations is set
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
 			return array();																			//  quit here and return empty list
@@ -112,12 +104,13 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and returns list of uninstall scripts.
+	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object 		$installedModule	Object of locally installed module
 	 *	@return		array		List of SQL statements to execute on module uninstallation
 	 */
 	public function getModuleUninstallSql( $installedModule ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
 			return array();																			//  quit here and return empty list
@@ -149,13 +142,14 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Return list of SQL statements to execute on module update.
+	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object		$installedModule	Object of locally installed module
 	 *	@param		object		$module				Object of library module to update to
 	 *	@return		array		List of SQL statements to execute on module update
 	 */
 	public function getModuleUpdateSql( $installedModule, $module ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
 			return array();																			//  quit here and return empty list
@@ -178,12 +172,15 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object 		$module				Object of nodule to install
 	 *	@param		object 		$module				Object of nodule to install
 	 *	@throws		RuntimeException		if target file is not readable
 	 */
 	public function runModuleInstallSql( $module ){
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
+			return;
 		$scripts	= $this->getModuleInstallSql( $module );
 		foreach( $scripts as $script ){																//  iterate collected scripts
 			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
@@ -197,11 +194,14 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and executes uninstall scripts.
+	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object 		$installedModule	Object of locally installed module
 	 *	@return		void
 	 */
 	public function runModuleUninstallSql( $installedModule ){
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
+			return;
 		$scripts	= $this->getModuleUninstallSql( $installedModule );
 
 		foreach( $scripts as $script ){
@@ -216,19 +216,25 @@ class Hymn_Module_SQL{
 
 	/**
 	 *	Reads module SQL scripts and executes install and update scripts.
+	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
 	 *	@param		object 		$installedModule	Object of locally installed module
 	 *	@param		object 		$module				Object of library module to update to
+	 *	@param		boolean		$tryMode			Flag: force no changes, only try (default: no)
 	 *	@return		void
+	 *	@todo		implement SQL checks or in try mode nothing is done
+	 *	@todo		also maybe add transactions
 	 */
-	public function runModuleUpdateSql( $installedModule, $module ){
+	public function runModuleUpdateSql( $installedModule, $module, $tryMode = FALSE ){
+		if( $this->flags->noDatabase )																//  flag to skip database operations is set
+			return;
 		$scripts	= $this->getModuleUpdateSql( $installedModule, $module );
 		foreach( $scripts as $script ){																//  iterate found ordered update scripts
-			if( $this->flags->verbose && !$this->flags->quiet ){									//  be verbose
+			if( $this->flags->verbose && !$this->flags->quiet && !$tryMode ){						//  be verbose
 				$msg	= "  … apply database script on %s at version %s";							//  ...
-				$this->client->out( sprintf( $msg, $script->event, $script->version ) );				//  ...
+				$this->client->out( sprintf( $msg, $script->event, $script->version ) );			//  ...
 			}
-			if( !$this->flags->dry ){																//  not a dry run
+			if( !( $this->flags->dry || $tryMode ) ){												//  not a dry or try run
 				try{
 					$this->executeSql( $script->sql );												//  execute collected SQL script
 				}

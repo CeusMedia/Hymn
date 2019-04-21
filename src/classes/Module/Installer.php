@@ -179,12 +179,9 @@ class Hymn_Module_Installer{
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
-			if( !( $this->client->flags & Hymn_Client::FLAG_NO_FILES ) ){
-				$files->copyFiles( $module, $installType );										//  copy module files
-			}
+			$files->copyFiles( $module, $installType );											//  copy module files
 			$this->configure( $module );														//  configure module
-			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )
-				$sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );					//  run SQL scripts, not for live copy builds
+			$sql->runModuleInstallSql( $module/*, $this->isLiveCopy*/ );						//  run SQL scripts, not for live copy builds
 			return TRUE;
 		}
 		catch( Exception $e ){
@@ -202,13 +199,12 @@ class Hymn_Module_Installer{
 			$pathConfig			= $this->client->getConfigPath();
 
 			$localModule->path	= $appUri;
-			$files->removeFiles( $localModule );											//  remove module files
+			$files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){															//  not a dry run
 				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );							//  remove module configuration file
 				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );					//  remove modules cache file
 			}
-			if( !( $this->client->flags & Hymn_Client::FLAG_NO_DB ) )							//  database actions are enabled
-				$sql->runModuleUninstallSql( $localModule );								//  run SQL scripts
+			$sql->runModuleUninstallSql( $localModule );										//  run SQL scripts
 			return TRUE;
 		}
 		catch( Exception $e ){

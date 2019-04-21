@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Manager for module files.
  *
  *	Copyright (c) 2014-2019 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Manager for module files.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
@@ -54,19 +54,22 @@ class Hymn_Module_Files{
 			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'noFiles'	=> $this->client->flags & Hymn_Client::FLAG_NO_FILES,
 		);
 	}
 
 	/**
 	 *	Tries to link or copy all module files into application.
+	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
 	 *	@param 		object 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
+	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		void
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( $module, $installType = "link" ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_FILES )
+	public function copyFiles( $module, $installType = "link", $tryMode = FALSE ){
+		if( $this->flags->noFiles )
 			return TRUE;
 
 		$fileMap	= $this->prepareModuleFileMap( $module );
@@ -84,7 +87,7 @@ class Hymn_Module_Files{
 //						throw new Exception( 'Source file '.$source.' is not executable' );
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
-					if( !$this->flags->dry ){														//  not a dry run
+					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 						if( file_exists( $target ) ){
 							if( is_file( $target ) && !is_link( $target ) && !$this->flags->force )
 								continue;
@@ -111,7 +114,7 @@ class Hymn_Module_Files{
 						throw new Exception( 'Source file '.$source.' is not readable' );
 					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
 						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
-					if( !$this->flags->dry ){														//  not a dry run
+					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 /*						if( file_exists( $target ) ){
 							if( is_file( $target ) && !$this->flags->force )
 								continue;
@@ -120,7 +123,7 @@ class Hymn_Module_Files{
 */						if( !@copy( $source, $target ) )											//  copying failed
 							throw new Exception( 'Source file '.$source.' could not been copied' );
 					}
-					if( $this->flags->verbose && !$this->flags->quiet )
+					if( $this->flags->verbose && !$this->flags->quiet && !$tryMode )
 						$this->client->out( '  … copied file '.$source );
 //				}
 //				catch( Exception $e ){
@@ -135,12 +138,15 @@ class Hymn_Module_Files{
 	 *	Creates a path.
 	 *	A nested path will be created recursively.
 	 *	No error messages will be shown but the return value indicates the result.
+	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@static
 	 *	@access		public
 	 *	@param		string		$path		Path to create
 	 *	@return		bool
 	 */
 	static public function createPath( $path ){
+		if( $this->flags->noFiles )
+			return TRUE;
 		if( file_exists( $path ) )
 			return NULL;
 		if( @mkdir( $path, 0777, TRUE ) )
@@ -249,14 +255,16 @@ class Hymn_Module_Files{
 
 	/**
 	 *	Removed installed files of module.
+	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
 	 *	@param 		object 		$module			Module object
+	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		void
 	 *	@throws		RuntimeException			if target file is not readable
 	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	public function removeFiles( $module ){
-		if( $this->client->flags & Hymn_Client::FLAG_NO_FILES )
+	public function removeFiles( $module, $tryMode = FALSE ){
+		if( $this->flags->noFiles )
 			return TRUE;
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( array_values( $fileMap ) as $target ){												//  iterate target file list
@@ -266,10 +274,10 @@ class Hymn_Module_Files{
 				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
 			if( !is_link( $target ) && !is_writable( $target ) )									//  if installed file is a copy and not writable
 				throw new RuntimeException( 'Target file '.$target.' is not removable' );			//  throw exception
-			if( !$this->flags->dry ){																//  not a dry run
+			if( !( $this->flags->dry || $tryMode ) ){												//  not a dry or try run
 				@unlink( $target );																	//  remove installed file
 			}
-			if( $this->flags->verbose && !$this->flags->quiet )										//  be verbose
+			if( $this->flags->verbose && !$this->flags->quiet && !$tryMode )						//  be verbose
 				$this->client->out( '  … removed file '.$target );									//  print note about removed file
 		}
 	}

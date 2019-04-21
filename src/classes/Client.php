@@ -135,7 +135,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.4a';
+	static public $version	= '0.9.8.4b';
 
 	public $arguments;
 
@@ -151,6 +151,14 @@ class Hymn_Client{
 
 	public $locale;
 
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		array			$arguments		Map of CLI arguments
+	 *	@param		boolean			$exit			Flag: exit execution afterwards (default: yes)
+	 *	@return		void
+	 *	@throws		RuntimeException				if trying to run via web server
+	 */
 	public function __construct( $arguments, $exit = TRUE ){
 		$this->exit	= $exit;
 		ini_set( 'display_errors', TRUE );
