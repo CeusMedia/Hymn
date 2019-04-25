@@ -145,8 +145,6 @@ class Hymn_Module_Files{
 	 *	@return		bool
 	 */
 	static public function createPath( $path ){
-		if( $this->flags->noFiles )
-			return TRUE;
 		if( file_exists( $path ) )
 			return NULL;
 		if( @mkdir( $path, 0777, TRUE ) )
