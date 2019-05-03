@@ -20,18 +20,6 @@ class Hymn_Module_Diff{
 		);
 	}
 
-	public function compareConfigByIds( $sourceModuleId, $targetModuleId ){
-		$this->readModules();
-		if( !array_key_exists( $sourceModuleId, $this->modulesInstalled ) )
-			throw new Exception( 'Module "'.$sourceModuleId.'" is not installed' );
-		if( !array_key_exists( $targetModuleId, $this->modulesAvailable ) )
-			throw new Exception( 'Module "'.$targetModuleId.'" is not available' );
-
-		$sourceModule	= $this->modulesInstalled[$sourceModuleId];
-		$targetModule	= $this->modulesAvailable[$targetModuleId];
-		return $this->compareConfigByModules( $sourceModule, $targetModule );
-	}
-
 	public function compareConfigByModules( $sourceModule, $targetModule ){
 		if( !isset( $sourceModule->config ) )
 			throw new InvalidArgumentException( 'Given source module object is invalid' );
@@ -39,9 +27,12 @@ class Hymn_Module_Diff{
 			throw new InvalidArgumentException( 'Given target module object is invalid' );
 		$skipProperties		= array( 'title', 'values', 'original', 'default' );
 
-		$list	= array();
-		foreach( $sourceModule->config as $item ){
-			if( !isset( $targetModule->config->{$item->key} ) ){
+		$list			= array();
+		$configSource	= (array) $sourceModule->config;
+		$configTarget	= (array) $targetModule->config;
+
+		foreach( $configSource as $item ){
+			if( !isset( $configTarget[$item->key] ) ){
 				$list[]	= (object) array(
 					'status'		=> 'removed',
 					'type'			=> $item->type,
@@ -50,8 +41,8 @@ class Hymn_Module_Diff{
 				);
 			}
 		}
-		foreach( $targetModule->config as $item ){
-			if( !isset( $sourceModule->config->{$item->key} ) ){
+		foreach( $configTarget as $item ){
+			if( !isset( $configSource[$item->key] ) ){
 				$list[]	= (object) array(
 					'status'		=> 'added',
 					'type'			=> $item->type,
@@ -59,7 +50,7 @@ class Hymn_Module_Diff{
 					'value'			=> $item->value,
 				);
 			}
-			else if( $item != $sourceModule->config->{$item->key} ){
+			else if( $item != $configSource[$item->key] ){
 				$changes	= array();
 				foreach( $item as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
@@ -67,8 +58,8 @@ class Hymn_Module_Diff{
 					if( !$targetModule->isInstalled && !$value )
 						continue;
 					$valueOld	= $value;
-					if( isset( $sourceModule->config->{$item->key}->{$property} ) )
-						$valueOld	= $sourceModule->config->{$item->key}->{$property};
+					if( isset( $configSource[$item->key]->{$property} ) )
+						$valueOld	= $configSource[$item->key]->{$property};
 					if( $valueOld !== $value ){
 						$changes[]	= (object) array(
 							'key'		=> $property,

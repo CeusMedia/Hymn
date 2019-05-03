@@ -49,8 +49,8 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 	 *	@return		void
 	 */
 	public function run(){
-		$shelfId	= $this->client->arguments->getArgument( 0 );
-		$type		= $this->client->arguments->getArgument( 1 );
+		$type		= $this->client->arguments->getArgument( 0 );
+		$shelfId	= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		$listInstalled	= $this->getLibrary()->listInstalledModules( $shelfId );					//  get list of installed modules

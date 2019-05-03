@@ -47,93 +47,62 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run(){
 		$pathName	= $this->client->arguments->getArgument( 0 );
-		$shelfId	= $this->client->arguments->getArgument( 1 );
-		$type		= $this->client->arguments->getArgument( 2 );
+		$type		= $this->client->arguments->getArgument( 1 );
+		$shelfId	= $this->client->arguments->getArgument( 2 );
+		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$modules	= $this->getInstalledModules( $shelfId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $shelfId );
-		$modules	= $this->getAvailableModules( $shelfId );									//  load available modules
+		if( $moduleId )
+			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId, $shelfId ) );
 
 		/*  --  FIND MODULE CHANGES  --  */
-		$changes	= array();
-		foreach( $modules as $module ){
-			if( !isset( $stamp->modules->{$module->id} ) ){
-				if( !$this->flags->quiet )
-					$this->client->out( 'Module '.$module->id.' was not installed before.' );
-			}
-			else{
-				$oldModule	= $stamp->modules->{$module->id};
-				if( !version_compare( $oldModule->version, $module->version, '<' ) )
-					continue;
-				$changes[$module->id]	= (object) array(
-					'type'		=> '...',
-					'source'	=> $oldModule,
-					'target'	=> $module,
-				);
-			}
-		}
-		if( !$changes ){
+		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
+		if( !$moduleChanges ){
 			if( !$this->flags->quiet )
 				$this->client->out( 'No modules have changed.' );
 			return;
 		}
 		if( !$this->flags->quiet )
-			$this->client->out( 'Found '.count( $changes ).' modules have changed:' );
+			$this->client->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
-		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
-		foreach( $changes as $change ){
-			$moduleOld		= $change->source;
-			$moduleNew		= $change->target;
-			if( !$this->flags->quiet )
-				$this->client->out( ' - Module: '.$moduleNew->id );
-			if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
-				if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
-					if( !$this->flags->quiet )
-						$this->client->out( '   SQL: '.count( $scripts ).' updates:' );
-					$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
-					$version	= $moduleOld->version;
-					foreach( $scripts as $script ){
-						$this->client->outVerbose( vsprintf( '--  UPDATE %s: %s-> %s', array(
-							strtoupper( $moduleNew->id ),
-							$version,
-							$script->version
-						) ) );
-						$this->client->out( trim( $script->query ) );
-						$version	= $script->version;
-					}
-				}
-			}
-			if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
-				$changes	= $keys = $diff->compareConfigByModules( $moduleOld, $moduleNew );
-				foreach( $changes as $change ){
-					if( $change->status === 'removed' ){
-						$message	= '   - %s has been removed.';
-						$this->client->out( vsprintf( $message, array( $change->key ) ) );
-					}
-					else if( $change->status === 'added' ){
-						$message	= '   - %s has beend added with default value: %s';
-						$this->client->out( vsprintf( $message, array(
-							$change->key,
-							$change->value
-						) ) );
-					}
-					else if( $change->status === 'changed' ){
-						foreach( $change->properties as $property ){
-							$message	= '   - %s: %s has changed from %s to %s';
-							$this->client->out( vsprintf( $message, array(
-								$change->key,
-								$property->key,
-								$property->valueOld,
-								$property->valueNew
-							) ) );
-						}
-					}
-				}
-			}
-		}
+		foreach( $moduleChanges as $moduleChange )
+			if( $moduleChange->type === 'added' )
+				$this->showAddedModule( $type, $moduleChange->module );
+
+		foreach( $moduleChanges as $moduleChange )
+			if( $moduleChange->type === 'changed' )
+				$this->showChangedModule( $type, $moduleChange->source, $moduleChange->target );
+
+		foreach( $moduleChanges as $moduleChange )
+			if( $moduleChange->type === 'removed' )
+				$this->showRemovedModule( $type, $moduleChange->module );
 	}
 
+	protected function detectModuleChanges( $stamp, $modules ){
+		$moduleChanges	= array();
+		foreach( $modules as $module ){
+			if( !isset( $stamp->modules->{$module->id} ) ){
+				$moduleChanges[$module->id]	= (object) array(
+					'type'		=> 'added',
+					'module'	=> $module,
+				);
+			}
+			else{
+				$oldModule	= $stamp->modules->{$module->id};
+				if( !version_compare( $oldModule->version, $module->version, '<' ) )
+					continue;
+				$moduleChanges[$module->id]	= (object) array(
+					'type'		=> 'changed',
+					'source'	=> $oldModule,
+					'target'	=> $module,
+				);
+			}
+		}
+		return $moduleChanges;
+	}
 
-	protected function getAvailableModules( $shelfId = NULL ){
+	protected function getInstalledModules( $shelfId = NULL ){
 		$modules	= $this->getLibrary()->listInstalledModules( $shelfId );
 		$message	= 'Found '.count( $modules ).' installed modules.';
 		if( $shelfId )
@@ -170,6 +139,13 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		return NULL;
 	}
 
+	/**
+	 *	...
+	 *	@access		protected
+	 *	@param		$pathName		...
+	 *	@param		$shelfId		...
+	 *	@return		array
+	 */
 	protected function getStamp( $pathName, $shelfId ){
 		if( $pathName ){
 			$fileName	= NULL;
@@ -186,5 +162,107 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
+	}
+
+	/**
+	 *	Calculates difference of added module and print out results.
+	 *	@access		protected
+	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
+	 *	@param		object		$module		Module that has been added (maybe from library)
+	 *	@return		void
+	 */
+	protected function showAddedModule( $type, $module ){
+		$sql	= new Hymn_Module_SQL( $this->client );
+		if( !$this->flags->quiet )
+			$this->client->out( ' - Module added: '.$module->id );
+		if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
+			$scripts	= $sql->getModuleInstallSql( $module );
+			if( $scripts ){
+				if( !$this->flags->quiet )
+					$this->client->out( '   SQL: '.count( $scripts ).' installation(s):' );
+				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
+				foreach( array_values( $scripts ) as $nr => $script ){
+					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s', array(
+						$nr + 1,
+						count( $scripts ),
+						$script->version
+					) ) );
+					$this->client->out( trim( $script->sql ) );
+					$version	= $script->version;
+				}
+			}
+		}
+		if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
+		}
+	}
+
+	/**
+	 *	Calculates difference of module change and print out results.
+	 *	@access		protected
+	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
+	 *	@param		object		$moduleOld	Old version of module (maybe from stamp)
+	 *	@param		object		$moduleNew	New version of module (maybe from library)
+	 *	@return		void
+	 */
+	protected function showChangedModule( $type, $moduleOld, $moduleNew ){
+		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
+		if( !$this->flags->quiet )
+			$this->client->out( ' - Module changed: '.$moduleNew->id );
+		if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
+			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
+				if( !$this->flags->quiet )
+					$this->client->out( '   SQL: '.count( $scripts ).' update(s):' );
+				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
+				$version	= $moduleOld->version;
+				foreach( array_values( $scripts ) as $nr => $script ){
+					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s-> %s', array(
+						$nr + 1,
+						count( $scripts ),
+						$version,
+						$script->version
+					) ) );
+					$this->client->out( trim( $script->query ) );
+					$version	= $script->version;
+				}
+			}
+		}
+		if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
+			$changes	= $keys = $diff->compareConfigByModules( $moduleOld, $moduleNew );
+			foreach( $changes as $change ){
+				if( $change->status === 'removed' ){
+					$message	= '   - %s has been removed.';
+					$this->client->out( vsprintf( $message, array( $change->key ) ) );
+				}
+				else if( $change->status === 'added' ){
+					$message	= '   - %s has been added with default value: %s';
+					$this->client->out( vsprintf( $message, array(
+						$change->key,
+						$change->value
+					) ) );
+				}
+				else if( $change->status === 'changed' ){
+					foreach( $change->properties as $property ){
+						$message	= '   - %s: %s has changed from %s to %s';
+						$this->client->out( vsprintf( $message, array(
+							$change->key,
+							$property->key,
+							$property->valueOld,
+							$property->valueNew
+						) ) );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 *	Calculates difference of removed module and print out results.
+	 *	@access		protected
+	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
+	 *	@param		object		$module		Module that has been removed (maybe from stamp)
+	 *	@return		void
+	 */
+	protected function showRemovedModule( $type, $module ){
+		$this->client->outError( 'showRemovedModule: Not implemented, yet.' );
 	}
 }

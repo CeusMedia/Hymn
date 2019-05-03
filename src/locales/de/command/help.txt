@@ -98,20 +98,20 @@ B4. App Database Management
 
 B5. App Module Management: Stamps
 ------------------------------------------------------------------------------
-- app-stamp-dump [SOURCE]                     Export current module settings into a stamp file
-- app-stamp-diff [PATH|FILE] [SOURCE] [TYPE]  Show changes between installed modules and stamp
-- app-stamp-load [PATH|FILE] [SOURCE] [TYPE]  Restore module settings of stamp (not implemented yet)
-- app-stamp-prospect [SOURCE] TYPE            Show changes when updating outdated modules
-
-Source:
-  - * | all                all sources (default on empty)
-  - SOURCE_ID              focus on specific source by its ID
+- app-stamp-dump [SOURCE]                              Export current module settings into a stamp file
+- app-stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between installed modules and stamp
+- app-stamp-load [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Restore module settings of stamp (not implemented yet)
+- app-stamp-prospect TYPE [SOURCE]                     Show changes when updating outdated modules
 
 Type:
   - * | all                All changes
   - config                 Configuration changes, only
   - file | files           File changes, only (not implemented yet)
   - sql                    Database changes, only
+
+Source:
+  - * | all                all sources (default on empty)
+  - SOURCE_ID              focus on specific source by its ID
 
 C. Additional Functions
 ==============================================================================
