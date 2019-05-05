@@ -53,6 +53,7 @@ class Hymn_Module_Installer{
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 		);
 
 /*		if( isset( $this->app->installMode ) )
@@ -136,6 +137,13 @@ class Hymn_Module_Installer{
 						$module->id,
 						$moduleConfigKey,
 					) ) );
+				}
+				if( $this->client->flags & Hymn_Client::FLAG_NO_INTERACTION ){
+					$message	= 'Config value %s of module %s is missing but mandatory. Questioning is allowed in interactive mode, only.';
+					$this->client->outError( vsprintf( $message, array(
+						$moduleConfigKey,
+						$module->id,
+					) ), Hymn_Client::EXIT_ON_RUN );
 				}
 				$question	= new Hymn_Tool_Cli_Question(											//  get new value from console
 					$this->client,

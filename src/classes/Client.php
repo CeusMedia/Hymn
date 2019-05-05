@@ -44,6 +44,7 @@ class Hymn_Client{
 	const FLAG_FORCE			= 16;
 	const FLAG_NO_DB			= 32;
 	const FLAG_NO_FILES			= 64;
+	const FLAG_NO_INTERACTION	= 128;
 
 	const EXIT_ON_END			= 0;
 	const EXIT_ON_LOAD			= 1;
@@ -106,6 +107,12 @@ class Hymn_Client{
 			'pattern'	=> '/^--version/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
+		),
+		'interactive'	=> array(
+			'pattern'	=> '/^--interactive=(\S+)$/',
+			'resolve'	=> '\\1',
+			'values'	=> array( 'yes', 'no' ),
+			'default'	=> 'yes',
 		)
 	);
 
@@ -135,7 +142,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.5a';
+	static public $version	= '0.9.8.5b';
 
 	public $arguments;
 
@@ -189,12 +196,16 @@ class Hymn_Client{
 			$this->flags	|= self::FLAG_NO_FILES;
 		if( $this->arguments->getOption( 'quiet' ) )
 			$this->flags	|= self::FLAG_QUIET;
-		if( $this->arguments->getOption( 'verbose' ) )
+		if( $this->arguments->getOption( 'verbose' ) ){
 			$this->flags	|= self::FLAG_VERBOSE;
+			$this->flags	|= self::FLAG_NO_INTERACTION;
+		}
 		if( $this->arguments->getOption( 'very-verbose' ) ){
 			$this->flags	|= self::FLAG_VERBOSE;
 			$this->flags	|= self::FLAG_VERY_VERBOSE;
 		}
+		if( $this->arguments->getOption( 'interactive' ) === 'no' )
+			$this->flags	|= self::FLAG_NO_INTERACTION;
 		self::$fileName		= $this->arguments->getOption( 'file' );
 
 		try{

@@ -53,7 +53,7 @@ A3. Project Module Management
 
 A4. Project Module Information
 ------------------------------------------------------------------------------
-- module-info MODULE                          Show information about module
+- module-info [-v] MODULE [SOURCE]            Show information about module (in library source)
 - modules-available [SOURCE]                  List modules available (in library source)
 - modules-installed [SOURCE]                  List modules installed within application (from library source)
 - modules-required                            List modules required for application
