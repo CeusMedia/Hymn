@@ -79,8 +79,18 @@ class Hymn_Module_Graph{
 			'out'		=> array(),																	//  … store outgoing module links
 		);
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
-		foreach( $module->relations->needs as $neededModuleId ){									//  iterate all modules linked as "needed"
-			$neededModule	= $this->library->getModule( $neededModuleId );							//  get module data object from module library
+		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
+			if( $relation->source ){
+				if( !$this->library->isModuleInShelf( $neededModuleId, $relation->source ) ){
+					$message	= 'Module %s needs module %s from source %s, which is missing.';
+					$this->client->outError( vsprintf( $message, array(
+						$module->id,
+						$neededModuleId,
+						$relation->source,
+					) ), Hymn_Client::EXIT_ON_RUN );
+				}
+			}
+			$neededModule	= $this->library->getModule( $neededModuleId, $relation->source );		//  get module data object from module library
 			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
 		}
 	}
@@ -151,7 +161,7 @@ class Hymn_Module_Graph{
 			$rand	= str_pad( rand( 0, $max ), 8, '0', STR_PAD_LEFT );
 			$list[(float) $edges.'.'.$rand]	= $id;
 		}
-		krsort( $list );																				//  sort module order list
+		krsort( $list );																			//  sort module order list
 
 		/*  collect modules by installation order  */
 		$modules	= array();																		//  prepare empty module list
@@ -163,7 +173,7 @@ class Hymn_Module_Graph{
 	protected function realizeRelations(){
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
-			foreach( $node->module->relations->needs as $neededModuleId ){							//  iterate all needed modules of node
+			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
 				$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];			//  note outgoing link on this node
 				$this->nodes[$neededModuleId]->in[$id]	= $node->module;							//  note ingoing link on the needed node
 			}

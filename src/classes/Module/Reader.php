@@ -147,7 +147,10 @@ class Hymn_Module_Reader{
 		);
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
-				$object	= (object) array( 'file' => (string) $file );
+				$object	= (object) array(
+					'type'	=> $source,
+					'file'	=> (string) $file,
+				);
 				foreach( $this->getAttributes( $file ) as $key => $value )
 					$object->$key	= $value;
 				$obj->files->{$target}[]	= $object;
@@ -216,9 +219,19 @@ class Hymn_Module_Reader{
 	protected function readRelations( $obj, $xml ){
 		if( $xml->relations ){
 			foreach( $xml->relations->needs as $moduleName )
-				$obj->relations->needs[]	= (string) $moduleName;
+				$obj->relations->needs[(string) $moduleName]	= (object) array(
+					'relation'	=> 'needs',
+					'type'		=> $this->getAttribute( $moduleName, 'type' ),
+					'id'		=> (string) $moduleName,
+					'source'	=> $this->getAttribute( $moduleName, 'source' ),
+				);
 			foreach( $xml->relations->supports as $moduleName )
-				$obj->relations->supports[]	= (string) $moduleName;
+				$obj->relations->supports[(string) $moduleName]	= (object) array(
+					'relation'	=> 'supports',
+					'type'		=> $this->getAttribute( $moduleName, 'type' ),
+					'id'		=> (string) $moduleName,
+					'source'	=> $this->getAttribute( $moduleName, 'source' ),
+				);
 		}
 	}
 

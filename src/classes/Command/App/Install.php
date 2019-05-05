@@ -65,7 +65,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			foreach( $config->modules as $moduleId => $moduleConfig ){
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
-				$module			= $library->getModule( $moduleId );
+				$sourceId	= NULL;
+				if( !empty( $moduleConfig->source ) )
+					$sourceId = $moduleConfig->source;
+				$module			= $library->getModule( $moduleId, $sourceId );
 				if( !$module->isActive )
 					continue;
 				$relation->addModule( $module );
@@ -81,7 +84,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
-			if( $isInstalled && !$isForced ){
+			if( 0 && $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
 					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
 
@@ -89,9 +92,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			else{
 				if( !$this->flags->quiet )
 					$this->client->out( sprintf(
-						"%sInstalling module '%s' version %s as %s ...",
+						"%sInstalling module '%s' (from %s) version %s as %s ...",
 						$this->flags->dry ? 'Dry: ' : '',
 						$module->id,
+						$module->sourceId,
 						$module->version,
 						$installType
 					) );

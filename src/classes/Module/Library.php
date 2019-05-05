@@ -112,6 +112,16 @@ class Hymn_Module_Library{
 		return NULL;
 	}
 
+	public function getModuleShelves( $moduleId ){
+		$this->loadModulesInShelves();
+		$list	= array();
+		foreach( $this->modules as $shelfId => $modules ){
+			if( array_key_exists($moduleId, $modules ) )
+				$list[$shelfId]	= $modules[$moduleId];
+		}
+		return $list;
+	}
+
 	public function getModules( $shelfId = NULL ){
 		$this->loadModulesInShelves();
 		if( $shelfId ){
@@ -120,8 +130,9 @@ class Hymn_Module_Library{
 			$modules	= array();
 			foreach( $this->modules[$shelfId] as $module ){
 				$module->sourceId	= $shelfId;
-				$list[]	= $module;
+				$list[$module->id]	= $module;
 			}
+			ksort( $list );
 			return $list;
 		}
 		$list	= array();
@@ -133,7 +144,10 @@ class Hymn_Module_Library{
 			}
 		}
 		ksort( $list );
-		return array_values( $list );
+		$modules	= array();
+		foreach( array_values( $list ) as $module )
+			$modules[$module->id] = $module;
+		return $modules;
 	}
 
 	public function getShelf( $moduleId, $withModules = FALSE ){
@@ -164,6 +178,10 @@ class Hymn_Module_Library{
 	public function isInstalledModule( $moduleId ){
 		$list	= self::listInstalledModules();
 		return array_key_exists( $moduleId, $list );
+	}
+
+	public function isModuleInShelf( $moduleId, $shelfId ){
+		return (bool) $this->getModuleFromShelf( $moduleId, $shelfId, FALSE );
 	}
 
 	public function isShelf( $shelfId ){

@@ -110,7 +110,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	private function uninstallModuleById( $moduleId, $listInstalled ){
 		$neededBy	= array();
 		foreach( $listInstalled as $installedModuleId => $installedModule )
-			if( in_array( $moduleId, $installedModule->relations->needs ) )
+			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
 				$neededBy[]	= $installedModuleId;
 
 		$module		= $listInstalled[$moduleId];

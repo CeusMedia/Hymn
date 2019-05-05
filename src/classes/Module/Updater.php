@@ -241,15 +241,15 @@ class Hymn_Module_Updater{
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
 
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
-			foreach( $module->relations->needs as $relation ){										//  iterate related modules
-				if( !array_key_exists( $relation, $localModules ) ){								//  related module is not installed
-					if( !array_key_exists( $relation, $availableModuleMap ) ){						//  related module is not available
+			foreach( $module->relations->needs as $neededModuleId => $relation ){										//  iterate related modules
+				if( !array_key_exists( $neededModuleId, $localModules ) ){							//  related module is not installed
+					if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){				//  related module is not available
 						$message	= 'Module "%s" is needed but not available.';					//  create exception message
-						throw new RuntimeException( sprintf( $message, $relation ) );				//  throw exception
+						throw new RuntimeException( sprintf( $message, $neededModuleId ) );			//  throw exception
 					}
-					$relatedModule	= $availableModuleMap[$relation];								//  get related module from map
+					$relatedModule	= $availableModuleMap[$neededModuleId];							//  get related module from map
 					if( !$this->flags->quiet )														//  quiet mode is off
-						$this->client->out( " - Installing needed module '".$relation."' ..." );	//  inform about installation of needed module
+						$this->client->out( " - Installing needed module '".$neededModuleId."' ..." );	//  inform about installation of needed module
 					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}
