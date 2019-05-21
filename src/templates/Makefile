@@ -1,20 +1,26 @@
 
-PATH_FRONTEND	= %appName%
-PATH_BACKEND	= 
+PATH_FRONTEND		= %appName%
+PATH_BACKEND		= admin
 
-PERMS_DIR		= 750
-PERMS_FILE		= 640
+PERMS_DIR			= 750
+PERMS_FILE			= 640
 
-PWD				= $(shell pwd)
-DATE			= `date +'%Y-%m-%d'`
+PWD					= $(shell pwd)
+DATE				= `date +'%Y-%m-%d'`
+
+MODS_CM_PUBLIC		= vendor/ceus-media/hydrogen-modules/
+MODS_CM_PROTECTED	= vendor/ceus-media/hydrogen-modules-protected/
+MODS_PROJECT		= modules/
+
 
 install:
 	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
 	@$(MAKE) -s configure
 	@$(MAKE) -s composer-install
 	@echo "Installing modules:" && hymn app-install
-	@test ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@cp .htaccess.dist .htaccess
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@hymn database-load
 	@echo "Settings permissions..." && $(MAKE) -s set-permissions
 	@echo "Generating autoloaders..." && $(MAKE) -s composer-update
@@ -26,8 +32,8 @@ build:
 	@$(MAKE) -s composer-install
 	@echo "Installing modules:" && hymn app-install
 	@cp .htaccess.dist .htaccess
-	@test ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@hymn database-load
 	@hymn database-dump install.sql
 	@$(MAKE) -s set-rights
@@ -42,10 +48,10 @@ build:
 
 update:
 	@$(MAKE) -s composer-update
-	@test -e vendor/ceus-media/hydrogen-modules-nonfree && echo "Updating protected modules..." && svn up -q vendor/ceus-media/hydrogen-modules-nonfree || true
+	@test -d ${MODS_CM_PROTECTED} && cd ${MODS_CM_PROTECTED} && echo "Updating protected modules..." && svn up -q . || true
 	@$(MAKE) -s set-rights
 	@hymn app-update
-	@test ${PATH_BACKEND} && cd ${PATH_BACKEND} && hymn app-update
+	@test -d ${PATH_BACKEND} && cd ${PATH_BACKEND} && hymn app-update
 	@$(MAKE) -s set-permissions
 
 doc:
@@ -53,6 +59,12 @@ doc:
 	@test ! -f vendor/ceus-media/doc-creator/doc-creator.php && echo "No config file set for DocCreator (missing config/doc.xml)" || true
 	@test -f vendor/ceus-media/doc-creator/doc-creator.php && test -f config/doc.xml && vendor/ceus-media/doc-creator/doc-creator.php --config-file=config/doc.xml || true
 
+dump-static:
+#	wget -q --show-progress --progress=dot -m https://DOMAIN.TLD/
+	@echo "Downloading ..." && wget -q -m https://DOMAIN.TLD/
+	@echo "Archiving ..." && tar -czf DOMAIN.TLD.tgz DOMAIN.TLD
+	@echo "Cleaning up ..." && rm -Rf DOMAIN.TLD
+	@echo "Done: DOMAIN.TLD.tgz"
 
 ##  PUBLIC: PERMISSIONS
 #------------------------
@@ -69,7 +81,7 @@ set-ownage:
 set-rights:
 	@find . -type d -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_DIR}
 	@find . -type f -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_FILE}
-	@find . -type f -path "./vendor/ceus-media/hydrogen-modules-nonfree/*" -print0 | xargs -0 xargs chmod ${PERMS_LIB} >/dev/null 2>&1 || true
+#	@test -d ${MODS_CM_PROTECTED} && cd ${MODS_CM_PROTECTED} && find . -type f -print0 | xargs -0 xargs chmod ${PERMS_LIB} >/dev/null 2>&1 || true
 
 enable-clamav:
 	@cat /etc/passwd | grep clamav > /dev/null && ( groups clamav | grep ${shell hymn config-get system.group} > /dev/null && true || ( adduser clamav ${shell hymn config-get system.group} && sudo service clamav-daemon restart ) ) || true
@@ -82,27 +94,27 @@ set-install-mode-dev:
 	@test -f config/config.ini.dev && cp config/config.ini.dev config/config.ini || true
 	@hymn config-set application.installMode dev
 	@test -f ${PATH_BACKEND}/.hymn.dev && cp ${PATH_BACKEND}/.hymn.dev ${PATH_BACKEND}/.hymn || true
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode dev || true
 	@test -f ${PATH_BACKEND}/config/config.ini.dev && cp ${PATH_BACKEND}/config/config.ini.dev ${PATH_BACKEND}/config/config.ini || true
-	@cd ${PATH_BACKEND} && hymn config-set application.installMode dev
+	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode dev || true
+	@$(MAKE) -s configure
 
 set-install-mode-live:
 	@test -f .hymn.live && cp .hymn.live .hymn || true
 	@test -f config/config.ini.live && cp config/config.ini.live config/config.ini || true
 	@hymn config-set application.installMode live
 	@test -f ${PATH_BACKEND}/.hymn.live && cp ${PATH_BACKEND}/.hymn.live ${PATH_BACKEND}/.hymn || true
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode live || true
 	@test -f ${PATH_BACKEND}/config/config.ini.live && cp ${PATH_BACKEND}/config/config.ini.live ${PATH_BACKEND}/config/config.ini || true
-	@cd ${PATH_BACKEND} && hymn config-set application.installMode live
+	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode live || true
+	@$(MAKE) -s configure
 
 set-install-mode-test:
 	@test -f .hymn.test && cp .hymn.test .hymn || true
 	@test -f config/config.ini.test && cp config/config.ini.test config/config.ini || true
 	@hymn config-set application.installMode test
 	@test -f ${PATH_BACKEND}/.hymn.test && cp ${PATH_BACKEND}/.hymn.test ${PATH_BACKEND}/.hymn || true
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode test || true
 	@test -f ${PATH_BACKEND}/config/config.ini.test && cp ${PATH_BACKEND}/config/config.ini.test ${PATH_BACKEND}/config/config.ini || true
-	@cd ${PATH_BACKEND} && hymn config-set application.installMode test
+	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.installMode test || true
+	@$(MAKE) -s configure
 
 set-install-type-copy:
 	@hymn config-set application.installType copy
@@ -137,10 +149,12 @@ detect-application-url:
 	@$(MAKE) -s .apply-application-url-to-config
 
 detect-sources:
-	@hymn config-set sources.CeusMedia_Modules_Public.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules/
-	@hymn config-set sources.CeusMedia_Modules_Nonfree.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules-nonfree/
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Modules_Public.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules/
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Modules_Nonfree.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules-nonfree/
+	@hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC}
+	@test -d ${MODS_CM_PROTECTED} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
+	@test -d ${MODS_PROJECT} && hymn config-set sources.Nagelneu.path $(shell hymn config-get application.uri)modules/ || true
+	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
+	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_CM_PROTECTED} && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
+	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&  hymn config-set sources.Nagelneu.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
 
 ask-system-group:
 	@echo
@@ -195,6 +209,7 @@ composer-update-dev:
 
 ##  PROTECTED
 #------------------------
+
 .apply-application-url-to-config:
 	@hymn app-base-config-set app.base.url $(shell hymn config-get application.url) || true
 	@hymn app-base-config-enable app.base.url > /dev/null || true
@@ -202,13 +217,39 @@ composer-update-dev:
 	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn app-base-config-set app.base.url $(shell hymn config-get application.url)${PATH_BACKEND}/ || true
 	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn app-base-config-enable app.base.url > /dev/null || true
 
+.backend-install:
+	@cd ${PATH_BACKEND} && ln -sf $(shell hymn config-get application.uri)vendor vendor
+	@cd ${PATH_BACKEND} && hymn config-set database.driver $(shell hymn config-get database.driver)
+	@cd ${PATH_BACKEND} && hymn config-set database.host "$(shell hymn config-get database.host)"
+	@cd ${PATH_BACKEND} && hymn config-set database.port "$(shell hymn config-get database.port)"
+	@cd ${PATH_BACKEND} && hymn config-set database.username "$(shell hymn config-get database.username)"
+	@cd ${PATH_BACKEND} && hymn config-set database.password "$(shell hymn config-get database.password)"
+	@cd ${PATH_BACKEND} && hymn config-set database.name "$(shell hymn config-get database.name)"
+	@cd ${PATH_BACKEND} && hymn config-set database.prefix "$(shell hymn config-get database.prefix)"
+	@cd ${PATH_BACKEND} && echo && echo "Installing backend modules:" && hymn app-install
+	@cd ${PATH_BACKEND} && rm -f config/modules/Resource_Library_cmModules.xml
+	@cd ${PATH_BACKEND} && hymn app-base-config-enable system.cache.modules
+	@cd ${PATH_BACKEND} && cp .htaccess.dist .htaccess
+
+.backend-secure:
+	@cd ${PATH_BACKEND} && cp .htaccess.dist .htaccess
+	@cd ${PATH_BACKEND} && sed -i 's#/path/to/my/project#${PWD}/${PATH_BACKEND}/#' .htaccess
+	@cd ${PATH_BACKEND} && sed -i 's/^#Auth/Auth/' .htaccess
+	@cd ${PATH_BACKEND} && sed -i 's/^#Require/Require/' .htaccess
+	@cd ${PATH_BACKEND} && sed -i 's/^#FileETag/FileETag/' .htaccess
+	@cd ${PATH_BACKEND} && sed -i 's/My Project/Admin/' .htaccess
+	@cd ${PATH_BACKEND} && htpasswd -cBb .htpasswd USER1 PASSWORD1
+	@cd ${PATH_BACKEND} && htpasswd -Bb .htpasswd USER2 PASSWORD2
+
+
 .build-cleanup:
 	@rm -Rf vendor/michelf
 	@rm -Rf vendor/ceus-media/doc-creator
 	@rm -Rf vendor/ceus-media/hydra
 	@rm -Rf vendor/ceus-media/hydrogen-themes
-	@rm -Rf vendor/ceus-media/hydrogen-modules
-	@rm -Rf vendor/ceus-media/hydrogen-modules-nonfree
+	@rm -Rf ${MODS_CM_PUBLIC}
+	@rm -Rf ${MODS_CM_PROTECTED}
+	@rm -Rf ${MODS_PROJECT}
 	@rm -Rf config/sql
 	@rm -Rf hydra Hydra
 	@rm -Rf .svn
@@ -219,30 +260,3 @@ composer-update-dev:
 	@rm -f Makefile ${PATH_BACKEND}/Makefile
 	@rm -f config/doc.xml ${PATH_BACKEND}/config/doc.xml
 
-##  PROTECTED: BACKEND
-#------------------------
-.backend-install:
-	@cd ${PATH_BACKEND} && ln -sf $(shell hymn config-get application.uri)vendor vendor
-	@cd ${PATH_BACKEND} && hymn config-set database.driver $(shell hymn config-get database.driver)
-	@cd ${PATH_BACKEND} && hymn config-set database.host "$(shell hymn config-get database.host)"
-	@cd ${PATH_BACKEND} && hymn config-set database.port "$(shell hymn config-get database.port)"
-	@cd ${PATH_BACKEND} && hymn config-set database.username "$(shell hymn config-get database.username)"
-	@cd ${PATH_BACKEND} && hymn config-set database.password "$(shell hymn config-get database.password)"
-	@cd ${PATH_BACKEND} && hymn config-set database.name "$(shell hymn config-get database.name)"
-	@cd ${PATH_BACKEND} && hymn config-set database.prefix "$(shell hymn config-get database.prefix)"
-	@cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Modules_Public.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules/
-	@cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Modules_Nonfree.path $(shell hymn config-get application.uri)vendor/ceus-media/hydrogen-modules-nonfree/
-	@cd ${PATH_BACKEND} && echo && echo "Installing backend modules:" && hymn app-install
-	@cd ${PATH_BACKEND} && rm -f config/modules/Resource_Library_cmModules.xml
-	@cd ${PATH_BACKEND} && hymn app-base-config-enable system.cache.modules
-
-.backend-secure:
-	@cd ${PATH_BACKEND} && cp .htaccess.dist .htaccess
-	@cd ${PATH_BACKEND} && sed -i 's#/path/to/my/project#${PWD}/${PATH_BACKEND}/#' .htaccess
-	@cd ${PATH_BACKEND} && sed -i 's/^#Auth/Auth/' .htaccess
-	@cd ${PATH_BACKEND} && sed -i 's/^#Require/Require/' .htaccess
-	@cd ${PATH_BACKEND} && sed -i 's/^#FileETag/FileETag/' .htaccess
-	@cd ${PATH_BACKEND} && sed -i 's/My Project/Admin/' .htaccess
-	@cd ${PATH_BACKEND} && htpasswd -cBb .htpasswd cmadmin nimda1
-	@cd ${PATH_BACKEND} && htpasswd -Bb .htpasswd kriss stoney
-	@cd ${PATH_BACKEND} && htpasswd -Bb .htpasswd marc stoney
