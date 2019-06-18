@@ -77,12 +77,19 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		$installTypes	= array( 0 => 'Copy', 1 => 'Link' );
 
 		$availableModule	= $modulesAvailable[$moduleId];
+
+		$frameworks	= array();
+		foreach( $availableModule->frameworks as $frameworkIdentifier => $frameworkVersion )
+			$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
+		$frameworks	= join( ' | ', $frameworks );
+
 		$this->client->out( $availableModule->title );
 		if( $availableModule->description )
 			$this->client->out( $availableModule->description );
-		$this->client->out( ' - Category:  '.$availableModule->category );
-		$this->client->out( ' - Source:    '.$availableModule->sourceId );
-		$this->client->out( ' - Version:   '.$availableModule->version );
+		$this->client->out( ' - Category:     '.$availableModule->category );
+		$this->client->out( ' - Source:       '.$availableModule->sourceId );
+		$this->client->out( ' - Version:      '.$availableModule->version );
+		$this->client->out( ' - Frameworks:   '.$frameworks );
 
 		if( array_key_exists( $moduleId, $modulesInstalled ) ){
 			$installedModule	= $modulesInstalled[$moduleId];

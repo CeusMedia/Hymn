@@ -227,6 +227,7 @@ class Hymn_Module_Updater{
 	}
 
 	public function update( $module, $installType ){
+		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{

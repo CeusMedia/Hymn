@@ -44,6 +44,7 @@ class Hymn_Module_Reader{
 
 		$xml	= new SimpleXMLElement( file_get_contents( $filePath ) );
 		$obj	= new stdClass();
+		$obj->frameworks			= array( 'Hydrogen' => '<0.9' );
 		$obj->id					= $moduleId;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
@@ -77,6 +78,7 @@ class Hymn_Module_Reader{
 		$obj->installType			= 0;
 		$obj->installDate			= NULL;
 		$obj->installSource			= NULL;
+		$this->readFrameworks( $obj, $xml );
 		$this->readInstallation( $obj, $xml );
 		$this->readLog( $obj, $xml );
 		$this->readFiles( $obj, $xml );
@@ -155,6 +157,20 @@ class Hymn_Module_Reader{
 					$object->$key	= $value;
 				$obj->files->{$target}[]	= $object;
 			}
+		}
+	}
+
+	protected function readFrameworks( $obj, $xml ){
+		$frameworks	= $this->getAttribute( $xml, 'frameworks', '' );
+		if( !strlen( trim( $frameworks ) ) )
+			return;
+		$obj->frameworks	= array();
+		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
+		foreach( $list as $listItem ){
+			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
+			if( count( $parts ) < 2 )
+				$parts[1]	= '*';
+			$obj->frameworks[(string) $parts[0]]	= (string) $parts[1];
 		}
 	}
 

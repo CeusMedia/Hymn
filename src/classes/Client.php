@@ -142,13 +142,15 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.5b';
+	static public $version	= '0.9.8.6';
 
 	public $arguments;
 
 	protected $config;
 
 	protected $database;
+
+	protected $framework;
 
 	protected $isLiveCopy	= FALSE;
 
@@ -176,9 +178,9 @@ class Hymn_Client{
 			if( in_array( $language, array( 'en', 'de' ) ) )
 				self::$language	= $language;
 		}
-		$this->database	= new Hymn_Tool_Database( $this );
-		$this->locale	= new Hymn_Tool_Locale( Hymn_Client::$language );
-		$this->words	= $this->locale->loadWords( 'client' );
+		$this->database		= new Hymn_Tool_Database( $this );
+		$this->locale		= new Hymn_Tool_Locale( Hymn_Client::$language );
+		$this->words		= $this->locale->loadWords( 'client' );
 
 		if( self::$outputMethod !== 'print' )
 			ob_start();
@@ -227,6 +229,12 @@ class Hymn_Client{
 		}
 		if( $this->exit )
 			exit( Hymn_Client::EXIT_ON_END );
+	}
+
+	public function getFramework(){
+		if( !$this->framework )
+			$this->framework	= new Hymn_Tool_Framework();
+		return $this->framework;
 	}
 
 	public function getConfig(){

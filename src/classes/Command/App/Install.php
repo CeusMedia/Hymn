@@ -78,16 +78,22 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$installer	= new Hymn_Module_Installer( $this->client, $library );
 		$modules	= $relation->getOrder();
 		foreach( $modules as $module ){
+			try{
+				$this->client->getFramework()->checkModuleSupport( $module );
+			}
+			catch( Exception $e ){
+				$this->client->out( 'Error: '.$e->getMessage().'.' );
+				continue;
+			}
 			$installType	= $this->client->getModuleInstallType( $module->id );
 //			$installMode	= $this->client->getModuleInstallMode( $module->id );
 			$listInstalled	= $library->listInstalledModules();
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
-			if( 0 && $isInstalled && !$isForced ){
+			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet )
 					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
-
 			}
 			else{
 				if( !$this->flags->quiet )

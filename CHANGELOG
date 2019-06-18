@@ -1,0 +1,27 @@
+v0.9.8.6
+- add support for sematic versioning
+	- new class Hymn_Tool_Semver
+	- supports version operator prefixes
+	- supported operator prefixes: <,>,<>,<=,>=,!=,==,=,^
+	- example: =>1.2 (same as ^1.2)
+	- not supported yet: wildcards (*,?) and operator suffixes
+- add module config attribute to note supported frameworks and versions
+	- attribute of XML node "module" named "frameworks"
+	- format: Framework@version or Framwork1@version|Framework2@version
+	- allows several frameworks, separated by colon
+	- supports semantic versioning
+	- defaults to: Hydrogen@<0.9
+	- supported frameworks will be displayed by command module-info
+- add detection of installed Hydrogen framework
+	- new class Hymn_Tool_Framework
+	- available by client->getFramework()
+	- lazy loading: create framework object on first call
+	- has method checkModuleSupport
+		- checks module framework version against installed framework version
+		- will respond with exceptions if mismatch or framework config error
+		- can be used by commands by try/catch
+	- detected framework will be display by command app-info in verbose mode
+- add check if module supports current framework
+	- compares module framework support against installed framework version
+	- applies on module installation and update
+	- applies only if framework could been detected

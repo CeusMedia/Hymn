@@ -124,7 +124,14 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$updater	= new Hymn_Module_Updater( $this->client, $library );
 		foreach( $modulesToUpdate as $update ){
-			$module			= $library->getModule( $update->id );
+			try{
+				$this->client->getFramework()->checkModuleSupport( $module );
+			}
+			catch( Exception $e ){
+				$this->client->out( 'Error: '.$e->getMessage().'.' );
+				continue;
+			}
+			$module			= $library->getModule( $update->id, $update->source );
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
 			$message		= vsprintf( 'Updating module "%s" from %s to %s as %s ...', array(
 				$module->id,
