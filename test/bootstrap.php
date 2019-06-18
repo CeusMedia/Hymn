@@ -18,3 +18,8 @@ function loadClassesInPath( $path ){
 		if( $entry->isFile() && preg_match( "/\.php$/", $entry->getFilename() ) )
 			require_once $path.'/'.$entry->getFilename();
 }
+
+if( !class_exists( 'PHPUnit_Framework_TestCase' ) ){
+	class PHPUnit_Framework_TestCase extends PHPUnit\Framework\TestCase{
+	}
+}
