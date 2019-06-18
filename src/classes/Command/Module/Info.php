@@ -121,7 +121,9 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			return;
 		$this->client->out( ' - Configuration: ' );
 		foreach( $module->config as $item ){
-			$this->client->out( '    - '.$item->key.': '.trim( $item->title ) );
+			$this->client->out( '    - '.$item->key.':' );
+			if( strlen( trim( $item->title ) ) )
+				$this->client->out( '       - Title:     '.trim( $item->title ) );
 			$this->client->out( '       - Type:      '.$item->type );
 			$this->client->out( '       - Value:     '.$item->value );
 			if( $item->values )
@@ -132,13 +134,11 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 	}
 
 	protected function showModuleFiles( $module ){
-		if( !count( $module->files ) )
-			return;
-		$this->client->out( ' - Included files: ' );
+		$list	= array();
 		foreach( $module->files as $sectionKey => $sectionFiles ){
 			if( !count( $sectionFiles ) )
 				continue;
-			$this->client->out( '    - '.ucfirst( $sectionKey ) );
+			$list[]	= '    - '.ucfirst( $sectionKey );
 			foreach( $sectionFiles as $file ){
 				$line	= $file->file;
 				$attr	= array();
@@ -153,12 +153,17 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 						$attr['source']	= $file->source;
 				}
 				if( count( $attr ) ){
-					foreach( $attr as $key => $value ){
+					foreach( $attr as $key => $value )
 						$attr[$key]	= '@'.$key.': '.$value;
-					}
 					$line .= ' ('.join( ', ', $attr ).')';
 				}
-				$this->client->out( '       - '.$line );
+				$list[]	= '       - '.$line;
+			}
+		}
+		if( $list ){
+			$this->client->out( ' - Included files: ' );
+			foreach( $list as $line ){
+				$this->client->out( $line );
 			}
 		}
 	}
