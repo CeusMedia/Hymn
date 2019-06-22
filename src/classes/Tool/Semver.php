@@ -73,7 +73,7 @@ class Hymn_Tool_Semver{
 	public static function staticCheck( $actualVersion, $semanticVersion, $defaultOperator = '==' ){
 		$operator		= $defaultOperator;
 		$version		= $semanticVersion;
-		$patternPrefix	= '/^'.preg_quote( '(^|>|<|>=|<=|<>|!=|==|=)(.+)', '/' ).'$/';
+		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';
 		if( preg_match( $patternPrefix, $semanticVersion ) ){
 			$matches	= array();
 			preg_match( $patternPrefix, $semanticVersion, $matches );
