@@ -113,6 +113,11 @@ class Hymn_Client{
 			'resolve'	=> '\\1',
 			'values'	=> array( 'yes', 'no' ),
 			'default'	=> 'yes',
+		),
+		'comment'	=> array(
+			'pattern'	=> '/^--comment=(\S+)$/',
+			'resolve'	=> '\\1',
+			'default'	=> NULL,
 		)
 	);
 
@@ -142,7 +147,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.6';
+	static public $version	= '0.9.8.5';
 
 	public $arguments;
 

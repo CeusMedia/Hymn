@@ -22,26 +22,26 @@ class Hymn_Tool_ConfigValue{
 	}
 
 	public function applyIfSet( Hymn_Tool_ConfigValue $value ){
-		if( $value->is() )
+		if( $value->isset() )
 			$this->set( $value->get() );
 		return $this;
 	}
 
 	public function compareTo( Hymn_Tool_ConfigValue $value, $typeSafe = TRUE ){
-		if( !$this->is() || !$value->is() ){
-			if( !$this->is() && !$value->is() )
+		if( !$this->isset() || !$value->isset() ){
+			if( !$this->isset() && !$value->isset() )
 				return static::COMPARED_UNSET_BOTH;
-			if( !$this->is() )
+			if( !$this->isset() )
 				return static::COMPARED_UNSET_SELF;
-			if( !$value->is() )
+			if( !$value->isset() )
 				return static::COMPARED_UNSET_OTHER;
 		}
-		if( !$this->is( TRUE ) || !$value->is( TRUE ) ){
-			if( !$this->is( TRUE ) && !$value->is() )
+		if( !$this->hasValue() || !$value->hasValue() ){
+			if( !$this->hasValue() && !$value->isset() )
 				return static::COMPARED_EMPTY_BOTH;
-			if( !$this->is( TRUE ) )
+			if( !$this->hasValue() )
 				return static::COMPARED_EMPTY_SELF;
-			if( !$value->is( TRUE ) )
+			if( !$value->hasValue() )
 				return static::COMPARED_EMPTY_OTHER;
 		}
 		if( $typeSafe ){
@@ -59,7 +59,7 @@ class Hymn_Tool_ConfigValue{
 	}
 
 	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, $typeSafe = TRUE ){
-		if( !$this->is() || !$value->is() )
+		if( !$this->isset() || !$value->isset() )
  			return FALSE;
 		if( $typeSafe )
 			return $this->get() !== $value->get();
@@ -79,7 +79,11 @@ class Hymn_Tool_ConfigValue{
 		return $this->value;
 	}
 
-	public function is( $hasValue = FALSE ){
+	public function hasValue(){
+		return $this->value !== NULL && strlen( trim( $this->value ) ) > 0;
+	}
+
+	public function isset( $hasValue = FALSE ){
 		if( $hasValue )
 			return strlen( trim( $this->value ) ) > 0;
 		return $this->value !== NULL;

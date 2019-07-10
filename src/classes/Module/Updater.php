@@ -117,6 +117,10 @@ class Hymn_Module_Updater{
 			$valueCurrent			= new Hymn_Tool_ConfigValue();
 			$valueCurrentDefault	= new Hymn_Tool_ConfigValue();
 			$valueCurrentOriginal	= new Hymn_Tool_ConfigValue();
+			$valueUpdateModule		= new Hymn_Tool_ConfigValue(
+				$configData->value,
+				$configData->type
+			);
 			if( isset( $moduleInstalled->config[$configKey] ) ){
 				$valueCurrent->set(
 					$moduleInstalled->config[$configKey]->value,
@@ -132,22 +136,12 @@ class Hymn_Module_Updater{
 				);
 			}
 			if( isset( $hymnModuleConfig->{$configKey} ) )
-				$valueConfig->set( $hymnModuleConfig->{$configKey} );
-			$valueUpdateModule		= new Hymn_Tool_ConfigValue(
-				$configData->value,
-				$configData->type
-			);
+				$valueConfig->set( $hymnModuleConfig->{$configKey}, $configData->type );
 
-			$valueAssumed	= $valueUpdateModule;													//  assume current module default as valid
-			$valueAssumed	= $valueConfig->is() ? $valueConfig : $valueAssumed;					//  if hymn config is set, take this as default
-
-			$valueSuggest	= $valueUpdateModule;													//  assume ...
-			$valueSuggest	= $valueConfig->is() ? $valueConfig : $valueAssumed;					//  if hymn config is set, take this as default
-			if( $valueCurrentOriginal->differsFromIfBothSet( $valueUpdateModule ) )					//  if module default has changed since installation
-				$valueSuggest	= $valueUpdateModule;
-
-			if( !$valueUpdateModule->is() )															//  config pair not used anymore
-				continue;																			//  skip to next
+			$valueSuggest	= $valueCurrentOriginal;
+			if( $valueUpdateModule->hasValue() )
+				if( $valueUpdateModule->get() !== $valueCurrentDefault->get() )
+					$valueSuggest	= $valueUpdateModule;
 
 			if( $changedOnly && !$valueCurrent->differsFromIfBothSet( $valueSuggest ) )				//  module value is not newer than config
 				continue;																			//  skip to next
@@ -157,7 +151,7 @@ class Hymn_Module_Updater{
 			$questionDefault	= 'd';
 			$questionAnswers[]	= 'd';
 			$this->client->out( '  - [d] default of module : '.$valueUpdateModule->get( TRUE ) );
-			if( $valueCurrent->is() ){
+			if( $valueCurrent->isset() ){
 				$questionDefault	= 'k';
 				$questionAnswers[]	= 'k';
 				$this->client->out( '  - [k] keep current: '.$valueCurrent->get( TRUE ) );
