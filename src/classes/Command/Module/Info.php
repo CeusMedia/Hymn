@@ -185,6 +185,12 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 	}
 
 	protected function showModuleRelations( $module ){
+		$module->relations->neededBy	= array();
+		$library	= $this->getLibrary();
+		foreach( $library->listInstalledModules() as $installedModule )
+			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
+				$module->relations->neededBy[$installedModule->id]	= $installedModule;
+
 		if( count( $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
 			foreach( $module->relations->needs as $moduleId => $relation )
@@ -193,6 +199,11 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
 			foreach( $module->relations->supports as $moduleId => $relation )
+				$this->client->out( '    - '.$moduleId );
+		}
+		if( count( $module->relations->neededBy ) ){
+			$this->client->out( ' - Modules related: ' );
+			foreach( $module->relations->neededBy as $moduleId => $relation )
 				$this->client->out( '    - '.$moduleId );
 		}
 	}
