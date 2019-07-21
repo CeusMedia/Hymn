@@ -213,7 +213,7 @@ class Hymn_Module_Files{
 								break;
 						}
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
-						if( !file_exists( $path ) )
+						if( !file_exists( $path ) && !$this->flags->dry )
 							self::createPath( $path );
 						$source	= $pathSource.'css/'.$file->file;
 						$map[$source]	= $path.'/css/'.$file->file;
@@ -241,7 +241,7 @@ class Hymn_Module_Files{
 								$path	= $this->config->paths->images;
 								break;
 						}
-						if( !file_exists( $pathTarget.$path ) )
+						if( !file_exists( $pathTarget.$path ) && !$this->flags->dry )
 							self::createPath( $pathTarget.$path );
 						$map[$source]	= $pathTarget.$path.$file->file;
 						break;

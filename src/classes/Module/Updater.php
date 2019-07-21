@@ -236,7 +236,27 @@ class Hymn_Module_Updater{
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
 
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
-			foreach( $module->relations->needs as $neededModuleId => $relation ){										//  iterate related modules
+
+			//  --  MODULES TO UNINSTALL
+			$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
+				array_keys( $localModule->relations->needs ),										//  ... by intersecting old list ...
+				array_keys( $module->relations->needs )												//  ... with new list of needed modules
+			);
+			foreach( $moduleIdsToUninstall as $moduleIdToUninstall ){								//  iterate modules to uninstall
+				if( !array_key_exists( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
+					continue;																		//  skip this module
+				foreach( $localModules as $localModule ){											//  iterate installed modules
+					if( $localModule->id === $module->id )											//  module to check is module to update
+						continue;																	//  skip this module
+					if( array_key_exists( $moduleIdToUninstall, $localModule->relations->needs ) )	//  module is needed by another module
+						continue 2;																	//  to not uninstall module
+				}
+				$this->client->out( " - Uninstalling module '".$moduleIdToUninstall."' ..." );		//  inform about installation of needed module
+				$installer->uninstall( $localModule );												//  uninstall module
+			}
+
+			//  --  MODULES TO INSTALL
+			foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
 				if( !array_key_exists( $neededModuleId, $localModules ) ){							//  related module is not installed
 					if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){				//  related module is not available
 						$message	= 'Module "%s" is needed but not available.';					//  create exception message
@@ -248,6 +268,8 @@ class Hymn_Module_Updater{
 					$installer->install( $relatedModule, $installType );							//  install related module
 				}
 			}
+
+			//  --  TRY TO HANDLE FILE AND DATABASE CHANGES
 			$files->removeFiles( $localModule, TRUE );												//  try run of: remove module files
 			$sql->runModuleUpdateSql( $localModule, $module, TRUE );								//  try run of: run SQL scripts
 			$files->copyFiles( $module, $installType, TRUE );										//  try run of: copy module files

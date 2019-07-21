@@ -140,8 +140,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$installType
 			) );
 			$this->client->out( $message );
-			if( !$this->flags->dry )
-				$updater->update( $module, $installType );
+			$updater->update( $module, $installType );
 		}
 	}
 }
