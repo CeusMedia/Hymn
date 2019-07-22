@@ -151,7 +151,7 @@ class Hymn_Module_Updater{
 			$questionDefault	= 'd';
 			$questionAnswers[]	= 'd';
 			$this->client->out( '  - [d] default of module : '.$valueUpdateModule->get( TRUE ) );
-			if( $valueCurrent->isset() ){
+			if( $valueCurrent->is() ){
 				$questionDefault	= 'k';
 				$questionAnswers[]	= 'k';
 				$this->client->out( '  - [k] keep current: '.$valueCurrent->get( TRUE ) );
