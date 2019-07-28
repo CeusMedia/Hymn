@@ -59,6 +59,7 @@ A4. Project Module Information
 - modules-required                            List modules required for application
 - modules-search NAME [SOURCE]                List modules found by name part (within library source)
 - modules-updatable                           List modules with available updates
+- modules-unneeded                            List modules not needed by other modules
 
 B. Application Management
 ==============================================================================
