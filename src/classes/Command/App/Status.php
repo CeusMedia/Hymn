@@ -1,6 +1,7 @@
 <?php
 /**
- *	...
+ *	Compares installed against available modules to sollect outdated modules.
+ *	Shows outdated modules with logged changes, if available and verbose.
  *
  *	Copyright (c) 2014-2019 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +26,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Compares installed against available modules to sollect outdated modules.
+ *	Shows outdated modules with logged changes, if available and verbose.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
@@ -79,7 +81,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	/*  --  PROTECTED  --  */
 
 	protected function printModuleUpdateChangelog( $update, $indent = '' ){
-		$changes	= $this->getLibrary()->getModuleChanges(
+		$changes	= $this->getLibrary()->getModuleLogChanges(
 			$update->id,
 			$update->source,
 			$update->installed,
@@ -94,6 +96,17 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 	}
 
+	/**
+	 *	Produce report for all outdated modules at once.
+	 *	Shows version numbers of installed and available modules.
+	 *	Shows logged changes in verbose mode.
+	 *	All shown information are grouped by modules on alphanumeric order.
+	 *	Cancels if no modules are outdated.
+	 *
+	 *	@protected
+	 *	@param		array		$outdatedModules		List of outdated modules to create report about
+	 *	@return		int			Return code: 0 - CODE_NONE | 1 - CODE MODULES_OUTDATED
+	 */
 	protected function runForAllModules( $outdatedModules ){
 		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
 		$message		= '%d installed modules found.';
@@ -120,6 +133,17 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		return static::CODE_MODULES_OUTDATED;
 	}
 
+	/**
+	 *	Produce report for one outdated module.
+	 *	Shows version numbers of installed and available modules.
+	 *	Shows logged changes in verbose mode.
+	 *	Cancels if given module ID is not installed or not outdated.
+	 *
+	 *	@protected
+	 *	@param		array		$outdatedModules		List of outdated modules to create report about
+	 *	@param		string		$moduleId				ID of outdated module to create report about
+	 *	@return		int			Return code: 0 - CODE_NONE | 1 - CODE MODULES_OUTDATED
+	 */
 	protected function runForSingleModule( $outdatedModules, $moduleId ){
 		if( !$this->getLibrary()->isInstalledModule( $moduleId ) ){
 			$this->client->out( 'Module '.$moduleId.' is not installed.' );

@@ -84,7 +84,7 @@ class Hymn_Module_Library{
 		return NULL;
 	}
 
-	public function getModuleChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
+	public function getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
 		$module	= $this->getModule( $moduleId, $shelfId );
 		$list	= array();
 		foreach( $module->versionLog as $change ){
