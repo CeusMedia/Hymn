@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Stamp
+ *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,14 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Stamp
+ *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Command_Interface{
+class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
 	/**
 	 *	Execute this command.
@@ -51,10 +51,16 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$shelfId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
-		$modules	= $this->getInstalledModules( $shelfId );									//  load installed modules
+		$modules	= $this->getAvailableModules( $shelfId );									//  load available modules
 		$stamp		= $this->getStamp( $pathName, $shelfId );
-		if( $moduleId )
-			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId, $shelfId ) );
+
+		$stampModules	= (array) $stamp->modules;
+		$this->client->outVerbose( 'Found '.count( $stampModules ).' modules in stamp.' );
+		if( $moduleId ){
+			if( !isset( $stamp->modules->{$moduleId} ) )
+				$this->client->outError( 'Module "'.$moduleId.'" is not in stamp.', Hymn_Client::EXIT_ON_RUN );
+			$stamp->modules	= (object) array( $moduleId => $stamp->modules->{$moduleId} );
+		}
 
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
@@ -67,46 +73,32 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			$this->client->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
-			if( $moduleChange->type === 'added' )
-				$this->showAddedModule( $type, $moduleChange->module );
-
-		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'changed' )
 				$this->showChangedModule( $type, $moduleChange->source, $moduleChange->target );
-
-		foreach( $moduleChanges as $moduleChange )
-			if( $moduleChange->type === 'removed' )
-				$this->showRemovedModule( $type, $moduleChange->module );
 	}
 
 	protected function detectModuleChanges( $stamp, $modules ){
 		$moduleChanges	= array();
 		foreach( $modules as $module ){
-			if( !isset( $stamp->modules->{$module->id} ) ){
-				$moduleChanges[$module->id]	= (object) array(
-					'type'		=> 'added',
-					'module'	=> $module,
-				);
-			}
-			else{
-				$oldModule	= $stamp->modules->{$module->id};
-				if( !version_compare( $oldModule->version, $module->version, '<' ) )
-					continue;
-				$moduleChanges[$module->id]	= (object) array(
-					'type'		=> 'changed',
-					'source'	=> $oldModule,
-					'target'	=> $module,
-				);
-			}
+			if( !isset( $stamp->modules->{$module->id} ) )
+				continue;
+			$oldModule	= $stamp->modules->{$module->id};
+			if( !version_compare( $oldModule->version, $module->version, '<' ) )
+				continue;
+			$moduleChanges[$module->id]	= (object) array(
+				'type'		=> 'changed',
+				'source'	=> $oldModule,
+				'target'	=> $module,
+			);
 		}
 		return $moduleChanges;
 	}
 
-	protected function getInstalledModules( $shelfId = NULL ){
-		$modules	= $this->getLibrary()->listInstalledModules( $shelfId );
-		$message	= 'Found '.count( $modules ).' installed modules.';
+	protected function getAvailableModules( $shelfId = NULL ){
+		$modules	= $this->getLibrary()->getModules( $shelfId );
+		$message	= 'Found '.count( $modules ).' available modules.';
 		if( $shelfId )
-			$message	= 'Found '.count( $modules ).' installed modules in source '.$shelfId.'.';
+			$message	= 'Found '.count( $modules ).' available modules in source '.$shelfId.'.';
 		$this->client->outVerbose( $message );
 		return $modules;
 	}
@@ -162,38 +154,6 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );
-	}
-
-	/**
-	 *	Calculates difference of added module and print out results.
-	 *	@access		protected
-	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$module		Module that has been added (maybe from library)
-	 *	@return		void
-	 */
-	protected function showAddedModule( $type, $module ){
-		$sql	= new Hymn_Module_SQL( $this->client );
-		if( !$this->flags->quiet )
-			$this->client->out( ' - Module added: '.$module->id );
-		if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
-			$scripts	= $sql->getModuleInstallSql( $module );
-			if( $scripts ){
-				if( !$this->flags->quiet )
-					$this->client->out( '   SQL: '.count( $scripts ).' installation(s):' );
-				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
-				foreach( array_values( $scripts ) as $nr => $script ){
-					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s', array(
-						$nr + 1,
-						count( $scripts ),
-						$script->version
-					) ) );
-					$this->client->out( trim( $script->sql ) );
-					$version	= $script->version;
-				}
-			}
-		}
-		if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
-		}
 	}
 
 	/**
@@ -253,16 +213,5 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-	}
-
-	/**
-	 *	Calculates difference of removed module and print out results.
-	 *	@access		protected
-	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$module		Module that has been removed (maybe from stamp)
-	 *	@return		void
-	 */
-	protected function showRemovedModule( $type, $module ){
-		$this->client->outError( 'showRemovedModule: Not implemented, yet.' );
 	}
 }

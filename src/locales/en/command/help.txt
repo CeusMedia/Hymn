@@ -103,7 +103,7 @@ B5. App Module Management: Stamps
 - app-stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between installed modules and stamp
 - app-stamp-load [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Restore module settings of stamp (not implemented yet)
 - app-stamp-prospect TYPE [SOURCE]                     Show changes when updating outdated modules
-- app-stamp-info [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Display details of stamp 
+- app-stamp-info [PATH|FILE] [TYPE*] [SOURCE] [MODULE] Display details of stamp
 
 Type:
   - * | all                All types or their changes
@@ -126,6 +126,11 @@ C1. Self Management
 - version                                     Show current hymn version
 - self-update                                 Replace global hymn installation by latest download
 - test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
+
+C2. Stamp Management
+------------------------------------------------------------------------------
+- stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between available modules and stamp
+
 
 Options:
 ------------------------------------------------------------------------------

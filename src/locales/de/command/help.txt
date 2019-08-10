@@ -127,6 +127,11 @@ C1. Self Management
 - self-update                                 Replace global hymn installation by latest download
 - test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
 
+C2. Stamp Management
+------------------------------------------------------------------------------
+- stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between available modules and stamp
+
+
 Options:
 ------------------------------------------------------------------------------
 -d | --dry                 Actions are simulated only
