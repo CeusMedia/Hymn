@@ -108,111 +108,12 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		}
 
 		if( $this->flags->verbose ){
-			$this->showModuleVersions( $availableModule );
-			$this->showModuleFiles( $availableModule );
-			$this->showModuleConfig( $availableModule );
-			$this->showModuleRelations( $availableModule );
-			$this->showModuleHook( $availableModule );
+			$moduleInfo	= new Hymn_Module_Info( $this->client );
+			$moduleInfo->showModuleVersions( $availableModule );
+			$moduleInfo->showModuleFiles( $availableModule );
+			$moduleInfo->showModuleConfig( $availableModule );
+			$moduleInfo->showModuleRelations( $availableModule );
+			$moduleInfo->showModuleHook( $availableModule );
 		}
-	}
-
-	protected function showModuleConfig( $module ){
-		if( !count( $module->config ) )
-			return;
-		$this->client->out( ' - Configuration: ' );
-		foreach( $module->config as $item ){
-			$this->client->out( '    - '.$item->key.':' );
-			if( strlen( trim( $item->title ) ) )
-				$this->client->out( '       - Title:     '.trim( $item->title ) );
-			$this->client->out( '       - Type:      '.$item->type );
-			$this->client->out( '       - Value:     '.$item->value );
-			if( $item->values )
-				$this->client->out( '       - Values:    '.join( ', ', $item->values ) );
-			$this->client->out( '       - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );
-			$this->client->out( '       - Protected: '.$item->protected );
-		}
-	}
-
-	protected function showModuleFiles( $module ){
-		$list	= array();
-		foreach( $module->files as $sectionKey => $sectionFiles ){
-			if( !count( $sectionFiles ) )
-				continue;
-			$list[]	= '    - '.ucfirst( $sectionKey );
-			foreach( $sectionFiles as $file ){
-				$line	= $file->file;
-				$attr	= array();
-				if( $file->type === 'style' ){
-					if( !empty( $file->source ) )
-						$attr['source']	= $file->source;
-					if( !empty( $file->load ) )
-						$attr['load']	= $file->load;
-				}
-				if( $file->type === 'image' ){
-					if( !empty( $file->source ) )
-						$attr['source']	= $file->source;
-				}
-				if( count( $attr ) ){
-					foreach( $attr as $key => $value )
-						$attr[$key]	= '@'.$key.': '.$value;
-					$line .= ' ('.join( ', ', $attr ).')';
-				}
-				$list[]	= '       - '.$line;
-			}
-		}
-		if( $list ){
-			$this->client->out( ' - Included files: ' );
-			foreach( $list as $line ){
-				$this->client->out( $line );
-			}
-		}
-	}
-
-	protected function showModuleHook( $module ){
-		if( !count( $module->hooks ) )
-			return;
-		$this->client->out( ' - Hooks: ' );
-		foreach( $module->hooks as $resource => $events ){
-			foreach( $events as $event => $functions ){
-				foreach( $functions as $function ){
-					if( !preg_match( '/\n/', $function ) )
-						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$function );
-					else
-						$this->client->out( '    - '.$resource.' > '.$event.' >> <func> !DEPRECATED!' );
-				}
-			}
-		}
-	}
-
-	protected function showModuleRelations( $module ){
-		$module->relations->neededBy	= array();
-		$library	= $this->getLibrary();
-		foreach( $library->listInstalledModules() as $installedModule )
-			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
-				$module->relations->neededBy[$installedModule->id]	= $installedModule;
-
-		if( count( $module->relations->needs ) ){
-			$this->client->out( ' - Modules needed: ' );
-			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
-		}
-		if( count( $module->relations->supports ) ){
-			$this->client->out( ' - Modules supported: ' );
-			foreach( $module->relations->supports as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
-		}
-		if( count( $module->relations->neededBy ) ){
-			$this->client->out( ' - Modules related: ' );
-			foreach( $module->relations->neededBy as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
-		}
-	}
-
-	protected function showModuleVersions( $module ){
-		if( !count( $module->versionLog ) )
-			return;
-		$this->client->out( ' - Versions: ' );
-		foreach( $module->versionLog as $item )
-			$this->client->out( '    - '.str_pad( $item->version, 10, ' ', STR_PAD_RIGHT ).' '.$item->note );
 	}
 }
