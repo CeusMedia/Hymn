@@ -27,38 +27,37 @@ For creating and extending a project Hymn config file, you execute these command
 
 #### 1. Project Creation and Source Management
 
-	- init                           Create initial Hymn file for this project
-	- source-list                    List registered library sources
-	- source-add                     Add module source of modules to Hymn file
-	- source-remove KEY              Remove module source from Hymn file
-	- source-enable                  ... to be implemented ...
-	- source-disable                 ... to be implemented ...
+	- init                                        Create initial Hymn file for this project
+	- source-list                                 List library sources registered in Hymn file
+	- source-add                                  Add module source of modules to Hymn file
+	- source-remove KEY                           Remove module source from Hymn file
+	- source-enable [-dfqv] SOURCE                Enable source in Hymn file
+	- source-disable [-dfqv] SOURCE               Disable source in Hymn file
 
 #### 2. Project Setup and Information
 
-	- info                           Show project configuration from Hymn file
-	- config-get KEY                 Get setting from Hymn file
-	- config-set KEY [VALUE]         Enter and save setting in Hymn file
-	- database-config                Enter and save database connection details
-	- database-test                  Test database connection
+	- config-get KEY                              Get setting from Hymn file
+	- config-set KEY [VALUE]                      Enter and save setting in Hymn file
+	- database-config                             Enter and save database connection details
+	- database-test                               Test database connection
 
 #### 3. Project Module Management
 
-	- config-module-add              Add a module to Hymn file
-	- config-module-remove           Remove a module from Hymn file
-	- config-module-get KEY          Get module setting from Hymn file
-	- config-module-set KEY [VALUE]  Enter and save module setting in Hymn file
-	- config-module-dump             Export current module settings into Hymn file
+	- config-module-add                           Add a module to Hymn file
+	- config-module-remove                        Remove a module from Hymn file
+	- config-module-get MODULE.KEY                Get module setting from Hymn file
+	- config-module-set MODULE.KEY [VALUE]        Enter and save module setting in Hymn file
 
 
 #### 4. Project Module Information
 
-	- info MODULE                    Show information about module
-	- modules-available [SHELF]      List modules available in library shelve(s)
-	- modules-installed              List modules installed within application
-	- modules-required               List modules required for application
-	- modules-search                 List modules found by name part
-	- modules-updatable              List modules with available updates
+	- module-info [-v] MODULE [SOURCE]            Show information about module (in library source)
+	- modules-available [SOURCE]                  List modules available (in library source)
+	- modules-installed [SOURCE]                  List modules installed within application (from library source)
+	- modules-required                            List modules required for application
+	- modules-search NAME [SOURCE]                List modules found by name part (within library source)
+	- modules-updatable                           List modules with available updates
+	- modules-unneeded                            List modules not needed by other modules
 
 ### B. Application Management
 
@@ -66,30 +65,42 @@ Having a valid Hymn config file, you execute these commands:
 
 #### 1. App Base Configuration Management
 
-	- config-base-get KEY            Read setting from config.ini
-	- config-base-set KEY VALUE      Save setting in config.ini
-	- config-base-disable KEY        Disable an enabled setting in config.ini
-	- config-base-enable KEY         Enable a disabled setting in config.ini
+	- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
+	- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
+	- app-base-config-get KEY                     Read setting from config.ini
+	- app-base-config-set [-dqv] KEY VALUE        Save setting in config.ini
 
 #### 2. App Instance & Module Management
 
-	- app-graph                      Render module relations graph
-	- app-sources                    List installed library sources
-	- app-info                       (not implemented yet)
-	- app-move DESTINATION [URL]     Move app to another folder (and adjust app base URL)
-	- app-status                     Show status of app and its modules
+	- app-info [-v]                               Show app setup
+	- app-status [-v]                             Show status of app and its modules
+	- app-graph                                   Render module relations graph (see config/modules.graph.png)
+	- app-sources                                 List installed library sources
+	- app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
 
 #### 3. App Module Management
 
-	- app-install [-dqv] [MODULE]    Install modules (or one specific)
-	- app-uninstall [-dfqv] MODULE   Uninstall one specific installed module
-	- app-update [-dqv] [MODULE]     Updated installed modules (or one specific)
+	- app-install [-dqv] [MODULE+]                Install specific available module(s) (or all)
+	- app-uninstall [-dfqv] [MODULE+]             Uninstall specific installed module(s) (or all)
+	- app-update [-dqv] [MODULE+]                 Updated specific installed modules(s) (or all)
+	- app-module-config-get MODULE.KEY            Get config value of installed module by config key
+	- app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
+	- app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
+	- app-module-reconfigure [-dqv] MODULE        Configure installed module
 
 #### 4. App Database Management
 
-	- database-clear [-fqv]          Drop database tables (force, verbose, quiet)
-	- database-dump [PATH]           Export database to SQL file
-	- database-load [PATH|FILE]      Import (specific or latest) SQL file
+	- database-clear [-dfqv]                      Drop database tables
+	- database-dump [PATH]                        Export database to SQL file
+	- database-load [PATH|FILE]                   Import (specific or latest) SQL file
+
+#### 5. App Stamp Management
+------------------------------------------------------------------------------
+	- app-stamp-dump [SOURCE]                              Export current module settings into a stamp file
+	- app-stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between installed modules and stamp
+	- app-stamp-load [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Restore module settings of stamp (not implemented yet)
+	- app-stamp-prospect TYPE [SOURCE]                     Show changes when updating outdated modules
+	- app-stamp-info [PATH|FILE] [TYPE*] [SOURCE] [MODULE] Display details of stamp
 
 ### C. Additional Functions
 
@@ -100,14 +111,20 @@ Having a valid Hymn config file, you execute these commands:
 	- self-update                    Replace global hymn installation by latest download
 	- reflect-options                Show parsable arguments and options
 
+#### 2. Stamp Management
+
+	- stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between available modules and stamp
+
 ## Options
 
-	-d | --dry                       Actions are simulated only
-	-f | --force                     Continue actions on error or warnings
-	-q | --quiet                     Avoid any output
-	-v | --verbose                   Be verbose about taken steps
-	--file=[.hymn]                   Alternative path of Hymn file
-	--prefix=[<%prefix%>]            Set database table prefix in dump
+	-d | --dry                 Actions are simulated only
+	-f | --force               Continue actions on error or warnings
+	-q | --quiet               Avoid any output
+	-v | --verbose             Be verbose about taken steps
+	-r | --recursive           Perform file actions recursively (used by test-syntax only)
+	--file=[.hymn]             Alternative path of Hymn file
+	--prefix=[<%prefix%>]      Set database table prefix in dump
+	--db=[yes,no,only]         Switch to enable changes in database (default: yes)
 
 ## Commands of `make`
 
@@ -153,7 +170,7 @@ Installs `hymn.phar` to global scope by creating a copy in `/usr/local/bin/hymn`
 Will:
 
 - remove `/usr/local/bin/hymn`
-- copy local `hymn.phar` to `/usr/local/bin/hymn` 
+- copy local `hymn.phar` to `/usr/local/bin/hymn`
 
 ### install-link
 
@@ -162,11 +179,11 @@ Installs `hymn.phar` to global scope by creating a symlink in `/usr/local/bin/hy
 Will:
 
 - remove `/usr/local/bin/hymn`
-- link local `hymn.phar` to `/usr/local/bin/hymn` 
+- link local `hymn.phar` to `/usr/local/bin/hymn`
 
 ### test-syntax
 
-Will test syntax of local PHP class files using `hymn test-syntax`. 
+Will test syntax of local PHP class files using `hymn test-syntax`.
 
 ### test-units
 
