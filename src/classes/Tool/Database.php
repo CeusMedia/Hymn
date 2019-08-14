@@ -174,35 +174,70 @@ class Hymn_Tool_Database{
 	/**
 	 *	Prepare database connection by setting up database access configuration.
 	 *	No database connection will be established.
-	 *	Will lookout for module Resource_Database and hymn configuration.
-	 *	Having a setup in hymn file means to have a "global configuration".
-	 *	Having module Resource_Database installed means to have a "module configuration".
-	 *	If both are missing, nothing will be done.
+	 *	Will lookout for 3 configuration sources:
+	 *	- global: hymn file configuration
+	 *	- linked: database resource modules linked in hymn file (in database.modules)
+	 *	- default: pseudo default database resource module Resource_Database from CeusMedia:HydrogenModules to be installed
+	 *
+	 *	In most cases, the hymn file will already (or still) hold database access information.
+	 *
+	 *	Secondly, the hymn file allows to link database resource modules.
+	 *	So, database access information can be retrived from one of these modules if installed.
+	 *
+	 *	As a fallback the pseudo-default database resource module Resource_Database will be looked after.
+	 *
  	 *	Using force mode, having no configuration will lead to abortion.
 	 *	Using force reset mode will read configuration again ignoring beforehand preparation.
 	 *
 	 *	@access		public
 	 *	@param		boolean		$force			Flag: throw exception if no database configuration available (default: yes)
-	 *	@param		boolean		$forceReset		Flag: read configuration again ignoring beforehand preparation (default: no)
+	 *	@param		boolean		$reset			Flag: read configuration again ignoring beforehand preparation (default: no)
 	 *	@return		void
 	 */
 	protected function prepareConnection( $force = TRUE, $reset = FALSE ){
-		if( $this->dba && !$reset )
-			return;
-		$config				= $this->client->getConfig();
-		$usesGlobalDbAccess	= isset( $config->database ) && $config->database;
-		$usesDatabaseModule	= isset( $config->modules->Resource_Database->config );
-		if( $usesGlobalDbAccess && !empty( $config->database->name ) ){
-			$this->dba		= (object) array_merge( $this->dbaDefaults, (array) $config->database );
+		if( $this->dba && !$reset )																	//  connection access already prepared and not forced to reset
+			return;																					//  do nothing
+		$config				= $this->client->getConfig();											//  shortcut configuration from hymn file
+		$usesGlobalDbAccess	= !empty( $config->database->name );									//  atleast the database name is defined in hymn file
+		$usesLinkedModules	= !empty( $config->database->modules );									//  database resource modules are are linked in hymn file
+		$usesDefaultModule	= isset( $config->modules->Resource_Database->config );					//  pseudo-default resource module from CeusMedia:HydrogenModules is installed
+		if( $usesGlobalDbAccess ){																	//  use global database access information from hymn file first for better performance
+			$configAsArray	= (array) $config->database;											//  convert config object to array
+			$this->dba		= (object) array_merge( $this->dbaDefaults, $configAsArray );			//  set database access information from hymn file config
 		}
-		else if( $usesDatabaseModule ){
-			$this->dba	= (object) $this->dbaDefaults;
-			foreach( $config->modules->Resource_Database->config as $key => $value )
-				if( preg_match( '/^access\./', $key ) )
-					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;
+		else if( $usesDefaultModule ){																//  use the pseudo-default resource module first for better performance
+			$this->dba	= (object) $this->dbaDefaults;												//  prepare database access information using defaults as template
+			foreach( $config->modules->Resource_Database->config as $key => $value )				//  iterate config pairs of installed database resource module
+				if( preg_match( '/^access\./', $key ) )												//  config key prefix is matching
+					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;				//  carry resource module config value to database access information
+		}
+		else if( $usesLinkedModules ){
+			$parts		= preg_split( '/\s*,\s*/', $config->database->modules );					//  split comma separated list if resource modules in registration format
+			foreach( $parts as $moduleRegistration ){												//  iterate these module registrations
+				$moduleId		= $moduleRegistration;												//  assume module ID to be the while module registration string ...
+				$configPrefix	= '';																//  ... and no config prefix as fallback (simplest situation)
+				if( preg_match( '/:/', $moduleRegistration ) )										//  a prefix defintion has been announced
+					list( $moduleId, $configPrefix ) = preg_split( '/:/', $moduleRegistration, 2 );	//  split module ID and config prefix into variables
+				if( !isset( $config->modules->{$moduleId} ) )										//  linked resource module is NOT installed
+					continue;																		//  skip this module registration
+				$this->dba		= (object) $this->dbaDefaults;										//  prepare database access information using defaults as template
+				$quotedPrefix	= preg_quote( $configPrefix, '/' );									//  quote resource module config key prefix prefix for preg operations
+				foreach( $config->modules->{$moduleId}->config as $key => $value ){					//  iterate config pairs of installed database resource module
+					if( $quotedPrefix ){															//  a resource module config key prefix has been registered
+						if( !preg_match( '/^'.$quotedPrefix.'/', $key ) )							//  current module config key is not of registered prefix
+							continue;
+						$key	= preg_replace( '/^'.$quotedPrefix.'/', '', $key );					//  otherwise remove prefix from config key
+					}
+					$this->dba->{$key}	= $value;													//  carry resource module config value to database access information
+				}
+				break;																				//  stop after first success
+			}
 		}
 		if( !$this->dba && $force ){
-			$this->client->outError( 'Database access needed but not configured', Hymn_Client::EXIT_ON_SETUP );
+			$this->client->outError(
+				'Database access needed but not configured',
+				Hymn_Client::EXIT_ON_SETUP
+			);
 		}
 	}
 }

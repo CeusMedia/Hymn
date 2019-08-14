@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language	= 'en';
 
-	static public $version	= '0.9.8.7';
+	static public $version	= '0.9.8.8a';
 
 	public $arguments;
 
@@ -438,26 +438,44 @@ class Hymn_Client{
 
 	/*  --  PROTECTED  --  */
 
-	protected function applyAppConfiguredDatabaseConfigToModules(){
+	/**
+	 *	Copies database access information into database related resource modules.
+	 *	Such modules can be registered in hymn file in 'database.modules' as string separated list of resource modules and option key prefixes (optional).
+	 *	Example: Resource_Database:access.,MyDatabaseResourceModule:myOptionPrefix.
+	 *	Hint: Hence the tailing dot.
+	 *	Default module to use is Resource_Database, if no other definition has been found.
+	 *
+	 *	@access		protected
+	 *	@param		array			$modules		Map of resource modules with config option key prefix (eG. Resource_Database:access.).
+	 *	@todo		kriss: Question is: Why? On which purpose is this important, again?
+	 */
+	protected function applyAppConfiguredDatabaseConfigToModules( $modules = array() ){
 		if( !isset( $this->config->database ) )
 			return FALSE;
-		if( !isset( $this->config->database->modules ) )
-			$this->config->database->modules	= 'Resource_Database:access.';
-		foreach( preg_split( '/\s*,\s*/', $this->config->database->modules ) as $applyTo ){
-			$applyId		= $applyTo;
-			$applyPrefix	= '';
-			if( preg_match( '/:/', $applyTo ) ){
-				list( $applyId, $applyPrefix ) = preg_split( '/:/', $applyTo, 2 );
+
+		if( !$modules ){																			//  no map of resource modules with config option key prefix given on function call
+			$modules	= array();																	//  set empty map
+			if( !isset( $this->config->database->modules ) )										//  no database resource modules defined in hymn file (default)
+				$this->config->database->modules	= 'Resource_Database:access.';					//  set atleast pseudo-default resource module from CeusMedia:HydrogenModules
+			$parts	= preg_split( '/\s*,\s*/', $this->config->database->modules );					//  split comma separated list if resource modules in registration format
+			foreach( $parts as $moduleRegistration ){												//  iterate these module registrations
+				$moduleId		= $moduleRegistration;												//  assume module ID to be the while module registration string ...
+				$configPrefix	= '';																//  ... and no config prefix as fallback (simplest situation)
+				if( preg_match( '/:/', $moduleRegistration ) )										//  a prefix defintion has been announced
+					list( $moduleId, $configPrefix ) = preg_split( '/:/', $moduleRegistration, 2 );	//  split module ID and config prefix into variables
+				$modules[$moduleId]	= $configPrefix;												//  enlist resource module registration in array form
 			}
-			$this->outVeryVerbose( 'Applying database config to module '.$applyId.' ...' );
-			if( !isset( $this->config->modules->{$applyId} ) )
-				$this->config->modules->{$applyId}	= (object) array();
-			$module	= $this->config->modules->{$applyId};										//  shortcut module configuration
-			if( !isset( $module->config ) )
-				$module->config	= (object) array();
-			foreach( $this->config->database as $key => $value )
-				if( !in_array( $key, array( 'modules' ) ) )
-					$module->config->{$applyPrefix.$key}	= $value;
+		}
+		foreach( $modules as $moduleId => $configPrefix ){											//  iterate given or found resource module registrations
+			$this->outVeryVerbose( 'Applying database config to module '.$moduleId.' ...' );		//  tell about this in very verbose mode
+			if( !isset( $this->config->modules->{$moduleId} ) )										//  registered module is not installed
+				$this->config->modules->{$moduleId}	= (object) array();								//  create an empty module definition in loaded module list
+			$module	= $this->config->modules->{$moduleId};											//  shortcut module definition
+			if( !isset( $module->config ) )															//  module definition has not configuration
+				$module->config	= (object) array();													//  create an empty configuration in module definition
+			foreach( $this->config->database as $key => $value )									//  iterate database access information from hymn file
+				if( !in_array( $key, array( 'modules' ) ) )											//  skip the found list of resource modules to apply exactly this method to
+					$module->config->{$configPrefix.$key}	= $value;								//  set database access information in resource module configuration
 		}
 		return TRUE;
 	}

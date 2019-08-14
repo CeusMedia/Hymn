@@ -95,7 +95,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
 //					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
 					'--force',																		//  continue if error eccoured
-//					'--replace',																	//  replace it already existing
+//					'--replace',																	//  replace if already existing
 				) ),
 				escapeshellarg( $name ),															//  configured database name as escaped shell arg
 				escapeshellarg( $importFile ),														//  temp file name as escaped shell arg
