@@ -183,14 +183,14 @@ class Hymn_Client{
 			if( in_array( $language, array( 'en', 'de' ) ) )
 				self::$language	= $language;
 		}
-		$this->database		= new Hymn_Tool_Database( $this );
+		$this->database		= new Hymn_Tool_Database_PDO( $this );
 		$this->locale		= new Hymn_Tool_Locale( Hymn_Client::$language );
 		$this->words		= $this->locale->loadWords( 'client' );
 
 		if( self::$outputMethod !== 'print' )
 			ob_start();
 
-		$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
+		$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
 		if( $this->arguments->getOption( 'dry' ) )
 			$this->flags	|= self::FLAG_DRY;
 		if( $this->arguments->getOption( 'force' ) )
@@ -221,11 +221,11 @@ class Hymn_Client{
 			$action	= $this->arguments->getArgument();
 			if( !$action && $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, 'help' );
-				$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			else if( $this->arguments->getOption( 'version' ) ){
 				array_unshift( $arguments, 'version' );
-				$this->arguments	= new Hymn_Tool_Cli_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
 			}
 			$this->dispatch();
 		}
@@ -264,7 +264,7 @@ class Hymn_Client{
 			'Deprecated - please use Hymn_Command_*::ask instead!',
 			'Method will be removed in v0.9.9.',
 		) );
-		$question	= new Hymn_Tool_Cli_Question(
+		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
 			$message,
 			$type,

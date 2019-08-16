@@ -78,47 +78,29 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			$this->client->outError( 'Missing read access to SQL script: '.$fileName );
 		try{
 			$dbc		= $this->client->getDatabase();
-			$host		= $dbc->getConfig( 'host' );												//  get server host from config
-			$port		= $dbc->getConfig( 'port' );												//  get server port from config
-			$username	= $dbc->getConfig( 'username' );											//  get username from config
-			$name		= $dbc->getConfig( 'name' );												//  get database name from config
-			$prefix		= $dbc->getConfig( 'prefix' );												//  get table prefix from config
-			$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );			//  get file with applied table prefix
-			$fileSize	= Hymn_Tool_FileSize::get( $importFile );									//  format file size
-
-			$cores		= (int) shell_exec( 'cat /proc/cpuinfo | grep processor | wc -l' );			//  get number of CPU cores
-			$command	= vsprintf( 'mysql %s %s < %s', array(
-				join( ' ', array(
-					'--host='.escapeshellarg( $host ),												//  configured host as escaped shell arg
-					'--port='.escapeshellarg( $port ),												//  configured port as escaped shell arg
-					'--user='.escapeshellarg( $username ),											//  configured username as escaped shell arg
-					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
-//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
-					'--force',																		//  continue if error eccoured
-//					'--replace',																	//  replace if already existing
-				) ),
-				escapeshellarg( $name ),															//  configured database name as escaped shell arg
-				escapeshellarg( $importFile ),														//  temp file name as escaped shell arg
-			) );
-
-			$this->client->outVerbose( 'Import file:  '.$fileName );
-			$this->client->outVerbose( 'File size:    '.$fileSize );
-			$this->client->outVerbose( 'DB Server:    '.$host.'@'.$port );
-			$this->client->outVerbose( 'Database:     '.$name );
-			$this->client->outVerbose( 'Table prefix: '.( $prefix ? $prefix : '- (none)' ) );
-			$this->client->outVerbose( 'Access as:    '.$username );
-			if( $this->flags->dry ){
-				return $this->client->out( 'Database setup okay - import itself not executed.' );
+			$prefix		= $dbc->getConfig( 'prefix' );											//  get table prefix from config
+			$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );						//  get CLI handler for MySQL
+			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
+			if( $this->flags->verbose ){
+				$this->client->out( array(
+					'Import file:  '.$fileName,														//  show import file name
+					'File size:    '.$fileSize,														//  show import file size
+					'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),		//  show server host and port from config
+					'Database:     '.$dbc->getConfig( 'name' ),										//  show database name from config
+					'Table prefix: '.( $prefix ? $prefix : '(none)' ),								//  show table prefix from config
+					'Access as:    '.$dbc->getConfig( 'username' ),									//  show username from config
+				) );
+				$this->client->out( 'Loading import file ...' );
 			}
-			else {
-				$this->client->outVerbose( 'Command:      '.$command );
-				$this->client->out( 'Importing '.$fileName.' ('.$fileSize.') ...' );
-				exec( $command );
-			}
-			@unlink( $importFile );
+			else
+				$this->client->out( 'Loading import file '.$fileName.' ('.$fileSize.') ...' );
+			if( $this->flags->dry )
+				$this->client->out( '-> Dry Mode: Import itself not executed.' );
+			else
+				$mysql->importFileWithPrefix( $fileName, $prefix );
 		}
 		catch( Exception $e ){
-			$this->client->out( 'Importing '.$fileName.' failed: '.$e->getMessage() );
+			$this->client->out( 'Loading import file '.$fileName.' failed: '.$e->getMessage() );
 		}
 	}
 
@@ -144,21 +126,5 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			return $path.array_shift( $list );
 		}
 		return NULL;
-	}
-
-	protected function getTempFileWithAppliedTablePrefix( $sourceFile, $prefix ){
-		$this->client->outVerbose( 'Applying table prefix to import file ...' );
-//		$this->client->outVerbose( 'Applying table prefix ...' );
-		$tempName	= $sourceFile.'.tmp';
-		$fpIn		= fopen( $sourceFile, 'r' );													//  open source file
-		$fpOut		= fopen( $tempName, 'a' );													//  prepare empty target file
-		while( !feof( $fpIn ) ){																//  read input file until end
-			$line	= fgets( $fpIn );															//  read line buffer
-			$line	= str_replace( '<%?prefix%>', $prefix, $line );								//  replace table prefix placeholder
-			fwrite( $fpOut, $line );															//  write buffer to target file
-		}
-		fclose( $fpOut );																		//  close target file
-		fclose( $fpIn );																		//  close source file
-		return $tempName;
 	}
 }

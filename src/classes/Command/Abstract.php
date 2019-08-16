@@ -71,7 +71,7 @@ abstract class Hymn_Command_Abstract{
 	}
 
 	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
-		$question	= new Hymn_Tool_Cli_Question(
+		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
 			$message,
 			$type,

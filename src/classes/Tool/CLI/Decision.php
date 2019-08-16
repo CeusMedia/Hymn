@@ -3,7 +3,7 @@
  *	@deprecated		seems to be not used anymore
  *	@todo			check deprecation assumption and remove
  */
-class Hymn_Tool_Cli_Decision{
+class Hymn_Tool_CLI_Decision{
 
 	protected $client;
 	protected $message;

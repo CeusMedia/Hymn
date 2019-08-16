@@ -1,5 +1,5 @@
 <?php
-class Hymn_Tool_Database{
+class Hymn_Tool_Database_PDO{
 
 	protected $client;
 	protected $dba;

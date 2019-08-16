@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn
+ *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,7 +28,7 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn
+ *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -36,7 +36,7 @@
  *	@todo    		code documentation
  *	@todo    		implement option includes and excludes (using inference and recursion)
  */
-class Hymn_Tool_Cli_Arguments{
+class Hymn_Tool_CLI_Arguments{
 
 	protected $arguments	= array();
 

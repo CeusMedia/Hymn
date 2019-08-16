@@ -145,7 +145,7 @@ class Hymn_Module_Installer{
 						$module->id,
 					) ), Hymn_Client::EXIT_ON_RUN );
 				}
-				$question	= new Hymn_Tool_Cli_Question(											//  get new value from console
+				$question	= new Hymn_Tool_CLI_Question(											//  get new value from console
 					$this->client,
 					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
 						$module->id,

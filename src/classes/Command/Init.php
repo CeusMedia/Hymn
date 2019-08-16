@@ -41,7 +41,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	protected $pathPhar	= "phar://hymn.phar/";
 
 	protected function answer( $key, $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
-		$question	= new Hymn_Tool_Cli_Question( $this->client, $message, $type, $default, $options, $break );
+		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options, $break );
 		$this->answers[$key]	= $question->ask();
 	}
 

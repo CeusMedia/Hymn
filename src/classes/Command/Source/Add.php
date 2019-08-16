@@ -86,7 +86,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			foreach( $this->questions as $question ){														//  iterate questions
 				if( !isset( $shelf[$question['key']] ) )
 					$shelf[$question['key']]	= $question['default'];
-				$input	= new Hymn_Tool_Cli_Question(													//  ask for value
+				$input	= new Hymn_Tool_CLI_Question(													//  ask for value
 					$this->client,
 					$question['label'],
 					$question['type'],

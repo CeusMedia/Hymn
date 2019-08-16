@@ -65,7 +65,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 			$this->client->out( "Database tables:" );
 			foreach( $tables as $table )
 				$this->client->out( "- ".$table );
-			$question	= new Hymn_Tool_Cli_Question(
+			$question	= new Hymn_Tool_CLI_Question(
 				$this->client,
 				'Do you really want to drop these tables?',
 				'boolean',
