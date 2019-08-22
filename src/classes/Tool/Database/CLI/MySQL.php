@@ -58,9 +58,12 @@ class Hymn_Tool_Database_CLI_MySQL{
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
 			$tempFilePath	= $tempFile->create()->getFilePath();
 			$optionsFile->create( $tempFilePath, FALSE );
-			$line			= join( ' ', array(
-				'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
-				'--result-file='.escapeshellarg( $fileName ),
+			$line	= vsprintf( '%s %s %s', array(													//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+				join( ' ', array(
+					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
+					'--result-file='.escapeshellarg( $fileName ),
+				) ),
+				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
 				$tables
 			) );
 		}
@@ -98,11 +101,13 @@ class Hymn_Tool_Database_CLI_MySQL{
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
 			$tempFilePath	= $tempFile->create()->getFilePath();
 			$optionsFile->create( $tempFilePath, FALSE );
-			$line			= join( ' ', array(
-				'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
-				'--force',																			//  continue if error eccoured
-//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
-//					'--replace',																	//  replace if already existing
+			$line		= vsprintf( '%s %s < %s', array(
+				join( ' ', array(
+					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
+					'--force',																			//  continue if error eccoured
+	//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
+	//					'--replace',																	//  replace if already existing
+				) ),
 				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
 				escapeshellarg( $fileName ),
 			) );
@@ -114,8 +119,8 @@ class Hymn_Tool_Database_CLI_MySQL{
 					'--port='.escapeshellarg( $dbc->getConfig( 'port' ) ),							//  configured port as escaped shell arg
 					'--user='.escapeshellarg( $dbc->getConfig( 'username' ) ),						//  configured username as escaped shell arg
 					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
-	//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
 					'--force',																		//  continue if error eccoured
+	//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
 	//					'--replace',																	//  replace if already existing
 				) ),
 				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg

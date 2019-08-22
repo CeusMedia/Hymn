@@ -38,7 +38,7 @@
 class Hymn_Module_Reader{
 
 	public function load( $filePath, $moduleId ){
-		$validator	= new Hymn_Tool_XmlValidator();
+		$validator	= new Hymn_Tool_XML_Validator();
 		if( !$validator->validateFile( $filePath ) )
 			throw new RuntimeException( 'XML file of module "'.$moduleId.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
 

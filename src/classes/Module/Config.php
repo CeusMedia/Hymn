@@ -68,7 +68,7 @@ class Hymn_Module_Config{
 		$this->get( $moduleId, $configKey, FALSE );
 		$target		= $this->client->getConfigPath().'modules/'.$moduleId.'.xml';
 		$xml		= file_get_contents( $target );
-		$xml		= new Hymn_Tool_XmlElement( $xml );
+		$xml		= new Hymn_Tool_XML_Element( $xml );
 		foreach( $xml->config as $node ){														//  iterate original module config pairs
 			$key	= (string) $node['name'];													//  shortcut config pair key
 			if( $key !== $configKey )

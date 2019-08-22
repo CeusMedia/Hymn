@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Tool
+ *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,14 +28,14 @@
  *	Validates XML.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Tool
+ *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			Unit Test
  */
-class Hymn_Tool_XmlValidator{
+class Hymn_Tool_XML_Validator{
 
 	/**	@var		array		$error		Array of Error Information */
 	protected $error	= array();

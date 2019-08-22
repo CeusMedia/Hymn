@@ -109,26 +109,14 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
-		if( file_exists( $path ) ){
-			$list	= array();
-			$index	= new DirectoryIterator( $path );
-			foreach( $index as $entry ){
-				if( $entry->isDir() || $entry->isDot() )
-					continue;
-				$pattern	= '/^stamp_[0-9:_-]+\.json$/';
-				if( $shelfId )
-					$pattern	= '/^stamp_'.preg_quote( $shelfId, '/' ).'_[0-9:_-]+\.json$/';
-				if( !preg_match( $pattern, $entry->getFilename() ) )
-					continue;
-				$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
-				$list[$key]	= $entry->getFilename();
-			}
-			krsort( $list );
-			if( $list ){
-				return $path.array_shift( $list );
-			}
-		}
-		return NULL;
+		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
+		if( $shelfId )
+			$pattern	= '/^stamp_'.preg_quote( $shelfId, '/' ).'_[0-9:_-]+\.json$/';
+
+		$finder		= new Hymn_Tool_LatestFile( $this->client );
+		$finder->setFileNamePattern( $pattern );
+		$finder->setAcceptedFileNames( array( 'latest.json' ) );
+		return $finder->find( $path );
 	}
 
 	/**

@@ -109,22 +109,10 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig.'sql/';
 		if( !file_exists( $path ) )
 			throw new RuntimeException( 'Path is not existing: '.$path );
+		$finder		= new Hymn_Tool_LatestFile( $this->client );
+		$finder->setAcceptedFileNames( array( 'latest.sql' ) );
+		$finder->setFileNamePattern( '/^dump_[0-9:_-]+\.sql$/' );
 		$this->client->outVerbose( 'Scanning folder '.$path.'...' );
-		$list	= array();
-		$index	= new DirectoryIterator( $path );
-		foreach( $index as $entry ){
-			if( $entry->isDir() || $entry->isDot() )
-				continue;
-			$this->client->outVerbose( 'Found: '.$entry->getFilename() );
-			if( !preg_match( '/^dump_[0-9:_-]+\.sql$/', $entry->getFilename() ) )
-				continue;
-			$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
-			$list[$key]	= $entry->getFilename();
-		}
-		krsort( $list );
-		if( $list ){
-			return $path.array_shift( $list );
-		}
-		return NULL;
+		return $finder->find( $path );
 	}
 }

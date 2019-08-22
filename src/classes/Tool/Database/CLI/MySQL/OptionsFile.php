@@ -55,7 +55,7 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile{
 		$map		= array(
 			'host'		=> 'host',
 			'port'		=> 'port',
-			'database'	=> 'name',
+//			'database'	=> 'name',
 			'user'		=> 'username',
 			'password'	=> 'password',
 		);

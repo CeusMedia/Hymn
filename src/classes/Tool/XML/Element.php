@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Module
+ *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -27,14 +27,14 @@
 /**
  *	XML element based on SimpleXMLElement with improved attribute Handling.
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Module
+ *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			namespace handling: implement detection "Prefix or URI?", see http://www.w3.org/TR/REC-xml/#NT-Name
  */
-class Hymn_Tool_XmlElement extends SimpleXMLElement{
+class Hymn_Tool_XML_Element extends SimpleXMLElement{
 
 	/**
 	 *	Adds an attributes.

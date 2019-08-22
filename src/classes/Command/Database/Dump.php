@@ -88,7 +88,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 		$result	= $mysql->exportToFileWithPrefix( $fileName, $prefix );
 		if( $result->code !== 0 )
-			return $this->client->out( 'Dumping export failed.' );
+			return $this->client->out( 'Dumping export failed: '.join( PHP_EOL, $result->output ) );
 		if( $this->flags->dry ){
 			unlink( $fileName );
 			return $this->client->out( '-> Dry Mode: Database dump has been successful. Export file deleted' );

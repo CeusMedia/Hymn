@@ -95,7 +95,7 @@ class Hymn_Module_Installer{
 		}
 
 		$xml	= file_get_contents( $target );
-		$xml	= new Hymn_Tool_XmlElement( $xml );
+		$xml	= new Hymn_Tool_XML_Element( $xml );
 		$type	= isset( $this->app->type ) ? $this->app->type : 1;
 		if( !$this->flags->dry ){																//  if not in dry mode
 			$xml->version->setAttribute( 'install-type', $type );
