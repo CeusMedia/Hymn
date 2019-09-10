@@ -42,4 +42,6 @@ interface Hymn_Command_Interface{
 	 *	@return		void
 	 */
 	public function run();
+
+	public function getArgumentOptions();
 }

@@ -41,6 +41,11 @@ abstract class Hymn_Command_Abstract{
 	protected $flags;
 	protected $locale;
 	protected $words;
+	protected $argumentOptions	= array();
+
+	public function getArgumentOptions(){
+		return $this->argumentOptions;
+	}
 
 	/**
 	 *	Constructor.

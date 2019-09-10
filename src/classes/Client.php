@@ -121,9 +121,9 @@ class Hymn_Client{
 		)
 	);
 
-	static public $fileName	= '.hymn';
+	static public $fileName			= '.hymn';
 
-	static public $outputMethod	= 'print';
+	static public $outputMethod		= 'print';
 
 	static protected $commandWithoutConfig	= array(
 		//  APP CREATION
@@ -145,11 +145,15 @@ class Hymn_Client{
 		'themes'		=> 'themes/',
 	);
 
-	static public $language	= 'en';
+	static public $language			= 'en';
 
-	static public $version	= '0.9.8.8b';
+	static public $version			= '0.9.8.8c';
 
 	public $arguments;
+
+	public $flags					= 0;
+
+	public $locale;
 
 	protected $config;
 
@@ -157,13 +161,11 @@ class Hymn_Client{
 
 	protected $framework;
 
-	protected $isLiveCopy	= FALSE;
-
 	protected $words;
 
-	public $flags			= 0;
+	protected $isLiveCopy			= FALSE;
 
-	public $locale;
+	protected $originalArguments	= array();
 
 	/**
 	 *	Constructor.
@@ -175,6 +177,7 @@ class Hymn_Client{
 	 */
 	public function __construct( $arguments, $exit = TRUE ){
 		$this->exit	= $exit;
+		$this->originalArguments	= $arguments;
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
@@ -503,6 +506,13 @@ class Hymn_Client{
 		}
 	}
 
+	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject ){
+		$commandOptions		= call_user_func( array( $commandObject, 'getArgumentOptions' ) );		//  get command specific argument options
+		$options			= array_merge( $this->baseArgumentOptions, $commandOptions );			//  merge with base argument options
+		$this->arguments	= new Hymn_Tool_CLI_Arguments( $this->originalArguments, $options );	//  parse original arguments again with combined options
+		$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
+	}
+
 	protected function dispatch(){
 		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
@@ -523,6 +533,7 @@ class Hymn_Client{
 				$commandObject		= $reflectedClass->newInstanceArgs( array( $this ) );			//  create object of reflected class
 				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
 				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
+				$this->applyCommandOptionsToArguments( $commandObject );							//  extend argument options by command specific options
 				$reflectedMethod->invokeArgs( $commandObject, (array) $this->arguments );			//  call reflected object method
 			}
 			catch( Exception $e ){
