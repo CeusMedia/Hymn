@@ -129,8 +129,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 					$module->id
 				) );
 			}
-			if( !$this->flags->dry )
-				$installer->uninstall( $module );
+			$installer->uninstall( $module );
 		}
 	}
 }

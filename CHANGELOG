@@ -1,27 +1,57 @@
+v0.9.8.8
+- Support command specific argument options.
+- Add shortcut to client output methods in all command classes (via abstract command class).
+- Add new command app-clear to remove module cache, job locks and logs.
+	- defines new argument option as "--age=MINUTES"
+	- removes module config cache
+	- removes job locks
+	- removes logs (not yet implemented)
+
+v0.9.8.7
+- Finish support of linked database resource modules in hymn file.
+- Restructure CLI classes and MySQL file handling.
+- Extract finding latest stamp or database file to own tool class.
+
 v0.9.8.6
-- add support for sematic versioning
-	- new class Hymn_Tool_Semver
-	- supports version operator prefixes
-	- supported operator prefixes: <,>,<>,<=,>=,!=,==,=,^
-	- example: =>1.2 (same as ^1.2)
-	- not supported yet: wildcards (*,?) and operator suffixes
-- add module config attribute to note supported frameworks and versions
-	- attribute of XML node "module" named "frameworks"
-	- format: Framework@version or Framwork1@version|Framework2@version
-	- allows several frameworks, separated by colon
-	- supports semantic versioning
-	- defaults to: Hydrogen@<0.9
-	- supported frameworks will be displayed by command module-info
-- add detection of installed Hydrogen framework
-	- new class Hymn_Tool_Framework
-	- available by client->getFramework()
-	- lazy loading: create framework object on first call
-	- has method checkModuleSupport
-		- checks module framework version against installed framework version
-		- will respond with exceptions if mismatch or framework config error
-		- can be used by commands by try/catch
-	- detected framework will be display by command app-info in verbose mode
-- add check if module supports current framework
-	- compares module framework support against installed framework version
-	- applies on module installation and update
-	- applies only if framework could been detected
+- Extend module-info by related modules (in verbose mode).
+- On module update remove modules which are not needed anymore.
+- Support PHP <7.
+- Add new command modules-unneeded to list modules not needed by other modules.
+- Add command app-stamp-info and extract module info class from command module-info.
+- Add new command stamp-diff to compare stamp against available modules.
+
+v0.9.8.5
+- Fix bug in semantic versioning.
+- Update bootstrap for PHPUnit.
+- Fix bug in command for module info.
+- Detect installed framework version and support module framework attribute.
+- Updated make file template.
+- Add option to disable interactive mode.
+- Support ambiguous modules in different sources and extend module info command by verbosity.
+- Details:
+	- add support for sematic versioning
+		- new class Hymn_Tool_Semver
+		- supports version operator prefixes
+		- supported operator prefixes: <,>,<>,<=,>=,!=,==,=,^
+		- example: =>1.2 (same as ^1.2)
+		- not supported yet: wildcards (*,?) and operator suffixes
+	- add module config attribute to note supported frameworks and versions
+		- attribute of XML node "module" named "frameworks"
+		- format: Framework@version or Framwork1@version|Framework2@version
+		- allows several frameworks, separated by colon
+		- supports semantic versioning
+		- defaults to: Hydrogen@<0.9
+		- supported frameworks will be displayed by command module-info
+	- add detection of installed Hydrogen framework
+		- new class Hymn_Tool_Framework
+		- available by client->getFramework()
+		- lazy loading: create framework object on first call
+		- has method checkModuleSupport
+			- checks module framework version against installed framework version
+			- will respond with exceptions if mismatch or framework config error
+			- can be used by commands by try/catch
+		- detected framework will be display by command app-info in verbose mode
+	- add check if module supports current framework
+		- compares module framework support against installed framework version
+		- applies on module installation and update
+		- applies only if framework could been detected

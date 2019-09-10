@@ -123,8 +123,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				}
 
 				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				if( !$this->flags->dry )
-					$installer->install( $module, $installType );
+				$installer->install( $module, $installType );
 			}
 		}
 
