@@ -168,6 +168,62 @@ abstract class Hymn_Command_Abstract{
 		return $this->library;																		//  return loaded library
 	}
 
+	/**
+	 *	Prints out message of one ore more lines.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 */
+	public function out( $lines = NULL, $newLine = TRUE ){
+		$this->client->out( $lines, $newLine );
+	}
+
+	/**
+	 *	Prints out deprecation message of one ore more lines.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@throws		InvalidArgumentException		if neither array nor string given
+	 *	@throws		InvalidArgumentException		if given string is empty
+	 *	@return		void
+	 */
+	public function outDeprecation( $lines = array() ){
+		$this->client->outDeprecation( $lines );
+	}
+
+	/**
+	 *	Prints out error message.
+	 *	@access		public
+	 *	@param		string			$message		Error message to print
+	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
+	 *	@return		void
+	 */
+	public function outError( $message, $exitCode = NULL ){
+		$this->client->outError( $message, $exitCode );
+	}
+
+	/**
+	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVerbose( $lines, $newLine = TRUE ){
+		$this->client->outVerbose( $lines, $newLine );
+	}
+
+	/**
+	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVeryVerbose( $lines, $newLine = TRUE ){
+		$this->client->outVeryVerbose( $lines, $newLine );
+	}
+
 	protected function realizeWildcardedModuleIds( $givenModuleIds, $availableModuleIds ){
 		$list	= array();
 		foreach( $givenModuleIds as $givenModuleId ){
