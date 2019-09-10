@@ -79,7 +79,7 @@ B2. App Instance & Module Management
 - app-status [-v]                             Show status of app and its modules
 - app-graph                                   Render module relations graph (see config/modules.graph.png)
 - app-sources                                 List installed library sources
-- app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
+- app-move [-dv] DESTINATION [URL]            Move app to another folder (and adjust app base URL)
 - app-clear [-v] [CLEAR_TYPE+] [--age=MINS]   Clear cache, locks or logs
 
 B3. App Module Management
@@ -119,6 +119,7 @@ Source:
   - SOURCE_ID              focus on specific source by its ID
 
 Clear Types:
+  - * | all                all types (default on empty)
   - cache                  clear caches
   - locks                  remove job locks
   - logs                   remove logs

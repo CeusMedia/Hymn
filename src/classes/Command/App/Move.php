@@ -74,36 +74,38 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->client->out( "Move application" );
 		$this->client->out( "- from: ".$source );
 		$this->client->out( "- to:   ".$dest );
-		if( strlen( $url ) )
+		if( strlen( $url ) ){
 			$this->client->out( "- URL:  ".$url );
-		if( !$this->flags->dry ){
-			if( strlen( $url ) ){
-				$this->client->outVerbose( "- setting URL in config file" );
-				$pathConfig	= $this->client->getConfigPath();
-				$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
-				if( $editor->hasProperty( 'app.base.url', FALSE ) ){
-					if( !$this->flags->dry ){
-						$editor->setProperty( 'app.base.url', $url );
-						clearstatcache();
-					}
+			$this->client->outVerbose( "  - setting URL in config file" );
+			$pathConfig	= $this->client->getConfigPath();
+			$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
+			if( $editor->hasProperty( 'app.base.url', FALSE ) ){
+				if( !$this->flags->dry ){
+					$editor->setProperty( 'app.base.url', $url );
+					clearstatcache();
 				}
-				$this->client->outVerbose( "- setting URL in hymn file" );
+			}
+			$this->client->outVerbose( "  - setting URL in hymn file" );
+			if( !$this->flags->dry ){
 				$config->application->url	= $url;
 				$json	= json_encode( $config, JSON_PRETTY_PRINT );
 				file_put_contents( Hymn_Client::$fileName, $json );
 			}
-			$this->client->outVerbose( "- setting URI in hymn file" );
+		}
+		$this->client->outVerbose( "- setting URI in hymn file" );
+		if( !$this->flags->dry ){
 			$config->application->uri	= $dest;
 			$json	= json_encode( $config, JSON_PRETTY_PRINT );
 			file_put_contents( Hymn_Client::$fileName, $json );
-
-			$this->client->outVerbose( "- moving folders, files and links" );
-			rename( $source, $dest );
-			$this->client->outVerbose( "- fixing links" );
-			$this->fixLinks( $source, $dest );
-			$this->client->out( "DONE!" );
-			$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 		}
+
+		$this->client->outVerbose( "- moving folders, files and links" );
+		if( !$this->flags->dry )
+			rename( $source, $dest );
+		$this->client->outVerbose( "- fixing links" );
+		$this->fixLinks( $source, $dest );
+		$this->client->out( "DONE!" );
+		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
 	protected function fixLinks( $source, $dest, $path = '' ){
@@ -118,8 +120,10 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 				$link = readlink( $pathName );
 				if( preg_match( "/^".preg_quote( $source, "/" )."/", $link ) ){
 					$link	= preg_replace( "/^".preg_quote( $source, "/" )."/", $dest, $link );
-					unlink( $pathName );
-					symlink( $link, $pathName );
+					if( !$this->flags->dry ){
+						unlink( $pathName );
+						symlink( $link, $pathName );
+					}
 				}
 			}
 		}
