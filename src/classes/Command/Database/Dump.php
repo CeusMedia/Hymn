@@ -52,13 +52,14 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return $this->client->out( 'Database can NOT be connected.' );
 
-		$dbc		= $this->client->getDatabase();
-		$arguments	= $this->client->arguments;
-		$pathConfig	= $this->client->getConfigPath();
+		$dbc			= $this->client->getDatabase();
+		$arguments		= $this->client->arguments;
+		$pathConfig		= $this->client->getConfigPath();
+		$defaultPath	= $pathConfig.'sql/';
 
 		$fileName	= $arguments->getArgument( 0 );
 		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
-			$fileName	= $pathConfig.'sql/';														//  set default path
+			$fileName	= $defaultPath;																//  set default path
 		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
 			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';							//  generate stamped file name
 		if( dirname( $fileName) )																	//  path is not existing
