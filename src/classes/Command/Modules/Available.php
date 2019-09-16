@@ -50,7 +50,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 		$shelfId	= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
-		$modules	= $library->getModules( $shelfId );
+		$modules	= $library->getAvailableModules( $shelfId );
 		if( count( $modules ) ){
 			$message	= 'Found '.count( $modules ).' available modules:';
 			if( $shelfId )

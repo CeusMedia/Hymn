@@ -57,7 +57,7 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 			$sourceId	= NULL;
 			if( !empty( $moduleConfig->source ) )
 				$sourceId = $moduleConfig->source;
-			$module			= $library->getModule( $moduleId, $sourceId );
+			$module			= $library->getAvailableModule( $moduleId, $sourceId );
 			if( !$module->isActive )
 				continue;
 			$relation->addModule( $module );

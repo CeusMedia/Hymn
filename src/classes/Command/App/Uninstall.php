@@ -95,7 +95,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	private function uninstallAllModules( $listInstalled ){
 		$relation	= new Hymn_Module_Graph( $this->client, $this->library );
 		foreach( array_keys( $listInstalled ) as $installedModuleId ){
-			$module	= $this->library->getModule( $installedModuleId );
+			$module	= $this->library->getAvailableModule( $installedModuleId );
 			$relation->addModule( $module );
 		}
 		$orderedInstalledModules	= array_reverse( $relation->getOrder(), TRUE );

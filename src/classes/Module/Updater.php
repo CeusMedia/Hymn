@@ -81,7 +81,7 @@ class Hymn_Module_Updater{
 		$outdated		= array();																	//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $shelfId ) as $installed ){					//  iterate installed modules
 			$source		= $installed->installSource;												//  get source of installed module
-			$available	= $this->library->getModule( $installed->id, $source, FALSE );				//  get available module within source of installed module
+			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore
 				continue;																			//  skip this module @todo remove gone modules ?!?
 			if( version_compare( $installed->version, $available->version, '>=' ) )					//  installed module is up-to-date
@@ -98,7 +98,7 @@ class Hymn_Module_Updater{
 
 	public function reconfigure( $module, $changedOnly = FALSE ){
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
-		$moduleSource		= $this->library->getModule( $module->id, $moduleInstalled->installSource, FALSE );
+		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource ){
 			$message	= vsprintf( 'Module "%" is not available in source "%"', array(
 				$module->id,
@@ -230,7 +230,7 @@ class Hymn_Module_Updater{
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$localModule->path	= $appUri;
 
-			$availableModules	= $this->library->getModules();										//  get list of all available modules
+			$availableModules	= $this->library->getAvailableModules();							//  get list of all available modules
 			$availableModuleMap	= array();															//  prepare map of available modules
 			foreach( $availableModules as $availableModule )										//  iterate module list
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map

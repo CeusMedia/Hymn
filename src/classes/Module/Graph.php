@@ -81,7 +81,7 @@ class Hymn_Module_Graph{
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
 			if( $relation->source ){
-				if( !$this->library->isModuleInShelf( $neededModuleId, $relation->source ) ){
+				if( !$this->library->isAvailableModuleInShelf( $neededModuleId, $relation->source ) ){
 					$message	= 'Module %s needs module %s from source %s, which is missing.';
 					$this->client->outError( vsprintf( $message, array(
 						$module->id,
@@ -90,7 +90,7 @@ class Hymn_Module_Graph{
 					) ), Hymn_Client::EXIT_ON_RUN );
 				}
 			}
-			$neededModule	= $this->library->getModule( $neededModuleId, $relation->source );		//  get module data object from module library
+			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relation->source );		//  get module data object from module library
 			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
 		}
 	}

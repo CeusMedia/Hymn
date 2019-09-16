@@ -125,7 +125,7 @@ abstract class Hymn_Command_Abstract{
 	protected function getAvailableModulesMap( $shelfId = NULL ){
 		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= array();																		//  prepare empty list of available modules
-		foreach( $library->getModules( $shelfId ) as $module )										//  iterate available modules in library
+		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
 		return $moduleMap;																			//  return map of modules by ID
 	}

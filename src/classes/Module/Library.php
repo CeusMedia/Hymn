@@ -37,233 +37,86 @@
  */
 class Hymn_Module_Library{
 
-	static protected $listModulesAvailable	= NULL;
-	static protected $listModulesInstalled	= NULL;
-	static protected $useCache				= FALSE;
+	protected $listModulesAvailable	= NULL;
+	protected $listModulesInstalled	= NULL;
+	protected $useCache				= FALSE;
 
 	protected $modules		= array();
-	protected $shelves		= array();
+	protected $client;
+	protected $installed;
+	protected $available;
 
 	public function __construct( Hymn_Client $client ){
 		$this->client		= $client;
+		$this->installed	= new Hymn_Module_Library_Installed( $client );
+		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
 	public function addShelf( $moduleId, $path, $type, $active = TRUE, $title = NULL ){
-		if( in_array( $moduleId, array_keys( $this->shelves ) ) )
-			throw new Exception( 'Source already set by ID: '.$moduleId );
-		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
-		$isDefault		= $active && !count( $activeShelves );
-		$this->shelves[$moduleId]	= (object) array(
-			'id'		=> $moduleId,
-			'path'		=> $path,
-			'type'		=> $type,
-			'active'	=> $active,
-			'default'	=> $isDefault,
-			'title'		=> $title,
-		);
-		ksort( $this->shelves );
-	}
-
-	public function getDefaultShelf(){
-		foreach( $this->shelves as $shelfId => $shelf )
-			if( $shelf->default )
-				return $shelfId;
-		throw new RuntimeException( 'No default source available' );
-	}
-
-	public function getModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
-		$this->loadModulesInShelves();
-		if( $shelfId )
-			return $this->getModuleFromShelf( $moduleId, $shelfId, $strict );
-		foreach( $this->modules as $modules )
-			foreach( $modules as $module )
-				if( $module->id === $moduleId )
-					return $module;
-		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId );
-		return NULL;
-	}
-
-	public function getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
-		$module	= $this->getModule( $moduleId, $shelfId );
-		$list	= array();
-		foreach( $module->versionLog as $change ){
-			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is to lower than installed
-				continue;
-			if( version_compare( $change->version, $versionAvailable, '>' ) )					//  log version is to higher than available
-				continue;
-			$list[]	= $change;
-		}
-		return $list;
-	}
-
-	public function getModuleFromShelf( $moduleId, $shelfId, $strict = TRUE ){
-		$this->loadModulesInShelves();
-		if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
-			if( $strict )
-				throw new DomainException( 'Source "'.$shelfId.'" is not active' );
-			return NULL;
-		}
-		foreach( $this->modules[$shelfId] as $module )
-			if( $module->id === $moduleId )
-				return $module;
-		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId );
-		return NULL;
-	}
-
-	public function getModuleShelves( $moduleId ){
-		$this->loadModulesInShelves();
-		$list	= array();
-		foreach( $this->modules as $shelfId => $modules ){
-			if( array_key_exists($moduleId, $modules ) )
-				$list[$shelfId]	= $modules[$moduleId];
-		}
-		return $list;
-	}
-
-	public function getModules( $shelfId = NULL ){
-		$this->loadModulesInShelves();
-		if( $shelfId ){
-			if( !isset( $this->modules[$shelfId] ) )
-				throw new DomainException( 'Invalid source ID: '.$shelfId );
-			$modules	= array();
-			foreach( $this->modules[$shelfId] as $module ){
-				$module->sourceId	= $shelfId;
-				$list[$module->id]	= $module;
-			}
-			ksort( $list );
-			return $list;
-		}
-		$list	= array();
-		foreach( $this->modules as $shelfId => $modules ){
-			foreach( $modules as $module ){
-				$module->sourceId	= $shelfId;
-				$key	= $module->id.'_AAA_'.$shelfId;
-				$list[$key]	= $module;
-			}
-		}
-		ksort( $list );
-		$modules	= array();
-		foreach( array_values( $list ) as $module )
-			$modules[$module->id] = $module;
-		return $modules;
-	}
-
-	public function getShelf( $moduleId, $withModules = FALSE ){
-		if( !in_array( $moduleId, array_keys( $this->shelves ) ) )
-			throw new DomainException( 'Invalid source ID: '.$moduleId );
-		$shelf	= $this->shelves[$moduleId];
-		if( !$withModules )
-			unset( $shelf->modules );
-		return $shelf;
+		return $this->available->addShelf( $moduleId, $path, $type, $active, $title );
 	}
 
 	public function getActiveShelves( $withModules = FALSE ){
-		return $this->getShelves( array( 'active' => TRUE ), $withModules );
+		return $this->available->getActiveShelves( $withModules );
+	}
+
+	public function getAvailableModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
+		return $this->available->get( $moduleId, $shelfId = NULL, $strict = TRUE );
+	}
+
+	public function getAvailableModuleFromShelf( $moduleId, $shelfId, $strict = TRUE ){
+		return $this->available->getFromShelf( $moduleId, $shelfId, $strict );
+	}
+
+	public function getAvailableModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
+		return $this->available->getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable );
+	}
+
+	public function getAvailableModules( $shelfId = NULL ){
+		return $this->available->getAll( $shelfId );
+	}
+
+	public function getAvailableModuleShelves( $moduleId ){
+		return $this->available->getModuleShelves( $moduleId );
+	}
+
+	public function getDefaultShelf(){
+		return $this->available->getDefaultShelf();
+	}
+
+	public function getShelf( $moduleId, $withModules = FALSE ){
+		return $this->available->getShelf( $moduleId, $withModules );
 	}
 
 	public function getShelves( $filters = array(), $withModules = FALSE ){
-		$list	= array();																			//  prepare empty shelf list
-		foreach( $this->shelves as $shelfId => $shelf ){											//  iterate known shelves
-			foreach( $filters as $filterKey => $filterValue )										//  iterate given filters
-				if( property_exists( $shelf, $filterKey ) )											//  filter key is shelf property
-					if( $shelf->{$filterKey} !== $filterValue )										//  shelf property value mismatches filter value
-						continue 2;																	//  skip this shelf
-			$list[$shelfId]	= $this->getShelf( $shelfId, $withModules );							//  enlist shelf
-		}
-		return $list;																				//  return list of found shelves
+		return $this->available->getShelves( $filters, $withModules );
+	}
+
+	public function isAvailableModuleInShelf( $moduleId, $shelfId ){
+		return (bool) $this->available->getFromShelf( $moduleId, $shelfId, FALSE );
 	}
 
 	public function isInstalledModule( $moduleId ){
-		$list	= self::listInstalledModules();
-		return array_key_exists( $moduleId, $list );
-	}
-
-	public function isModuleInShelf( $moduleId, $shelfId ){
-		return (bool) $this->getModuleFromShelf( $moduleId, $shelfId, FALSE );
+		return $this->installed->has( $moduleId );
 	}
 
 	public function isShelf( $shelfId ){
 		return array_key_exists( $shelfId, $this->getShelves() );
 	}
 
-	static protected function listModulesInPath( $path = "" ){
-//		if( self::$useCache && self::$listModulesAvailable !== NULL )			//  @todo realize shelves in cache
-//			return self::$listModulesAvailable;									//  @todo realize shelves in cache
-		$list		= array();
-		$iterator	= new RecursiveDirectoryIterator( $path );
-		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
-		foreach( $index as $entry ){
-			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
-				continue;
-			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
-			$module	= self::readModule( $path, $key );
-			$list[$key]	= $module;
-		}
-//		self::$listModulesAvailable	= $list;									//  @todo realize shelves in cache
-		return $list;
-	}
-
 	public function listInstalledModules( $shelfId = NULL ){
-//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
-//			return self::$listModulesInstalled;									//  @todo realize shelves in cache
-		$list			= array();
-		$pathModules	= $this->client->getConfigPath().'modules/';
-		if( file_exists( $pathModules ) ){
-			$iterator	= new RecursiveDirectoryIterator( realpath( $pathModules ) );
-			$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
-			foreach( $index as $entry ){
-				if( !$entry->isFile() || !preg_match( "/\.xml$/", $entry->getFilename() ) )
-					continue;
-				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-				$module	= $this->readInstalledModule( $key );
-				if( !$shelfId || $module->installSource === $shelfId )
-					$list[$key]	= $module;
-			}
-		}
-		ksort( $list );
-//		self::$listModulesInstalled	= $list;									//  @todo realize shelves in cache
+//		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize shelves in cache
+//			return $this->listModulesInstalled;									//  @todo realize shelves in cache
+		$list	= $this->installed->getAll();
+//		$this->listModulesInstalled	= $list;									//  @todo realize shelves in cache
 		return $list;
-	}
-
-	protected function loadModulesInShelves( $force = FALSE ){
-		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
-			return;																					//  skip this rerun
-		foreach( $this->shelves as $shelf ){														//  iterate sources
-			if( !$shelf->active )																	//  if source if deactivated
-				continue;																			//  skip this source
-			$this->modules[$shelf->id]	= array();													//  prepare empty module list for source
-			foreach( self::listModulesInPath( $shelf->path ) as $module ){							//  iterate modules in source path
-				$module->sourceId	= $shelf->id;													//  extend found module by source ID
-				$module->sourcePath	= $shelf->path;													//  extend found module by source path
-				$module->sourceType	= $shelf->type;													//  extend found module by source type
-				$this->modules[$shelf->id][$module->id] = $module;									//  add found module to general module map
-				ksort( $this->modules[$shelf->id] );												//  sort source modules in general module map
-			}
-		}
-		ksort( $this->modules );																	//  sort general module map by source IDs
-	}
-
-	static public function readModule( $path, $moduleId ){
-		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
-		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
-		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
-		$reader		= new Hymn_Module_Reader();
-		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
-		$module->absolutePath	= realpath( $pathname )."/";										//  extend found module by real source path
-		$module->pathname		= $pathname;														//  extend found module by relative path
-		$module->path			= $path.$pathname;													//  extebd found module by pseudo real path
-		return $module;																				//  return module
 	}
 
 	public function readInstalledModule( $moduleId ){
-		$pathModules	= $this->client->getConfigPath().'modules/';
-		$filename		= $pathModules.$moduleId.'.xml';
-		if( !file_exists( $filename ) )
-			throw new RuntimeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		$reader			= new Hymn_Module_Reader();
-		return $reader->load( $filename, $moduleId );
+		return $this->installed->get( $moduleId );
+	}
+
+	public function useCache( $useCache = TRUE ){
+		$this->useCache		= $useCache;
 	}
 }

@@ -72,7 +72,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		$outdatedModules	= array();																//  prepare empty list of updatable modules
 		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
 			$source				= $installedModule->installSource;									//  get installed module
-			$availableModule	= $library->getModule( $installedModule->id, $source, FALSE );		//  get available module
+			$availableModule	= $library->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
 			if( $availableModule ){																	//  installed module is available atleast
 				$versionInstalled	= $installedModule->version;									//  shortcut installed module version
 				$versionAvailable	= $availableModule->version;									//  shortcut available module version
@@ -124,7 +124,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$updater	= new Hymn_Module_Updater( $this->client, $library );
 		foreach( $modulesToUpdate as $update ){
-			$module			= $library->getModule( $update->id, $update->source );
+			$module			= $library->getAvailableModule( $update->id, $update->source );
 			try{
 				$this->client->getFramework()->checkModuleSupport( $module );
 			}

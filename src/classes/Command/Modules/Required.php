@@ -52,7 +52,7 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		foreach( $modules as $moduleId => $moduleConfig ){
-			$module		= $library->getModule( $moduleId, NULL, FALSE );
+			$module		= $library->getAvailableModule( $moduleId, NULL, FALSE );
 			if( !$module ){
 				$this->client->out( "! ".$moduleId.' MISSING' );
 				continue;

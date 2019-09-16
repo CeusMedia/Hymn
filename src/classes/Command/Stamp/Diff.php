@@ -95,7 +95,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	}
 
 	protected function getAvailableModules( $shelfId = NULL ){
-		$modules	= $this->getLibrary()->getModules( $shelfId );
+		$modules	= $this->getLibrary()->getAvailableModules( $shelfId );
 		$message	= 'Found '.count( $modules ).' available modules.';
 		if( $shelfId )
 			$message	= 'Found '.count( $modules ).' available modules in source '.$shelfId.'.';

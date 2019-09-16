@@ -59,7 +59,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$moduleIds			= $this->client->arguments->getArguments();
 		if( $moduleIds ){
 			foreach( $moduleIds as $moduleId )
-				$relation->addModule( $library->getModule( $moduleId ) );
+				$relation->addModule( $library->getAvailableModule( $moduleId ) );
 		}
 		else{
 			foreach( $config->modules as $moduleId => $moduleConfig ){
@@ -68,7 +68,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				$sourceId	= NULL;
 				if( !empty( $moduleConfig->source ) )
 					$sourceId = $moduleConfig->source;
-				$module			= $library->getModule( $moduleId, $sourceId );
+				$module			= $library->getAvailableModule( $moduleId, $sourceId );
 				if( !$module->isActive )
 					continue;
 				$relation->addModule( $module );
@@ -108,7 +108,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				$defaultShelfId	= $library->getDefaultShelf();
 				$selfModules	= array();
 				foreach( array_keys( $library->getShelves() ) as $shelfId  ){
-					$shelfModule	= $library->getModule( $module->id, $shelfId, FALSE );
+					$shelfModule	= $library->getAvailableModule( $module->id, $shelfId, FALSE );
 					if( $shelfModule )
 						$selfModules[$shelfId]	= $shelfModule;
 				}

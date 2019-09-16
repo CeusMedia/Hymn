@@ -105,7 +105,7 @@ class Hymn_Module_Diff{
 	protected function readModules( $shelfId = NULL ){
 		if( !$this->modulesAvailable ){
 			$this->modulesInstalled	= $this->library->getInstalledModules( $shelfId );
-			$this->modulesAvailable	= $this->library->getModules( $shelfId );
+			$this->modulesAvailable	= $this->library->getAvailableModules( $shelfId );
 		}
 	}
 }

@@ -87,7 +87,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		foreach( $outdatedModules as $outdatedModule ){
 			$sourceModule	= $listInstalled[$outdatedModule->id];
-			$targetModule	= $this->getLibrary()->getModule( $outdatedModule->id );
+			$targetModule	= $this->getLibrary()->getAvailableModule( $outdatedModule->id );
 			if( in_array( $type, array( NULL, 'all', 'sql', 'db', 'database' ) ) ){
 				if( ( $scripts = $diff->compareSqlByModules( $sourceModule, $targetModule ) ) ){
 					$this->client->outVerbose( vsprintf( ' - Module: %s: v%s -> v%s (%d update(s))', array(
