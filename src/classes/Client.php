@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.8.8';
+	static public $version			= '0.9.8.9a';
 
 	public $arguments;
 
@@ -166,6 +166,8 @@ class Hymn_Client{
 	protected $isLiveCopy			= FALSE;
 
 	protected $originalArguments	= array();
+
+	protected $output;
 
 	/**
 	 *	Constructor.
@@ -189,6 +191,7 @@ class Hymn_Client{
 		$this->database		= new Hymn_Tool_Database_PDO( $this );
 		$this->locale		= new Hymn_Tool_Locale( Hymn_Client::$language );
 		$this->words		= $this->locale->loadWords( 'client' );
+		$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
 
 		if( self::$outputMethod !== 'print' )
 			ob_start();
@@ -327,24 +330,7 @@ class Hymn_Client{
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
 	public function out( $lines = NULL, $newLine = TRUE ){
-		if( is_null( $lines ) )
-			$lines	= array();
-		if( !is_array( $lines ) ){																	//  output content is not a list
-			if( is_bool( $lines ) )																	//  output is booleann
-				$lines	= $lines ? 'yes' : 'no';													//  convert to string
-			if( !is_string( $lines ) && !is_numeric( $lines ) ){									//  output content is neither a string nor numeric
-				throw new InvalidArgumentException( sprintf(										//  quit with exception
-					'Argument must be a list, string or numeric (got: %s)',							//  ... complain about invalid argument
-					gettype( $lines )																//  ... display argument type
-				) );
-			}
-			$lines	= array( $lines );																//  collect output content as list
-		}
-		foreach( $lines as $line ){																	//  iterate output lines
-			print( $line );																			//  display each line
-			if( $newLine )																				//  output should be closed by newline character
-				print( PHP_EOL );																		//  print newline character
-		}
+		return $this->output->out( $lines, $newLine );
 	}
 
 	/**
@@ -356,17 +342,7 @@ class Hymn_Client{
 	 *	@return		void
 	 */
 	public function outDeprecation( $lines = array() ){
-		if( !is_array( $lines ) ){
-			if( !is_string( $lines ) )
-				throw new InvalidArgumentException( 'Argument must be array or string.' );			//  ...
-			if( !strlen( trim( $lines ) ) )
-				throw new InvalidArgumentException( 'Argument must not be empty.' );				//  ...
-			$lines	= array( $lines );
-		}
-		$lines[0]	= $this->words->outPrefixDeprecation.$lines[0];
-		array_unshift( $lines, '' );
-		array_push( $lines, '' );
-		$this->out( $lines );
+		return $this->output->outDeprecation( $lines );
 	}
 
 	/**
@@ -377,12 +353,7 @@ class Hymn_Client{
 	 *	@return		void
 	 */
 	public function outError( $message, $exitCode = NULL ){
-		$this->out( $this->words->outPrefixError.$message );
-		if( $this->exit && is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
-			if( self::$outputMethod !== 'print' && ob_get_level() )
-				print( ob_get_clean() );
-			exit( $exitCode );
-		}
+		return $this->output->outError( $message, $exitCode );
 	}
 
 	/**
@@ -393,9 +364,7 @@ class Hymn_Client{
 	 *	@return		void
 	 */
 	public function outVerbose( $lines, $newLine = TRUE ){
-		if( $this->flags & self::FLAG_VERBOSE )														//  verbose mode is on
-			if( !( $this->flags & self::FLAG_QUIET ) )												//  quiet mode is off
-				$this->out( $lines, $newLine );
+		return $this->output->outVerbose( $lines, $newLine );
 	}
 
 	/**
@@ -406,8 +375,7 @@ class Hymn_Client{
 	 *	@return		void
 	 */
 	public function outVeryVerbose( $lines, $newLine = TRUE ){
-		if( $this->flags & self::FLAG_VERY_VERBOSE )												//  very verbose mode is on
-			$this->outVerbose( $lines, $newLine );
+		return $this->output->outVeryVerbose( $lines, $newLine );
 	}
 
 	public function runCommand( $command, $arguments = array(), $addOptions = array(), $ignoreOptions = array() ){
