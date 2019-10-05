@@ -1,3 +1,8 @@
+v0.9.8.9
+- Split module library for available and installed modules.
+- Extract output methods from client to own tool class.
+- Add new command database-keep to remove outdated database dumps.
+
 v0.9.8.8
 - Support command specific argument options.
 - Add shortcut to client output methods in all command classes (via abstract command class).

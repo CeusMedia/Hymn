@@ -93,6 +93,12 @@ Having a valid Hymn config file, you execute these commands:
 	- database-clear [-dfqv]                      Drop database tables
 	- database-dump [PATH]                        Export database to SQL file
 	- database-load [PATH|FILE]                   Import (specific or latest) SQL file
+	- database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
+
+	Keep Rules:
+	--daily=[DAYS]             Number of daily dumps to keep
+	--monthly=[MONTHS]         Number of monthly dumps to keep
+	--yearly=[YEARS]           Number of yearly dumps to keep
 
 #### 5. App Stamp Management
 ------------------------------------------------------------------------------
