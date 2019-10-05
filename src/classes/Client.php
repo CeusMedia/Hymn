@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.8.9a';
+	static public $version			= '0.9.8.9b';
 
 	public $arguments;
 
@@ -191,7 +191,6 @@ class Hymn_Client{
 		$this->database		= new Hymn_Tool_Database_PDO( $this );
 		$this->locale		= new Hymn_Tool_Locale( Hymn_Client::$language );
 		$this->words		= $this->locale->loadWords( 'client' );
-		$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
 
 		if( self::$outputMethod !== 'print' )
 			ob_start();
@@ -220,6 +219,7 @@ class Hymn_Client{
 		if( $this->arguments->getOption( 'interactive' ) === 'no' )
 			$this->flags	|= self::FLAG_NO_INTERACTION;
 		self::$fileName		= $this->arguments->getOption( 'file' );
+		$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
 
 		try{
 			if( getEnv( 'HTTP_HOST' ) )

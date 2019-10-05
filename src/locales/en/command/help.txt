@@ -96,6 +96,12 @@ B4. App Database Management
 - database-clear [-dfqv]                      Drop database tables
 - database-dump [PATH]                        Export database to SQL file
 - database-load [PATH|FILE]                   Import (specific or latest) SQL file
+- database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
+
+Keep Rules:
+--daily=[DAYS]             Number of daily dumps to keep
+--monthly=[MONTHS]         Number of monthly dumps to keep
+--yearly=[YEARS]           Number of yearly dumps to keep
 
 B5. App Module Management: Stamps
 ------------------------------------------------------------------------------

@@ -85,8 +85,8 @@ class Hymn_Tool_CLI_Output{
 		}
 		foreach( $lines as $line ){																	//  iterate output lines
 			print( $line );																			//  display each line
-			if( $newLine )																				//  output should be closed by newline character
-				print( PHP_EOL );																		//  print newline character
+			if( $newLine )																			//  output should be closed by newline character
+				print( PHP_EOL );																	//  print newline character
 		}
 	}
 
@@ -137,7 +137,7 @@ class Hymn_Tool_CLI_Output{
 	 */
 	public function outVerbose( $lines, $newLine = TRUE ){
 		if( $this->flags->verbose )																	//  verbose mode is on
-			if( !( $this->flags->quiet ) )															//  quiet mode is off
+			if( !$this->flags->quiet )																//  quiet mode is off
 				$this->out( $lines, $newLine );
 	}
 
