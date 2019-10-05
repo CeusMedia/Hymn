@@ -75,7 +75,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 
 		/*  --  LIST ALL FILES  --  */
 		$index	= array();
-		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/';
+		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
 		foreach( new DirectoryIterator( $pathName ) as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
 				continue;
