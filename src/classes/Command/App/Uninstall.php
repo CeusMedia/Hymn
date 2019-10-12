@@ -78,7 +78,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		else{
 			$answer = TRUE;
 			if( !$this->flags->force ){
-				$question	= new Nymn_Tool_Question(
+				$question	= new Hymn_Tool_CLI_Question(
 					$this->client,
 					"Do you really want to uninstall ALL installed modules?",
 					'boolean',
