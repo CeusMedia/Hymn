@@ -186,7 +186,7 @@ class Hymn_Module_Files{
 						break;
 					case 'scripts':
 						if( isset( $file->source ) && in_array( $file->source, $skipSources ) )
-							continue;
+							continue 2;
 						$path	= $this->config->paths->scripts;
 						$source	= $pathSource.'js/'.$file->file;
 						$target	= $pathTarget.$path.$file->file;
@@ -196,7 +196,7 @@ class Hymn_Module_Files{
 						if( !isset( $file->source ) )
 							$file->source	= 'theme';
 						if( in_array( $file->source, $skipSources ) )
-							continue;
+							continue 2;
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
@@ -225,7 +225,7 @@ class Hymn_Module_Files{
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
-								continue;
+								continue 2;
 							case 'common':
 								$path	= $this->config->paths->themes.'common/img/';
 								break;
