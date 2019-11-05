@@ -200,7 +200,7 @@ class Hymn_Module_Files{
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
-								continue 2;
+								break 2;
 							case 'common':
 								$theme	= "common";
 								break;
@@ -225,7 +225,7 @@ class Hymn_Module_Files{
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
-								continue 2;
+								break 2;
 							case 'common':
 								$path	= $this->config->paths->themes.'common/img/';
 								break;
