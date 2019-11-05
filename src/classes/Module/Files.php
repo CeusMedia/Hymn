@@ -200,7 +200,7 @@ class Hymn_Module_Files{
 						switch( $file->source ){
 							case 'styles-lib':
 							case 'scripts-lib':
-								continue;
+								continue 2;
 							case 'common':
 								$theme	= "common";
 								break;
