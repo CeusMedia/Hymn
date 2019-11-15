@@ -100,6 +100,10 @@ class Hymn_Module_Library{
 		return $this->installed->has( $moduleId );
 	}
 
+	public function isActiveShelf( $shelfId ){
+		return array_key_exists( $shelfId, $this->getActiveShelves() );
+	}
+
 	public function isShelf( $shelfId ){
 		return array_key_exists( $shelfId, $this->getShelves() );
 	}

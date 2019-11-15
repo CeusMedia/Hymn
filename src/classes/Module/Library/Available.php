@@ -20,10 +20,6 @@ class Hymn_Module_Library_Available{
 		ksort( $this->shelves );
 	}
 
-	public function getActiveShelves( $withModules = FALSE ){
-		return $this->getShelves( array( 'active' => TRUE ), $withModules );
-	}
-
 	public function get( $moduleId, $shelfId = NULL, $strict = TRUE ){
 		$this->loadModulesInShelves();
 		if( $shelfId )
@@ -35,6 +31,10 @@ class Hymn_Module_Library_Available{
 		if( $strict )
 			throw new Exception( 'Invalid module ID: '.$moduleId );
 		return NULL;
+	}
+
+	public function getActiveShelves( $withModules = FALSE ){
+		return $this->getShelves( array( 'active' => TRUE ), $withModules );
 	}
 
 	public function getAll( $shelfId = NULL ){
@@ -67,7 +67,7 @@ class Hymn_Module_Library_Available{
 
 	public function getDefaultShelf(){
 		foreach( $this->shelves as $shelfId => $shelf )
-			if( $shelf->default )
+			if( $shelf->active && $shelf->default )
 				return $shelfId;
 		throw new RuntimeException( 'No default source available' );
 	}
@@ -146,6 +146,23 @@ class Hymn_Module_Library_Available{
 
 	//  --  PROTECTED  --  //
 
+	protected function listModulesInPath( $path = "" ){
+//		if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
+//			return $this->listModulesAvailable;									//  @todo realize shelves in cache
+		$list		= array();
+		$iterator	= new RecursiveDirectoryIterator( $path );
+		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
+		foreach( $index as $entry ){
+			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
+				continue;
+			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
+			$module	= $this->readModule( $path, $key );
+			$list[$key]	= $module;
+		}
+//		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
+		return $list;
+	}
+
 	protected function loadModulesInShelves( $force = FALSE ){
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
@@ -162,22 +179,5 @@ class Hymn_Module_Library_Available{
 			}
 		}
 		ksort( $this->modules );																	//  sort general module map by source IDs
-	}
-
-	protected function listModulesInPath( $path = "" ){
-//		if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
-//			return $this->listModulesAvailable;									//  @todo realize shelves in cache
-		$list		= array();
-		$iterator	= new RecursiveDirectoryIterator( $path );
-		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
-		foreach( $index as $entry ){
-			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
-				continue;
-			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
-			$module	= $this->readModule( $path, $key );
-			$list[$key]	= $module;
-		}
-//		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
-		return $list;
 	}
 }

@@ -57,21 +57,26 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleIds			= $this->client->arguments->getArguments();
+		$defaultShelfId		= $library->getDefaultShelf();
+		$activeShelfIdList	= $library->getActiveShelves();
+		$listInstalled		= $library->listInstalledModules();
+
 		if( $moduleIds ){
-			foreach( $moduleIds as $moduleId )
-				$relation->addModule( $library->getAvailableModule( $moduleId ) );
+			foreach( $moduleIds as $moduleId ){
+				$sourceId	= $this->detectModuleSource( $moduleId );
+				$module		= $library->getAvailableModule( $moduleId, $sourceId );
+				if( $module->isActive )
+					$relation->addModule( $module );
+			}
 		}
 		else{
 			foreach( $config->modules as $moduleId => $moduleConfig ){
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
-				$sourceId	= NULL;
-				if( !empty( $moduleConfig->source ) )
-					$sourceId = $moduleConfig->source;
-				$module			= $library->getAvailableModule( $moduleId, $sourceId );
-				if( !$module->isActive )
-					continue;
-				$relation->addModule( $module );
+				$sourceId	= $this->detectModuleSource( $moduleId );
+				$module		= $library->getAvailableModule( $moduleId, $sourceId );
+				if( $module->isActive )
+					$relation->addModule( $module );
 			}
 		}
 
@@ -87,43 +92,28 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id );
 //			$installMode	= $this->client->getModuleInstallMode( $module->id );
-			$listInstalled	= $library->listInstalledModules();
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
 			$isCalledModule	= $moduleId && $moduleId == $module->id;
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
 			if( $isInstalled && !$isForced ){
-				if( !$this->flags->quiet )
+				if( !$this->flags->quiet ){
 					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
+					continue;
+				}
 			}
-			else{
+			$sourceId	= $this->detectModuleSource( $module->id );
+			if( $sourceId ){
+				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
 				if( !$this->flags->quiet )
 					$this->client->out( sprintf(
 						"%sInstalling module '%s' (from %s) version %s as %s ...",
 						$this->flags->dry ? 'Dry: ' : '',
 						$module->id,
-						$module->sourceId,
+						$sourceId,
 						$module->version,
 						$installType
 					) );
-				$defaultShelfId	= $library->getDefaultShelf();
-				$selfModules	= array();
-				foreach( array_keys( $library->getShelves() ) as $shelfId  ){
-					$shelfModule	= $library->getAvailableModule( $module->id, $shelfId, FALSE );
-					if( $shelfModule )
-						$selfModules[$shelfId]	= $shelfModule;
-				}
-
-				if( count( $selfModules ) > 1 ){													//  module exists in several shelfs
-					$installShelfId	= $this->client->getModuleInstallShelf(							//  get shelf ID to install from
-						$module->id,																//  ID of module to install
-						array_keys( $selfModules ),													//  list shelf IDs having requested module
-						$defaultShelfId																//  default shelf ID (first active added shelf)
-					);
-					$module	= $selfModules[$installShelfId];										//  get module from shelf
-				}
-
-				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				$installer->install( $module, $installType );
+				$installer->install( $module, $installType, $sourceId );
 			}
 		}
 
@@ -134,5 +124,26 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$installer->executeSql( file_get_contents( $import ) );							//  broken on this point since extraction to Hymn_Module_SQL
 			}
 		}*/
+	}
+
+	protected function detectModuleSource( $moduleId ){
+		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
+		$defaultId	= $library->getDefaultShelf();
+		if( !empty( $config->modules->{$moduleId}->source ) ){
+			$sourceByHymn	= trim( $config->modules->{$moduleId}->source );
+			if( $library->isAvailableModuleInShelf( $moduleId, $sourceByHymn, FALSE ) )
+				return $sourceByHymn;
+		}
+/*		if( $library->isInstalledModule( $moduleId ) ){
+		}*/
+		if( $defaultId ){
+			if( $library->isAvailableModuleInShelf( $moduleId, $defaultId, FALSE ) )
+				return $defaultId;
+		}
+		$moduleSourceIds	= array_keys( $library->getAvailableModuleShelves( $moduleId ) );
+		if( $moduleSourceIds )
+			return $moduleSourceIds[0];
+		return NULL;
 	}
 }
