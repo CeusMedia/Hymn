@@ -266,7 +266,7 @@ class Hymn_Module_Files{
 			return TRUE;
 		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
 		foreach( array_values( $fileMap ) as $target ){												//  iterate target file list
-			if( !file_exists( $target ) )
+			if( !file_exists( $target ) && !is_link( $target ) )
 				continue;
 			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable
 				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
