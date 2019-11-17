@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.8.9d';
+	static public $version			= '0.9.8.9';
 
 	public $arguments;
 
@@ -438,7 +438,7 @@ class Hymn_Client{
 			}
 		}
 		foreach( $modules as $moduleId => $configPrefix ){											//  iterate given or found resource module registrations
-			$this->outVeryVerbose( 'Applying database config to module '.$moduleId.' ...' );		//  tell about this in very verbose mode
+		//	$this->outVeryVerbose( 'Applying database config to module '.$moduleId.' ...' );		//  tell about this in very verbose mode
 			if( !isset( $this->config->modules->{$moduleId} ) )										//  registered module is not installed
 				$this->config->modules->{$moduleId}	= (object) array();								//  create an empty module definition in loaded module list
 			$module	= $this->config->modules->{$moduleId};											//  shortcut module definition

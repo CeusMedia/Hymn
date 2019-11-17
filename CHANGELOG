@@ -2,6 +2,7 @@ v0.9.8.9
 - Split module library for available and installed modules.
 - Extract output methods from client to own tool class.
 - Add new command database-keep to remove outdated database dumps.
+- Remove symlinks on module uninstall even if target is not existing anymore.
 
 v0.9.8.8
 - Support command specific argument options.
