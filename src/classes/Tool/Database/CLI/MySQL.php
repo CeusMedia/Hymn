@@ -60,8 +60,9 @@ class Hymn_Tool_Database_CLI_MySQL{
 			$optionsFile->create( $tempFilePath, FALSE );
 			$line	= vsprintf( '%s %s %s', array(													//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
 				join( ' ', array(
-					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
-					'--result-file='.escapeshellarg( $fileName ),
+					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),						//  configured host as escaped shell arg
+					'--result-file='.escapeshellarg( $fileName ),									//  target file
+					'--skip-extended-insert',														//  each row in one insert line
 				) ),
 				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
 				$tables
