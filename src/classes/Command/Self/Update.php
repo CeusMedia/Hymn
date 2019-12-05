@@ -37,11 +37,13 @@
  */
 class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
 
+	protected $pharDownloadUrl	= 'https://github.com/CeusMedia/Hymn/raw/<VERSION>/hymn.phar';
+
 	protected function downloadFile( $url, $file ){
-		if( !( $fpSave = @fopen( $file, "wb" ) ) )													//  try to open target file for writing
-			throw new RuntimeException( "Permission denied to change ".$file );						//  otherwise quit with exception
-		if( !( $fpLoad = fopen( $url, "rb" ) ) )													//  try to open source URL for reading
-			throw new RuntimeException( "Failed to open stream to URL" );							//  otherwise quit with exception
+		if( !( $fpSave = @fopen( $file, 'wb' ) ) )													//  try to open target file for writing
+			throw new RuntimeException( 'Permission denied to change '.$file );						//  otherwise quit with exception
+		if( !( $fpLoad = fopen( $url, 'rb' ) ) )													//  try to open source URL for reading
+			throw new RuntimeException( 'Failed to open stream to URL' );							//  otherwise quit with exception
 		while( !feof( $fpLoad ) )																	//  read source until end of file
 			fwrite( $fpSave, fread( $fpLoad, 4096 ) );												//  copy 4K block from source to target
 		fclose( $fpSave );																			//  close target file
@@ -49,7 +51,7 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 	}
 
 	protected function getHymnFilePath(){
-		exec( "whereis hymn", $output/*, $b*/ );
+		exec( 'whereis hymn', $output/*, $b*/ );
 		if( is_array( $output ) && count( $output ) ){
 			foreach( $output as $line ){
 				if( preg_match( '/^hymn: (.+)$/', $line ) ){
@@ -62,21 +64,30 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: dry, quiet, verbose
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
-		$urlHymn	= "https://github.com/CeusMedia/Hymn/raw/master/hymn.phar";
+		$version	= $this->client->arguments->getArgument( 0 );
+		$version	= strlen( trim( $version ) ) ? $version : 'master';
+		if( !$version === 'master' && !preg_match( '/^[0-9.]+$/', $version ) )
+			throw new InvalidArgumentException( 'No valid version given: '.$version );
+		$urlHymn	= str_replace( '<VERSION>', $version, $this->pharDownloadUrl );
 		$pathFile	= $this->getHymnFilePath();
 		if( !$pathFile )
-			throw new Exception( "Hymn not found" );
-		$this->client->out( "Download: ".$urlHymn );
-		$this->downloadFile( $urlHymn, $pathFile );
-		$this->client->out( "Saved to: ".$pathFile );
-		$this->client->out( "Version installed: ", FALSE );
-		passthru( "hymn version" );
+			throw new Exception( 'Hymn not found' );
+		if( !$this->flags->quiet ){
+			$this->client->out( 'Version installed: '.Hymn_Client::$version );
+			$this->client->out( 'Download: '.$urlHymn );
+		}
+		if( !$this->flags->dry ){
+			$this->downloadFile( $urlHymn, $pathFile );
+			$this->client->outVerbose( 'Saved to: '.$pathFile );
+		}
+		if( !$this->flags->quiet ){
+			$this->client->out( 'Version installed: ', FALSE );
+				passthru( 'hymn version' );
+		}
 	}
 }

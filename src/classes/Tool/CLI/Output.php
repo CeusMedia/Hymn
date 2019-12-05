@@ -79,7 +79,7 @@ class Hymn_Tool_CLI_Output{
 				throw new InvalidArgumentException( sprintf(										//  quit with exception
 					'Argument must be a list, string or numeric (got: %s)',							//  ... complain about invalid argument
 					gettype( $lines )																//  ... display argument type
-				) );
+				) ); 	
 			}
 			$lines	= array( $lines );																//  collect output content as list
 		}

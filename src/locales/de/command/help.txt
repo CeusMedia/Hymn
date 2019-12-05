@@ -136,7 +136,7 @@ C1. Self Management
 ------------------------------------------------------------------------------
 - help                                        Show this help screen
 - version                                     Show current hymn version
-- self-update                                 Replace global hymn installation by latest download
+- self-update [-dv] [VERSION]                 Replace hymn binary by master or given version
 - test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
 
 C2. Stamp Management
