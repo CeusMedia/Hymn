@@ -57,16 +57,16 @@ class Hymn_Tool_Database_PDO{
 			$this->client->outError( 'PDO driver "'.$this->dba->driver.'" is not available', Hymn_Client::EXIT_ON_SETUP );
 		}
 		while( empty( $this->dba->name ) ){
-			$this->dba->name		= $this->client->ask( 'Database Name:' );
+			$this->dba->name		= $this->ask( 'Database Name:' );
 		}
 		while( empty( $this->dba->username ) ){
-			$this->dba->username	= $this->client->ask( 'Database Username:' );
+			$this->dba->username	= $this->ask( 'Database Username:' );
 		}
 		while( empty( $this->dba->password ) ){
-			$this->dba->password	= $this->client->ask( 'Database Password:' );
+			$this->dba->password	= $this->ask( 'Database Password:' );
 		}
 		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= $this->client->ask( 'Table Prefix:' );
+			$this->dba->prefix		= $this->ask( 'Table Prefix:' );
 		}
 
 		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
@@ -170,6 +170,18 @@ class Hymn_Tool_Database_PDO{
 	}
 
 	/*  --  PROTECTED  --  */
+
+	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+		$question	= new Hymn_Tool_CLI_Question(
+			$this->client,
+			$message,
+			$type,
+			$default,
+			$options,
+			$break
+		);
+		return $question->ask();
+	}
 
 	/**
 	 *	Prepare database connection by setting up database access configuration.
