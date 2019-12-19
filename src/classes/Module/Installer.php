@@ -218,7 +218,7 @@ class Hymn_Module_Installer{
 		}
 		catch( Exception $e ){
 			$message	= "Uninstallation of module '%s' failed.\ņ%s";
-			$message	= sprintf( $message, $localModule->id, $e->getMessage() );
+			$message	= sprintf( $message, $module->id, $e->getMessage() );
 			throw new RuntimeException( $message, 0, $e );
 		}
 	}
