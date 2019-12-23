@@ -111,7 +111,7 @@ class Hymn_Module_Library{
 	public function listInstalledModules( $shelfId = NULL ){
 //		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize shelves in cache
 //			return $this->listModulesInstalled;									//  @todo realize shelves in cache
-		$list	= $this->installed->getAll();
+		$list	= $this->installed->getAll( $shelfId );
 //		$this->listModulesInstalled	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
