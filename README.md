@@ -114,8 +114,8 @@ Having a valid Hymn config file, you execute these commands:
 
 	- help                           Show this help screen
 	- version                        Show current hymn version
-	- self-update                    Replace global hymn installation by latest download
-	- reflect-options                Show parsable arguments and options
+	- self-update [-dv] [VERSION]    Replace hymn binary by master or given version
+	- test-syntax [-rqv] [PATH]      Test syntax of Hymn PHP classes
 
 #### 2. Stamp Management
 

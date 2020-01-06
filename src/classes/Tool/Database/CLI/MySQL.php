@@ -81,7 +81,6 @@ class Hymn_Tool_Database_CLI_MySQL{
 				$tables,																			//  collected found tables
 			) );
 		}
-		$this->client->out( $line );
 		$result	 = $this->execCommandLine( $line, 'mysqldump' );
 		if( $this->useTempOptionsFile )
 			$optionsFile->remove();

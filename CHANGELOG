@@ -1,3 +1,9 @@
+v0.9.9.0
+- Support self upgrade/downgrade to given version.
+- Add hymn as binary in package definition.
+- Fix bug in list of installed modules: shelf ID is ignored.
+- Fix bug in module installer.
+
 v0.9.8.9
 - Split module library for available and installed modules.
 - Extract output methods from client to own tool class.
