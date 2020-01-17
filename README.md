@@ -13,6 +13,36 @@ hymn - Hydrogen Management
 
 Console tool for installing Hydrogen applications.
 
+## Installation
+
+### PHAR download
+
+````
+sudo curl -LsS https://github.com/CeusMedia/Hymn/raw/master/hymn.phar -o /usr/local/bin/hymn
+sudo chmod a+x /usr/local/bin/hymn
+````
+
+### Checkout
+````
+git checkout https://github.com/CeusMedia/Hymn.git
+sudo mv Hymn/hymn.phar /usr/local/bin/hymn
+rm -Rf Hymn
+````
+
+Afterwards, the <code>hymn</code> command is available systemwide.
+Check the installation by displaying the current version from any folder you like.
+````
+> hymn version
+0.9.9.0 (en)
+````
+
+## Upgrade
+
+Run <code>hymn self-update</code> to install the latest version.
+You can install any tagged version by providing the desired version, like <code>hymn self-update 0.9.9.0</code>.
+
+# Usage
+
 ## Keywords
 
 	- Project = Blueprint for an App installation configured by Hymn file
