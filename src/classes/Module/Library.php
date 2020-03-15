@@ -61,7 +61,7 @@ class Hymn_Module_Library{
 	}
 
 	public function getAvailableModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
-		return $this->available->get( $moduleId, $shelfId = NULL, $strict = TRUE );
+		return $this->available->get( $moduleId, $shelfId, $strict );
 	}
 
 	public function getAvailableModuleFromShelf( $moduleId, $shelfId, $strict = TRUE ){

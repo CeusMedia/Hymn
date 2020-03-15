@@ -46,9 +46,11 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@return		void
 	 */
 	public function run(){
-		$shelves		= $this->getLibrary()->getActiveShelves();
+		$library	= $this->getLibrary();
+		$shelves	= $library->getActiveShelves();
 		$this->client->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
 		foreach( $shelves as $shelfId => $shelf ){
+			$modules	= $library->getAvailableModules( $shelfId );
 			$this->client->out( array(
 				'* '.$shelfId.':',
 				'  - Title:   '.$shelf->title,
@@ -56,7 +58,12 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 				'  - Path:    '.$shelf->path,
 				'  - Active:  '.( $shelf->active ? 'yes' : 'no' ),
 				'  - Default: '.( $shelf->default ? 'yes' : 'no' ),
+				'  - Modules: '.count( $modules ),
 			) );
+			if( $this->flags->verbose ){
+				foreach( $modules as $moduleId => $module )
+					$this->client->out( '    - '.$moduleId.' ('.$module->version.')' );
+			}
 		}
 	}
 }

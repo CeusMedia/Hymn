@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.9.0';
+	static public $version			= '0.9.9.1a';
 
 	public $arguments;
 
@@ -312,9 +312,9 @@ class Hymn_Client{
 
 		$modules	= $this->config->modules;														//  shortcut configured modules
 		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
-			if( isset( $modules->$moduleId->{'source'} ) )											//  module has configured source shelf
-				if( in_array( $modules->$moduleId->{'source'}, $availableShelfIds ) )				//  configured shelf source has requested module
-					return $modules->$moduleId->{'source'};											//  return configured source shelf
+			if( isset( $modules->$moduleId->source ) )											//  module has configured source shelf
+				if( in_array( $modules->$moduleId->source, $availableShelfIds ) )				//  configured shelf source has requested module
+					return $modules->$moduleId->source;											//  return configured source shelf
 
 		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )								//  default shelf has requested module
 			return $defaultInstallShelfId;															//  return default shelf

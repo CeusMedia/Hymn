@@ -58,12 +58,14 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 
 		$moduleIds			= $this->client->arguments->getArguments();
 		$defaultShelfId		= $library->getDefaultShelf();
-		$activeShelfIdList	= $library->getActiveShelves();
+		$activeShelfList	= $library->getActiveShelves();
+		$activeShelfIds		= array_keys( $activeShelfList );
 		$listInstalled		= $library->listInstalledModules();
 
 		if( $moduleIds ){
 			foreach( $moduleIds as $moduleId ){
 				$sourceId	= $this->detectModuleSource( $moduleId );
+				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )
 					$relation->addModule( $module );
@@ -74,6 +76,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
 				$sourceId	= $this->detectModuleSource( $moduleId );
+				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )
 					$relation->addModule( $module );
@@ -101,20 +104,22 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					continue;
 				}
 			}
-			$sourceId	= $this->detectModuleSource( $module->id );
-			if( $sourceId ){
-				$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-				if( !$this->flags->quiet )
-					$this->client->out( sprintf(
-						"%sInstalling module '%s' (from %s) version %s as %s ...",
-						$this->flags->dry ? 'Dry: ' : '',
-						$module->id,
-						$sourceId,
-						$module->version,
-						$installType
-					) );
-				$installer->install( $module, $installType, $sourceId );
+//			$sourceId	= $this->detectModuleSource( $module->id );
+			if( empty( $module->sourceId ) ){
+				$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );
+				continue;
 			}
+			$installType	= $this->client->getModuleInstallType( $module->id, $installType );
+			if( !$this->flags->quiet )
+				$this->client->out( sprintf(
+					"%sInstalling module '%s' (from %s) version %s as %s ...",
+					$this->flags->dry ? 'Dry: ' : '',
+					$module->id,
+					$module->sourceId,
+					$module->version,
+					$installType
+				) );
+			$installer->install( $module, $installType, $module->sourceId );
 		}
 
 /*		//  todo: custom install mode: define SQL to import in hymn file
