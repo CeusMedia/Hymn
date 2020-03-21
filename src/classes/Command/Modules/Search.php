@@ -74,33 +74,41 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-		$this->client->out( sprintf( $msgTotal, count( $modulesFound ), $shelfId ) );
+		$this->out( sprintf( $msgTotal, count( $modulesFound ), $shelfId ) );
 		foreach( $modulesFound as $moduleId => $module ){
 			if( $this->flags->verbose ){
 				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
-				$this->client->out( $msg );
-				if( isset( $modulesInstalled[$module->id] ) ){
-					$this->client->out( ' - Title:       '.$module->description );
-					$moduleInstalled	= $modulesInstalled[$module->id];
-					$this->client->out( ' - Installed:' );
-					$this->client->out( '   - Version: '.$moduleInstalled->version );
-					$this->client->out( '   - Source: '.$moduleInstalled->installSource );
-					if( $this->flags->veryVerbose ){
-						$this->client->out( ' - Description: '.$module->description );
-						$moduleInfo	= new Hymn_Module_Info( $this->client );
-						$moduleInfo->showModuleVersions( $moduleInstalled );
-						$moduleInfo->showModuleFiles( $moduleInstalled );
-						$moduleInfo->showModuleConfig( $moduleInstalled );
-						$moduleInfo->showModuleRelations( $library, $moduleInstalled );
-						$moduleInfo->showModuleHook( $moduleInstalled );
-						$this->client->out();
-					}
+				$this->out( $msg );
+				$this->out( ' - Title:       '.$module->description );
+				$moduleResource	= NULL;
+				if( isset( $modulesAvailable[$module->id] ) ){
+					$moduleResource	= $modulesAvailable[$module->id];
+					$this->out( ' - Available:' );
+					$this->out( '   - Version:   '.$moduleResource->version );
+					$this->out( '   - Source:    '.$moduleResource->sourceId );
 				}
-				$this->client->out();
+				if( isset( $modulesInstalled[$module->id] ) ){
+					$moduleResource	= $modulesInstalled[$module->id];
+					$this->out( ' - Installed:' );
+					$this->out( '   - Version:   '.$moduleResource->version );
+					$this->out( '   - Source:    '.$moduleResource->installSource );
+				}
+				if( $moduleResource ){
+					if( $this->flags->veryVerbose ){
+						$this->out( ' - Description: '.$moduleResource->description );
+						$moduleInfo	= new Hymn_Module_Info( $this->client );
+						$moduleInfo->showModuleVersions( $moduleResource );
+						$moduleInfo->showModuleFiles( $moduleResource );
+						$moduleInfo->showModuleConfig( $moduleResource );
+						$moduleInfo->showModuleRelations( $library, $moduleResource );
+						$moduleInfo->showModuleHook( $moduleResource );
+					}
+					$this->out( '' );
+				}
 			}
 			else{
 				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version, $module->sourceId );
-				$this->client->out( $msg );
+				$this->out( $msg );
 			}
 		}
 	}

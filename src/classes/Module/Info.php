@@ -112,10 +112,15 @@ class Hymn_Module_Info{
 	}
 
 	public function showModuleRelations( Hymn_Module_Library $library, $module ){
-		$module->relations->neededBy	= array();
+		$module->relations->requiredBy	= array();
 		foreach( $library->listInstalledModules() as $installedModule )
 			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
-				$module->relations->neededBy[$installedModule->id]	= $installedModule;
+				$module->relations->requiredBy[$installedModule->id]	= $installedModule;
+
+		$module->relations->neededBy	= array();
+		foreach( $library->getAvailableModules() as $availableModule )
+			if( array_key_exists( $module->id, $availableModule->relations->needs ) )
+				$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( (array) $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
@@ -128,8 +133,13 @@ class Hymn_Module_Info{
 				$this->client->out( '    - '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
-			$this->client->out( ' - Modules related: ' );
+			$this->client->out( ' - Modules needing: ' );
 			foreach( $module->relations->neededBy as $moduleId => $relation )
+				$this->client->out( '    - '.$moduleId );
+		}
+		if( count( $module->relations->requiredBy ) ){
+			$this->client->out( ' - Modules requiring: ' );
+			foreach( $module->relations->requiredBy as $moduleId => $relation )
 				$this->client->out( '    - '.$moduleId );
 		}
 	}
