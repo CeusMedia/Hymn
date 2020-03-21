@@ -39,44 +39,69 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose?
-	 *	@todo		implement missing flags
+	 *	Implements flags: verbose, veryVerbose
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(){
 		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
 		$term		= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		$msgTotal		= '%d module(s) found in all module sources:';
-		$msgEntry		= '- %s (%s)';
-		$foundModules	= array();
+		$msgEntry		= '%s (%s)';
+		$modulesFound	= array();
 
 		if( $shelfId ){
 			$msgTotal	= '%d module(s) found in module source "%s":';
 			$msgEntry	= '- %s (%s)';
-			$availableModules	= $this->getAvailableModulesMap( $shelfId );
-			foreach( $availableModules as $moduleId => $module ){
+			$modulesAvailable	= $this->getAvailableModulesMap( $shelfId );
+			$modulesInstalled	= $library->listInstalledModules( $shelfId );
+			foreach( $modulesAvailable as $moduleId => $module ){
 				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
-					$foundModules[$moduleId]	= $module;
+					$modulesFound[$moduleId]	= $module;
 				}
 			}
 		}
 		else{
-			$availableModules	= $this->getAvailableModulesMap();
-			foreach( $availableModules as $moduleId => $module ){
+			$modulesAvailable	= $this->getAvailableModulesMap();
+			$modulesInstalled	= $library->listInstalledModules();
+			foreach( $modulesAvailable as $moduleId => $module ){
 				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
-					$foundModules[$moduleId]	= $module;
+					$modulesFound[$moduleId]	= $module;
 				}
 			}
 		}
-		$this->client->out( sprintf( $msgTotal, count( $foundModules ), $shelfId ) );
-		foreach( $foundModules as $moduleId => $module ){
-			$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
-			$this->client->out( $msg );
+		$this->client->out( sprintf( $msgTotal, count( $modulesFound ), $shelfId ) );
+		foreach( $modulesFound as $moduleId => $module ){
+			if( $this->flags->verbose ){
+				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
+				$this->client->out( $msg );
+				if( isset( $modulesInstalled[$module->id] ) ){
+					$this->client->out( ' - Title:       '.$module->description );
+					$moduleInstalled	= $modulesInstalled[$module->id];
+					$this->client->out( ' - Installed:' );
+					$this->client->out( '   - Version: '.$moduleInstalled->version );
+					$this->client->out( '   - Source: '.$moduleInstalled->installSource );
+					if( $this->flags->veryVerbose ){
+						$this->client->out( ' - Description: '.$module->description );
+						$moduleInfo	= new Hymn_Module_Info( $this->client );
+						$moduleInfo->showModuleVersions( $moduleInstalled );
+						$moduleInfo->showModuleFiles( $moduleInstalled );
+						$moduleInfo->showModuleConfig( $moduleInstalled );
+						$moduleInfo->showModuleRelations( $library, $moduleInstalled );
+						$moduleInfo->showModuleHook( $moduleInstalled );
+						$this->client->out();
+					}
+				}
+				$this->client->out();
+			}
+			else{
+				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version, $module->sourceId );
+				$this->client->out( $msg );
+			}
 		}
 	}
 }

@@ -47,6 +47,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run(){
 		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
 		$moduleId	= $this->client->arguments->getArgument( 0 );
 		$sourceId	= $this->client->arguments->getArgument( 1 );
 
@@ -55,8 +56,8 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		if( !strlen( trim( $sourceId ) ) )
 			$sourceId	= NULL;
 
-		$modulesAvailable	= $this->getLibrary()->getAvailableModules( $sourceId );
-		$modulesInstalled	= $this->getLibrary()->listInstalledModules( $sourceId );							//  get list of installed modules
+		$modulesAvailable	= $library->getAvailableModules( $sourceId );
+		$modulesInstalled	= $library->listInstalledModules( $sourceId );							//  get list of installed modules
 
 		if( !array_key_exists( $moduleId, $modulesAvailable ) ){
 			$message	= 'Module '.$moduleId.' not available.';
@@ -66,7 +67,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		}
 
 		if( !$sourceId ){
-			$shelvesWithModule	= $this->getLibrary()->getAvailableModuleShelves( $moduleId );
+			$shelvesWithModule	= $library->getAvailableModuleShelves( $moduleId );
 			if( count( $shelvesWithModule ) > 1 ){
 				$message	= 'Module exists in several sources: %s. Please specify!';
 				$message	= sprintf( $message, join( ', ', array_keys( $shelvesWithModule ) ) );
@@ -112,7 +113,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$moduleInfo->showModuleVersions( $availableModule );
 			$moduleInfo->showModuleFiles( $availableModule );
 			$moduleInfo->showModuleConfig( $availableModule );
-			$moduleInfo->showModuleRelations( $availableModule );
+			$moduleInfo->showModuleRelations( $library, $availableModule );
 			$moduleInfo->showModuleHook( $availableModule );
 		}
 	}

@@ -111,9 +111,8 @@ class Hymn_Module_Info{
 		}
 	}
 
-	public function showModuleRelations( $module ){
+	public function showModuleRelations( Hymn_Module_Library $library, $module ){
 		$module->relations->neededBy	= array();
-		$library	= $this->getLibrary();
 		foreach( $library->listInstalledModules() as $installedModule )
 			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
 				$module->relations->neededBy[$installedModule->id]	= $installedModule;

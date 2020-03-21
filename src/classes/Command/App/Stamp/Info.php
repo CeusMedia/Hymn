@@ -96,7 +96,7 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 			if( in_array( 'config', $types ) )
 				$moduleInfo->showModuleConfig( $module );
 			if( in_array( 'relations', $types ) )
-				$moduleInfo->showModuleRelations( $module );
+				$moduleInfo->showModuleRelations( $this->getLibrary(), $module );
 			if( in_array( 'hooks', $types ) )
 				$moduleInfo->showModuleHook( $module );
 			$this->client->out( '' );
