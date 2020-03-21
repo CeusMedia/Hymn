@@ -76,7 +76,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			unset( $module->versionInstalled );
 			$data->modules[$module->id]	= $module;
 		}
-		file_put_contents( $fileName, json_encode( $data/*, JSON_PRETTY_PRINT*/ ) );
+		file_put_contents( $fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
 
 		$this->client->out( 'Saved app stamp to '.$fileName.'.' );
 	}
