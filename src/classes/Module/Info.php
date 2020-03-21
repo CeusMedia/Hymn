@@ -113,17 +113,17 @@ class Hymn_Module_Info{
 
 	public function showModuleRelations( $module ){
 		$module->relations->neededBy	= array();
-/*		$library	= $this->getLibrary();
+		$library	= $this->getLibrary();
 		foreach( $library->listInstalledModules() as $installedModule )
 			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
 				$module->relations->neededBy[$installedModule->id]	= $installedModule;
-*/
-		if( count( $module->relations->needs ) ){
+
+		if( count( (array) $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
 			foreach( $module->relations->needs as $moduleId => $relation )
 				$this->client->out( '    - '.$moduleId );
 		}
-		if( count( $module->relations->supports ) ){
+		if( count( (array) $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
 			foreach( $module->relations->supports as $moduleId => $relation )
 				$this->client->out( '    - '.$moduleId );
