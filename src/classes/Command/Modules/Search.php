@@ -79,7 +79,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 			if( $this->flags->verbose ){
 				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
 				$this->out( $msg );
-				$this->out( ' - Title:       '.$module->description );
+				$this->out( ' - Title:       '.$module->title );
 				$moduleResource	= NULL;
 				if( isset( $modulesAvailable[$module->id] ) ){
 					$moduleResource	= $modulesAvailable[$module->id];
