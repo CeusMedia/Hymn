@@ -1,3 +1,11 @@
+v0.9.9.1
+- Dump app stamps as pretty JSON.
+- Extend module info relations by neededBy.
+- Extend modules-search verbosity.
+- Extend module info relations by requiredBy.
+- Create modules graph from installed modules (instead of configured modules).
+- Remove deprecated classes and methods.
+
 v0.9.9.0
 - Support self upgrade/downgrade to given version.
 - Add hymn as binary in package definition.

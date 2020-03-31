@@ -13,7 +13,7 @@ MODS_CM_PROTECTED	= vendor/ceus-media/hydrogen-modules-protected/
 MODS_PROJECT		= modules/
 
 
-install:
+install-complete-and-empty:
 	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
 	@$(MAKE) -s configure
 	@$(MAKE) -s composer-install
@@ -23,7 +23,30 @@ install:
 #	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@hymn database-load
 	@echo "Settings permissions..." && $(MAKE) -s set-permissions
-	@echo "Generating autoloaders..." && $(MAKE) -s composer-update
+	@echo "Generating autoloaders..." && composer dump-autoload
+
+install-files-only:
+	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
+	@$(MAKE) -s configure
+	@$(MAKE) -s composer-install
+	@echo "Installing modules:" && hymn app-install --db=no
+	@cp .htaccess.dist .htaccess
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@echo "Settings permissions..." && $(MAKE) -s set-permissions
+	@echo "Generating autoloaders..." && composer dump-autoload
+
+install-files-and-load-database:
+	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
+	@$(MAKE) -s configure
+	@$(MAKE) -s composer-install
+	@echo "Installing modules:" && hymn app-install --db=no
+	@cp .htaccess.dist .htaccess
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@hymn database-load
+	@echo "Settings permissions..." && $(MAKE) -s set-permissions
+	@echo "Generating autoloaders..." && composer dump-autoload
 
 build:
 	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
@@ -65,6 +88,7 @@ dump-static:
 	@echo "Archiving ..." && tar -czf DOMAIN.TLD.tgz DOMAIN.TLD
 	@echo "Cleaning up ..." && rm -Rf DOMAIN.TLD
 	@echo "Done: DOMAIN.TLD.tgz"
+
 
 ##  PUBLIC: PERMISSIONS
 #------------------------
@@ -151,10 +175,10 @@ detect-application-url:
 detect-sources:
 	@hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC}
 	@test -d ${MODS_CM_PROTECTED} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
-	@test -d ${MODS_PROJECT} && hymn config-set sources.Nagelneu.path $(shell hymn config-get application.uri)modules/ || true
+	@test -d ${MODS_PROJECT} && hymn config-set sources.Project.path $(shell hymn config-get application.uri)modules/ || true
 	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
 	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_CM_PROTECTED} && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
-	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&  hymn config-set sources.Nagelneu.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
+	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&  hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
 
 ask-system-group:
 	@echo
@@ -241,7 +265,6 @@ composer-update-dev:
 	@cd ${PATH_BACKEND} && htpasswd -cBb .htpasswd USER1 PASSWORD1
 	@cd ${PATH_BACKEND} && htpasswd -Bb .htpasswd USER2 PASSWORD2
 
-
 .build-cleanup:
 	@rm -Rf vendor/michelf
 	@rm -Rf vendor/ceus-media/doc-creator
@@ -259,4 +282,3 @@ composer-update-dev:
 	@rm -f composer.* ${PATH_BACKEND}/composer.*
 	@rm -f Makefile ${PATH_BACKEND}/Makefile
 	@rm -f config/doc.xml ${PATH_BACKEND}/config/doc.xml
-
