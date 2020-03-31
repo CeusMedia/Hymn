@@ -147,7 +147,7 @@ class Hymn_Client{
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.9.1b';
+	static public $version			= '0.9.9.1c';
 
 	public $arguments;
 
@@ -263,22 +263,6 @@ class Hymn_Client{
 
 	public function getDatabase(){
 		return $this->database;
-	}
-
-	public function getInput( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
-		$this->outDeprecation( array(
-			'Deprecated - please use Hymn_Command_*::ask instead!',
-			'Method will be removed in v0.9.9.',
-		) );
-		$question	= new Hymn_Tool_CLI_Question(
-			$this->client,
-			$message,
-			$type,
-			$default,
-			$options,
-			$break
-		);
-		return $question->ask();
 	}
 
 	public function getLocale(){
