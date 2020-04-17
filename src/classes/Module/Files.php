@@ -160,6 +160,9 @@ class Hymn_Module_Files{
 	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
 	protected function prepareModuleFileMap( $module ){
+		if( !is_object($module) || !isset( $module->path ) )
+			throw new InvalidArgumentException( 'Given module object is invalid' );
+
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
 		$layoutTheme	= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'common';
