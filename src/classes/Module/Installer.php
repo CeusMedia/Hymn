@@ -75,7 +75,7 @@ class Hymn_Module_Installer{
 
 	/**
 	 *	Configures an installed module by several steps:
-	 *	1. set version attribtes: install type, source and date
+	 *	1. set version attributes: install type, source and date
 	 *	2. look for mandatory but empty config pairs in original module
 	 *	3. get value for these missing pairs from console if also not set in hymn file
 	 *	4. combine values from hymn file and console input and apply to module file
