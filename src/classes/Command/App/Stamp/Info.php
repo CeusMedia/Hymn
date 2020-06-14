@@ -143,6 +143,10 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 		if( !( $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return json_decode( trim( file_get_contents( $fileName ) ) );
+		$data	= json_decode( trim( file_get_contents( $fileName ) ) );
+		foreach( $data->modules as $module ){
+			$module->hooks	= (array) $module->hooks;
+		}
+		return $data;
 	}
 }
