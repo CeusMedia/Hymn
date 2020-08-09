@@ -111,7 +111,8 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		$neededBy	= array();
 		foreach( $listInstalled as $installedModuleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
-				$neededBy[]	= $installedModuleId;
+				if( $installedModule->relations->needs[$moduleId]->type === 'module' )
+					$neededBy[]	= $installedModuleId;
 
 		$module		= $listInstalled[$moduleId];
 		if( $neededBy && !$this->flags->force ) {

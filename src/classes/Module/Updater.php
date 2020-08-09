@@ -238,12 +238,22 @@ class Hymn_Module_Updater{
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 
 			//  --  MODULES TO UNINSTALL
+			$installedModules	= array();
+			$neededModules		= array();
+			foreach( $localModule->relations->needs as $moduleId => $relation )
+				if( $relation->type === 'module' )													//  only if relation is a module
+					$installedModules[$moduleId]	= $relation;
+			foreach( $module->relations->needs as $moduleId => $relation )
+				if( $relation->type === 'module' )													//  only if relation is a module
+					$neededModules[$moduleId]	= $relation;
 			$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
-				array_keys( $localModule->relations->needs ),										//  ... by intersecting old list ...
-				array_keys( $module->relations->needs )												//  ... with new list of needed modules
+				array_keys( $installedModules ),													//  ... by intersecting old list ...
+				array_keys( $neededModules )														//  ... with new list of needed modules
 			);
 			foreach( $moduleIdsToUninstall as $moduleIdToUninstall ){								//  iterate modules to uninstall
 				if( !array_key_exists( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
+					continue;																		//  skip this module
+				if( $moduleIdToUninstall( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
 					continue;																		//  skip this module
 				foreach( $localModules as $localModule ){											//  iterate installed modules
 					if( $localModule->id === $module->id )											//  module to check is module to update
@@ -257,16 +267,18 @@ class Hymn_Module_Updater{
 
 			//  --  MODULES TO INSTALL
 			foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
-				if( !array_key_exists( $neededModuleId, $localModules ) ){							//  related module is not installed
-					if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){				//  related module is not available
-						$message	= 'Module "%s" is needed but not available.';					//  create exception message
-						throw new RuntimeException( sprintf( $message, $neededModuleId ) );			//  throw exception
-					}
-					$relatedModule	= $availableModuleMap[$neededModuleId];							//  get related module from map
-					if( !$this->flags->quiet )														//  quiet mode is off
-						$this->client->out( " - Installing needed module '".$neededModuleId."' ..." );	//  inform about installation of needed module
-					$installer->install( $relatedModule, $installType );							//  install related module
+				if( $relation->type !== 'module' )													//  relation is not a module
+					continue;
+				if( array_key_exists( $neededModuleId, $localModules ) )							//  related module is installed
+					continue;
+				if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){					//  related module is not available
+					$message	= 'Module "%s" is needed but not available.';						//  create exception message
+					throw new RuntimeException( sprintf( $message, $neededModuleId ) );				//  throw exception
 				}
+				$relatedModule	= $availableModuleMap[$neededModuleId];								//  get related module from map
+				if( !$this->flags->quiet )															//  quiet mode is off
+					$this->client->out( " - Installing needed module '".$neededModuleId."' ..." );	//  inform about installation of needed module
+				$installer->install( $relatedModule, $installType );								//  install related module
 			}
 
 			//  --  TRY TO HANDLE FILE AND DATABASE CHANGES

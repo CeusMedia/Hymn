@@ -1,3 +1,7 @@
+v0.9.9.2
+- Support relations to composer packages.
+- Prepare support for versioned relations.
+
 v0.9.9.1
 - Dump app stamps as pretty JSON.
 - Extend module info relations by neededBy.

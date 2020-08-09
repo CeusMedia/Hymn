@@ -115,32 +115,34 @@ class Hymn_Module_Info{
 		$module->relations->requiredBy	= array();
 		foreach( $library->listInstalledModules() as $installedModule )
 			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
-				$module->relations->requiredBy[$installedModule->id]	= $installedModule;
+				if( $installedModule->relations->needs[$moduleId]->type === 'module' )
+					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= array();
 		foreach( $library->getAvailableModules() as $availableModule )
 			if( array_key_exists( $module->id, $availableModule->relations->needs ) )
-				$module->relations->neededBy[$availableModule->id]	= $availableModule;
+				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
+					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( (array) $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
 		if( count( (array) $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
 			foreach( $module->relations->supports as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
 			$this->client->out( ' - Modules needing: ' );
 			foreach( $module->relations->neededBy as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
 		if( count( $module->relations->requiredBy ) ){
 			$this->client->out( ' - Modules requiring: ' );
 			foreach( $module->relations->requiredBy as $moduleId => $relation )
-				$this->client->out( '    - '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
 	}
 

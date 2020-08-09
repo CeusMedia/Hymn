@@ -80,6 +80,8 @@ class Hymn_Module_Graph{
 		);
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
+			if( $relation->type !== 'module' )
+			 	continue;
 			if( $relation->source ){
 				if( !$this->library->isAvailableModuleInShelf( $neededModuleId, $relation->source ) ){
 					$message	= 'Module %s needs module %s from source %s, which is missing.';
@@ -174,8 +176,10 @@ class Hymn_Module_Graph{
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
 			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
-				$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];			//  note outgoing link on this node
-				$this->nodes[$neededModuleId]->in[$id]	= $node->module;							//  note ingoing link on the needed node
+				if( $relation->type === 'module' ){
+					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
+					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
+				}
 			}
 		}
 		$this->status	= self::STATUS_LINKED;

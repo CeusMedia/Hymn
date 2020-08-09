@@ -240,6 +240,7 @@ class Hymn_Module_Reader{
 					'type'		=> $this->getAttribute( $moduleName, 'type' ),
 					'id'		=> (string) $moduleName,
 					'source'	=> $this->getAttribute( $moduleName, 'source' ),
+					'version'	=> $this->getAttribute( $moduleName, 'version' ),
 				);
 			foreach( $xml->relations->supports as $moduleName )
 				$obj->relations->supports[(string) $moduleName]	= (object) array(
@@ -247,6 +248,7 @@ class Hymn_Module_Reader{
 					'type'		=> $this->getAttribute( $moduleName, 'type' ),
 					'id'		=> (string) $moduleName,
 					'source'	=> $this->getAttribute( $moduleName, 'source' ),
+					'version'	=> $this->getAttribute( $moduleName, 'version' ),
 				);
 		}
 	}
