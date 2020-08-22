@@ -253,8 +253,6 @@ class Hymn_Module_Updater{
 			foreach( $moduleIdsToUninstall as $moduleIdToUninstall ){								//  iterate modules to uninstall
 				if( !array_key_exists( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
 					continue;																		//  skip this module
-				if( $moduleIdToUninstall( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
-					continue;																		//  skip this module
 				foreach( $localModules as $localModule ){											//  iterate installed modules
 					if( $localModule->id === $module->id )											//  module to check is module to update
 						continue;																	//  skip this module
