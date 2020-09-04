@@ -154,14 +154,22 @@ class Hymn_Module_Files{
 
 	/**
 	 *	Enlist all module files onto a map of source and target files.
+	 *	Needs given object to be an available module to map between source and target.
+	 *	If not awaiting an available module, an installed module can be given.
+	 *	Mapped source and target paths are identical in this case.
 	 *	@access		protected
 	 *	@param 		object 		$module		Module object
 	 *	@return		array
 	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
-	protected function prepareModuleFileMap( $module ){
-		if( !is_object($module) || !isset( $module->path ) )
+	protected function prepareModuleFileMap( $module, $awaitAvailableModule = TRUE ){
+		if( !is_object($module) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
+		if( !isset( $module->path ) ){
+			if( $awaitAvailableModule )
+				throw new InvalidArgumentException( 'Given module object is an installed module - object of available module needed' );
+			$module->path	= $this->config->application->uri;
+		}
 
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
@@ -201,9 +209,6 @@ class Hymn_Module_Files{
 						if( in_array( $file->source, $skipSources ) )
 							continue 2;
 						switch( $file->source ){
-							case 'styles-lib':
-							case 'scripts-lib':
-								break 2;
 							case 'common':
 								$theme	= "common";
 								break;
@@ -225,10 +230,9 @@ class Hymn_Module_Files{
 						$source	= $pathSource.'img/'.$file->file;
 						if( !isset( $file->source ) )
 							$file->source	= 'images';
+						if( in_array( $file->source, $skipSources ) )
+							continue 2;
 						switch( $file->source ){
-							case 'styles-lib':
-							case 'scripts-lib':
-								break 2;
 							case 'common':
 								$path	= $this->config->paths->themes.'common/img/';
 								break;
@@ -267,7 +271,7 @@ class Hymn_Module_Files{
 	public function removeFiles( $module, $tryMode = FALSE ){
 		if( $this->flags->noFiles )
 			return TRUE;
-		$fileMap	= $this->prepareModuleFileMap( $module );										//  get list of installed module files
+		$fileMap	= $this->prepareModuleFileMap( $module, FALSE );								//  get list of installed module files
 		foreach( array_values( $fileMap ) as $target ){												//  iterate target file list
 			if( !file_exists( $target ) && !is_link( $target ) )
 				continue;

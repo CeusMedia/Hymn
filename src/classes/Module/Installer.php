@@ -206,8 +206,6 @@ class Hymn_Module_Installer{
 			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$pathConfig			= $this->client->getConfigPath();
-
-			$localModule->path	= $appUri;
 			$files->removeFiles( $localModule );												//  remove module files
 			if( !$this->flags->dry ){															//  not a dry run
 				@unlink( $pathConfig.'modules/'.$module->id.'.xml' );							//  remove module configuration file

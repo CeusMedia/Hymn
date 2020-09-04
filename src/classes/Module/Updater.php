@@ -122,25 +122,18 @@ class Hymn_Module_Updater{
 				$configData->type
 			);
 			if( isset( $moduleInstalled->config[$configKey] ) ){
-				$valueCurrent->set(
-					$moduleInstalled->config[$configKey]->value,
-					$moduleInstalled->config[$configKey]->type
-				);
-				$valueCurrentDefault->set(
-					$moduleInstalled->config[$configKey]->default,
-					$moduleInstalled->config[$configKey]->type
-				);
-				$valueCurrentOriginal->set(
-					$moduleInstalled->config[$configKey]->original,
-					$moduleInstalled->config[$configKey]->type
-				);
+				$pair	= $moduleInstalled->config[$configKey];
+				$valueCurrent->setType( $pair->type )->setValue( $pair->value );
+				$valueCurrentDefault->setType( $pair->type )->setValue( $pair->default );
+				$valueCurrentOriginal->setType( $pair->type )->setValue( $pair->original );
 			}
-			if( isset( $hymnModuleConfig->{$configKey} ) )
-				$valueConfig->set( $hymnModuleConfig->{$configKey}, $configData->type );
-
+			if( isset( $hymnModuleConfig->{$configKey} ) ){
+				$valueConfig->setType( $configData->type );
+				$valueConfig->setValue( $hymnModuleConfig->{$configKey} );
+			}
 			$valueSuggest	= $valueCurrentOriginal;
 			if( $valueUpdateModule->hasValue() )
-				if( $valueUpdateModule->get() !== $valueCurrentDefault->get() )
+				if( $valueUpdateModule->getValue() !== $valueCurrentDefault->getValue() )
 					$valueSuggest	= $valueUpdateModule;
 
 			if( $changedOnly && !$valueCurrent->differsFromIfBothSet( $valueSuggest ) )				//  module value is not newer than config
@@ -150,23 +143,23 @@ class Hymn_Module_Updater{
 			$this->client->out( '- Config key "'.$configKey.'":' );
 			$questionDefault	= 'd';
 			$questionAnswers[]	= 'd';
-			$this->client->out( '  - [d] default of module : '.$valueUpdateModule->get( TRUE ) );
+			$this->client->out( '  - [d] default of module : '.$valueUpdateModule->getValue( TRUE ) );
 			if( $valueCurrent->is() ){
 				$questionDefault	= 'k';
 				$questionAnswers[]	= 'k';
-				$this->client->out( '  - [k] keep current: '.$valueCurrent->get( TRUE ) );
+				$this->client->out( '  - [k] keep current: '.$valueCurrent->getValue( TRUE ) );
 			}
 			if( $valueCurrent->differsFromIfBothSet( $valueSuggest ) ){
 				$questionAnswers[]	= 's';
-				$this->client->out( '  - [s] suggested: '.$valueSuggest->get( TRUE ) );
+				$this->client->out( '  - [s] suggested: '.$valueSuggest->getValue( TRUE ) );
 			}
 			if( $valueConfig->differsFromIfBothSet( $valueSuggest ) ){
 				$questionAnswers[]	= 'c';
-				$this->client->out( '  - [c] config value: '.$valueConfig->get( TRUE ) );
+				$this->client->out( '  - [c] config value: '.$valueConfig->getValue( TRUE ) );
 			}
 			if( $valueUpdateModule->differsFromIfBothSet( $valueSuggest ) ){
 				$questionAnswers[]	= 'm';
-				$this->client->out( '  - [m] module value: '.$valueUpdateModule->get( TRUE ) );
+				$this->client->out( '  - [m] module value: '.$valueUpdateModule->getValue( TRUE ) );
 			}
 			$questionAnswers[]	= 'e';
 			$this->client->out( '  - [e] enter value' );
@@ -186,23 +179,23 @@ class Hymn_Module_Updater{
 						$this->client,
 						"  > Enter new value:",
 						'string',
-						$valueCurrent->get(),
+						$valueCurrent->getValue(),
 						array(),
 						FALSE
 					);
 					$inputValues[$configKey] = $question->ask();
 					break;
 				case "c":
-					$inputValues[$configKey]	= $valueConfig->get( TRUE );
+					$inputValues[$configKey]	= $valueConfig->getValue( TRUE );
 					break;
 				case "m":
-					$inputValues[$configKey]	= $valueUpdateModule->get( TRUE );
+					$inputValues[$configKey]	= $valueUpdateModule->getValue( TRUE );
 					break;
 				case "s":
-					$inputValues[$configKey]	= $valueSuggest->get( TRUE );
+					$inputValues[$configKey]	= $valueSuggest->getValue( TRUE );
 					break;
 				case "k":
-					$inputValues[$configKey]	= $valueCurrent->get( TRUE );
+					$inputValues[$configKey]	= $valueCurrent->getValue( TRUE );
 					break;
 			}
 		}
