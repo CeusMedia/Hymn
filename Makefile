@@ -30,7 +30,7 @@ uninstall:
 	@test -l /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
 
 test-units:
-	@phpunit
+	@./vendor/bin/phpunit
 
 test-syntax:
 	@echo "Checking syntax..."
