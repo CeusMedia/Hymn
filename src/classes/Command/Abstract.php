@@ -149,6 +149,8 @@ abstract class Hymn_Command_Abstract{
 				return $this->library;																//  return empty library
 			}
 			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
+				if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
+					continue;																		//  skip this source
 				if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
 					$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
 					$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
