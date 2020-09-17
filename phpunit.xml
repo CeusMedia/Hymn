@@ -18,5 +18,5 @@
     <log type="junit" target="doc/Test/logfile.xml" logIncompleteSkipped="false"/>
     <log type="testdox-html" target="doc/Test/testdox.html"/>
     <log type="testdox-text" target="doc/Test/testdox.txt"/>
-</logging>
+  </logging>
 </phpunit>
