@@ -4,20 +4,20 @@ class Hymn_Module_Library_Available{
 	protected $modules		= array();
 	protected $shelves		= array();
 
-	public function addShelf( $moduleId, $path, $type, $active = TRUE, $title = NULL ){
-		if( in_array( $moduleId, array_keys( $this->shelves ) ) )
-			throw new Exception( 'Source already set by ID: '.$moduleId );
+	public function addShelf( $shelfId, $path, $type, $active = TRUE, $title = NULL ){
+		if( in_array( $shelfId, array_keys( $this->shelves ) ) )
+			throw new Exception( 'Source already set by ID: '.$shelfId );
 		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
 		$isDefault		= $active && !count( $activeShelves );
-		$this->shelves[$moduleId]	= (object) array(
-			'id'		=> $moduleId,
+		$this->shelves[$shelfId]	= (object) array(
+			'id'		=> $shelfId,
 			'path'		=> $path,
 			'type'		=> $type,
 			'active'	=> $active,
 			'default'	=> $isDefault,
 			'title'		=> $title,
 		);
-		ksort( $this->shelves );
+//		ksort( $this->shelves );
 	}
 
 	public function get( $moduleId, $shelfId = NULL, $strict = TRUE ){
@@ -166,6 +166,7 @@ class Hymn_Module_Library_Available{
 	protected function loadModulesInShelves( $force = FALSE ){
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
+		$this->modules	= array();																	//  reset module list
 		foreach( $this->shelves as $shelf ){														//  iterate sources
 			if( !$shelf->active )																	//  if source if deactivated
 				continue;																			//  skip this source
@@ -178,6 +179,6 @@ class Hymn_Module_Library_Available{
 				ksort( $this->modules[$shelf->id] );												//  sort source modules in general module map
 			}
 		}
-		ksort( $this->modules );																	//  sort general module map by source IDs
+//		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
 }

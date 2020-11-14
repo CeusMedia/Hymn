@@ -42,5 +42,4 @@ class Hymn_Module_Library_Installed{
 		$list	= $this->getAll( $shelfId );
 		return array_key_exists( $moduleId, $list );
 	}
-
 }
