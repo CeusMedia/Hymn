@@ -92,6 +92,15 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		$this->client->out( ' - Version:      '.$availableModule->version );
 		$this->client->out( ' - Frameworks:   '.$frameworks );
 
+		if( $availableModule->isDeprecated ){
+			$deprecation	= (object) $availableModule->deprecation;
+			$this->client->out( ' - Deprecated:   with version '.$deprecation->version );
+			if( strlen( trim( $deprecation->message ) ) > 0 )
+				$this->client->out( '   - Message:    '.$deprecation->message );
+			if( strlen( trim( $deprecation->url ) ) > 0 )
+				$this->client->out( '   - New URL:    '.$deprecation->url );
+		}
+
 		if( array_key_exists( $moduleId, $modulesInstalled ) ){
 			$installedModule	= $modulesInstalled[$moduleId];
 			$this->client->out( ' - Installed:' );

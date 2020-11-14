@@ -24,10 +24,17 @@ class Hymn_Module_Library_Available{
 		$this->loadModulesInShelves();
 		if( $shelfId )
 			return $this->getFromShelf( $moduleId, $shelfId, $strict );
-		foreach( $this->modules as $modules )
-			foreach( $modules as $module )
-				if( $module->id === $moduleId )
-					return $module;
+		$candidates	= array();
+		foreach( $this->modules as $shelfId => $shelfModules )
+			foreach( $shelfModules as $shelfModuleId => $shelfModule )
+				if( $shelfModuleId === $moduleId )
+					$candidates[]	= $shelfModule;
+		if( count( $candidates ) === 1 )
+			return $candidate[0];
+		if( count( $candidates ) > 1 )
+			foreach( $candidates as $candidate )
+				if( !$candidate->isDeprecated )
+					return $candidate;
 		if( $strict )
 			throw new Exception( 'Invalid module ID: '.$moduleId );
 		return NULL;

@@ -49,6 +49,7 @@ class Hymn_Module_Reader{
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
+		$obj->deprecation			= array();
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
@@ -90,8 +91,10 @@ class Hymn_Module_Reader{
 		$this->readSql( $obj, $xml );
 		$this->readLinks( $obj, $xml );
 		$this->readHooks( $obj, $xml );
+		$this->readDeprecation( $obj, $xml );
 		if( isset( $obj->config['active'] ) )
 			$obj->isActive	= $obj->config['active']->value;
+		$obj->isDeprecated	= count( $obj->deprecation ) > 0;
 		return $obj;
 	}
 
@@ -120,19 +123,62 @@ class Hymn_Module_Reader{
 		return isset( $attributes[$attributeName] );
 	}
 
-	protected function readInstallation( $obj, $xml ){
-		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );				//  note install type
-		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );		//  note install date
-		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );					//  note install source
-	}
-
-	protected function readLog( $obj, $xml ){
-		foreach( $xml->log as $entry ){																//  iterate version log entries if available
-			$obj->versionLog[]	= (object) array(													//  append version log entry
-				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> $this->getAttribute( $entry, 'version' ),									//  extract entry version
+	protected function readAuthors( $obj, $xml ){
+		foreach( $xml->author as $author ){
+			$email	= $this->getAttribute( $author, 'email', '' );
+			$site	= $this->getAttribute( $author, 'site', '' );
+			$obj->authors[]	= (object) array(
+				'name'	=> (string) $author,
+				'email'	=> $email,
+				'site'	=> $site
 			);
 		}
+	}
+
+	protected function readCompanies( $obj, $xml ){
+		foreach( $xml->company as $company ){
+			$site	= $this->getAttribute( $company, 'site', '' );
+			$obj->companies[]	= (object) array(
+				'name'		=> (string) $company,
+				'site'		=> $site
+			);
+		}
+	}
+
+	protected function readConfig( $obj, $xml ){
+		foreach( $xml->config as $pair ){
+			$key		= $this->getAttribute( $pair, 'name' );
+			$type		= $this->getAttribute( $pair, 'type', 'string' );
+			$values		= $this->getAttribute( $pair, 'values', '' );
+			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
+			$title		= $this->getAttribute( $pair, 'title' );
+			if( !$title && $this->hasAttribute( $pair, 'info' ) )
+				$title	= $this->getAttribute( $pair, 'info' );
+			$value		= trim( (string) $pair );
+			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
+				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+			$obj->config[$key]	= (object) array(
+				'key'			=> trim( $key ),
+				'type'			=> trim( strtolower( $type ) ),
+				'value'			=> $value,
+				'values'		=> $values,
+				'mandatory'		=> $this->getAttribute( $pair, 'mandatory', FALSE ),
+				'protected'		=> $this->getAttribute( $pair, 'protected', FALSE ),
+				'title'			=> $title,
+				'default'		=> $this->getAttribute( $pair, 'default', NULL ),
+				'original'		=> $this->getAttribute( $pair, 'original', NULL ),
+			);
+		}
+	}
+
+	protected function readDeprecation( $obj, $xml ){
+		if( !isset( $xml->deprecation ) )
+			return;
+		$obj->deprecation		= array(
+			'message'	=> (string) $xml->deprecation,
+			'version'	=> $this->getAttribute( $xml->deprecation, 'version', $obj->version ),
+			'url'		=> $this->getAttribute( $xml->deprecation, 'url', '' ),
+		);
 	}
 
 	protected function readFiles( $obj, $xml ){
@@ -174,6 +220,20 @@ class Hymn_Module_Reader{
 		}
 	}
 
+	protected function readHooks( $obj, $xml ){
+		foreach( $xml->hook as $hook ){
+			$resource	= $this->getAttribute( $hook, 'resource' );
+			$event		= $this->getAttribute( $hook, 'event' );
+			$obj->hooks[$resource][$event][]	= (string) $hook;
+		}
+	}
+
+	protected function readInstallation( $obj, $xml ){
+		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );				//  note install type
+		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );		//  note install date
+		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );					//  note install source
+	}
+
 	protected function readLicenses( $obj, $xml ){
 		foreach( $xml->license as $license ){
 			$source	= $this->getAttribute( $license, 'source' );
@@ -184,50 +244,33 @@ class Hymn_Module_Reader{
 		}
 	}
 
-	protected function readCompanies( $obj, $xml ){
-		foreach( $xml->company as $company ){
-			$site	= $this->getAttribute( $company, 'site', '' );
-			$obj->companies[]	= (object) array(
-				'name'		=> (string) $company,
-				'site'		=> $site
+	protected function readLinks( $obj, $xml ){
+		foreach( $xml->link as $link ){
+			$access		= $this->getAttribute( $link, 'access' );
+			$language	= $this->getAttribute( $link, 'lang', NULL, 'xml' );
+			$label		= (string) $link;
+			$path		= $this->getAttribute( $link, 'path', $label );
+			$rank		= $this->getAttribute( $link, 'rank', 10 );
+			$parent		= $this->getAttribute( $link, 'parent' );
+			$link		= $this->getAttribute( $link, 'link' );
+			$obj->links[]	= (object) array(
+				'parent'	=> $parent,
+				'access'	=> $access,
+				'language'	=> $language,
+				'path'		=> $path,
+				'link'		=> $link,
+				'rank'		=> $rank,
+				'label'		=> $label,
 			);
+			(string) $link;
 		}
 	}
 
-	protected function readAuthors( $obj, $xml ){
-		foreach( $xml->author as $author ){
-			$email	= $this->getAttribute( $author, 'email', '' );
-			$site	= $this->getAttribute( $author, 'site', '' );
-			$obj->authors[]	= (object) array(
-				'name'	=> (string) $author,
-				'email'	=> $email,
-				'site'	=> $site
-			);
-		}
-	}
-
-	protected function readConfig( $obj, $xml ){
-		foreach( $xml->config as $pair ){
-			$key		= $this->getAttribute( $pair, 'name' );
-			$type		= $this->getAttribute( $pair, 'type', 'string' );
-			$values		= $this->getAttribute( $pair, 'values', '' );
-			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
-			$title		= $this->getAttribute( $pair, 'title' );
-			if( !$title && $this->hasAttribute( $pair, 'info' ) )
-				$title	= $this->getAttribute( $pair, 'info' );
-			$value		= trim( (string) $pair );
-			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
-				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
-			$obj->config[$key]	= (object) array(
-				'key'			=> trim( $key ),
-				'type'			=> trim( strtolower( $type ) ),
-				'value'			=> $value,
-				'values'		=> $values,
-				'mandatory'		=> $this->getAttribute( $pair, 'mandatory', FALSE ),
-				'protected'		=> $this->getAttribute( $pair, 'protected', FALSE ),
-				'title'			=> $title,
-				'default'		=> $this->getAttribute( $pair, 'default', NULL ),
-				'original'		=> $this->getAttribute( $pair, 'original', NULL ),
+	protected function readLog( $obj, $xml ){
+		foreach( $xml->log as $entry ){																//  iterate version log entries if available
+			$obj->versionLog[]	= (object) array(													//  append version log entry
+				'note'		=> (string) $entry,														//  extract entry note
+				'version'	=> $this->getAttribute( $entry, 'version' ),									//  extract entry version
 			);
 		}
 	}
@@ -275,36 +318,6 @@ class Hymn_Module_Reader{
 					'sql'		=> (string) $sql
 				);
 			}
-		}
-	}
-
-	protected function readLinks( $obj, $xml ){
-		foreach( $xml->link as $link ){
-			$access		= $this->getAttribute( $link, 'access' );
-			$language	= $this->getAttribute( $link, 'lang', NULL, 'xml' );
-			$label		= (string) $link;
-			$path		= $this->getAttribute( $link, 'path', $label );
-			$rank		= $this->getAttribute( $link, 'rank', 10 );
-			$parent		= $this->getAttribute( $link, 'parent' );
-			$link		= $this->getAttribute( $link, 'link' );
-			$obj->links[]	= (object) array(
-				'parent'	=> $parent,
-				'access'	=> $access,
-				'language'	=> $language,
-				'path'		=> $path,
-				'link'		=> $link,
-				'rank'		=> $rank,
-				'label'		=> $label,
-			);
-			(string) $link;
-		}
-	}
-
-	protected function readHooks( $obj, $xml ){
-		foreach( $xml->hook as $hook ){
-			$resource	= $this->getAttribute( $hook, 'resource' );
-			$event		= $this->getAttribute( $hook, 'event' );
-			$obj->hooks[$resource][$event][]	= (string) $hook;
 		}
 	}
 }
