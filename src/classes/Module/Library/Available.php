@@ -30,7 +30,7 @@ class Hymn_Module_Library_Available{
 				if( $shelfModuleId === $moduleId )
 					$candidates[]	= $shelfModule;
 		if( count( $candidates ) === 1 )
-			return $candidate[0];
+			return $candidates[0];
 		if( count( $candidates ) > 1 )
 			foreach( $candidates as $candidate )
 				if( !$candidate->isDeprecated )
