@@ -100,15 +100,18 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		}
 
 		$this->client->outVerbose( "- moving folders, files and links" );
-		if( !$this->flags->dry )
+		if( !$this->flags->dry ){
 			rename( $source, $dest );
-		$this->client->outVerbose( "- fixing links" );
-		$this->fixLinks( $source, $dest );
+			$this->client->outVerbose( "- fixing links" );
+			$this->fixLinks( $source, $dest );
+		}
 		$this->client->out( "DONE!" );
 		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
 	protected function fixLinks( $source, $dest, $path = '' ){
+		if( $this->flags->dry )
+			return;
 		$index	= new DirectoryIterator( $dest.$path );
 		foreach( $index as $entry ){
 			$pathName	= $entry->getPathname();
