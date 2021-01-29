@@ -1,3 +1,11 @@
+v0.9.9.3
+- Fix dry mode app-move.
+- Support deprecation of modules and rank deprecated modules lower during installations.
+- Keep order of sources on loading up.
+- Fix bug in PHP 8.
+- Update code doc to 2021.
+- Extract client configuration handling from client class.
+
 v0.9.9.2
 - Support relations to composer packages.
 - Prepare support for versioned relations.
