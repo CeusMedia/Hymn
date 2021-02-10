@@ -11,12 +11,14 @@
         }
     ],
     "require": {
-        "php": "^7",
+        "php": "^7.3|^8",
         "ext-json": "*",
-        "ext-PDO": "^7.2"
+        "ext-PDO": "*"
     },
     "minimum-stability": "dev",
-    "bin": ["bin/hymn"],
+    "bin": [
+        "bin/hymn",
+	],
     "require-dev": {
         "phpunit/phpunit": "^9.4@dev"
     }
