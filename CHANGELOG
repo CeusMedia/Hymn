@@ -1,3 +1,7 @@
+v0.9.9.4
+- Provide newest hymn client version in bin folder.
+- Disable foreign key checks on database-clear.
+
 v0.9.9.3
 - Fix dry mode app-move.
 - Support deprecation of modules and rank deprecated modules lower during installations.

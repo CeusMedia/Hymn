@@ -75,11 +75,15 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 				return;
 		}
 
+		if( !$this->flags->dry )
+			$dbc->execute( 'SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;' );
 		foreach( $tables as $table ){
 			$this->client->outVerbose( "- Drop table '".$table."'" );
 			if( !$this->flags->dry )
 				$dbc->query( "DROP TABLE ".$table );
 		}
+		if( !$this->flags->dry )
+			$dbc->execute( 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' );
 		if( !$this->flags->quiet )
 			$this->client->out( "Database cleared" );
 	}
