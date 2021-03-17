@@ -42,6 +42,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 	const ACTION_LINK_FILE		= 3;
 	const ACTION_REMOVE_FOLDER	= 4;
 
+	protected $regExpSource;
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -69,66 +71,100 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$config		= json_decode( file_get_contents( Hymn_Client::$fileName ) );
 		if( !isset( $config->application->uri ) || !strlen( trim( $config->application->uri ) ) )
 			throw new RuntimeException( 'No application URI configured.' );
-		$source	= rtrim( $config->application->uri, '/' ).'/';
+		$source		= rtrim( $config->application->uri, '/' ).'/';
+		$sourceUriRegex	= '/^'.preg_quote( $source, '/' ).'/';
 
 		$this->client->out( "Move application" );
 		$this->client->out( "- from: ".$source );
 		$this->client->out( "- to:   ".$dest );
-		if( strlen( $url ) ){
+		if( strlen( $url ) )
 			$this->client->out( "- URL:  ".$url );
-			$this->client->outVerbose( "  - setting URL in config file" );
-			$pathConfig	= $this->client->getConfigPath();
-			$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
-			if( $editor->hasProperty( 'app.base.url', FALSE ) ){
-				if( !$this->flags->dry ){
-					$editor->setProperty( 'app.base.url', $url );
-					clearstatcache();
-				}
-			}
-			$this->client->outVerbose( "  - setting URL in hymn file" );
-			if( !$this->flags->dry ){
-				$config->application->url	= $url;
-				$json	= json_encode( $config, JSON_PRETTY_PRINT );
-				file_put_contents( Hymn_Client::$fileName, $json );
-			}
-		}
-		$this->client->outVerbose( "- setting URI in hymn file" );
-		if( !$this->flags->dry ){
-			$config->application->uri	= $dest;
-			$json	= json_encode( $config, JSON_PRETTY_PRINT );
-			file_put_contents( Hymn_Client::$fileName, $json );
-		}
 
-		$this->client->outVerbose( "- moving folders, files and links" );
-		if( !$this->flags->dry ){
-			rename( $source, $dest );
-			$this->client->outVerbose( "- fixing links" );
-			$this->fixLinks( $source, $dest );
-		}
+		$this->updateConfigFile( $url );
+		$this->updateHymnFile( $config, $url, $sourceUriRegex, $dest );
+		$this->moveProject( $source, $dest );
+		$this->fixLinks( $source, $dest );
+
 		$this->client->out( "DONE!" );
 		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
-	protected function fixLinks( $source, $dest, $path = '' ){
-		if( $this->flags->dry )
+	protected function moveProject( $source, $dest ){
+		if( $this->flags->dry ){
+			$this->client->outVerbose( "- would move from ".$source." to ".$dest );
 			return;
+		}
+		$this->client->outVerbose( "- moving folders, files and links" );
+		rename( $source, $dest );
+	}
+
+	protected function fixLinks( $sourceUriRegex, $dest, $path = '' ){
+		if( !$this->flags->dry )
+			$this->client->outVerbose( "- fixing links" );
+		else
+			$this->client->outVerbose( "- would fix links" );
 		$index	= new DirectoryIterator( $dest.$path );
 		foreach( $index as $entry ){
 			$pathName	= $entry->getPathname();
 			if( $entry->isDot() )
 				continue;
 			if( $entry->isDir() )
-				$this->fixLinks( $source, $dest, $path.$entry->getFilename().'/' );
+				$this->fixLinks( $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
 			else if( is_link( $pathName ) ){
 				$link = readlink( $pathName );
-				if( preg_match( "/^".preg_quote( $source, "/" )."/", $link ) ){
-					$link	= preg_replace( "/^".preg_quote( $source, "/" )."/", $dest, $link );
+				if( preg_match( $sourceUriRegex, $link ) ){
+					$link	= preg_replace( $sourceUriRegex, $dest, $link );
+					$this->cient->outVeryVerbose( '  - '.$pathName );
 					if( !$this->flags->dry ){
 						unlink( $pathName );
 						symlink( $link, $pathName );
 					}
 				}
 			}
+		}
+	}
+
+	protected function updateConfigFile( $url ){
+		if( !strlen( $url ) )
+			return;
+		$pathConfig	= $this->client->getConfigPath();
+		$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
+		if( $editor->hasProperty( 'app.base.url', FALSE ) ){
+			if( !$this->flags->dry ){
+				$this->client->outVerbose( "- setting URL in config file" );
+				$editor->setProperty( 'app.base.url', $url );
+				clearstatcache();
+			}
+			else
+				$this->client->outVerbose( "- would set URL in config file" );
+		}
+	}
+
+	protected function updateHymnFile( $config, $url, $sourceUriRegex, $dest ){
+		if( !$this->flags->dry )
+			$this->client->outVerbose( "- updating hymn file" );
+		else
+			$this->client->outVerbose( "- would update hymn file" );
+		if( strlen( $url ) ){
+			$this->client->outVerbose( "  - setting URL in hymn file" );
+			$config->application->url	= $url;
+		}
+		$this->client->outVerbose( "  - setting URI in hymn file" );
+		$config->application->uri	= $dest;
+
+		$this->client->outVerbose( "  - update module sources in hymn file" );
+		foreach( $config->sources as $sourceKey => $sourceData ){
+			foreach( $sourceData as $key => $value ){
+				if( $key === 'path' ){
+					$regExp	= $this->regExpSource;
+					$value	= preg_repace( $regExp, $dest, $value );
+					$sourceData->path	= $value;
+				}
+			}
+		}
+		if( !$this->flags->dry ){
+			$json	= json_encode( $config, JSON_PRETTY_PRINT );
+			file_put_contents( Hymn_Client::$fileName, $json );
 		}
 	}
 }
