@@ -83,8 +83,14 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->updateConfigFile( $url );
 		$this->updateHymnFile( $config, $url, $sourceUriRegex, $dest );
 		$this->moveProject( $source, $dest );
-		$this->fixLinks( $source, $dest );
 
+		if( !$this->flags->dry ){
+			$this->client->outVerbose( "- fixing links" );
+		}
+		else{
+			$this->client->outVerbose( "- would fix links" );
+		}
+		$this->fixLinks( $source, $sourceUriRegex, $dest );
 		$this->client->out( "DONE!" );
 		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
@@ -98,23 +104,22 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		rename( $source, $dest );
 	}
 
-	protected function fixLinks( $sourceUriRegex, $dest, $path = '' ){
+	protected function fixLinks( $source, $sourceUriRegex, $dest, $path = '' ){
 		if( !$this->flags->dry )
-			$this->client->outVerbose( "- fixing links" );
+			$index	= new DirectoryIterator( $dest.$path );
 		else
-			$this->client->outVerbose( "- would fix links" );
-		$index	= new DirectoryIterator( $dest.$path );
+			$index	= new DirectoryIterator( $source.$path );
 		foreach( $index as $entry ){
 			$pathName	= $entry->getPathname();
 			if( $entry->isDot() )
 				continue;
 			if( $entry->isDir() )
-				$this->fixLinks( $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
+				$this->fixLinks( $source, $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
 			else if( is_link( $pathName ) ){
 				$link = readlink( $pathName );
 				if( preg_match( $sourceUriRegex, $link ) ){
 					$link	= preg_replace( $sourceUriRegex, $dest, $link );
-					$this->cient->outVeryVerbose( '  - '.$pathName );
+					$this->client->outVeryVerbose( '  - '.preg_replace( $sourceUriRegex, '', readlink( $pathName ) ) );
 					if( !$this->flags->dry ){
 						unlink( $pathName );
 						symlink( $link, $pathName );
@@ -153,15 +158,11 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$config->application->uri	= $dest;
 
 		$this->client->outVerbose( "  - update module sources in hymn file" );
-		foreach( $config->sources as $sourceKey => $sourceData ){
-			foreach( $sourceData as $key => $value ){
-				if( $key === 'path' ){
-					$regExp	= $this->regExpSource;
-					$value	= preg_repace( $regExp, $dest, $value );
-					$sourceData->path	= $value;
-				}
-			}
-		}
+		foreach( $config->sources as $sourceKey => $sourceData )
+			foreach( $sourceData as $key => $value )
+				if( $key === 'path' )
+					$sourceData->path	= preg_replace( $sourceUriRegex, $dest, $value );
+
 		if( !$this->flags->dry ){
 			$json	= json_encode( $config, JSON_PRETTY_PRINT );
 			file_put_contents( Hymn_Client::$fileName, $json );
