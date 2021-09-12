@@ -72,10 +72,13 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 		else{
+			$this->client->out( 'Mode: Install ALL ('.count((array)$config->modules).')' );
 			foreach( $config->modules as $moduleId => $moduleConfig ){
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
+				$this->client->outVerbose( 'Module ID: '.$moduleId );
 				$sourceId	= $this->detectModuleSource( $moduleId );
+				$this->client->outVerbose( 'Source ID: '.$sourceId );
 				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )

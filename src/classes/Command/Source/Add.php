@@ -83,10 +83,10 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$shelf			= array();
 		$connectable	= FALSE;
 		do{
-			foreach( $this->questions as $question ){														//  iterate questions
+			foreach( $this->questions as $question ){												//  iterate questions
 				if( !isset( $shelf[$question['key']] ) )
 					$shelf[$question['key']]	= $question['default'];
-				$input	= new Hymn_Tool_CLI_Question(													//  ask for value
+				$input	= new Hymn_Tool_CLI_Question(												//  ask for value
 					$this->client,
 					$question['label'],
 					$question['type'],
@@ -102,6 +102,10 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 				$this->client->outError( 'Path to module library source is not existing.' );
 			else
 				$connectable	= TRUE;																//  note connectability for loop break
+			if( $shelf['type'] === "folder" ){
+				$shelf['path']	= realpath( $shelf['path'] );
+				$shelf['path']	= rtrim( $shelf['path'], '/' ).'/';
+			}
 		}
 		while( !$connectable );																		//  repeat until connectable
 		$shelfId		= $shelf['key'];
