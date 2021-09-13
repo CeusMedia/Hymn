@@ -89,6 +89,11 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "Config file has been created." );
 	}
 
+	protected function createGitIgnoreFile(){
+		copy( $this->pathPhar."templates/gitignore", '.gitignore' );
+		$this->client->out( "Git ignore file has been created." );
+	}
+
 	protected function createMakeFile(){
 		copy( $this->pathPhar."templates/Makefile", 'Makefile' );
 		$content	= file_get_contents( 'Makefile' );
@@ -186,28 +191,39 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "" );
 
 		/*  --  CREATE PHPUNIT FILE  --  */
-		if( $this->ask( "Configure PHPUnit?", 'boolean', 'yes', NULL, FALSE ) ){
-			$this->createUnitFile();
-			$this->client->out( "" );
-		}
+		if( !file_exists( 'phpunit.xml' ) )
+			if( $this->ask( "Configure PHPUnit?", 'boolean', 'yes', NULL, FALSE ) ){
+				$this->createUnitFile();
+				$this->client->out( "" );
+			}
 
 		/*  --  CREATE COMPOSER FILE  --  */
-		if( $this->ask( "Configure composer?", 'boolean', 'yes', NULL, FALSE ) ){
-			$this->createComposerFile();
-			$this->client->out( "" );																//  print empty line as optical separator
-		}
+		if( !file_exists( 'composer.json' ) )
+			if( $this->ask( "Configure composer?", 'boolean', 'yes', NULL, FALSE ) ){
+				$this->createComposerFile();
+				$this->client->out( "" );															//  print empty line as optical separator
+			}
 
 		/*  --  CREATE APP BASE CONFIG FILE  --  */
-		if( $this->ask( "Create base config file?", 'boolean', 'yes', NULL, FALSE ) ){
-			$this->createConfigFile();
-			$this->client->out( "" );																//  print empty line as optical separator
-		}
+		if( !file_exists( 'config/config.ini' ) )
+			if( $this->ask( "Create base config file?", 'boolean', 'yes', NULL, FALSE ) ){
+				$this->createConfigFile();
+				$this->client->out( "" );															//  print empty line as optical separator
+			}
 
 		/*  --  CREATE MAKE FILE  --  */
-		if( $this->ask( "Create make file?", 'boolean', 'yes', NULL, FALSE ) ){
-			$this->createMakeFile();
-			$this->client->out( "" );																//  print empty line as optical separator
-		}
+		if( !file_exists( 'Makefile' ) )
+			if( $this->ask( "Create make file?", 'boolean', 'yes', NULL, FALSE ) ){
+				$this->createMakeFile();
+				$this->client->out( "" );															//  print empty line as optical separator
+			}
+
+		/*  --  CREATE GIT IGNORE FILE  --  */
+		if( !file_exists( '.gitignore' ) )
+			if( $this->ask( "Create Git ignore file?", 'boolean', 'yes', NULL, FALSE ) ){
+				$this->createGitIgnoreFile();
+				$this->client->out( "" );															//  print empty line as optical separator
+			}
 
 		$this->client->out( "Done." );
 		$this->client->out( "Now you can execute commands like install module sources using 'hymn source-add'." );

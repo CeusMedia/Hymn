@@ -137,7 +137,7 @@ class Hymn_Client
 
 	static public $language			= 'en';
 
-	static public $version			= '0.9.9.4c';
+	static public $version			= '0.9.9.4d';
 
 	public $arguments;
 
