@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$pathName	= $this->client->arguments->getArgument( 0 );
 		$types		= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->client->arguments->getArgument( 2 );
@@ -105,7 +106,8 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 		}
 	}
 
-	protected function getLatestStamp( $path = NULL, $shelfId = NULL ){
+	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL ): ?string
+	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
 		$path		= preg_replace( '@\.+/@', '', $path );
 		$path		= rtrim( $path, '/' );
@@ -128,7 +130,8 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 *	@param		$shelfId		...
 	 *	@return		array
 	 */
-	protected function getStamp( $pathName, $shelfId ){
+	protected function getStamp( string $pathName, string $shelfId )
+	{
 		if( $pathName ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )

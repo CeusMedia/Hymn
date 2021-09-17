@@ -34,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-abstract class Hymn_Command_Abstract{
-
+abstract class Hymn_Command_Abstract
+{
 	protected $client;
 	protected $library	= NULL;
 	protected $flags;
@@ -43,7 +43,8 @@ abstract class Hymn_Command_Abstract{
 	protected $words;
 	protected $argumentOptions	= array();
 
-	public function getArgumentOptions(){
+	public function getArgumentOptions()
+	{
 		return $this->argumentOptions;
 	}
 
@@ -53,7 +54,8 @@ abstract class Hymn_Command_Abstract{
 	 *	@param		Hymn_Client		$client		Hymn client instance
 	 *	@return		void
 	 */
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 		$this->flags	= (object) array(
 			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
@@ -72,10 +74,81 @@ abstract class Hymn_Command_Abstract{
 		$this->__onInit();
 	}
 
-	protected function __onInit(){
+	/**
+	 *	Prints out message of one ore more lines.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 */
+	public function out( $lines = NULL, bool $newLine = TRUE )
+	{
+		$this->client->out( $lines, $newLine );
 	}
 
-	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = FALSE ){
+	/**
+	 *	Prints out deprecation message of one ore more lines.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@throws		InvalidArgumentException		if neither array nor string given
+	 *	@throws		InvalidArgumentException		if given string is empty
+	 *	@return		void
+	 */
+	public function outDeprecation( $lines = array() )
+	{
+		$this->client->outDeprecation( $lines );
+	}
+
+	/**
+	 *	Prints out error message.
+	 *	@access		public
+	 *	@param		string			$message		Error message to print
+	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
+	 *	@return		void
+	 */
+	public function outError( string $message, ?int $exitCode = NULL )
+	{
+		$this->client->outError( $message, $exitCode );
+	}
+
+	/**
+	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVerbose( $lines, bool $newLine = TRUE )
+	{
+		$this->client->outVerbose( $lines, $newLine );
+	}
+
+	/**
+	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
+	 *	@access		public
+	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
+	 */
+	public function outVeryVerbose( $lines, bool $newLine = TRUE )
+	{
+		$this->client->outVeryVerbose( $lines, $newLine );
+	}
+
+	/**
+	 *	This method is automatically called by client dispatcher.
+	 *	Commands need to implement this method.
+	 *	@access		public
+	 *	@return		void
+	 */
+	abstract public function run();
+
+	protected function __onInit()
+	{
+	}
+
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = FALSE ): string
+	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
 			$message,
@@ -87,7 +160,8 @@ abstract class Hymn_Command_Abstract{
 		return $question->ask();
 	}
 
-	protected function deprecate( $messageLines ){
+	protected function deprecate( $messageLines )
+	{
 		$this->client->outDeprecation( $messageLines );
 	}
 
@@ -101,7 +175,8 @@ abstract class Hymn_Command_Abstract{
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
 	 */
-	protected function evaluateShelfId( $shelfId = NULL, $strict = TRUE ){
+	protected function evaluateShelfId( ?string $shelfId = NULL, bool $strict = TRUE )
+	{
 		$all	= array( 'all', '*' );
 		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
 			return NULL;
@@ -122,7 +197,8 @@ abstract class Hymn_Command_Abstract{
 	 *	@return		array					Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
-	protected function getAvailableModulesMap( $shelfId = NULL ){
+	protected function getAvailableModulesMap( ?string $shelfId = NULL ): array
+	{
 		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= array();																		//  prepare empty list of available modules
 		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
@@ -139,13 +215,16 @@ abstract class Hymn_Command_Abstract{
 	 *	@param		boolean		$forceReload	Flag: reload library (optional, not default)
 	 *	@return		Hymn_Module_Library			Library of available modules in found sources
 	 */
-	protected function getLibrary( $forceReload = FALSE ){
+	protected function getLibrary( bool $forceReload = FALSE )
+	{
 		$config	= $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
 			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
+			if( $this->flags->veryVerbose )
+				$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );
 			if( !isset( $config->sources ) || empty( $config->sources ) ){
 				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
-				$this->client->out( sprintf( $msg, $sourceId ) );										//  output warning
+				$this->client->out( sprintf( $msg ) );												//  output warning
 				return $this->library;																//  return empty library
 			}
 			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
@@ -170,63 +249,8 @@ abstract class Hymn_Command_Abstract{
 		return $this->library;																		//  return loaded library
 	}
 
-	/**
-	 *	Prints out message of one ore more lines.
-	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
-	 */
-	public function out( $lines = NULL, $newLine = TRUE ){
-		$this->client->out( $lines, $newLine );
-	}
-
-	/**
-	 *	Prints out deprecation message of one ore more lines.
-	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@throws		InvalidArgumentException		if neither array nor string given
-	 *	@throws		InvalidArgumentException		if given string is empty
-	 *	@return		void
-	 */
-	public function outDeprecation( $lines = array() ){
-		$this->client->outDeprecation( $lines );
-	}
-
-	/**
-	 *	Prints out error message.
-	 *	@access		public
-	 *	@param		string			$message		Error message to print
-	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
-	 *	@return		void
-	 */
-	public function outError( $message, $exitCode = NULL ){
-		$this->client->outError( $message, $exitCode );
-	}
-
-	/**
-	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
-	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
-	 */
-	public function outVerbose( $lines, $newLine = TRUE ){
-		$this->client->outVerbose( $lines, $newLine );
-	}
-
-	/**
-	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
-	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
-	 */
-	public function outVeryVerbose( $lines, $newLine = TRUE ){
-		$this->client->outVeryVerbose( $lines, $newLine );
-	}
-
-	protected function realizeWildcardedModuleIds( $givenModuleIds, $availableModuleIds ){
+	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds )
+	{
 		$list	= array();
 		foreach( $givenModuleIds as $givenModuleId ){
 			if( !substr_count( $givenModuleId, '*' ) ){
@@ -249,12 +273,4 @@ abstract class Hymn_Command_Abstract{
 		}
 		return $list;
 	}
-
-	/**
-	 *	This method is automatically called by client dispatcher.
-	 *	Commands need to implement this method.
-	 *	@access		public
-	 *	@return		void
-	 */
-	abstract function run();
 }

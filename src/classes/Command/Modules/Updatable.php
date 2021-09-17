@@ -36,8 +36,8 @@
  *	@todo    		code documentation
  *	@todo 			handle relations (new relations after update)
  */
-class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -46,7 +46,8 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 //		$config		= $this->client->getConfig();
 //		$relation	= new Hymn_Module_Graph( $this->client, $this->getLibrary() );					//  @todo use to find new required modules
 

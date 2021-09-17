@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $argumentOptions	= array(
 		'age'		=> array(
 			'pattern'	=> '/^--age=(\S+)$/',
@@ -53,7 +53,8 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( !file_exists( Hymn_Client::$fileName ) )
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
@@ -73,7 +74,8 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 		}
 	}
 
-	protected function clearLocks(){
+	protected function clearLocks()
+	{
 		$age	= (int) $this->client->arguments->getOption( 'age' );
 		$age	= $age > 0 ? $age * 60 : 0;
 		$index	= new DirectoryIterator( 'config/locks' );

@@ -35,17 +35,20 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_LatestFile{
-
+class Hymn_Tool_LatestFile
+{
 	protected $acceptedFileNames	= array();
 	protected $fileNamePattern;
 	protected $path;
+	protected $client;
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 	}
 
-	public function find( $path = NULL, $fileNamePattern = NULL, $acceptedFileNames = array() ){
+	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = array() ): ?string
+	{
 		$path		= $path ? $path : $this->path;
 		$pattern	= $fileNamePattern ? $fileNamePattern : $this->fileNamePattern;
 		$accepted	= $acceptedFileNames ? $acceptedFileNames : $this->acceptedFileNames;
@@ -71,17 +74,20 @@ class Hymn_Tool_LatestFile{
 		return NULL;
 	}
 
-	public function setAcceptedFileNames( $fileNames = array() ){
+	public function setAcceptedFileNames( array $fileNames = array() ): self
+	{
 		$this->acceptedFileNames	= $fileNames;
 		return $this;
 	}
 
-	public function setFileNamePattern( $fileNamePattern ){
+	public function setFileNamePattern( $fileNamePattern ): self
+	{
 		$this->fileNamePattern	= $fileNamePattern;
 		return $this;
 	}
 
-	public function setPath( $path ){
+	public function setPath( $path ): self
+	{
 		$this->path		= $path;
 		return $this;
 	}

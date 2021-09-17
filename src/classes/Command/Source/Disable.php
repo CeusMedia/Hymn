@@ -35,24 +35,25 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( !( $shelf = $this->getShelfByArgument() ) )
 			return;
 
 		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Source "'.$shelfId.'" already disabled.' );
+			$this->client->outVerbose( 'Source "'.$shelf->id.'" already disabled.' );
 			return;
 		}
 
-		$installedModules	= $this->getLibrary()->listInstalledModules( $shelfId );
+		$installedModules	= $this->getLibrary()->listInstalledModules( $shelf->id );
 		if( count( $installedModules ) && !$this->flags->force ){
 			$this->client->outError( sprintf(
 				'Source cannot be disabled since %d installed modules are related.',
@@ -62,16 +63,15 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" would have been disabled.' );
+				$this->client->out( 'Source "'.$shelf->id.'" would have been disabled.' );
 			return;
 		}
 		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources->{$shelfId}->active	= FALSE;
-		if( isset( $json->sources->{$shelfId}->default ) )
-			unset( $json->sources->{$shelfId}->default );
+		$json->sources->{$shelf->id}->active	= FALSE;
+		if( isset( $json->sources->{$shelf->id}->default ) )
+			unset( $json->sources->{$shelf->id}->default );
 		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 		if( !$this->flags->quiet )
-			$this->client->out( 'Source "'.$shelfId.'" has been disabled.' );
+			$this->client->out( 'Source "'.$shelf->id.'" has been disabled.' );
 	}
 }
-?>

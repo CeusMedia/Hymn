@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$command	= new Hymn_Command_Test_Syntax( $this->client );
 		$command->run();
 	}

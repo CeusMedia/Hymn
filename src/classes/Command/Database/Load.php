@@ -35,13 +35,9 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $defaultPath;
-
-	protected function __onInit(){
-		$this->defaultPath		= $this->client->getConfigPath().'sql/';
-	}
 
 	/**
 	 *	Execute this command.
@@ -51,7 +47,9 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
+		$fileName = NULL;
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
@@ -60,13 +58,13 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		$pathName		= $this->client->arguments->getArgument( 0 );
 		if( $pathName && file_exists( $pathName ) ){
 			if( is_dir( $pathName ) )
-				$fileName	= $this->getLatestDump( $pathName, TRUE );
+				$fileName	= $this->getLatestDump( $pathName );
 			else{
 				$fileName	= $pathName;
 			}
 		}
 		else if( file_exists( $this->defaultPath ) )
-			$fileName		= $this->getLatestDump( NULL, TRUE );
+			$fileName		= $this->getLatestDump( NULL );
 		else
 			$this->client->outError( 'No loadable database file or folder found.', Hymn_Client::EXIT_ON_RUN );
 
@@ -104,7 +102,13 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	protected function getLatestDump( $path = NULL ){
+	protected function __onInit()
+	{
+		$this->defaultPath		= $this->client->getConfigPath().'sql/';
+	}
+
+	protected function getLatestDump( ?string $path = NULL )
+	{
 		$pathConfig	= $this->client->getConfigPath();
 		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig.'sql/';
 		if( !file_exists( $path ) )

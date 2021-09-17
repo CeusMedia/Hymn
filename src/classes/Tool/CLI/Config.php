@@ -47,6 +47,10 @@ class Hymn_Tool_CLI_Config
 		'themes'		=> 'themes/',
 	);
 
+	public $isLiveCopy	= FALSE;
+
+	protected $client;
+
 	protected $config;
 
 	/**
@@ -102,7 +106,8 @@ class Hymn_Tool_CLI_Config
 	 *	@param		array			$modules		Map of resource modules with config option key prefix (eG. Resource_Database:access.).
 	 *	@todo		kriss: Question is: Why? On which purpose is this important, again?
 	 */
-	protected function applyAppConfiguredDatabaseConfigToModules( $modules = array() ){
+	protected function applyAppConfiguredDatabaseConfigToModules( array $modules = array() )
+	{
 		if( !isset( $this->config->database ) )
 			return FALSE;
 
@@ -133,7 +138,8 @@ class Hymn_Tool_CLI_Config
 		return TRUE;
 	}
 
-	protected function applyBaseConfiguredPathsToAppConfig(){
+	protected function applyBaseConfiguredPathsToAppConfig()
+	{
 		$this->config->paths	= (object) array();
 		foreach( self::$pathDefaults as $pathKey => $pathValue )
 			if( !isset( $this->config->paths->{$pathKey} ) )

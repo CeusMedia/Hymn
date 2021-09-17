@@ -35,15 +35,16 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Updater{
-
+class Hymn_Module_Updater
+{
 	protected $client;
 	protected $config;
 	protected $library;
 	protected $isLiveCopy	= FALSE;
 	protected $flags;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
+	{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
@@ -77,7 +78,8 @@ class Hymn_Module_Updater{
 	 *	@param		string		$shelfId		ID of shelf to reduce to
 	 *	@return		array		List of outdated modules
 	 */
-	public function getUpdatableModules( $shelfId = NULL ){
+	public function getUpdatableModules( string $shelfId = NULL ): array
+	{
 		$outdated		= array();																	//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $shelfId ) as $installed ){					//  iterate installed modules
 			$source		= $installed->installSource;												//  get source of installed module
@@ -96,7 +98,8 @@ class Hymn_Module_Updater{
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, $changedOnly = FALSE ){
+	public function reconfigure( $module, bool $changedOnly = FALSE )
+	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource ){
@@ -213,7 +216,8 @@ class Hymn_Module_Updater{
 			$configurator->set( $module->id, $configKey, $inputConfigValue );
 	}
 
-	public function update( $module, $installType ){
+	public function update( $module, string $installType ): bool
+	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );

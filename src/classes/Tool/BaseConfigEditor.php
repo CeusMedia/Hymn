@@ -35,34 +35,47 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_BaseConfigEditor{
-
+class Hymn_Tool_BaseConfigEditor
+{
 	/**	@var		array			$added					Added Properties */
 	protected $added				= array();
+
 	/**	@var		array			$comments				List of collected Comments */
 	protected $comments				= array();
+
 	/**	@var		array			$deleted				Deleted Properties */
 	protected $deleted				= array();
+
 	/**	@var		array			$disabled				List of disabled Properties */
 	protected $disabled				= array();
+
 	/**	@var		string			$fileName				URI of Ini File */
 	protected $fileName;
+
 	/**	@var		array			$lines					List of collected Lines */
 	protected $lines				= array();
+
 	/**	@var		array			$properties				List of collected Properties */
 	protected $properties			= array();
+
 	/**	@var		array			$renamed				Renamed Properties */
 	protected $renamed				= array();
+
 	/**	@var		boolean			$reservedWords			Flag: use reserved words */
 	protected $reservedWords		= TRUE;
+
 	/**	@var		string			$signDisabled			Sign( string) of disabled Properties */
 	protected $signDisabled			= ';';
+
 	/**	@var		string			$patternDisabled		Pattern( regex) of disabled Properties */
 	protected $patternDisabled 		= '/^;/';
+
 	/**	@var		string			$patternProperty		Pattern( regex) of Properties */
 	protected $patternProperty		= '/^(;|[a-z0-9-])+([a-z0-9#.:@\/\\|_-]*[ |\t]*=)/i';
+
 	/**	@var		string			$patternDescription		Pattern( regex) of Descriptions */
 	protected $patternDescription	= '/^[;|#|:|\/|=]{1,2}/';
+
 	/**	@var		string			$patternLineComment		Pattern( regex) of Line Comments */
 	protected $patternLineComment	= '/([\t| ]+([\/]{2}|[;])+[\t| ]*)/';
 
@@ -73,7 +86,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$reservedWords	Flag: interprete reserved Words like yes,no,true,false,null
 	 *	@return		void
 	 */
-	public function __construct( $fileName, $reservedWords = TRUE ){
+	public function __construct( string $fileName, bool $reservedWords = TRUE )
+	{
 		$this->createFileIfNotExists( $fileName );
 		$this->checkFile( $fileName );
 		$this->fileName				= $fileName;
@@ -87,7 +101,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		string		$key			Key of  Property
 	 *	@return		bool
 	 */
-	public function activateProperty( $key ){
+	public function activateProperty( string $key ): bool
+	{
 		if( !$this->hasProperty( $key ) )
 			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing' );
 		if( $this->isActiveProperty( $key ) )
@@ -105,7 +120,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$state			Activity state of new Property
 	 *	@return		bool
 	 */
-	public function addProperty( $key, $value, $comment = '', $state = TRUE ){
+	public function addProperty( string $key, $value, string $comment = '', bool $state = TRUE ): bool
+	{
 		$key = ( $state ? "" : $this->signDisabled ).$key;
 		$this->added[] = array(
 			"key"		=> $key,
@@ -123,7 +139,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		string		$comment		Comment of Property
 	 *	@return		string
 	 */
-	private function buildLine( $key, $value, $comment ){
+	private function buildLine( string $key, $value, string $comment ): string
+	{
 		$content	= '"'.addslashes( $value ).'"';
 		if( $this->reservedWords && is_bool( $value ) )
 			$content	= $value ? 'yes' : 'no';
@@ -139,33 +156,14 @@ class Hymn_Tool_BaseConfigEditor{
 		return $line;
 	}
 
-	protected function checkFile( $fileName ){
-		if( !is_string( $fileName ) )
-			throw new InvalidArgumentException( 'File name must a string' );
-		if( !file_exists( $fileName ) )
-			throw new RuntimeException( 'File "'.addslashes( $fileName ).'" is not existing' );
-		if( !is_file( $fileName ) )
-			throw new RuntimeException( 'Give file name  "'.$fileName.'" is not a file' );
-		if( !is_readable( $fileName ) )
-			throw new RuntimeException( 'File "'.$fileName.'" is not readable' );
-		if( !is_writable( $fileName ) )
-			throw new RuntimeException( 'File "'.$fileName.'" is not writable' );
-	}
-
-	protected function createFileIfNotExists( $fileName ){
-		if( !is_string( $fileName ) )
-			throw new InvalidArgumentException( 'File name must a string' );
-		if( !file_exists( $fileName ) )
-			touch( $fileName );
-	}
-
 	/**
 	 *	Deactivates a Property.
 	 *	@access		public
 	 *	@param		string		$key			Key of  Property
 	 *	@return		bool
 	 */
-	public function deactivateProperty( $key ){
+	public function deactivateProperty( string $key ): bool
+	{
 		if( !$this->hasProperty( $key ) )
 			throw new InvalidArgumentException( 'Key "'.$key.'" is not existing' );
 		if( !$this->isActiveProperty( $key ) )
@@ -178,9 +176,10 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	Returns the Comment of a Property.
 	 *	@access		public
 	 *	@param		string		$key			Key of Property
-	 *	@return		string
+	 *	@return		string|NULL
 	 */
-	public function getComment( $key ){
+	public function getComment( string $key ): ?string
+	{
 		if( !empty( $this->comments[$key] ) )
 			return $this->comments[$key];
 		return NULL;
@@ -192,7 +191,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		array
 	 */
-	public function getCommentedProperties( $activeOnly = TRUE ){
+	public function getCommentedProperties( bool $activeOnly = TRUE ): array
+	{
 		$list = array();
 		foreach( $this->properties as $key => $value ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
@@ -213,7 +213,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@access		public
 	 *	@return		array
 	 */
-	public function getComments(){
+	public function getComments(): array
+	{
 		return $this->comments;
 	}
 
@@ -223,7 +224,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		array
 	 */
-	public function getProperties( $activeOnly = TRUE ){
+	public function getProperties( bool $activeOnly = TRUE ): array
+	{
 		$properties	= array();
 		foreach( $this->properties as $key => $value ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
@@ -240,7 +242,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		string
 	 */
-	public function getProperty( $key, $activeOnly = TRUE ){
+	public function getProperty( string $key, bool $activeOnly = TRUE )
+	{
 		if( $activeOnly && !$this->isActiveProperty( $key ) )
 			throw new InvalidArgumentException( 'Property "'.$key.'" is not set or inactive' );
 		return $this->properties[$key];
@@ -252,7 +255,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		array
 	 */
-	public function getPropertyList( $activeOnly = TRUE ){
+	public function getPropertyList( bool $activeOnly = TRUE ): array
+	{
 		$list = array();
 		foreach( array_keys( $this->properties ) as $key ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
@@ -269,7 +273,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
 	 *	@return		bool
 	 */
-	public function hasProperty( $key, $activeOnly = TRUE ){
+	public function hasProperty( string $key, bool $activeOnly = TRUE )
+	{
 		if( $activeOnly )
 			return isset( $this->properties[$key] );
 		if( $this->hasProperty( $key, TRUE ) )
@@ -283,7 +288,8 @@ class Hymn_Tool_BaseConfigEditor{
 	 *	@param		string		$key		Key of Property
 	 *	@return		bool
 	 */
-	public function isActiveProperty( $key ){
+	public function isActiveProperty( string $key ): bool
+	{
 		if( isset( $this->disabled ) )
 			if( is_array( $this->disabled ) )
 				if( in_array( $key, $this->disabled ) )
@@ -292,11 +298,50 @@ class Hymn_Tool_BaseConfigEditor{
 	}
 
 	/**
+	 *	Sets the Comment of a Property.
+	 *	@access		public
+	 *	@param		string		$key			Key of Property
+	 *	@param		string		$value			Value of Property
+	 *	@return		bool
+	 */
+	public function setProperty( string $key, $value ): bool
+	{
+		if( $this->hasProperty( $key ) )
+			$this->properties[$key] = $value;
+		else
+			$this->addProperty( $key, $value, FALSE, TRUE );
+		return is_int( $this->write() );
+	}
+
+	protected function checkFile( string $fileName )
+	{
+		if( !is_string( $fileName ) )
+			throw new InvalidArgumentException( 'File name must a string' );
+		if( !file_exists( $fileName ) )
+			throw new RuntimeException( 'File "'.addslashes( $fileName ).'" is not existing' );
+		if( !is_file( $fileName ) )
+			throw new RuntimeException( 'Give file name  "'.$fileName.'" is not a file' );
+		if( !is_readable( $fileName ) )
+			throw new RuntimeException( 'File "'.$fileName.'" is not readable' );
+		if( !is_writable( $fileName ) )
+			throw new RuntimeException( 'File "'.$fileName.'" is not writable' );
+	}
+
+	protected function createFileIfNotExists( string $fileName )
+	{
+		if( !is_string( $fileName ) )
+			throw new InvalidArgumentException( 'File name must a string' );
+		if( !file_exists( $fileName ) )
+			touch( $fileName );
+	}
+
+	/**
 	 *	Reads the entire Property File and divides Properties and Comments.
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function read(){
+	protected function read()
+	{
 		$this->comments		= array();
 		$this->disabled		= array();
 		$this->lines		= array();
@@ -350,26 +395,12 @@ class Hymn_Tool_BaseConfigEditor{
 	}
 
 	/**
-	 *	Sets the Comment of a Property.
-	 *	@access		public
-	 *	@param		string		$key			Key of Property
-	 *	@param		string		$value			Value of Property
-	 *	@return		bool
-	 */
-	public function setProperty( $key, $value ){
-		if( $this->hasProperty( $key ) )
-			$this->properties[$key] = $value;
-		else
-			$this->addProperty( $key, $value, FALSE, TRUE );
-		return is_int( $this->write() );
-	}
-
-	/**
 	 *	Writes manipulated Content to File.
 	 *	@access		protected
 	 *	@return		int			Number of written bytes
 	 */
-	protected function write(){
+	protected function write(): int
+	{
 		$newLines	= array();
 		foreach( $this->lines as $line ){
 			if( preg_match( $this->patternProperty, $line ) ){
@@ -416,4 +447,3 @@ class Hymn_Tool_BaseConfigEditor{
 		return $result;
 	}
 }
-?>

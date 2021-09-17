@@ -35,9 +35,10 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
- abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract{
-
-	protected function getShelfByArgument( $position = 0, $arguments = NULL ){
+abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
+{
+	protected function getShelfByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL )
+	{
 		$arguments  = $arguments ? $arguments : $this->client->arguments;
 		$shelfId	= $arguments->getArgument( $position );
 
@@ -56,4 +57,3 @@
 		return $shelves[$shelfId];
 	}
 }
-?>

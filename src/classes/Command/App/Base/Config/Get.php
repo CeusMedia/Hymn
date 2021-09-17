@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Base_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Base_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_App_Base_Config_Get extends Hymn_Command_Abstract implements 
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$key	= $this->client->arguments->getArgument( 0 );
 		$pathConfig	= $this->client->getConfigPath();
 

@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	const ACTION_CREATE_FOLDER	= 1;
 	const ACTION_MOVE_FILE		= 2;
 	const ACTION_LINK_FILE		= 3;
@@ -52,7 +52,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( $this->flags->dry )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
@@ -95,7 +96,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
-	protected function moveProject( $source, $dest ){
+	protected function moveProject( string $source, string $dest )
+	{
 		if( $this->flags->dry ){
 			$this->client->outVerbose( "- would move from ".$source." to ".$dest );
 			return;
@@ -104,7 +106,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		rename( $source, $dest );
 	}
 
-	protected function fixLinks( $source, $sourceUriRegex, $dest, $path = '' ){
+	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' )
+	{
 		if( !$this->flags->dry )
 			$index	= new DirectoryIterator( $dest.$path );
 		else
@@ -129,7 +132,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		}
 	}
 
-	protected function updateConfigFile( $url ){
+	protected function updateConfigFile( string $url )
+	{
 		if( !strlen( $url ) )
 			return;
 		$pathConfig	= $this->client->getConfigPath();
@@ -145,7 +149,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		}
 	}
 
-	protected function updateHymnFile( $config, $url, $sourceUriRegex, $dest ){
+	protected function updateHymnFile( $config, string $url, string $sourceUriRegex, string $dest )
+	{
 		if( !$this->flags->dry )
 			$this->client->outVerbose( "- updating hymn file" );
 		else

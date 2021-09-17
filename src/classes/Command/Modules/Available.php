@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$library	= $this->getLibrary();
 		$shelfId	= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
@@ -66,7 +67,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 		$this->client->out( $message );
 		foreach( $modules as $module ){
 			$line	= $module->id.' ('.$module->version.')';
-			if( $module->isDeprecated )
+			if( isset( $module->isDeprecate ) && $module->isDeprecated )
 				$line	.= ' [deprecated]';
 			$this->client->out( '- '.$line );
 		}

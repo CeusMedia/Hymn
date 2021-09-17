@@ -35,15 +35,16 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run( $arguments = NULL ){
+	public function run( ?Hymn_Tool_CLI_Arguments $arguments = NULL )
+	{
 		if( !( $arguments instanceof Hymn_Tool_CLI_Arguments ) )
 			$arguments	= $this->client->arguments;
 		$config		= $this->client->getConfig();

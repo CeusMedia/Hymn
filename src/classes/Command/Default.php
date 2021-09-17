@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,8 +45,8 @@ class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_I
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
-
+	public function run()
+	{
 		$language	= Hymn_Client::$language;
 		$fileName	= 'hymn.phar/locales/'.$language.'/index.txt';									//  get file name of help text
 		$text		= file_get_contents( "phar://".$fileName );										//  read default help text

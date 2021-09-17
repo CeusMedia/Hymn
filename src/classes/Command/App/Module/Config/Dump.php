@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$pathConfig	= $this->client->getConfigPath();
 		$fileName	= Hymn_Client::$fileName;
 		if( !file_exists( $pathConfig."modules" ) )

@@ -39,6 +39,12 @@ test-syntax:
 #	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
 	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED"
 
+test-phpstan:
+	@vendor/bin/phpstan analyse --configuration phpstan.neon --xdebug || true
+
+test-phpstan-save-baseline:
+	@vendor/bin/phpstan analyse --configuration phpstan.neon --generate-baseline phpstan-baseline.neon || true
+
 update:
 	@echo "Currently installed: \c" && hymn version
 	@git fetch && git checkout hymn.phar && touch stashing && git stash --include-untracked -q && git rebase && git stash pop -q && rm stashing && $(MAKE) -s create-phar

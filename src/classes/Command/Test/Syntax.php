@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE );
 		$this->client->arguments->parse();
 		$this->flags->recursive	= $this->client->arguments->getOption( 'recursive' );

@@ -35,12 +35,13 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_SQL{
-
+class Hymn_Module_SQL
+{
 	protected $client;
 	protected $flags;
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 		$this->flags	= (object) array(
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
@@ -57,7 +58,8 @@ class Hymn_Module_SQL{
 	 *	@param		object 		$module				Object of library module to install
 	 *	@return		array		List of SQL statements to execute on module installation
 	 */
-	public function getModuleInstallSql( $module ){
+	public function getModuleInstallSql( $module ): array
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
@@ -109,7 +111,8 @@ class Hymn_Module_SQL{
 	 *	@param		object 		$installedModule	Object of locally installed module
 	 *	@return		array		List of SQL statements to execute on module uninstallation
 	 */
-	public function getModuleUninstallSql( $installedModule ){
+	public function getModuleUninstallSql( $installedModule ): array
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
@@ -148,7 +151,8 @@ class Hymn_Module_SQL{
 	 *	@param		object		$module				Object of library module to update to
 	 *	@return		array		List of SQL statements to execute on module update
 	 */
-	public function getModuleUpdateSql( $installedModule, $module ){
+	public function getModuleUpdateSql( $installedModule, $module ): array
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return array();																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
@@ -178,7 +182,8 @@ class Hymn_Module_SQL{
 	 *	@param		object 		$module				Object of nodule to install
 	 *	@throws		RuntimeException		if target file is not readable
 	 */
-	public function runModuleInstallSql( $module ){
+	public function runModuleInstallSql( $module )
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
 		$scripts	= $this->getModuleInstallSql( $module );
@@ -199,7 +204,8 @@ class Hymn_Module_SQL{
 	 *	@param		object 		$installedModule	Object of locally installed module
 	 *	@return		void
 	 */
-	public function runModuleUninstallSql( $installedModule ){
+	public function runModuleUninstallSql( $installedModule )
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
 		$scripts	= $this->getModuleUninstallSql( $installedModule );
@@ -225,7 +231,8 @@ class Hymn_Module_SQL{
 	 *	@todo		implement SQL checks or in try mode nothing is done
 	 *	@todo		also maybe add transactions
 	 */
-	public function runModuleUpdateSql( $installedModule, $module, $tryMode = FALSE ){
+	public function runModuleUpdateSql( $installedModule, $module, bool $tryMode = FALSE )
+	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
 		$scripts	= $this->getModuleUpdateSql( $installedModule, $module );
@@ -253,7 +260,8 @@ class Hymn_Module_SQL{
 	 *	@return		string							PDO driver used by database connection
 	 *	@throws		\RuntimeException				if no database connection driver is set
 	 */
-	protected function checkDriver(){
+	protected function checkDriver()
+	{
 		$dbc	= $this->client->getDatabase();														//  shortcut database resource of client
 		$driver	= $dbc->getConfig( 'driver' );														//  get configured database driver
 		if( !$driver )																				//  no database driver set
@@ -268,7 +276,8 @@ class Hymn_Module_SQL{
 	 *	@return		void
 	 *	@throws		RuntimeException				if execution fails
 	 */
-	protected function executeSql( $sql ){
+	protected function executeSql( string $sql )
+	{
 		$dbc		= $this->client->getDatabase();
 		$dbc->connect( TRUE );
 		$prefix		= $dbc->getConfig( 'prefix' );

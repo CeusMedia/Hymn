@@ -34,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -44,7 +44,8 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$command	= $this->client->arguments->getArgument( 0 );				//  get first argument as command
 		$locale		= $this->client->getLocale();								//  shortcut client locale handler
 //		$words		= $locale->loadWords( 'command/help' );

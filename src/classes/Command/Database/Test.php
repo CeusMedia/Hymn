@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: database-no
@@ -45,7 +45,8 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( self::test( $this->client ) )
@@ -53,7 +54,8 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 		return $this->client->out( "Database is NOT connected." );
 	}
 
-	static public function test( $client ){
+	public static function test( Hymn_Client $client )
+	{
 		$dbc		= $client->getDatabase();
 		if( !$dbc->isConnected() )
 			$dbc->connect( TRUE );												//  force setup of new connection to database

@@ -35,32 +35,9 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $pharDownloadUrl	= 'https://github.com/CeusMedia/Hymn/raw/<VERSION>/hymn.phar';
-
-	protected function downloadFile( $url, $file ){
-		if( !( $fpSave = @fopen( $file, 'wb' ) ) )													//  try to open target file for writing
-			throw new RuntimeException( 'Permission denied to change '.$file );						//  otherwise quit with exception
-		if( !( $fpLoad = fopen( $url, 'rb' ) ) )													//  try to open source URL for reading
-			throw new RuntimeException( 'Failed to open stream to URL' );							//  otherwise quit with exception
-		while( !feof( $fpLoad ) )																	//  read source until end of file
-			fwrite( $fpSave, fread( $fpLoad, 4096 ) );												//  copy 4K block from source to target
-		fclose( $fpSave );																			//  close target file
-		fclose( $fpLoad );																			//  close connection to source URL
-	}
-
-	protected function getHymnFilePath(){
-		exec( 'whereis hymn', $output/*, $b*/ );
-		if( is_array( $output ) && count( $output ) ){
-			foreach( $output as $line ){
-				if( preg_match( '/^hymn: (.+)$/', $line ) ){
-					return preg_replace( '/^hymn: /', '', $line );
-				}
-			}
-		}
-		return NULL;
-	}
 
 	/**
 	 *	Execute this command.
@@ -68,7 +45,8 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$version	= $this->client->arguments->getArgument( 0 );
 		$version	= strlen( trim( $version ) ) ? $version : 'master';
 		if( !$version === 'master' && !preg_match( '/^[0-9.]+$/', $version ) )
@@ -89,5 +67,30 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 			$this->client->out( 'Version installed: ', FALSE );
 				passthru( 'hymn version' );
 		}
+	}
+
+	protected function downloadFile( string $url, string $file )
+	{
+		if( !( $fpSave = @fopen( $file, 'wb' ) ) )													//  try to open target file for writing
+			throw new RuntimeException( 'Permission denied to change '.$file );						//  otherwise quit with exception
+		if( !( $fpLoad = fopen( $url, 'rb' ) ) )													//  try to open source URL for reading
+			throw new RuntimeException( 'Failed to open stream to URL' );							//  otherwise quit with exception
+		while( !feof( $fpLoad ) )																	//  read source until end of file
+			fwrite( $fpSave, fread( $fpLoad, 4096 ) );												//  copy 4K block from source to target
+		fclose( $fpSave );																			//  close target file
+		fclose( $fpLoad );																			//  close connection to source URL
+	}
+
+	protected function getHymnFilePath()
+	{
+		exec( 'whereis hymn', $output/*, $b*/ );
+		if( is_array( $output ) && count( $output ) ){
+			foreach( $output as $line ){
+				if( preg_match( '/^hymn: (.+)$/', $line ) ){
+					return preg_replace( '/^hymn: /', '', $line );
+				}
+			}
+		}
+		return NULL;
 	}
 }

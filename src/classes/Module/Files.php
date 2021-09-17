@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Files{
-
+class Hymn_Module_Files
+{
 	protected $client;
 	protected $config;
 	protected $flags;
@@ -46,7 +46,8 @@ class Hymn_Module_Files{
 	 *	@access		public
 	 *	@param		Hymn_Client		$client		Hymn client instance
 	 */
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->flags	= (object) array(
@@ -68,7 +69,8 @@ class Hymn_Module_Files{
 	 *	@return		void
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( $module, $installType = "link", $tryMode = FALSE ){
+	public function copyFiles( $module, string $installType = 'link', bool $tryMode = FALSE ): bool
+	{
 		if( $this->flags->noFiles )
 			return TRUE;
 
@@ -142,9 +144,10 @@ class Hymn_Module_Files{
 	 *	@static
 	 *	@access		public
 	 *	@param		string		$path		Path to create
-	 *	@return		bool
+	 *	@return		bool|NULL
 	 */
-	static public function createPath( $path ){
+	static public function createPath( string $path ): ?bool
+	{
 		if( file_exists( $path ) )
 			return NULL;
 		if( @mkdir( $path, 0777, TRUE ) )
@@ -162,7 +165,8 @@ class Hymn_Module_Files{
 	 *	@return		array
 	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
-	protected function prepareModuleFileMap( $module, $awaitAvailableModule = TRUE ){
+	protected function prepareModuleFileMap( $module, bool $awaitAvailableModule = TRUE )
+	{
 		if( !is_object($module) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
 		if( !isset( $module->path ) ){
@@ -268,7 +272,8 @@ class Hymn_Module_Files{
 	 *	@throws		RuntimeException			if target file is not readable
 	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	public function removeFiles( $module, $tryMode = FALSE ){
+	public function removeFiles( $module, bool $tryMode = FALSE )
+	{
 		if( $this->flags->noFiles )
 			return TRUE;
 		$fileMap	= $this->prepareModuleFileMap( $module, FALSE );								//  get list of installed module files

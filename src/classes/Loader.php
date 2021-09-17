@@ -35,16 +35,18 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Loader{
-
+class Hymn_Loader
+{
 	protected $path			= 'phar://hymn.phar/';
 
-	public function __construct(){
+	public function __construct()
+	{
 		$this->loadClassesFromFolder( '' );
 	}
 
 	//  method for recursive class loading
-	protected function loadClassesFromFolder( $folder ){
+	protected function loadClassesFromFolder( string $folder )
+	{
 		foreach( new DirectoryIterator( $this->path.$folder ) as $entry ){		//  iterate folder in path
 			$nodeName	= $entry->getFilename();								//  shortcut filename
 			if( !$entry->isDot() && $entry->isDir() ){							//  found a folder node

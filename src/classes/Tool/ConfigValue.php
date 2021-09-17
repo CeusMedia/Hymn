@@ -1,6 +1,6 @@
 <?php
-class Hymn_Tool_ConfigValue{
-
+class Hymn_Tool_ConfigValue
+{
 	const COMPARED_UNDONE			= 0;
 	const COMPARED_EQUAL			= 1;
 	const COMPARED_UNEQUAL			= 2;
@@ -16,18 +16,21 @@ class Hymn_Tool_ConfigValue{
 	protected $value;
 	protected $type			= 'string';
 
-	public function __construct( $value = NULL, $type = NULL ){
+	public function __construct( $value = NULL, $type = NULL )
+	{
 		$this->setType( $type );
 		$this->setValue( $value );
 	}
 
-	public function applyIfSet( Hymn_Tool_ConfigValue $value ){
+	public function applyIfSet( Hymn_Tool_ConfigValue $value ): self
+	{
 		if( $value->is() )
 			$this->setValue( $value->getValue() );
 		return $this;
 	}
 
-	public function compareTo( Hymn_Tool_ConfigValue $value, $typeSafe = TRUE ){
+	public function compareTo( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): int
+	{
 		if( !$this->is() || !$value->is() ){
 			if( !$this->is() && !$value->is() )
 				return static::COMPARED_UNSET_BOTH;
@@ -58,7 +61,8 @@ class Hymn_Tool_ConfigValue{
 		return static::COMPARED_UNEQUAL;
 	}
 
-	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, $typeSafe = TRUE ){
+	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE )
+	{
 		if( !$this->is() || !$value->is() )
  			return FALSE;
 		if( $typeSafe )
@@ -66,11 +70,13 @@ class Hymn_Tool_ConfigValue{
 		return $this->getValue( TRUE ) !== $value->getValue( TRUE );
 	}
 
-	public function equalsToIfBothSet( Hymn_Tool_ConfigValue $value, $typeSafe = TRUE ){
+	public function equalsToIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE )
+	{
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}
 
-	public function getValue( $asTrimmedString = FALSE ){
+	public function getValue( bool $asTrimmedString = FALSE )
+	{
 		if( $asTrimmedString ){
 			if( in_array( $this->type, array( 'bool', 'boolean' ) ) )
 				return $this->value ? 'yes' : 'no';
@@ -79,15 +85,18 @@ class Hymn_Tool_ConfigValue{
 		return $this->value;
 	}
 
-	public function getType(){
+	public function getType(): string
+	{
 		return $this->type;
 	}
 
-	public function hasValue(){
+	public function hasValue(): bool
+	{
 		return $this->value !== NULL && strlen( trim( $this->value ) ) > 0;
 	}
 
-	public function is( $hasValue = FALSE ){
+	public function is( bool $hasValue = FALSE ): bool
+	{
 		if( $hasValue )
 			return strlen( trim( $this->value ) ) > 0;
 		return $this->value !== NULL;
@@ -96,7 +105,8 @@ class Hymn_Tool_ConfigValue{
 	/**
 	 *	@deprecated		use setValue and setType instead
 	 */
-	public function set( $value, $type = NULL ){
+	public function set( $value, string $type = NULL )
+	{
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );
 		if( in_array( strtolower( $this->type ), array( 'boolean', 'bool' ) ) )					//  value is boolean
@@ -105,7 +115,8 @@ class Hymn_Tool_ConfigValue{
 		return $this;
 	}
 
-	public function setValue( $value ){
+	public function setValue( $value )
+	{
 		$value		= trim( (string) $value );
 		if( $this->type === 'bool' )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
@@ -115,7 +126,8 @@ class Hymn_Tool_ConfigValue{
 		return $this;
 	}
 
-	public function setType( $type ){
+	public function setType( string $type )
+	{
 		$types		= array( 'bool', 'int', 'double', 'float', 'string', 'null' );
 		$shortmap	= array( 'boolean' => 'bool', 'integer' => 'int' );
 		$type		= is_null( $type ) ? 'string' : $type;
@@ -128,4 +140,3 @@ class Hymn_Tool_ConfigValue{
 		return $this;
 	}
 }
-?>

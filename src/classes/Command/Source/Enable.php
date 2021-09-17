@@ -35,33 +35,33 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Enable extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Source_Enable extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( !( $shelf = $this->getShelfByArgument() ) )
 			return;
 
 		if( $shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Source "'.$shelfId.'" already enabled.' );
+			$this->client->outVerbose( 'Source "'.$shelf->id.'" already enabled.' );
 			return;
 		}
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" would have been enabled.' );
+				$this->client->out( 'Source "'.$shelf->id.'" would have been enabled.' );
 			return;
 		}
 		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources->{$shelfId}->active	= TRUE;
+		$json->sources->{$shelf->id}->active	= TRUE;
 		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 		if( !$this->flags->quiet )
-			$this->client->out( 'Source "'.$shelfId.'" has been enabled.' );
+			$this->client->out( 'Source "'.$shelf->id.'" has been enabled.' );
 	}
 }
-?>

@@ -35,13 +35,9 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $defaultPath;
-
-	protected function __onInit(){
-		$this->defaultPath		= $this->client->getConfigPath().'sql/';
-	}
 
 	/**
 	 *	Execute this command.
@@ -51,7 +47,8 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		/*  --  REGISTER OPTIONS AND PARSE AGAIN  --  */
 		$this->client->arguments->registerOption( 'daily', '/^--daily=(\d+)$/', '\\1', 0 );
 		$this->client->arguments->registerOption( 'weekly', '/^--weekly=(\d+)$/', '\\1', 0);
@@ -131,5 +128,10 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 				$this->client->out( count( $list ).' database dumps would have been removed.' );
 			else
 				$this->client->out( count( $list ).' database dumps removed.' );
+	}
+
+	protected function __onInit()
+	{
+		$this->defaultPath	= $this->client->getConfigPath().'sql/';
 	}
 }

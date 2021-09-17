@@ -35,16 +35,19 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_Database_CLI_MySQL_OptionsFile{
-
+class Hymn_Tool_Database_CLI_MySQL_OptionsFile
+{
 	protected $defaultFileName		= '.mysqlOptions.cfg';
 	protected $actualFileName;
+	protected $client;
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 	}
 
-	public function create( $fileName = NULL, $strict = TRUE ){
+	public function create( ?string $fileName = NULL, bool $strict = TRUE )
+	{
 		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
 		if( file_exists( $fileName ) && $strict ){
 			$message	= 'MySQL options file "'.$fileName.'" is already existing';
@@ -72,23 +75,28 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile{
 		return $this;
 	}
 
-	public function getDefaultFileName(){
+	public function getDefaultFileName(): string
+	{
 		return $this->defaultFileName;
 	}
 
-	public function has( $fileName = NULL ){
+	public function has( ?string $fileName = NULL ): bool
+	{
 		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
 		return file_exists( $fileName );
 	}
 
-	public function remove( $fileName = NULL ){
+	public function remove( ?string $fileName = NULL ): bool
+	{
 		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
 		if( $this->has( $fileName ) )
 			@unlink( $fileName );
 		return $this;
 	}
 
-	public function setDefaultFileName( $fileName ){
+	public function setDefaultFileName( string$fileName ): self
+	{
 		$this->defaultFileName	= $fileName;
+		return $this;
 	}
 }

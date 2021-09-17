@@ -35,15 +35,16 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: verbose, veryVerbose
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$term		= $this->client->arguments->getArgument( 0 );
@@ -56,7 +57,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 
 		if( $shelfId ){
 			$msgTotal	= '%d module(s) found in module source "%s":';
-			$msgEntry	= '- %s (%s)';
+			$msgEntry	= '- %s v%s (%s)';
 			$modulesAvailable	= $this->getAvailableModulesMap( $shelfId );
 			$modulesInstalled	= $library->listInstalledModules( $shelfId );
 			foreach( $modulesAvailable as $moduleId => $module ){

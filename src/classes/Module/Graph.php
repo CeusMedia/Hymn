@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Graph{
-
+class Hymn_Module_Graph
+{
 	const STATUS_EMPTY		= 0;
 	const STATUS_CHANGED	= 1;
 	const STATUS_LINKED		= 2;
@@ -45,11 +45,12 @@ class Hymn_Module_Graph{
 
 	public $client;
 	public $library;
-	public $nodes		= array();
+	public $nodes			= array();
 	protected $flags;
-	protected $status	= self::STATUS_EMPTY;
+	protected $status		= self::STATUS_EMPTY;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
+	{
 		$this->client	= $client;
 		$this->library	= $library;
 		$this->flags	= (object) array(
@@ -66,7 +67,8 @@ class Hymn_Module_Graph{
 	 *	@param		integer			$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( $module, $level = 0 ){
+	public function addModule( $module, int $level = 0 )
+	{
 		if( array_key_exists( $module->id, $this->nodes ) ){										//  module has been added already
 			if( $this->nodes[$module->id]->level < $level )											//  this time the level is deeper
 				$this->nodes[$module->id]->level	= $level;										//  store deeper level
@@ -98,53 +100,18 @@ class Hymn_Module_Graph{
 	}
 
 	/**
-	 *	Check for loop in module relations.
-	 *	@access		protected
-	 *	@param		object		$node		Node data object containing module and in and out relations
-	 *	@param		integer		$level		Counter of recursion level, 0 by default.
-	 *	@return		object|NULL				Object if looping node or null if no loop found
-	 */
-	protected function checkForLoop( $node, $level = 0, $steps = array() ){
-		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
-			return (object) array(																	//  return loop data ...
-				'module'	=> $node->module,														//  ... containing looping module
-				'modules'	=> $steps																//  ... and the module chain
-			);
-		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
-		if( count( $node->in ) ){																	//  there are relations
-			foreach( $node->in as $parent ){														//  iterate these relations
-				$parent	= $this->nodes[$parent->id];												//  shortcut parent module
-				$loop	= $this->checkForLoop( $parent, $level + 1, $steps );						//  recurse for related node
-				if( $loop )																			//  found loop
-					return $loop;																	//  return looping node to prior rounds
-			}
-		}
-		return NULL;																				//  no loop found
-	}
-
-	protected function countModuleEdgesToRoot( $node, $level = 0 ){
-		$count	= $level;
-		if( count( $node->in ) ){
-			$ways	= array();
-			foreach( $node->in as $parent )
-				$ways[]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
-			$count	= max( $ways );
-		}
-		return $count;
-	}
-
-	/**
 	 *	Return list of all needed modules by installation order.
 	 *	Calculates order key by call level and needed modules.
 	 *	Resulting list will start with modules which are needed by others and end with meta modules.
 	 *	@access		public
 	 *	@return		array
 	 */
-	public function getOrder(){
+	public function getOrder(): array
+	{
 		if( $this->status < self::STATUS_CHANGED )
 			throw new Exception( 'No modules loaded' );
 		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations( TRUE );
+			$this->realizeRelations();
 
 		/*  calculate maximum relation depth  */
 		$list	= array();
@@ -172,22 +139,9 @@ class Hymn_Module_Graph{
 		return $modules;																			//  return list of modules by installation order
 	}
 
-	protected function realizeRelations(){
-		/*  count ingoing and outgoing module links  */
-		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
-			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
-				if( $relation->type === 'module' ){
-					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
-					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
-				}
-			}
-		}
-		$this->status	= self::STATUS_LINKED;
-		if( $this->flags->verbose && !$this->flags->quiet )
-			$this->client->outVeryVerbose( "Found ".count( $this->nodes )." modules." );
-	}
-
-	public function renderGraphFile( $targetFile = NULL/*, $type = 'needs'*/ ){							//  @todo	make indepentent from need/support
+	//  @todo	make indepentent from need/support
+	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ )
+	{
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
@@ -214,7 +168,8 @@ class Hymn_Module_Graph{
 		return $graph;
 	}
 
-	public function renderGraphImage( $graph = NULL, $targetFile = NULL ){
+	public function renderGraphImage( ?string $graph = NULL, ?string $targetFile = NULL )
+	{
 		$this->client->out( "Checking graphviz: ", FALSE );
 		$toolTest	= new Hymn_Tool_Test( $this->client );
 		$toolTest->checkShellCommand( "graphviz" );
@@ -242,5 +197,58 @@ class Hymn_Module_Graph{
 			$this->client->out( 'Graph rendering failed: '.$e->getMessage().'.' );
 		}
 	}
+
+	/**
+	 *	Check for loop in module relations.
+	 *	@access		protected
+	 *	@param		object		$node		Node data object containing module and in and out relations
+	 *	@param		integer		$level		Counter of recursion level, 0 by default.
+	 *	@return		object|NULL				Object if looping node or null if no loop found
+	 */
+	protected function checkForLoop( $node, int $level = 0, array $steps = array() )
+	{
+		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
+			return (object) array(																	//  return loop data ...
+				'module'	=> $node->module,														//  ... containing looping module
+				'modules'	=> $steps																//  ... and the module chain
+			);
+		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
+		if( count( $node->in ) ){																	//  there are relations
+			foreach( $node->in as $parent ){														//  iterate these relations
+				$parent	= $this->nodes[$parent->id];												//  shortcut parent module
+				$loop	= $this->checkForLoop( $parent, $level + 1, $steps );						//  recurse for related node
+				if( $loop )																			//  found loop
+					return $loop;																	//  return looping node to prior rounds
+			}
+		}
+		return NULL;																				//  no loop found
+	}
+
+	protected function countModuleEdgesToRoot( $node, int $level = 0 ): int
+	{
+		$count	= $level;
+		if( count( $node->in ) ){
+			$ways	= array();
+			foreach( $node->in as $parent )
+				$ways[]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
+			$count	= max( $ways );
+		}
+		return $count;
+	}
+
+	protected function realizeRelations()
+	{
+		/*  count ingoing and outgoing module links  */
+		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
+			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
+				if( $relation->type === 'module' ){
+					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
+					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
+				}
+			}
+		}
+		$this->status	= self::STATUS_LINKED;
+		if( $this->flags->verbose && !$this->flags->quiet )
+			$this->client->outVeryVerbose( "Found ".count( $this->nodes )." modules." );
+	}
 }
-?>

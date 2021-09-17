@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Installer{
-
+class Hymn_Module_Installer
+{
 	protected $client;
 	protected $config;
 	protected $library;
@@ -44,16 +44,17 @@ class Hymn_Module_Installer{
 	protected $flags;
 	protected $app;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
+	{
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
 		$this->app		= $this->config->application;											//  shortcut to application config
 		$this->flags	= (object) array(
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
+			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
+			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
 		);
 
 /*		if( isset( $this->app->installMode ) )
@@ -83,7 +84,8 @@ class Hymn_Module_Installer{
 	 *	@param		object		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( $module ){
+	public function configure( $module )
+	{
 		$source		= $module->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
@@ -183,7 +185,8 @@ class Hymn_Module_Installer{
 		}
 	}
 
-	public function install( $module, $installType = "link" ){
+	public function install( $module, string $installType = 'link' ): bool
+	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
@@ -199,7 +202,8 @@ class Hymn_Module_Installer{
 		}
 	}
 
-	public function uninstall( $module ){
+	public function uninstall( $module ): bool
+	{
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{

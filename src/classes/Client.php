@@ -54,6 +54,20 @@ class Hymn_Client
 	const EXIT_ON_EXEC			= 16;
 	const EXIT_ON_OUTPUT		= 32;
 
+	public static $fileName			= '.hymn';
+
+	public static $outputMethod		= 'print';
+
+	public static $language			= 'en';
+
+	public static $version			= '0.9.9.4';
+
+	public $arguments;
+
+	public $flags					= 0;
+
+	public $locale;
+
 	protected $baseArgumentOptions	= array(
 		'db'		=> array(
 			'pattern'	=> '/^--db=(\S+)$/',
@@ -121,11 +135,7 @@ class Hymn_Client
 		)
 	);
 
-	static public $fileName			= '.hymn';
-
-	static public $outputMethod		= 'print';
-
-	static protected $commandWithoutConfig	= array(
+	protected static $commandWithoutConfig	= array(
 		//  APP CREATION
 		'init',
 		//  SELF MANAGEMENT
@@ -134,16 +144,6 @@ class Hymn_Client
 		'test-syntax',
 		'version',
 	);
-
-	static public $language			= 'en';
-
-	static public $version			= '0.9.9.4d';
-
-	public $arguments;
-
-	public $flags					= 0;
-
-	public $locale;
 
 	protected $config;
 
@@ -159,6 +159,8 @@ class Hymn_Client
 
 	protected $output;
 
+	protected $exit;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -167,7 +169,8 @@ class Hymn_Client
 	 *	@return		void
 	 *	@throws		RuntimeException				if trying to run via web server
 	 */
-	public function __construct( $arguments, $exit = TRUE ){
+	public function __construct( array $arguments, bool $exit = TRUE )
+	{
 		$this->exit	= $exit;
 		$this->originalArguments	= $arguments;
 		ini_set( 'display_errors', TRUE );
@@ -232,41 +235,48 @@ class Hymn_Client
 			exit( Hymn_Client::EXIT_ON_END );
 	}
 
-	public function getFramework(){
+	public function getFramework(): Hymn_Tool_Framework
+	{
 		if( !$this->framework )
 			$this->framework	= new Hymn_Tool_Framework();
 		return $this->framework;
 	}
 
-	public function getConfig(){
+	public function getConfig()
+	{
 		if( !$this->config )
 			$this->readConfig();
 		return $this->config;
 	}
 
-	public function getConfigPath(){
+	public function getConfigPath(): string
+	{
 		$config	= $this->getConfig();
 		if( substr( $config->paths->config, 0, 1 ) === '/' )
 			return $config->paths->config;
 		return $config->application->uri.$config->paths->config;
 	}
 
-	public function getDatabase(){
+	public function getDatabase(): Hymn_Tool_Database_PDO
+	{
 		return $this->database;
 	}
 
-	public function getLocale(){
+	public function getLocale(): Hymn_Tool_Locale
+	{
 		return $this->locale;
 	}
 
-/*	public function getModuleInstallMode( $moduleId, $defaultInstallMode = 'dev' ){
+/*	public function getModuleInstallMode( string $moduleId, string $defaultInstallMode = 'dev' ): string
+	{
 		$mode	= $defaultInstallMode;
 		if( isset( $this->config->application->{'installMode'} ) )
 			$mode	= $this->config->application->{'installMode'};
 		return $mode;
 	}*/
 
-	public function getModuleInstallType( $moduleId, $defaultInstallType = 'copy' ){
+	public function getModuleInstallType( string $moduleId, string $defaultInstallType = 'copy' ): string
+	{
 		$type	= $defaultInstallType;
 		if( isset( $this->config->application->{'installType'} ) )
 			$type	= $this->config->application->{'installType'};
@@ -278,17 +288,16 @@ class Hymn_Client
 		return $type;
 	}
 
-	public function getModuleInstallShelf( $moduleId, $availableShelfIds, $defaultInstallShelfId ){
-		if( !array( $availableShelfIds ) )
-			throw new InvalidArgumentException( 'Available source IDs must be an array' );
+	public function getModuleInstallShelf( string $moduleId, array $availableShelfIds, string $defaultInstallShelfId )
+	{
 		if( !count( $availableShelfIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );
 
 		$modules	= $this->config->modules;														//  shortcut configured modules
 		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
-			if( isset( $modules->$moduleId->source ) )											//  module has configured source shelf
-				if( in_array( $modules->$moduleId->source, $availableShelfIds ) )				//  configured shelf source has requested module
-					return $modules->$moduleId->source;											//  return configured source shelf
+			if( isset( $modules->$moduleId->source ) )												//  module has configured source shelf
+				if( in_array( $modules->$moduleId->source, $availableShelfIds ) )					//  configured shelf source has requested module
+					return $modules->$moduleId->source;												//  return configured source shelf
 
 		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )								//  default shelf has requested module
 			return $defaultInstallShelfId;															//  return default shelf
@@ -301,10 +310,12 @@ class Hymn_Client
 	 *	@access		public
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@return		void
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, $newLine = TRUE ){
-		return $this->output->out( $lines, $newLine );
+	public function out( $lines = NULL, bool $newLine = TRUE )
+	{
+		$this->output->out( $lines, $newLine );
 	}
 
 	/**
@@ -315,8 +326,9 @@ class Hymn_Client
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = array() ){
-		return $this->output->outDeprecation( $lines );
+	public function outDeprecation( array $lines = array() )
+	{
+		$this->output->outDeprecation( $lines );
 	}
 
 	/**
@@ -326,8 +338,9 @@ class Hymn_Client
 	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
-	public function outError( $message, $exitCode = NULL ){
-		return $this->output->outError( $message, $exitCode );
+	public function outError( string $message, ?int $exitCode = NULL )
+	{
+		$this->output->outError( $message, $exitCode );
 	}
 
 	/**
@@ -337,8 +350,9 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, $newLine = TRUE ){
-		return $this->output->outVerbose( $lines, $newLine );
+	public function outVerbose( $lines, bool $newLine = TRUE )
+	{
+		$this->output->outVerbose( $lines, $newLine );
 	}
 
 	/**
@@ -348,11 +362,13 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, $newLine = TRUE ){
-		return $this->output->outVeryVerbose( $lines, $newLine );
+	public function outVeryVerbose( $lines, bool $newLine = TRUE )
+	{
+		$this->output->outVeryVerbose( $lines, $newLine );
 	}
 
-	public function runCommand( $command, $arguments = array(), $addOptions = array(), $ignoreOptions = array() ){
+	public function runCommand( string $command, array $arguments = array(), array $addOptions = array(), array $ignoreOptions = array() )
+	{
 		$args	= array( $command );
 		foreach( $arguments as $argument )
 			$args[]	= $argument;
@@ -383,14 +399,16 @@ class Hymn_Client
 
 	/*  --  PROTECTED  --  */
 
-	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject ){
+	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
+	{
 		$commandOptions		= call_user_func( array( $commandObject, 'getArgumentOptions' ) );		//  get command specific argument options
 		$options			= array_merge( $this->baseArgumentOptions, $commandOptions );			//  merge with base argument options
 		$this->arguments	= new Hymn_Tool_CLI_Arguments( $this->originalArguments, $options );	//  parse original arguments again with combined options
 		$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
 	}
 
-	protected function dispatch(){
+	protected function dispatch()
+	{
 		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
@@ -428,7 +446,8 @@ class Hymn_Client
 	 *	@return		string								Command class name
 	 *	@throws		InvalidArgumentException			if no command class is available for called command
 	 */
-	protected function getCommandClassFromCommand( $command ){
+	protected function getCommandClassFromCommand( string $command ): string
+	{
 		if( !strlen( trim( $command ) ) )
 			throw new InvalidArgumentException( 'No command given' );
 		$commandWords	= ucwords( preg_replace( '/-+/', ' ', $command ) );
@@ -441,7 +460,8 @@ class Hymn_Client
 		return $className;
 	}
 
-	protected function readConfig( $forceReload = FALSE ){
+	protected function readConfig( bool $forceReload = FALSE )
+	{
 		if( $this->config && !$forceReload )
 			return;
 

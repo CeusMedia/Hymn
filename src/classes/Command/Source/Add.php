@@ -35,36 +35,35 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
-		protected $questions	= array(
-			array(
-				'key'		=> 'key',
-				'label'		=> "- Source ID",
-				'type'		=> 'string',
-				'default'	=> 'Local_Modules',
-			),
-			array(
-				'key'		=> 'type',
-				'label'		=> "- Source type",
-				'type'		=> 'string',
-				'default'	=> 'folder',
-				'options'	=> array( "folder" ),
-			),
-			array(
-				'key'		=> 'path',
-				'label'		=> "- Source path",
-				'type'		=> 'string',
-				'default'	=> NULL,
-			),
-			array(
-				'key'		=> 'title',
-				'label'		=> "- Source description",
-				'type'		=> 'string',
-				'default'	=> NULL,
-			),
-		);
-
+class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
+	protected $questions	= array(
+		array(
+			'key'		=> 'key',
+			'label'		=> "- Source ID",
+			'type'		=> 'string',
+			'default'	=> 'Local_Modules',
+		),
+		array(
+			'key'		=> 'type',
+			'label'		=> "- Source type",
+			'type'		=> 'string',
+			'default'	=> 'folder',
+			'options'	=> array( "folder" ),
+		),
+		array(
+			'key'		=> 'path',
+			'label'		=> "- Source path",
+			'type'		=> 'string',
+			'default'	=> NULL,
+		),
+		array(
+			'key'		=> 'title',
+			'label'		=> "- Source description",
+			'type'		=> 'string',
+			'default'	=> NULL,
+		),
+	);
 
 	/**
 	 *	Execute this command.
@@ -74,7 +73,8 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->sources ) )
@@ -128,4 +128,3 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			$this->client->out( 'Source "'.$shelfId.'" has been added.' );
 	}
 }
-?>

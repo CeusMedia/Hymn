@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	const CODE_NONE					= 0;
 	const CODE_MODULES_OUTDATED		= 1;
 
@@ -48,7 +48,8 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$type		= $this->client->arguments->getArgument( 0 );
 		$shelfId	= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
@@ -153,7 +154,8 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 		return static::CODE_MODULES_OUTDATED;
 	}
 
-	protected function formatValue( $value, $type ){
+	protected function formatValue( $value, string $type )
+	{
 		if( $type === 'string' ){
 			if( !preg_match( '/^[A-Z:_]+$/', $value ) ){
 				return '"'.$value.'"';

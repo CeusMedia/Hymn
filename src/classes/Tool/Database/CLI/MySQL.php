@@ -35,21 +35,24 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_Database_CLI_MySQL{
-
+class Hymn_Tool_Database_CLI_MySQL
+{
 	protected $client;
 	protected $optionsFile;
 	protected $prefixPlaceholder		= '<%?prefix%>';
 	protected $useTempOptionsFile		= TRUE;
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client		= $client;
 		$this->optionsFile	= new Hymn_Tool_Database_CLI_MySQL_OptionsFile( $client );
 	}
 
-	public function exportToFile( $fileName, $tablePrefix = '' ){
-		$dbc		= $this->client->getDatabase();
-		$tables		= '';																			//  no table selection by default
+	public function exportToFile( string $fileName, string $tablePrefix = '' )
+	{
+		$dbc			= $this->client->getDatabase();
+		$optionsFile	= NULL;
+		$tables			= '';																		//  no table selection by default
 		if( $tablePrefix )																			//  table prefix has been set and is not empty
 			foreach( $dbc->getTables( $tablePrefix ) as $table )									//  iterate found tables with prefix
 				$tables	.= ' '.escapeshellarg( $table );											//  collect table as escaped shell arg
@@ -82,18 +85,21 @@ class Hymn_Tool_Database_CLI_MySQL{
 			) );
 		}
 		$result	 = $this->execCommandLine( $line, 'mysqldump' );
-		if( $this->useTempOptionsFile )
+		if( $this->useTempOptionsFile && $optionsFile )
 			$optionsFile->remove();
 		return $result;
 	}
 
-	public function exportToFileWithPrefix( $fileName, $prefix = NULL ){
+	public function exportToFileWithPrefix( string $fileName, ?string $prefix = NULL )
+	{
 		$result	= $this->exportToFile( $fileName, $prefix );
 		$this->insertPrefixInFile( $fileName, $prefix );
 		return $result;
 	}
 
-	public function importFile( $fileName ){
+	public function importFile( string $fileName )
+	{
+		$optionsFile	= NULL;
 		$dbc		= $this->client->getDatabase();
 		$cores		= (int) shell_exec( 'cat /proc/cpuinfo | grep processor | wc -l' );				//  get number of CPU cores
 		if( $this->useTempOptionsFile ){
@@ -128,12 +134,13 @@ class Hymn_Tool_Database_CLI_MySQL{
 			) );
 		}
 		$result	= $this->execCommandLine( $line );
-		if( $this->useTempOptionsFile )
+		if( $this->useTempOptionsFile && $optionsFile )
 			$optionsFile->remove();
 		return $result;
 	}
 
-	public function importFileWithPrefix( $fileName, $prefix = NULL ){
+	public function importFileWithPrefix( string $fileName, ?string $prefix = NULL )
+	{
 		$dbc		= $this->client->getDatabase();
 		$prefix		= $prefix ? $prefix : $dbc->getConfig( 'prefix' );								//  get table prefix from config as fallback
 		$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );				//  get file with applied table prefix
@@ -142,7 +149,8 @@ class Hymn_Tool_Database_CLI_MySQL{
 		return $result;
 	}
 
-	public function insertPrefixInFile( $fileName, $prefix ){
+	public function insertPrefixInFile( string $fileName, string $prefix )
+	{
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
 		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
@@ -162,30 +170,37 @@ class Hymn_Tool_Database_CLI_MySQL{
 		unlink( $fileName."_" );																	//  remove source file
 	}
 
-	public function setPrefixPlaceholder( $prefixPlaceholder ){
+	public function setPrefixPlaceholder( string $prefixPlaceholder ): self
+	{
 		$this->prefixPlaceholder	= $prefixPlaceholder;
+		return $this;
 	}
 
-	public function setUseTempOptionsFile( $use ){
+	public function setUseTempOptionsFile( bool $use ): self
+	{
 		$this->useTempOptionsFile	= (bool) $use;
+		return $this;
 	}
 
 	/*  --  PROTECTED  --  */
 
-	protected function _callbackReplacePrefix( $matches ){
+	protected function _callbackReplacePrefix( array $matches ): string
+	{
 		if( $matches[1] === 'for table' )
 			return $matches[1].$matches[2].$matches[4].$matches[5];
 		return $matches[1].$matches[2].$this->prefixPlaceholder.$matches[4].$matches[5];
 	}
 
-	protected function execCommandLine( $line, $command = 'mysql' ){
+	protected function execCommandLine( string $line, string $command = 'mysql' )
+	{
 		$resultCode		= 0;
 		$resultOutput	= array();
 		exec( escapeshellarg( $command ).' '.$line, $resultOutput, $resultCode );
 		return (object) array( 'code' => $resultCode, 'output' => $resultOutput );
 	}
 
-	protected function getTempFileWithAppliedTablePrefix( $sourceFile, $prefix ){
+	protected function getTempFileWithAppliedTablePrefix( string $sourceFile, string $prefix )
+	{
 		$this->client->outVerbose( 'Applying table prefix to import file ...' );
 //		$this->client->outVerbose( 'Applying table prefix ...' );
 		$tempName	= $sourceFile.'.tmp';

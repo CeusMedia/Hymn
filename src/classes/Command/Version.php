@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$this->client->out( Hymn_Client::$version.' ('.Hymn_Client::$language.')' );
 //		$this->client->out( "Working in: " . getCwd() );
 //		$this->client->out( "Hymn Path: " . __DIR__ );

@@ -34,7 +34,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-interface Hymn_Command_Interface{
+interface Hymn_Command_Interface
+{
+	public function getArgumentOptions();
 
 	/**
 	 *	Execute this command.
@@ -42,6 +44,4 @@ interface Hymn_Command_Interface{
 	 *	@return		void
 	 */
 	public function run();
-
-	public function getArgumentOptions();
 }

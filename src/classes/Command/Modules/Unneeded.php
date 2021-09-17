@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$config		= $this->client->getConfig();
 //		$this->client->getDatabase()->connect();													//  setup connection to database
 		$library	= $this->getLibrary();

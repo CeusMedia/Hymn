@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $installType	= "link";
 
 	/**
@@ -47,7 +47,8 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( $this->flags->dry && !$this->flags->quiet )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
@@ -99,8 +100,8 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$installType	= $this->client->getModuleInstallType( $module->id );
 //			$installMode	= $this->client->getModuleInstallMode( $module->id );
 			$isInstalled	= array_key_exists( $module->id, $listInstalled );
-			$isCalledModule	= $moduleId && $moduleId == $module->id;
-			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleId );
+			$isCalledModule	= in_array( $module->id, $moduleIds );
+			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleIds );
 			if( $isInstalled && !$isForced ){
 				if( !$this->flags->quiet ){
 					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
@@ -134,7 +135,8 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		}*/
 	}
 
-	protected function detectModuleSource( $moduleId ){
+	protected function detectModuleSource( string $moduleId )
+	{
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$defaultId	= $library->getDefaultShelf();

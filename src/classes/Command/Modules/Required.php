@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -46,7 +46,8 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 	 *	@return		void
 	 *	@todo		replace by recursive library solution or remove
 	 */
-	public function run(){
+	public function run()
+	{
 		$modules	= (array) $this->client->getConfig()->modules;
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );

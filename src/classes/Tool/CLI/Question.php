@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_CLI_Question{
-
+class Hymn_Tool_CLI_Question
+{
 	protected $client;
 	protected $message;
 	protected $type			= 'string';
@@ -44,7 +44,8 @@ class Hymn_Tool_CLI_Question{
 	protected $options		= array();
 	protected $break		= TRUE;
 
-	public function __construct( Hymn_Client $client, $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	public function __construct( Hymn_Client $client, string $message, string $type = 'string', $default = NULL, array $options = array(), bool $break = TRUE )
+	{
 		$this->client	= $client;
 		$this->message	= $message;
 		$this->setType( $type );
@@ -53,7 +54,8 @@ class Hymn_Tool_CLI_Question{
 		$this->setBreak( $break );
 	}
 
-	public function ask(){
+	public function ask()
+	{
 		$typeIsBoolean	= in_array( $this->type, array( 'bool', 'boolean' ) );
 		$typeIsInteger	= in_array( $this->type, array( 'int', 'integer' ) );
 		$typeIsNumber	= in_array( $this->type, array( 'float', 'double', 'decimal' ) );
@@ -89,19 +91,27 @@ class Hymn_Tool_CLI_Question{
 		return $input;
 	}
 
-	public function setBreak( $break = TRUE ){
+	public function setBreak( bool $break = TRUE ): self
+	{
 		$this->break	= $break;
+		return $this;
 	}
 
-	public function setDefault( $default = NULL ){
+	public function setDefault( bool $default = NULL ): self
+	{
 		$this->default	= $default;
+		return $this;
 	}
 
-	public function setOptions( $options = array() ){
+	public function setOptions( array $options = array() ): self
+	{
 		$this->options	= $options;
+		return $this;
 	}
 
-	public function setType( $type ){
+	public function setType( string $type ): self
+	{
 		$this->type		= $type;
+		return $this;
 	}
 }

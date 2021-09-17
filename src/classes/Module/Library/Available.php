@@ -1,5 +1,42 @@
 <?php
-class Hymn_Module_Library_Available{
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Module.Library
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2021 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Module.Library
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2021 Christian Würker
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo    		code documentation
+ */
+class Hymn_Module_Library_Available
+{
 	const MODE_AUTO			= 0;
 	const MODE_FOLDER		= 1;
 	const MODE_INDEX		= 2;
@@ -15,7 +52,13 @@ class Hymn_Module_Library_Available{
 	protected $modules		= array();
 	protected $shelves		= array();
 
-	public function addShelf( $shelfId, $path, $type, $active = TRUE, $title = NULL ){
+	public function __construct( Hymn_Client $client )
+	{
+		$this->client	= $client;
+	}
+
+	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL )
+	{
 		if( in_array( $shelfId, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Source already set by ID: '.$shelfId );
 		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
@@ -31,7 +74,8 @@ class Hymn_Module_Library_Available{
 //		ksort( $this->shelves );
 	}
 
-	public function get( $moduleId, $shelfId = NULL, $strict = TRUE ){
+	public function get( string $moduleId, string $shelfId = NULL, bool $strict = TRUE )
+	{
 		$this->loadModulesInShelves();
 		if( $shelfId )
 			return $this->getFromShelf( $moduleId, $shelfId, $strict );
@@ -51,12 +95,15 @@ class Hymn_Module_Library_Available{
 		return NULL;
 	}
 
-	public function getActiveShelves( $withModules = FALSE ){
+	public function getActiveShelves( bool $withModules = FALSE ): array
+	{
 		return $this->getShelves( array( 'active' => TRUE ), $withModules );
 	}
 
-	public function getAll( $shelfId = NULL ){
+	public function getAll( string $shelfId = NULL ): array
+	{
 		$this->loadModulesInShelves();
+		$list	= array();
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
 				throw new DomainException( 'Invalid source ID: '.$shelfId );
@@ -68,7 +115,6 @@ class Hymn_Module_Library_Available{
 			ksort( $list );
 			return $list;
 		}
-		$list	= array();
 		foreach( $this->modules as $shelfId => $modules ){
 			foreach( $modules as $module ){
 				$module->sourceId	= $shelfId;
@@ -83,14 +129,16 @@ class Hymn_Module_Library_Available{
 		return $modules;
 	}
 
-	public function getDefaultShelf(){
+	public function getDefaultShelf(): string
+	{
 		foreach( $this->shelves as $shelfId => $shelf )
 			if( $shelf->active && $shelf->default )
 				return $shelfId;
 		throw new RuntimeException( 'No default source available' );
 	}
 
-	public function getFromShelf( $moduleId, $shelfId, $strict = TRUE ){
+	public function getFromShelf( string $moduleId, string $shelfId, bool $strict = TRUE )
+	{
 		$this->loadModulesInShelves();
 		if( !in_array( $shelfId, array_keys( $this->getActiveShelves() ) ) ){
 			if( $strict )
@@ -105,7 +153,8 @@ class Hymn_Module_Library_Available{
 		return NULL;
 	}
 
-	public function getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
+	public function getModuleLogChanges( string $moduleId, string $shelfId, string $versionInstalled, string $versionAvailable ): array
+	{
 		$module	= $this->get( $moduleId, $shelfId );
 		$list	= array();
 		foreach( $module->versionLog as $change ){
@@ -118,7 +167,8 @@ class Hymn_Module_Library_Available{
 		return $list;
 	}
 
-	public function getModuleShelves( $moduleId ){
+	public function getModuleShelves( string $moduleId ): array
+	{
 		$this->loadModulesInShelves();
 		$list	= array();
 		foreach( $this->modules as $shelfId => $modules ){
@@ -128,8 +178,9 @@ class Hymn_Module_Library_Available{
 		return $list;
 	}
 
-	public function getShelf( $moduleId, $withModules = FALSE ){
-		if( !in_array( $moduleId, array_keys( $this->shelves ) ) )
+	public function getShelf( string $moduleId, bool $withModules = FALSE )
+	{
+		if( !array_key_exists( $moduleId, $this->shelves ) )
 			throw new DomainException( 'Invalid source ID: '.$moduleId );
 		$shelf	= $this->shelves[$moduleId];
 		if( !$withModules )
@@ -137,7 +188,8 @@ class Hymn_Module_Library_Available{
 		return $shelf;
 	}
 
-	public function getShelves( $filters = array(), $withModules = FALSE ){
+	public function getShelves( array $filters = array(), bool $withModules = FALSE ): array
+	{
 		$list	= array();																			//  prepare empty shelf list
 		foreach( $this->shelves as $shelfId => $shelf ){											//  iterate known shelves
 			foreach( $filters as $filterKey => $filterValue )										//  iterate given filters
@@ -149,7 +201,8 @@ class Hymn_Module_Library_Available{
 		return $list;																				//  return list of found shelves
 	}
 
-	public function readModule( $path, $moduleId ){
+	public function readModule( string $path, string $moduleId )
+	{
 		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
@@ -208,7 +261,8 @@ class Hymn_Module_Library_Available{
 		return $list;
 	}
 
-	protected function loadModulesInShelves( $force = FALSE ){
+	protected function loadModulesInShelves( bool $force = FALSE )
+	{
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
 		$this->modules	= array();																	//  reset module list

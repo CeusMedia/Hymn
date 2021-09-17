@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$library	= $this->getLibrary();
 		$shelves	= $library->getActiveShelves();
 		$this->client->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
@@ -67,4 +68,3 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 		}
 	}
 }
-?>

@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			Unit Test
  */
-class Hymn_Tool_XML_Validator{
-
+class Hymn_Tool_XML_Validator
+{
 	/**	@var		array		$error		Array of Error Information */
 	protected $error	= array();
 
@@ -45,7 +45,8 @@ class Hymn_Tool_XML_Validator{
 	 *	@access		public
 	 *	@return		int
 	 */
-	public function getErrorLine(){
+	public function getErrorLine(): int
+	{
 		if( $this->error )
 			return $this->error['line'];
 		return -1;
@@ -56,10 +57,11 @@ class Hymn_Tool_XML_Validator{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getErrorMessage(){
+	public function getErrorMessage(): string
+	{
 		if( $this->error )
 			return $this->error['message'];
-		return "";
+		return '';
 	}
 
 	/**
@@ -67,7 +69,8 @@ class Hymn_Tool_XML_Validator{
 	 *	@access		public
 	 *	@return		bool
 	 */
-	public function validateFile( $fileName ){
+	public function validateFile( string $fileName ): bool
+	{
 		if( !file_exists( $fileName ) )
 			throw new InvalidArgumentException( "XML file '".$fileName."' is not existing" );
 		$xml = file_get_contents( $fileName );
@@ -80,7 +83,8 @@ class Hymn_Tool_XML_Validator{
 	 *	@param		string		$xml		XML string to validate
 	 *	@return		bool
 	 */
-	public function validate( $xml ){
+	public function validate( string $xml ): bool
+	{
 		$parser	= xml_parser_create();
 		$dummy	= function(){};
 		xml_set_element_handler( $parser, $dummy, $dummy );
@@ -99,4 +103,3 @@ class Hymn_Tool_XML_Validator{
 		return TRUE;
 	}
 }
-?>

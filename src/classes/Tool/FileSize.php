@@ -38,8 +38,8 @@ define( 'SIZE_GIGABYTE', pow( 1024, 3 ) );
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-class Hymn_Tool_FileSize{
-
+class Hymn_Tool_FileSize
+{
 	/**	@var		array		$unitBytes		List of Byte Units */
 	public static $unitBytes	= array(
 		'B',
@@ -65,9 +65,10 @@ class Hymn_Tool_FileSize{
 	 *	@param		int			$precision		Number of Floating Point Digits
 	 *	@param		string		$indent			Space between Number and Unit
 	 *	@param		float		$edge			Factor of next higher Unit when to break
-	 *	@return		string
+	 *	@return		string|float
 	 */
-	public static function get( $filePath, $precision = 1, $indent = " ", $edge = 0.5 ){
+	public static function get( string $filePath, int $precision = 1, string $indent = " ", float $edge = 0.5 )
+	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'File "'.$filePath.'" is not existing' );
 		$float		= (float) filesize( $filePath );
@@ -86,4 +87,3 @@ class Hymn_Tool_FileSize{
 		return $float;															//  return resultung Value
 	}
 }
-?>

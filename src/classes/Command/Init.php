@@ -35,17 +35,19 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $answers	= array();
 	protected $pathPhar	= "phar://hymn.phar/";
 
-	protected function answer( $key, $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = TRUE )
+	{
 		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options, $break );
 		$this->answers[$key]	= $question->ask();
 	}
 
-	protected function configureDatabase(){
+	protected function configureDatabase()
+	{
 		$this->client->out( "Please enter database information:" );
 		$this->answer( 'database.driver', "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE );
 		$this->answer( 'database.host', "- Host", 'string', "localhost", NULL, FALSE );
@@ -56,7 +58,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->answer( 'database.prefix', "- Table Prefix", 'string', "", NULL, FALSE );
 	}
 
-	protected function createComposerFile(){
+	protected function createComposerFile()
+	{
 		$this->client->out( "Please enter more Application information:" );
 		$this->answer( 'app.author.name', "- Author Name", 'string', "John Doe", NULL, FALSE );
 		$this->answer( 'app.author.email', "- Author Email", 'string', "<john.doe@example.com>", NULL, FALSE );
@@ -70,7 +73,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "Composer file has been created." );
 	}
 
-	protected function createConfigFile(){
+	protected function createConfigFile()
+	{
 		$this->client->out( "Please enter more Application information:" );
 		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
 		$this->answer( 'app.language', "- Language", 'string', "de", array( 'en', 'de' ), FALSE );
@@ -89,12 +93,14 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "Config file has been created." );
 	}
 
-	protected function createGitIgnoreFile(){
+	protected function createGitIgnoreFile()
+	{
 		copy( $this->pathPhar."templates/gitignore", '.gitignore' );
 		$this->client->out( "Git ignore file has been created." );
 	}
 
-	protected function createMakeFile(){
+	protected function createMakeFile()
+	{
 		copy( $this->pathPhar."templates/Makefile", 'Makefile' );
 		$content	= file_get_contents( 'Makefile' );
 		$content	= str_replace( "%appName%", $this->answers['app.name'], $content );
@@ -103,7 +109,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "Make file has been created." );
 	}
 
-	protected function createUnitFile(){
+	protected function createUnitFile()
+	{
 		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
 		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
 		$pathSource	= rtrim( trim( $pathSource ), '/' );
@@ -129,8 +136,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
-
+	public function run()
+	{
 		/*  --  CREATE HYMN FILE  --  */
 		$this->client->out( "Please enter application information:" );
 		$this->answer( 'app.title', "- Application Title", 'string', "My Project", NULL, FALSE );

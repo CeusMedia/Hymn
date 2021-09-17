@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$pathName	= $this->client->arguments->getArgument( 0 );
 		$type		= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->client->arguments->getArgument( 2 );
@@ -77,7 +78,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 				$this->showChangedModule( $type, $moduleChange->source, $moduleChange->target );
 	}
 
-	protected function detectModuleChanges( $stamp, $modules ){
+	protected function detectModuleChanges( $stamp, $modules ): array
+	{
 		$moduleChanges	= array();
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) )
@@ -94,7 +96,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		return $moduleChanges;
 	}
 
-	protected function getAvailableModules( $shelfId = NULL ){
+	protected function getAvailableModules( ?string $shelfId = NULL ): array
+	{
 		$modules	= $this->getLibrary()->getAvailableModules( $shelfId );
 		$message	= 'Found '.count( $modules ).' available modules.';
 		if( $shelfId )
@@ -103,7 +106,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		return $modules;
 	}
 
-	protected function getLatestStamp( $path = NULL, $shelfId = NULL ){
+	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL ): ?string
+	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
 		$path		= preg_replace( '@\.+/@', '', $path );
 		$path		= rtrim( $path, '/' );
@@ -122,11 +126,12 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		$pathName		...
-	 *	@param		$shelfId		...
+	 *	@param		string		$pathName		...
+	 *	@param		string		$shelfId		...
 	 *	@return		array
 	 */
-	protected function getStamp( $pathName, $shelfId ){
+	protected function getStamp( string $pathName, string $shelfId ): array
+	{
 		if( $pathName ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )
@@ -152,7 +157,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@param		object		$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( $type, $moduleOld, $moduleNew ){
+	protected function showChangedModule( string $type, $moduleOld, $moduleNew )
+	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
 			$this->client->out( ' - Module changed: '.$moduleNew->id );

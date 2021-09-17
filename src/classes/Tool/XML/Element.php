@@ -34,30 +34,35 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			namespace handling: implement detection "Prefix or URI?", see http://www.w3.org/TR/REC-xml/#NT-Name
  */
-class Hymn_Tool_XML_Element extends SimpleXMLElement{
-
+class Hymn_Tool_XML_Element extends SimpleXMLElement
+{
 	/**
 	 *	Adds an attributes.
 	 *	@access		public
-	 *	@param		string		$name		Name of attribute
-	 *	@param		string		$value		Value of attribute
-	 *	@param		string		$nsPrefix	Namespace prefix of attribute
-	 *	@param		string		$nsURI		Namespace URI of attribute
+	 *	@param		mixed		$name		Name of attribute
+	 *	@param		mixed		$value		Value of attribute
+	 *	@param		mixed	$nsPrefix	Namespace prefix of attribute
+	 *	@param		string|NULL	$nsURI		Namespace URI of attribute
 	 *	@return		void
 	 *	@throws		RuntimeException		if attribute is already set
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
-	public function addAttribute( $name, $value = NULL, $nsPrefix = NULL, $nsURI = NULL ){
+	public function addAttribute( $name, $value = NULL, $nsPrefix = NULL, ?string $nsURI = NULL )
+	{
 		$key	= $nsPrefix ? $nsPrefix.':'.$name : $name;
 		if( $nsPrefix ){
 			$namespaces	= $this->getDocNamespaces();
 			$key		= $nsPrefix ? $nsPrefix.':'.$name : $name;
 			if( $this->hasAttribute( $name, $nsPrefix ) )
 				throw new RuntimeException( 'Attribute "'.$key.'" is already set' );
-			if( array_key_exists( $nsPrefix, $namespaces ) )
-				return parent::addAttribute( $key, $value, $namespaces[$nsPrefix] );
-			if( $nsURI )
-				return parent::addAttribute( $key, $value, $nsURI );
+			if( array_key_exists( $nsPrefix, $namespaces ) ){
+				parent::addAttribute( $key, $value, $namespaces[$nsPrefix] );
+				return;
+			}
+			if( $nsURI ){
+				parent::addAttribute( $key, $value, $nsURI );
+				return;
+			}
 			throw new RuntimeException( 'Namespace prefix is not registered and namespace URI is missing' );
 		}
 		if( $this->hasAttribute( $name ) )
@@ -66,26 +71,17 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	}
 
 	/**
-	 *	Add CDATA text in a node
-	 *	@param		string		$cdata_text		The CDATA value to add
-	 */
-	private function addCData( $text ){
-		$node		= dom_import_simplexml( $this );
-		$document	= $node->ownerDocument;
-		$node->appendChild( $document->createCDATASection( $text ) );
-	}
-
-	/**
 	 *	Adds a child element. Sets node content as CDATA section if necessary.
 	 *	@access		public
-	 *	@param		string		$name		Name of child element
-	 *	@param		string		$value		Value of child element
-	 *	@param		string		$nsPrefix	Namespace prefix of child element
-	 *	@param		string		$nsURI		Namespace URI of child element
-	 *	@return		XML_Element
+	 *	@param		mixed		$name		Name of child element
+	 *	@param		mixed		$value		Value of child element
+	 *	@param		mixed		$nsPrefix	Namespace prefix of child element
+	 *	@param		string|NULL	$nsURI		Namespace URI of child element
+	 *	@return		SimpleXMLElement
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
-	public function addChild( $name, $value = NULL, $nsPrefix = NULL, $nsURI = NULL ){
+	public function addChild( $name, $value = NULL, $nsPrefix = NULL, ?string $nsURI = NULL ): SimpleXMLElement
+	{
 		$child		= NULL;
 		if( $nsPrefix ){
 			$namespaces	= $this->getDocNamespaces();
@@ -110,10 +106,11 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$cdata_text		The CDATA value of the child element.
 	 *	@param		string		$nsPrefix		Namespace prefix of child element
 	 *	@param		string		$nsURI			Namespace URI of child element
-	 *	@return		XML_Element
+	 *	@return		SimpleXMLElement
 	 *	@reprecated	use addChild instead
 	 */
-	public function addChildCData( $name, $text, $nsPrefix = NULL, $nsURI = NULL ){
+	public function addChildCData( string $name, string $text, ?string $nsPrefix = NULL, ?string $nsURI = NULL ): SimpleXMLElement
+	{
 		$child	= $this->addChild( $name, NULL, $nsPrefix, $nsURI );
 		$child->addCData( $text );
 		return $child;
@@ -125,7 +122,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$nsPrefix		Namespace prefix of attributes
 	 *	@return		int
 	 */
-	public function countAttributes( $nsPrefix = NULL ){
+	public function countAttributes( ?string $nsPrefix = NULL ): int
+	{
 		return count( $this->getAttributeNames( $nsPrefix ) );
 	}
 
@@ -134,7 +132,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@access		public
 	 *	@return		int
 	 */
-	public function countChildren( $nsPrefix = NULL ){
+	public function countChildren( ?string $nsPrefix = NULL ): int
+	{
 		$i = 0;
 		foreach( $this->children( $nsPrefix, TRUE ) as $node )
 			$i++;
@@ -149,7 +148,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@return		string
 	 *	@throws		RuntimeException		if attribute is not set
 	 */
-	public function getAttribute( $name, $nsPrefix = NULL ){
+	public function getAttribute( string $name, ?string $nsPrefix = NULL ): string
+	{
 		$data	= $nsPrefix ? $this->attributes( $nsPrefix, TRUE ) : $this->attributes();
 		if( !isset( $data[$name] ) )
 			throw new RuntimeException( 'Attribute "'.( $nsPrefix ? $nsPrefix.':'.$name : $name ).'" is not set' );
@@ -162,7 +162,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$nsPrefix	Namespace prefix of attribute
 	 *	@return		array
 	 */
-	public function getAttributeNames( $nsPrefix = NULL ){
+	public function getAttributeNames( ?string $nsPrefix = NULL ): array
+	{
 		$list	= array();
 		$data	= $nsPrefix ? $this->attributes( $nsPrefix, TRUE ) : $this->attributes();
 		foreach( $data as $name => $value )
@@ -176,7 +177,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$nsPrefix	Namespace prefix of attributes
 	 *	@return		array
 	 */
-	public function getAttributes( $nsPrefix = NULL ){
+	public function getAttributes( ?string $nsPrefix = NULL ): array
+	{
 		$list	= array();
 		foreach( $this->attributes( $nsPrefix, TRUE ) as $name => $value )
 			$list[$name]	= (string) $value;
@@ -188,7 +190,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getValue(){
+	public function getValue(): string
+	{
 		return (string) $this;
 	}
 
@@ -199,7 +202,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$nsPrefix	Namespace prefix of attribute
 	 *	@return		bool
 	 */
-	public function hasAttribute( $name, $nsPrefix = NULL ){
+	public function hasAttribute( string $name, ?string $nsPrefix = NULL ): bool
+	{
 		$names	= $this->getAttributeNames( $nsPrefix );
 		return in_array( $name, $names );
 	}
@@ -211,7 +215,8 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@param		string		$nsPrefix	Namespace prefix of attribute
 	 *	@return		boolean
 	 */
-	public function removeAttribute( $name, $nsPrefix = NULL ){
+	public function removeAttribute( string $name, ?string $nsPrefix = NULL ): bool
+	{
 		$data	= $nsPrefix ? $this->attributes( $nsPrefix, TRUE ) : $this->attributes();
 		foreach( $data as $key => $attributeNode ){
 			if( $key == $name ){
@@ -222,12 +227,14 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 		return FALSE;
 	}
 
-	public function remove(){
+	public function remove()
+	{
 		$dom	= dom_import_simplexml( $this );
 		$dom->parentNode->removeChild( $dom );
 	}
 
-	public function removeChild( $name, $number = NULL ){
+	public function removeChild( string $name, ?int $number = NULL ): int
+	{
 		$nr		= 0;
 		foreach( $this->children() as $nodeName => $child ){
 			if( $nodeName == $name ){
@@ -248,14 +255,17 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	 *	@access		public
 	 *	@param		string		$name		Name of attribute
 	 *	@param		string		$value		Value of attribute, NULL means removal
-	 *	@param		string		$nsPrefix	Namespace prefix of attribute
-	 *	@param		string		$nsURI		Namespace URI of attribute
+	 *	@param		string|NULL	$nsPrefix	Namespace prefix of attribute
+	 *	@param		string|NULL	$nsURI		Namespace URI of attribute
 	 *	@return		void
 	 */
-	public function setAttribute( $name, $value, $nsPrefix = NULL, $nsURI = NULL ){
+	public function setAttribute( string $name, string $value, ?string $nsPrefix = NULL, ?string $nsURI = NULL )
+	{
 		if( $value !== NULL ){
-			if( !$this->hasAttribute( $name, $nsPrefix ) )
-				return $this->addAttribute( $name, $value, $nsPrefix, $nsURI );
+			if( !$this->hasAttribute( $name, $nsPrefix ) ){
+				$this->addAttribute( $name, $value, $nsPrefix, $nsURI );
+				return;
+			}
 			$this->removeAttribute( $name, $nsPrefix );
 			$this->addAttribute( $name, $value, $nsPrefix, $nsURI );
 		}
@@ -267,9 +277,9 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 	/**
 	 *	Returns Text Value.
 	 *	@access		public
-	 *	@return		string
 	 */
-	public function setValue( $value, $cdata = FALSE ){
+	public function setValue( string $value, bool $cdata = FALSE )
+	{
 		if( !is_string( $value ) && $value !== NULL )
 			throw new InvalidArgumentException( 'Value must be a string or NULL - '.gettype( $value ).' given' );
 
@@ -284,5 +294,15 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement{
 			dom_import_simplexml( $this )->nodeValue	= $value;									//  set node content
 		}
 	}
+
+	/**
+	 *	Add CDATA text in a node
+	 *	@param		string		$cdata_text		The CDATA value to add
+	 */
+	private function addCData( string $text )
+	{
+		$node		= dom_import_simplexml( $this );
+		$document	= $node->ownerDocument;
+		$node->appendChild( $document->createCDATASection( $text ) );
+	}
 }
-?>

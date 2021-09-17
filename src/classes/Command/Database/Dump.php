@@ -36,8 +36,8 @@
  *	@todo    		code documentation
  *	@todo			extract MySQL code to Hymn_Tool_Database_CLI_MySQL
  */
-class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags: database-no
@@ -46,7 +46,8 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !Hymn_Command_Database_Test::test( $this->client ) )

@@ -38,8 +38,8 @@
  *	@todo			code documentation
  *	@todo			implement flags (eg. quiet: return status code)
  */
-class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	const CODE_NONE					= 0;
 	const CODE_MODULES_OUTDATED		= 1;
 
@@ -51,7 +51,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 	//	$config			= $this->client->getConfig();
 
 		/* @todo	find a better solution
@@ -80,7 +81,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/*  --  PROTECTED  --  */
 
-	protected function printModuleUpdateChangelog( $update, $indent = '' ){
+	protected function printModuleUpdateChangelog( $update, string $indent = '' )
+	{
 		$changes	= $this->getLibrary()->getAvailableModuleLogChanges(
 			$update->id,
 			$update->source,
@@ -107,7 +109,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@param		array		$outdatedModules		List of outdated modules to create report about
 	 *	@return		int			Return code: 0 - CODE_NONE | 1 - CODE MODULES_OUTDATED
 	 */
-	protected function runForAllModules( $outdatedModules ){
+	protected function runForAllModules( array $outdatedModules ): int
+	{
 		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
 		$message		= '%d installed modules found.';
 		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
@@ -144,7 +147,8 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@param		string		$moduleId				ID of outdated module to create report about
 	 *	@return		int			Return code: 0 - CODE_NONE | 1 - CODE MODULES_OUTDATED
 	 */
-	protected function runForSingleModule( $outdatedModules, $moduleId ){
+	protected function runForSingleModule( array $outdatedModules, string $moduleId ): int
+	{
 		if( !$this->getLibrary()->isInstalledModule( $moduleId ) ){
 			$this->client->out( 'Module '.$moduleId.' is not installed.' );
 			return static::CODE_NONE;

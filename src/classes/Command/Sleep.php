@@ -34,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-class Hymn_Command_Sleep extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Sleep extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/** @var		integer		$maxSeconds			Upper limit of seconds (default: 3600 = 1h) */
 	static public $maxSeconds	= 3600;
 
@@ -47,7 +47,8 @@ class Hymn_Command_Sleep extends Hymn_Command_Abstract implements Hymn_Command_I
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$seconds	= $this->client->arguments->getArgument();									//  get amount of seconds from arguments
 		$seconds	= max( 0, min( self::$maxSeconds, abs( (int) $seconds ) ) );				//  limit seconds in interval (0,maxSeconds)
 		if( $seconds )																			//  amount of seconds is atleast 1

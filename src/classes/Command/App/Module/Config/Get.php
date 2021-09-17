@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
@@ -84,7 +85,8 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 		}
 	}
 
-	protected function renderValue( $item ){
+	protected function renderValue( $item ): string
+	{
 		if( in_array( $item->type, array( 'bool', 'boolean' ) ) )
 			return $item->value ? 'yes' : 'no';
 		if( in_array( $item->type, array( 'int', 'integer' ) ) )

@@ -35,13 +35,9 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $installType	= "link";
-
-	protected function __onInit(){
-		$this->library		= $this->getLibrary();													//  get module library instance
-	}
 
 	/**
 	 *	Execute this command.
@@ -51,7 +47,8 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 	//	$config				= $this->client->getConfig();
 	//	$this->client->getDatabase()->connect();													//  setup connection to database
 
@@ -92,7 +89,13 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	private function uninstallAllModules( $listInstalled ){
+	protected function __onInit()
+	{
+		$this->library		= $this->getLibrary();													//  get module library instance
+	}
+
+	private function uninstallAllModules( array $listInstalled )
+	{
 		$relation	= new Hymn_Module_Graph( $this->client, $this->library );
 		foreach( array_keys( $listInstalled ) as $installedModuleId ){
 			$module	= $this->library->getAvailableModule( $installedModuleId );
@@ -107,7 +110,8 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	private function uninstallModuleById( $moduleId, $listInstalled ){
+	private function uninstallModuleById( string $moduleId, array $listInstalled )
+	{
 		$neededBy	= array();
 		foreach( $listInstalled as $installedModuleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )

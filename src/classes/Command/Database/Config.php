@@ -35,9 +35,9 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
-	protected 		$questions	= array(
+class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
+	protected $questions	= array(
 		'driver'	=> array(
 			'key'		=> 'driver',
 			'label'		=> "- PDO Driver",
@@ -84,7 +84,8 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		$config	= $this->client->getConfig();
@@ -148,4 +149,3 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 	}
 }
-?>

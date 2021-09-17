@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$key		= $this->client->arguments->getArgument( 0 );
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
@@ -55,7 +56,8 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	}
 
 	/*  --  PROTECTED  --  */
-	protected function getCurrentValue( $config, $key ){
+	protected function getCurrentValue( $config, string $key )
+	{
 		$parts	= explode( ".", $key );
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
@@ -76,7 +78,8 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 		$this->client->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
 	}
 
-	protected function loadConfig(){
+	protected function loadConfig()
+	{
 		$filePath	= Hymn_Client::$fileName;
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'File "'.$filePath.'" is missing' );

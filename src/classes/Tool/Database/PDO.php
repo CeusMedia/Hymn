@@ -1,6 +1,6 @@
 <?php
-class Hymn_Tool_Database_PDO{
-
+class Hymn_Tool_Database_PDO
+{
 	protected $client;
 	protected $dba;
 	protected $dbc;
@@ -22,7 +22,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@param		Hymn_Client		$client		Hymn client instance
 	 *	@return		void
 	 */
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 	}
 
@@ -30,10 +31,11 @@ class Hymn_Tool_Database_PDO{
 	 *	Applied table prefix to SQL with table prefix placeholders.
 	 *	@access		public
 	 *	@param		string		$sql		SQL with prefix placeholders
-	 *	@param		string		$prefix		Table prefix to apply, default: none (empty)
+	 *	@param		string|NULL	$prefix		Table prefix to apply, default: none (empty)
 	 *	@return		string		SQL with applied table prefix
 	 */
-	public function applyTablePrefixToSql( $sql, $prefix = NULL ){
+	public function applyTablePrefixToSql( string $sql, ?string $prefix = NULL ): string
+	{
 		$prefix		= $prefix ? $prefix : $this->getConfig( 'prefix' );								//  use given or configured table prefix
 		return str_replace( "<%?prefix%>", $prefix, $sql );											//  apply table prefix to SQL and return result
 	}
@@ -46,7 +48,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@return		void
 	 *	@todo		implment force or remove (this is the way to go since dba has been extracted to prepareConnection)
 	 */
-	public function connect( $force = FALSE, $forceReset = FALSE ){
+	public function connect( bool $force = FALSE, bool $forceReset = FALSE )
+	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( $this->dbc && !$forceReset )
@@ -110,7 +113,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@return		integer
 	 *	@see		http://php.net/manual/en/pdo.exec.php
 	 */
-	public function exec( $statement ){
+	public function exec( string $statement )
+	{
 		$this->connect();
 		return $this->dbc->exec( $statement );
 	}
@@ -122,7 +126,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@return		object|string
 	 *	@throws		DomainException			if key is not set in configuration
 	 */
-	public function getConfig( $key = NULL ){
+	public function getConfig( string $key = NULL )
+	{
 		$this->prepareConnection( FALSE, FALSE );
 		if( !$this->dba )
 			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
@@ -139,7 +144,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@access		public
 	 *	@return		boolean
 	 */
-	public function isConnected(){
+	public function isConnected(): bool
+	{
 		return (bool) $this->dbc;
 	}
 
@@ -150,7 +156,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@param		string		$prefix		Table prefix (optional)
 	 *	@return		array
 	 */
-	public function getTables( $prefix = NULL ){
+	public function getTables( ?string $prefix = NULL ): array
+	{
 		$query		= "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" );
 		$result		= $this->query( $query );
 		return $result->fetchAll( PDO::FETCH_COLUMN );
@@ -164,14 +171,16 @@ class Hymn_Tool_Database_PDO{
 	 *	@return		PDOStatement
 	 *	@see		http://php.net/manual/en/pdo.query.php
 	 */
-	public function query( $query ){
+	public function query( string $query ): PDOStatement
+	{
 		$this->connect();
 		return $this->dbc->query( $query );
 	}
 
 	/*  --  PROTECTED  --  */
 
-	protected function ask( $message, $type = 'string', $default = NULL, $options = array(), $break = TRUE ){
+	protected function ask( string $message, string $type = 'string', $default = NULL, array $options = array(), bool $break = TRUE ): string
+	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
 			$message,
@@ -206,7 +215,8 @@ class Hymn_Tool_Database_PDO{
 	 *	@param		boolean		$reset			Flag: read configuration again ignoring beforehand preparation (default: no)
 	 *	@return		void
 	 */
-	protected function prepareConnection( $force = TRUE, $reset = FALSE ){
+	protected function prepareConnection( bool $force = TRUE, bool $reset = FALSE )
+	{
 		if( $this->dba && !$reset )																	//  connection access already prepared and not forced to reset
 			return;																					//  do nothing
 		$config				= $this->client->getConfig();											//  shortcut configuration from hymn file

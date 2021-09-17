@@ -35,16 +35,18 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Info{
-
+class Hymn_Module_Info
+{
 	protected $client;
 
-	public function __construct( $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 	}
 
-	public function showModuleConfig( $module ){
-		if( !count( $module->config ) )
+	public function showModuleConfig( $module )
+	{
+		if( !isset( $module->config ) || !count( $module->config ) )
 			return;
 		$this->client->out( ' - Configuration: ' );
 		foreach( $module->config as $item ){
@@ -60,31 +62,34 @@ class Hymn_Module_Info{
 		}
 	}
 
-	public function showModuleFiles( $module ){
+	public function showModuleFiles( $module )
+	{
 		$list	= array();
-		foreach( $module->files as $sectionKey => $sectionFiles ){
-			if( !count( $sectionFiles ) )
+		if( isset( $module->files ) ){
+			foreach( $module->files as $sectionKey => $sectionFiles ){
+				if( !count( $sectionFiles ) )
 				continue;
-			$list[]	= '    - '.ucfirst( $sectionKey );
-			foreach( $sectionFiles as $file ){
-				$line	= $file->file;
-				$attr	= array();
-				if( $file->type === 'style' ){
-					if( !empty( $file->source ) )
+				$list[]	= '    - '.ucfirst( $sectionKey );
+				foreach( $sectionFiles as $file ){
+					$line	= $file->file;
+					$attr	= array();
+					if( $file->type === 'style' ){
+						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
-					if( !empty( $file->load ) )
+						if( !empty( $file->load ) )
 						$attr['load']	= $file->load;
-				}
-				if( $file->type === 'image' ){
-					if( !empty( $file->source ) )
+					}
+					if( $file->type === 'image' ){
+						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
-				}
-				if( count( $attr ) ){
-					foreach( $attr as $key => $value )
+					}
+					if( count( $attr ) ){
+						foreach( $attr as $key => $value )
 						$attr[$key]	= '@'.$key.': '.$value;
-					$line .= ' ('.join( ', ', $attr ).')';
+						$line .= ' ('.join( ', ', $attr ).')';
+					}
+					$list[]	= '       - '.$line;
 				}
-				$list[]	= '       - '.$line;
 			}
 		}
 		if( $list ){
@@ -95,8 +100,9 @@ class Hymn_Module_Info{
 		}
 	}
 
-	public function showModuleHook( $module ){
-		if( !count( $module->hooks ) )
+	public function showModuleHook( $module )
+	{
+		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
 		$this->client->out( ' - Hooks: ' );
 		foreach( $module->hooks as $resource => $events ){
@@ -111,16 +117,17 @@ class Hymn_Module_Info{
 		}
 	}
 
-	public function showModuleRelations( Hymn_Module_Library $library, $module ){
+	public function showModuleRelations( Hymn_Module_Library $library, $module )
+	{
 		$module->relations->requiredBy	= array();
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
-			if( array_key_exists( $module->id, $installedModule->relations->needs, TRUE ) )
+			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
 				if( $installedModule->relations->needs[$module->id]->type === 'module' )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= array();
 		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
-			if( array_key_exists( $module->id, $availableModule->relations->needs, TRUE ) )
+			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
 				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
@@ -146,7 +153,8 @@ class Hymn_Module_Info{
 		}
 	}
 
-	public function showModuleVersions( $module ){
+	public function showModuleVersions( $module )
+	{
 		if( !count( $module->versionLog ) )
 			return;
 		$this->client->out( ' - Versions: ' );

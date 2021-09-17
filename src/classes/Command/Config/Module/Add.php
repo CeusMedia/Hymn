@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -45,7 +45,8 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$filename	= Hymn_Client::$fileName;
 		$config		= json_decode( file_get_contents( $filename ) );
 

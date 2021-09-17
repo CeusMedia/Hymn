@@ -35,13 +35,14 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Module_Config{
-
+class Hymn_Module_Config
+{
 	protected $client;
 	protected $library;
 	protected $flags;
 
-	public function __construct( Hymn_Client $client, Hymn_Module_Library $library ){
+	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
+	{
 		$this->client	= $client;
 		$this->library	= $library;
 		$this->flags	= (object) array(
@@ -51,7 +52,8 @@ class Hymn_Module_Config{
 		);
 	}
 
-	public function get( $moduleId, $configKey ){
+	public function get( string $moduleId, string $configKey )
+	{
 		$module		= $this->library->readInstalledModule( $moduleId );
 		if( array_key_exists( $configKey, $module->config ) )
 			return $module->config[$configKey];
@@ -59,13 +61,15 @@ class Hymn_Module_Config{
 		throw new InvalidArgumentException( sprintf( $msg, $moduleId, $configKey ) );			//  throw exception
 	}
 
-	public function getAll( $moduleId ){
+	public function getAll( string $moduleId )
+	{
 		$module		= $this->library->readInstalledModule( $moduleId );
 		return $module->config;
 	}
 
-	public function set( $moduleId, $configKey, $configValue ){
-		$this->get( $moduleId, $configKey, FALSE );
+	public function set( string $moduleId, string $configKey, $configValue )
+	{
+		$this->get( $moduleId, $configKey );
 		$target		= $this->client->getConfigPath().'modules/'.$moduleId.'.xml';
 		$xml		= file_get_contents( $target );
 		$xml		= new Hymn_Tool_XML_Element( $xml );
@@ -86,4 +90,3 @@ class Hymn_Module_Config{
 		clearstatcache();
 	}
 }
-?>

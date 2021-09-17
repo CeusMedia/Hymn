@@ -35,12 +35,13 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_Cache_AppModules{
-
+class Hymn_Tool_Cache_AppModules
+{
 	protected $client;
 	protected $flags;
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client	= $client;
 		$this->flags	= (object) array(
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
@@ -52,10 +53,11 @@ class Hymn_Tool_Cache_AppModules{
 	/**
 	 *	Remove app module cache file.
 	 *	@access		public
-	 *	@param		bool		$outputPrefix		Perfix of verbose message
+	 *	@param		string		$outputPrefix		Perfix of verbose message
 	 *	@return		bool|NULL
 	 */
-	public function invalidate( $outputPrefix = '' ){
+	public function invalidate( string $outputPrefix = '' ): ?bool
+	{
 		$filePath	= $this->client->getConfigPath().'modules.cache.serial';
 		$exists		= file_exists( $filePath );
 		if( !$exists )
@@ -73,7 +75,8 @@ class Hymn_Tool_Cache_AppModules{
 	 *	@param		Hymn_Client		$hymnClient		Hymn client instance
 	 *	@return		bool|NULL		Result of cache invalidation, NULL if not cached
 	 */
-	static public function staticInvalidate( Hymn_Client $hymnClient, $outputPrefix = '' ){
+	public static function staticInvalidate( Hymn_Client $hymnClient, string $outputPrefix = '' ): ?bool
+	{
 		$tool	= new Hymn_Tool_Cache_AppModules( $hymnClient );
 		return $tool->invalidate( $outputPrefix );
 	}

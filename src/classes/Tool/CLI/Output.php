@@ -35,11 +35,17 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_CLI_Output{
-
-	static public $outputMethod		= 'print';
+class Hymn_Tool_CLI_Output
+{
+	public static $outputMethod		= 'print';
 
 	public $flags;
+
+	protected $client;
+
+	protected $words;
+
+	protected $exit;
 
 	/**
 	 *	Constructor.
@@ -47,7 +53,8 @@ class Hymn_Tool_CLI_Output{
 	 *	@param		Hymn_Client		$client		Hymn client instance
 	 *	@return		void
 	 */
-	public function __construct( Hymn_Client $client, $exit = TRUE ){
+	public function __construct( Hymn_Client $client, bool $exit = TRUE )
+	{
 		$this->client	= $client;
 		$this->exit		= $exit;
 		$this->flags	= (object) array(
@@ -69,7 +76,8 @@ class Hymn_Tool_CLI_Output{
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, $newLine = TRUE ){
+	public function out( $lines = NULL, bool $newLine = TRUE )
+	{
 		if( is_null( $lines ) )
 			$lines	= array();
 		if( !is_array( $lines ) ){																	//  output content is not a list
@@ -79,7 +87,7 @@ class Hymn_Tool_CLI_Output{
 				throw new InvalidArgumentException( sprintf(										//  quit with exception
 					'Argument must be a list, string or numeric (got: %s)',							//  ... complain about invalid argument
 					gettype( $lines )																//  ... display argument type
-				) ); 	
+				) );
 			}
 			$lines	= array( $lines );																//  collect output content as list
 		}
@@ -98,7 +106,8 @@ class Hymn_Tool_CLI_Output{
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = array() ){
+	public function outDeprecation( $lines = array() )
+	{
 		if( !is_array( $lines ) ){
 			if( !is_string( $lines ) )
 				throw new InvalidArgumentException( 'Argument must be array or string.' );			//  ...
@@ -116,10 +125,11 @@ class Hymn_Tool_CLI_Output{
 	 *	Prints out error message.
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
-	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
+	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
-	public function outError( $message, $exitCode = NULL ){
+	public function outError( string $message, ?int $exitCode = NULL )
+	{
 		$this->out( $this->words->outPrefixError.$message );
 		if( $this->exit && is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
 			if( self::$outputMethod !== 'print' && ob_get_level() )
@@ -135,7 +145,8 @@ class Hymn_Tool_CLI_Output{
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, $newLine = TRUE ){
+	public function outVerbose( $lines, bool $newLine = TRUE )
+	{
 		if( $this->flags->verbose )																	//  verbose mode is on
 			if( !$this->flags->quiet )																//  quiet mode is off
 				$this->out( $lines, $newLine );
@@ -148,9 +159,9 @@ class Hymn_Tool_CLI_Output{
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, $newLine = TRUE ){
+	public function outVeryVerbose( $lines, bool $newLine = TRUE )
+	{
 		if( $this->flags->veryVerbose )																//  very verbose mode is on
 			$this->outVerbose( $lines, $newLine );
 	}
 }
-?>

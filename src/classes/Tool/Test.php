@@ -35,22 +35,24 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Tool_Test {
-
+class Hymn_Tool_Test
+{
 	protected $client;
 
-	static protected $shellCommands	= array(
+	protected static $shellCommands	= array(
 		'graphviz'	=> array(
 			'command'	=> "dot -V",
 			'error'		=> 'Missing graphViz.',
 		),
 	);
 
-	public function __construct( Hymn_Client $client ){
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client		= $client;
 	}
 
-	public function checkShellCommand( $key ){
+	public function checkShellCommand( string $key )
+	{
 		if( !array_key_exists( $key, self::$shellCommands ) )
 			throw new InvalidArgumentException( "No shell command test available for '".$key."'" );
 		$command	= self::$shellCommands[$key]['command']." >/dev/null 2>&1";
@@ -59,12 +61,14 @@ class Hymn_Tool_Test {
 			throw new RuntimeException( self::$shellCommands[$key]['error'] );
 	}
 
-	public function checkPhpfileSyntax( $filePath ){
+	public function checkPhpfileSyntax( string $filePath )
+	{
 		return static::staticCheckPhpfileSyntax( $filePath );
 	}
 
-	public function checkPhpClasses( $path = "src", $recursive = TRUE, $verbose = FALSE, $level = 0 ){
-		$indent	= str_repeat( ". ", $level );
+	public function checkPhpClasses( string $path = 'src', bool $recursive = TRUE, bool $verbose = FALSE, int $level = 0 )
+	{
+		$indent	= str_repeat( '. ', $level );
 //		if( $verbose )
 //			$this->client->out( $indent."Folder: ".$path );
 		$index	= new DirectoryIterator( $path );
@@ -78,21 +82,22 @@ class Hymn_Tool_Test {
 				if( !preg_match( '/\.php[0-9]*$/', $entry->getFilename() ) )
 					continue;
 				if( $verbose )
-					$this->client->out( $indent.". File: ".$entry->getPathname() );
+					$this->client->out( $indent.'. File: '.$entry->getPathname() );
 
 				$syntax	= $this->checkPhpfileSyntax( $entry->getPathname() );
 				if( !$syntax->valid ){
-					$this->client->out( "Invalid PHP code found in ".$entry->getPathname() );
+					$this->client->out( 'Invalid PHP code found in '.$entry->getPathname() );
 					if( $syntax->output )
 						$this->client->out( join( PHP_EOL, $syntax->output ) );
 				}
 			}
 		}
 		if( !$valid )
-			throw new RuntimeException( "Invalid PHP code has been found. Please check syntax!" );
+			throw new RuntimeException( 'Invalid PHP code has been found. Please check syntax!' );
 	}
 
-	public static function staticCheckPhpfileSyntax( $filePath ){
+	public static function staticCheckPhpfileSyntax( string $filePath )
+	{
 		$code		= 0;
 		$output		= array();
 		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
@@ -110,4 +115,3 @@ class Hymn_Tool_Test {
 		);
 	}
 }
-?>

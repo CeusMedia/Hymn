@@ -34,31 +34,18 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-class Hymn_Tool_Semver{
-
+class Hymn_Tool_Semver
+{
 	protected $actualVersion;
 	protected $semanticVersion;
 	protected $defaultOperator		= '=';
 
-	public function __construct(){
+	public function __construct()
+	{
 	}
 
-	public function setActualVersion( $version ){
-		$this->actualVersion	= $version;
-	}
-
-	public function setSemanticVersion( $version ){
-		$this->semanticVersion	= $version;
-	}
-
-	public function setDefaultOperator( $operator ){
-		$validOperators	= array( '^', '>', '<', '>=', '<=', '<>', '!=', '==', '=' );
-		if( !in_array( $operator, $validOperators ) )
-			throw new InvalidArgumentException( 'Unsupported operator: '.$operator );
-		$this->defaultOperator	= $operator;
-	}
-
-	public function check(){
+	public function check(): bool
+	{
 		if( !$this->actualVersion )
 			throw new RuntimeException( 'No actual version set' );
 		if( !$this->semanticVersion )
@@ -70,7 +57,29 @@ class Hymn_Tool_Semver{
 		);
 	}
 
-	public static function staticCheck( $actualVersion, $semanticVersion, $defaultOperator = '==' ){
+	public function setActualVersion( string $version ): self
+	{
+		$this->actualVersion	= $version;
+		return $this;
+	}
+
+	public function setDefaultOperator( string $operator ): self
+	{
+		$validOperators	= array( '^', '>', '<', '>=', '<=', '<>', '!=', '==', '=' );
+		if( !in_array( $operator, $validOperators ) )
+			throw new InvalidArgumentException( 'Unsupported operator: '.$operator );
+		$this->defaultOperator	= $operator;
+		return $this;
+	}
+
+	public function setSemanticVersion( string $version ): self
+	{
+		$this->semanticVersion	= $version;
+		return $this;
+	}
+
+	public static function staticCheck( string $actualVersion, string $semanticVersion, string $defaultOperator = '==' ): bool
+	{
 		$operator		= $defaultOperator;
 		$version		= $semanticVersion;
 		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';

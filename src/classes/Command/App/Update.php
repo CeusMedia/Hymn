@@ -36,8 +36,8 @@
  *	@todo    		code documentation
  *	@todo 			handle relations (new relations after update)
  */
-class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface{
-
+class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
+{
 	protected $installType	= "link";
 	protected $installMode	= "dev";
 
@@ -49,7 +49,8 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		$config				= $this->client->getConfig();											//  shortcut hymn config
 		$library			= $this->getLibrary();													//  get module library instance
 	//	$this->client->getDatabase()->connect();													//  setup connection to database

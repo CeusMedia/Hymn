@@ -35,80 +35,105 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
-class Hymn_Module_Library{
-
+class Hymn_Module_Library
+{
 	protected $listModulesAvailable	= NULL;
 	protected $listModulesInstalled	= NULL;
 	protected $useCache				= FALSE;
 
-	protected $modules		= array();
 	protected $client;
-	protected $installed;
+
+	protected $modules		= array();
+
+	/**
+	 * @var		Hymn_Module_Library_Available		$available
+	 */
 	protected $available;
 
-	public function __construct( Hymn_Client $client ){
+	/**
+	 * @var		Hymn_Module_Library_Installed		$installed
+	 */
+	protected $installed;
+
+	public function __construct( Hymn_Client $client )
+	{
 		$this->client		= $client;
 		$this->installed	= new Hymn_Module_Library_Installed( $client );
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
-	public function addShelf( $moduleId, $path, $type, $active = TRUE, $title = NULL ){
-		return $this->available->addShelf( $moduleId, $path, $type, $active, $title );
+	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL )
+	{
+		return $this->available->addShelf( $shelfId, $path, $type, $active, $title );
 	}
 
-	public function getActiveShelves( $withModules = FALSE ){
+	public function getActiveShelves( bool $withModules = FALSE ): array
+	{
 		return $this->available->getActiveShelves( $withModules );
 	}
 
-	public function getAvailableModule( $moduleId, $shelfId = NULL, $strict = TRUE ){
+	public function getAvailableModule( string $moduleId, ?string $shelfId = NULL, bool $strict = TRUE )
+	{
 		return $this->available->get( $moduleId, $shelfId, $strict );
 	}
 
-	public function getAvailableModuleFromShelf( $moduleId, $shelfId, $strict = TRUE ){
+	public function getAvailableModuleFromShelf( string $moduleId, string $shelfId, bool $strict = TRUE )
+	{
 		return $this->available->getFromShelf( $moduleId, $shelfId, $strict );
 	}
 
-	public function getAvailableModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable ){
+	public function getAvailableModuleLogChanges( string $moduleId, string $shelfId, string $versionInstalled, string $versionAvailable ): array
+	{
 		return $this->available->getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable );
 	}
 
-	public function getAvailableModules( $shelfId = NULL ){
+	public function getAvailableModules( ?string $shelfId = NULL ): array
+	{
 		return $this->available->getAll( $shelfId );
 	}
 
-	public function getAvailableModuleShelves( $moduleId ){
+	public function getAvailableModuleShelves( string $moduleId ): array
+	{
 		return $this->available->getModuleShelves( $moduleId );
 	}
 
-	public function getDefaultShelf(){
+	public function getDefaultShelf(): string
+	{
 		return $this->available->getDefaultShelf();
 	}
 
-	public function getShelf( $moduleId, $withModules = FALSE ){
+	public function getShelf( string $moduleId, bool $withModules = FALSE )
+	{
 		return $this->available->getShelf( $moduleId, $withModules );
 	}
 
-	public function getShelves( $filters = array(), $withModules = FALSE ){
+	public function getShelves( array $filters = array(), bool $withModules = FALSE ): array
+	{
 		return $this->available->getShelves( $filters, $withModules );
 	}
 
-	public function isAvailableModuleInShelf( $moduleId, $shelfId ){
+	public function isAvailableModuleInShelf( string $moduleId, string $shelfId ): bool
+	{
 		return (bool) $this->available->getFromShelf( $moduleId, $shelfId, FALSE );
 	}
 
-	public function isInstalledModule( $moduleId ){
+	public function isInstalledModule( string $moduleId ): bool
+	{
 		return $this->installed->has( $moduleId );
 	}
 
-	public function isActiveShelf( $shelfId ){
+	public function isActiveShelf( string $shelfId ): bool
+	{
 		return array_key_exists( $shelfId, $this->getActiveShelves() );
 	}
 
-	public function isShelf( $shelfId ){
+	public function isShelf( string $shelfId ): bool
+	{
 		return array_key_exists( $shelfId, $this->getShelves() );
 	}
 
-	public function listInstalledModules( $shelfId = NULL ){
+	public function listInstalledModules( ?string $shelfId = NULL ): array
+	{
 //		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize shelves in cache
 //			return $this->listModulesInstalled;									//  @todo realize shelves in cache
 		$list	= $this->installed->getAll( $shelfId );
@@ -116,12 +141,15 @@ class Hymn_Module_Library{
 		return $list;
 	}
 
-	public function readInstalledModule( $moduleId ){
+	public function readInstalledModule( string $moduleId )
+	{
 		return $this->installed->get( $moduleId );
 	}
 
-	public function useCache( $useCache = TRUE ){
+	public function useCache( bool $useCache = TRUE ): self
+	{
 		$this->useCache		= $useCache;
+		return $this;
 	}
 
 	public function setReadMode( int $mode ): self

@@ -34,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
-class Hymn_Tool_Locale{
-
+class Hymn_Tool_Locale
+{
 	const TYPE_UNKNOWN	= 0;
 	const TYPE_TEXT		= 1;
 	const TYPE_WORDS	= 2;
@@ -49,7 +49,8 @@ class Hymn_Tool_Locale{
 	 *	@access		public
 	 *	@return		object
 	 */
-	public function __construct( $language = NULL ){
+	public function __construct( $language = NULL )
+	{
 		if( is_null( $language ) )
 			$language		= Hymn_Client::$language;
 		$this->language		= $language;
@@ -61,7 +62,8 @@ class Hymn_Tool_Locale{
 	 *	@access		public
 	 *	@return		string		Language currently set for locale
 	 */
-	public function getLanguage(){
+	public function getLanguage(): string
+	{
 		return $this->language;
 	}
 
@@ -73,7 +75,8 @@ class Hymn_Tool_Locale{
 	 *	@return		boolean
 	 *	@throws		RuntimeException		if given type is invalid
 	 */
-	public function has( $path, $type ){
+	public function has( string $path, int $type ): bool
+	{
 		if( $type === static::TYPE_TEXT )
 			return $this->hasText( $path );
 		else if( $type === static::TYPE_WORDS )
@@ -82,14 +85,16 @@ class Hymn_Tool_Locale{
 			throw new RangeException( 'Invalid type given' );
 	}
 
-	public function hasText( $path ){
+	public function hasText( string $path ): bool
+	{
 		$filePath	= $this->baseUri.$this->language.'/'.$path.'.txt';
 		if( !file_exists( $filePath ) )
 			return FALSE;
 		return TRUE;
 	}
 
-	public function hasWords( $path ){
+	public function hasWords( string $path ): bool
+	{
 		$filePath	= $this->baseUri.$this->language.'/'.$path.'.ini';
 		if( !file_exists( $filePath ) )
 			return FALSE;
@@ -103,7 +108,8 @@ class Hymn_Tool_Locale{
 	 *	@return		string		Content of locale file
 	 *	@throws		RuntimeException		if text file is not existing
 	 */
-	public function load( $path, $type ){
+	public function load( string $path, int $type ): string
+	{
 		if( $type === static::TYPE_TEXT )
 			return $this->loadText( $path );
 		else if( $type === static::TYPE_WORDS )
@@ -119,7 +125,8 @@ class Hymn_Tool_Locale{
 	 *	@return		string		Content of locale file
 	 *	@throws		RuntimeException		if text file is not existing
 	 */
-	public function loadText( $path ){
+	public function loadText( string $path ): string
+	{
 		if( !$this->hasText( $path ) ){
 			throw new RuntimeException( sprintf(
 				'Missing text file for "%s"',
@@ -140,7 +147,8 @@ class Hymn_Tool_Locale{
 	 *	@return		object		Object map of words
 	 *	@throws		RuntimeException		if words file is not existing
 	 */
-	public function loadWords( $path ){
+	public function loadWords( string $path ): object
+	{
 		if( !$this->hasWords( $path ) ){
 			throw new RuntimeException( sprintf(
 				'Missing words file for "%s"',
@@ -161,7 +169,8 @@ class Hymn_Tool_Locale{
 	 *	@param		string		$language	Language to set for locale
 	 *	@return		self					for chainability
 	 */
-	public function setLanguage( $language ){
+	public function setLanguage( string $language ): self
+	{
 		$this->language		= $language;
 		return $this;
 	}
