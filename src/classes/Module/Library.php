@@ -123,4 +123,10 @@ class Hymn_Module_Library{
 	public function useCache( $useCache = TRUE ){
 		$this->useCache		= $useCache;
 	}
+
+	public function setReadMode( int $mode ): self
+	{
+		$this->available->setMode( $mode );
+		return $this;
+	}
 }

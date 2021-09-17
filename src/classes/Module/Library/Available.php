@@ -1,6 +1,17 @@
 <?php
 class Hymn_Module_Library_Available{
+	const MODE_AUTO			= 0;
+	const MODE_FOLDER		= 1;
+	const MODE_INDEX		= 2;
 
+	const MODES				= [
+		self::MODE_AUTO,
+		self::MODE_FOLDER,
+		self::MODE_INDEX,
+	];
+
+	protected $client;
+	protected $mode			= self::MODE_AUTO;
 	protected $modules		= array();
 	protected $shelves		= array();
 
@@ -151,21 +162,48 @@ class Hymn_Module_Library_Available{
 		return $module;																				//  return module
 	}
 
+	public function setMode( int $mode ): self
+	{
+		if( !in_array( $mode, self::MODES, TRUE ) )
+			throw new InvalidArgumentException( 'Invalid mode' );
+		$this->mode	= $mode;
+		return $this;
+	}
+
 	//  --  PROTECTED  --  //
 
-	protected function listModulesInPath( $path = "" ){
-//		if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
-//			return $this->listModulesAvailable;									//  @todo realize shelves in cache
-		$list		= array();
-		$iterator	= new RecursiveDirectoryIterator( $path );
-		$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
-		foreach( $index as $entry ){
-			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
-				continue;
-			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
-			$module	= $this->readModule( $path, $key );
-			$list[$key]	= $module;
+	protected function listModulesInPath( string $path = '' ): array
+	{
+		$start	= microtime( TRUE );
+		$this->client->outVeryVerbose( 'Source Path: '.$path.PHP_EOL );
+		$indexFile	= $path.'/index.json';
+		$mode		= $this->mode;
+		if( $mode === self::MODE_AUTO )
+			$mode	= file_exists( $indexFile ) ? self::MODE_INDEX : self::MODE_FOLDER;
+		$list	= array();
+		switch( $mode ){
+			case self::MODE_INDEX;
+				$this->client->outVeryVerbose( 'Source strategy: Index ('.$indexFile.')'.PHP_EOL );
+				$index	= json_decode( file_get_contents( $indexFile ) );
+				foreach( $index->modules as $module )
+					$list[$module->id]	= $module;
+				break;
+			case self::MODE_FOLDER:
+				$this->client->outVeryVerbose( 'Source strategy: Folder'.PHP_EOL );
+	//			if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
+	//				return $this->listModulesAvailable;									//  @todo realize shelves in cache
+				$iterator	= new RecursiveDirectoryIterator( $path );
+				$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
+				foreach( $index as $entry ){
+					if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
+						continue;
+					$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
+					$module	= $this->readModule( $path, $key );
+					$list[$key]	= $module;
+				}
+				break;
 		}
+		$this->client->outVeryVerbose( 'Time: '.number_format( ( microtime( TRUE ) - $start ), 3 ).'s' );
 //		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
