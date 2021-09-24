@@ -60,13 +60,15 @@ class Hymn_Client
 
 	public static $language			= 'en';
 
-	public static $version			= '0.9.9.4';
+	public static $version			= '0.9.9.4e';
 
 	public $arguments;
 
 	public $flags					= 0;
 
 	public $locale;
+
+	public $memoryUsageAtStart;
 
 	protected $baseArgumentOptions	= array(
 		'db'		=> array(
@@ -157,6 +159,7 @@ class Hymn_Client
 
 	protected $originalArguments	= array();
 
+	/** @var	Hymn_Tool_CLI_Output	$output */
 	protected $output;
 
 	protected $exit;
@@ -171,61 +174,31 @@ class Hymn_Client
 	 */
 	public function __construct( array $arguments, bool $exit = TRUE )
 	{
-		$this->exit	= $exit;
+		$this->exit					= $exit;
 		$this->originalArguments	= $arguments;
+
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		if( class_exists( 'Locale' ) ){
-			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
-			if( in_array( $language, array( 'en', 'de' ) ) )
-				self::$language	= $language;
-		}
-		$this->database		= new Hymn_Tool_Database_PDO( $this );
-		$this->locale		= new Hymn_Tool_Locale( Hymn_Client::$language );
-		$this->words		= $this->locale->loadWords( 'client' );
-
-		if( self::$outputMethod !== 'print' )
-			ob_start();
-
-		$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
-		if( $this->arguments->getOption( 'dry' ) )
-			$this->flags	|= self::FLAG_DRY;
-		if( $this->arguments->getOption( 'force' ) )
-			$this->flags	|= self::FLAG_FORCE;
-		if( $this->arguments->getOption( 'force' ) )
-			$this->flags	|= self::FLAG_FORCE;
-		if( $this->arguments->getOption( 'db' ) === 'no' )
-			$this->flags	|= self::FLAG_NO_DB;
-		if( $this->arguments->getOption( 'db' ) === 'only' )
-			$this->flags	|= self::FLAG_NO_FILES;
-		if( $this->arguments->getOption( 'quiet' ) )
-			$this->flags	|= self::FLAG_QUIET;
-		if( $this->arguments->getOption( 'verbose' ) ){
-			$this->flags	|= self::FLAG_VERBOSE;
-			$this->flags	|= self::FLAG_NO_INTERACTION;
-		}
-		if( $this->arguments->getOption( 'very-verbose' ) ){
-			$this->flags	|= self::FLAG_VERBOSE;
-			$this->flags	|= self::FLAG_VERY_VERBOSE;
-		}
-		if( $this->arguments->getOption( 'interactive' ) === 'no' )
-			$this->flags	|= self::FLAG_NO_INTERACTION;
-		self::$fileName		= $this->arguments->getOption( 'file' );
-		$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
-
 		try{
+			$this->parseArguments( $arguments );
+			$this->realizeLanguage();
+			$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
+			$this->printMemoryUsage( 'at start' );
+
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
 			$action	= $this->arguments->getArgument();
 			if( !$action && $this->arguments->getOption( 'help' ) ){
 				array_unshift( $arguments, 'help' );
-				$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->parseArguments( $arguments, [], TRUE );
 			}
 			else if( $this->arguments->getOption( 'version' ) ){
 				array_unshift( $arguments, 'version' );
-				$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $this->baseArgumentOptions );
+				$this->parseArguments( $arguments, [], TRUE );
 			}
+
+			self::$fileName		= $this->arguments->getOption( 'file' );
 			$this->dispatch();
 		}
 		catch( Exception $e ){
@@ -259,12 +232,28 @@ class Hymn_Client
 
 	public function getDatabase(): Hymn_Tool_Database_PDO
 	{
+		if( !$this->database )
+			$this->database		= new Hymn_Tool_Database_PDO( $this );
 		return $this->database;
 	}
 
 	public function getLocale(): Hymn_Tool_Locale
 	{
 		return $this->locale;
+	}
+
+	public function printMemoryUsage( string $position = '' )
+	{
+		$bytes	= memory_get_usage();
+		if( !$this->memoryUsageAtStart )
+			$this->memoryUsageAtStart	= $bytes;
+
+		$difference	= $bytes - $this->memoryUsageAtStart;
+		$this->out( vsprintf( 'Memory usage%s: +%s (%s)', [
+			strlen( trim( $position ) ) ? ' '.trim( $position ) : '',
+			Hymn_Tool_FileSize::formatBytes( $difference ),
+			Hymn_Tool_FileSize::formatBytes( $bytes ),
+		] ) );
 	}
 
 /*	public function getModuleInstallMode( string $moduleId, string $defaultInstallMode = 'dev' ): string
@@ -369,6 +358,7 @@ class Hymn_Client
 
 	public function runCommand( string $command, array $arguments = array(), array $addOptions = array(), array $ignoreOptions = array() )
 	{
+		$this->printMemoryUsage( 'at Client::runCommand' );
 		$args	= array( $command );
 		foreach( $arguments as $argument )
 			$args[]	= $argument;
@@ -401,9 +391,8 @@ class Hymn_Client
 
 	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
 	{
-		$commandOptions		= call_user_func( array( $commandObject, 'getArgumentOptions' ) );		//  get command specific argument options
-		$options			= array_merge( $this->baseArgumentOptions, $commandOptions );			//  merge with base argument options
-		$this->arguments	= new Hymn_Tool_CLI_Arguments( $this->originalArguments, $options );	//  parse original arguments again with combined options
+		$commandOptions	= call_user_func( array( $commandObject, 'getArgumentOptions' ) );			//  get command specific argument options
+		$this->parseArguments( $this->originalArguments, $commandOptions, TRUE );					//  parse original arguments again with command specific options
 		$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
 	}
 
@@ -460,6 +449,35 @@ class Hymn_Client
 		return $className;
 	}
 
+	protected function parseArguments( $arguments, array $options = array(), bool $force = FALSE )
+	{
+		$options	= array_merge( $this->baseArgumentOptions, $options );
+		if( $this->arguments && !$force )
+			return;
+		$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $options );
+
+		if( $force )
+			$this->flags	= 0;
+		$map	= [
+			'dry'			=> [self::FLAG_DRY],
+			'force'			=> [self::FLAG_FORCE],
+			'quiet'			=> [self::FLAG_QUIET],
+			'verbose'		=> [self::FLAG_VERBOSE],
+			'very-verbose'	=> [self::FLAG_VERBOSE, self::FLAG_VERY_VERBOSE],
+		];
+		foreach( $map as $key => $flags )
+			if( $this->arguments->getOption( $key ) )
+				foreach( $flags as $flag )
+					$this->flags	|= $flag;
+
+		if( $this->arguments->getOption( 'db' ) === 'no' )
+			$this->flags	|= self::FLAG_NO_DB;
+		if( $this->arguments->getOption( 'db' ) === 'only' )
+			$this->flags	|= self::FLAG_NO_FILES;
+		if( $this->arguments->getOption( 'interactive' ) === 'no' )
+			$this->flags	|= self::FLAG_NO_INTERACTION;
+	}
+
 	protected function readConfig( bool $forceReload = FALSE )
 	{
 		if( $this->config && !$forceReload )
@@ -467,5 +485,16 @@ class Hymn_Client
 
 		$config	= new Hymn_Tool_CLI_Config( $this );
 		$this->config	= $config->readConfig();
+	}
+
+	protected function realizeLanguage()
+	{
+		if( class_exists( 'Locale' ) ){
+			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
+			if( in_array( $language, array( 'en', 'de' ) ) )
+				self::$language	= $language;
+		}
+		$this->locale		= new Hymn_Tool_Locale( self::$language );
+		$this->words		= $this->locale->loadWords( 'client' );
 	}
 }

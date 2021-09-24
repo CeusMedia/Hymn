@@ -54,24 +54,43 @@ class Hymn_Tool_FileSize
 	);
 
 	/**
-	 *	Formats Number of Bytes by switching to next higher Unit if an set Edge is reached.
-	 *	Edge is a Factor when to switch to ne next higher Unit, eG. 0.5 means 50% of 1024.
+	 *	Formats file size by switching to next higher unit if an set edge is reached.
+	 *	Edge is a factor when to switch to ne next higher unit, eG. 0.5 means 50% of 1024.
 	 *	If you enter 512 (B) it will return 0.5 KB.
-	 *	Caution! With Precision at 0 you may have Errors from rounding.
-	 *	To avoid the Units to be appended, enter FALSE or NULL for indent.
+	 *	Caution! With precision at 0 you may have rounding errors.
+	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
 	 *	@access		public
 	 *	@static
-	 *	@param		float		$float			Number of Bytes
-	 *	@param		int			$precision		Number of Floating Point Digits
-	 *	@param		string		$indent			Space between Number and Unit
-	 *	@param		float		$edge			Factor of next higher Unit when to break
+	 *	@param		float		$float			Number of bytes
+	 *	@param		int			$precision		Number of floating point digits
+	 *	@param		string		$indent			Space between number and unit
+	 *	@param		float		$edge			Factor of next higher unit when to break
 	 *	@return		string|float
 	 */
 	public static function get( string $filePath, int $precision = 1, string $indent = " ", float $edge = 0.5 )
 	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'File "'.$filePath.'" is not existing' );
-		$float		= (float) filesize( $filePath );
+		return self::formatBytes( filesize( $filePath ), $precision, $indent, $edge );
+	}
+
+	/**
+	 *	Formats number of bytes by switching to next higher unit if an set edge is reached.
+	 *	Edge is a factor when to switch to ne next higher unit, eG. 0.5 means 50% of 1024.
+	 *	If you enter 512 (B) it will return 0.5 KB.
+	 *	Caution! With precision at 0 you may have rounding errors.
+	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
+	 *	@access		public
+	 *	@static
+	 *	@param		float		$float			Number of bytes
+	 *	@param		int			$precision		Number of floating point digits
+	 *	@param		string		$indent			Space between number and unit
+	 *	@param		float		$edge			Factor of next higher unit when to break
+	 *	@return		string|float
+	 */
+	public static function formatBytes( int $bytes, int $precision = 1, string $indent = " ", float $edge = 0.5 )
+	{
+		$float		= (float) $bytes;
 		$unitKey	= 0;														//  step to first Unit
 		$edge		= abs( $edge );												//  avoid negative Edges
 		$edge		= $edge > 1 ? 1 : $edge;									//  avoid senseless Edges
@@ -83,7 +102,7 @@ class Hymn_Tool_FileSize
 		if( is_int( $precision ) )												//  Precision is set
 			$float	= round( $float, $precision );								//  round Value
 		if( is_string( $indent ) )												//  Indention is set
-			$float	= $float.$indent.self::$unitBytes[$unitKey];					//  append Unit
+			$float	= $float.$indent.self::$unitBytes[$unitKey];				//  append Unit
 		return $float;															//  return resultung Value
 	}
 }
