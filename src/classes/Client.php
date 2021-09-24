@@ -62,6 +62,7 @@ class Hymn_Client
 
 	public static $version			= '0.9.9.4e';
 
+	/** @var	Hymn_Tool_CLI_Arguments 	$arguments		Parsed CLI arguments and options */
 	public $arguments;
 
 	public $flags					= 0;
@@ -184,7 +185,8 @@ class Hymn_Client
 			$this->parseArguments( $arguments );
 			$this->realizeLanguage();
 			$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
-			$this->printMemoryUsage( 'at start' );
+			$this->outVeryVerbose( 'hymn v'.self::$version );
+			$this->outVeryVerbose( $this->getMemoryUsage( 'at start' ) );
 
 			if( getEnv( 'HTTP_HOST' ) )
 				throw new RuntimeException( 'Access denied' );
@@ -203,6 +205,9 @@ class Hymn_Client
 		}
 		catch( Exception $e ){
 			$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_SETUP );
+		}
+		finally{
+			$this->outVeryVerbose( $this->getMemoryUsage( 'at the end' ) );
 		}
 		if( $this->exit )
 			exit( Hymn_Client::EXIT_ON_END );
@@ -242,18 +247,18 @@ class Hymn_Client
 		return $this->locale;
 	}
 
-	public function printMemoryUsage( string $position = '' )
+	public function getMemoryUsage( string $position = '' )
 	{
 		$bytes	= memory_get_usage();
 		if( !$this->memoryUsageAtStart )
 			$this->memoryUsageAtStart	= $bytes;
 
 		$difference	= $bytes - $this->memoryUsageAtStart;
-		$this->out( vsprintf( 'Memory usage%s: +%s (%s)', [
+		return vsprintf( 'Memory usage%s: +%s (%s)', [
 			strlen( trim( $position ) ) ? ' '.trim( $position ) : '',
 			Hymn_Tool_FileSize::formatBytes( $difference ),
 			Hymn_Tool_FileSize::formatBytes( $bytes ),
-		] ) );
+		] );
 	}
 
 /*	public function getModuleInstallMode( string $moduleId, string $defaultInstallMode = 'dev' ): string
@@ -358,7 +363,8 @@ class Hymn_Client
 
 	public function runCommand( string $command, array $arguments = array(), array $addOptions = array(), array $ignoreOptions = array() )
 	{
-		$this->printMemoryUsage( 'at Client::runCommand' );
+		if( $this->flags & self::FLAG_VERY_VERBOSE )
+			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
 		$args	= array( $command );
 		foreach( $arguments as $argument )
 			$args[]	= $argument;

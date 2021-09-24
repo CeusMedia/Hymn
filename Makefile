@@ -35,9 +35,10 @@ test-units:
 	@./vendor/bin/phpunit
 
 test-syntax:
-	@echo "Checking syntax..."
-#	@find src/classes -type f -print0 | xargs -0 -n1 xargs php -l
-	@hymn test-syntax -r src/classes && echo "Result: OK" || echo "Result: FAILED"
+	@hymn test-syntax && echo "Result: OK" || echo "Result: FAILED"
+
+test-syntax-verbose:
+	@hymn test-syntax -vv && echo "Result: OK" || echo "Result: FAILED"
 
 test-phpstan:
 	@vendor/bin/phpstan analyse --configuration phpstan.neon --xdebug || true

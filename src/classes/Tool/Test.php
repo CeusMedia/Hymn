@@ -66,13 +66,17 @@ class Hymn_Tool_Test
 		return static::staticCheckPhpfileSyntax( $filePath );
 	}
 
-	public function checkPhpClasses( string $path = 'src', bool $recursive = TRUE, bool $verbose = FALSE, int $level = 0 )
+	public function checkPhpClasses( ?string $path = NULL, ?bool $recursive = FALSE, bool $verbose = FALSE, int $level = 0 )
 	{
-		$indent	= str_repeat( '. ', $level );
-//		if( $verbose )
-//			$this->client->out( $indent."Folder: ".$path );
+		$path		= $path ?? 'src/classes';
+		$path		= ltrim( rtrim( trim( $path ), '/' ), './' );
+		$recursive	= $recursive || $path === 'src/classes';
+
+		$indent	= '- ';
 		$index	= new DirectoryIterator( $path );
 		$valid	= TRUE;
+		if( $level === 0 )
+			$this->client->outVerbose( sprintf( 'Checking syntax of files in folder %s:', $path ) );
 		foreach( $index as $entry ){
 			if( $entry->isDot() )
 				continue;
@@ -81,8 +85,7 @@ class Hymn_Tool_Test
 			else if( $entry->isFile() ){
 				if( !preg_match( '/\.php[0-9]*$/', $entry->getFilename() ) )
 					continue;
-				if( $verbose )
-					$this->client->out( $indent.'. File: '.$entry->getPathname() );
+				$this->client->outVerbose( $indent.$entry->getPathname() );
 
 				$syntax	= $this->checkPhpfileSyntax( $entry->getPathname() );
 				if( !$syntax->valid ){

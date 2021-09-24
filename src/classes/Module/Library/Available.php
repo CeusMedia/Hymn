@@ -232,6 +232,8 @@ class Hymn_Module_Library_Available
 		$module->absolutePath	= realpath( $shelfPath.$pathname )."/";								//  extend found module by real source path
 		$module->pathname		= $pathname;														//  extend found module by relative path
 		$module->path			= $shelfPath.$pathname;												//  extend found module by pseudo real path
+		if( empty( $module->frameworks ) || !isset( $module->frameworks['Hydrogen'] ) )
+			$module->frameworks['Hydrogen']	= '<0.9';
 	}
 
 	protected function listModulesInShelf( $shelf ): array
@@ -301,8 +303,6 @@ class Hymn_Module_Library_Available
 			if( isset( $index->description ) && strlen( trim( $index->description ) ) )	//  source index has a description
 				$shelf->title	= strip_tags( $index->description );
 		}
-		if( empty( $module->frameworks ) || !isset( $module->frameworks['Hydrogen'] ) )
-			$module->frameworks['Hydrogen']	= '<0.9';
 //		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
@@ -328,7 +328,7 @@ class Hymn_Module_Library_Available
 				count( $this->modules[$shelf->id] )
 			] ) );
 		}
-		$this->client->printMemoryUsage( 'after loading module sources' );
+		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after loading module sources' ) );
 //		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
 }
