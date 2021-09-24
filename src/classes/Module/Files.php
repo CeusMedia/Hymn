@@ -167,7 +167,7 @@ class Hymn_Module_Files
 	 */
 	protected function prepareModuleFileMap( $module, bool $awaitAvailableModule = TRUE )
 	{
-		if( !is_object($module) )
+		if( !is_object( $module ) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
 		if( !isset( $module->path ) ){
 			if( $awaitAvailableModule )

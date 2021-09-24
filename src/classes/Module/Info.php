@@ -73,13 +73,13 @@ class Hymn_Module_Info
 				foreach( $sectionFiles as $file ){
 					$line	= $file->file;
 					$attr	= array();
-					if( $file->type === 'style' ){
+					if( $sectionKey === 'styles' ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 						if( !empty( $file->load ) )
 						$attr['load']	= $file->load;
 					}
-					if( $file->type === 'image' ){
+					else if( $sectionKey === 'images' ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 					}
@@ -106,10 +106,10 @@ class Hymn_Module_Info
 			return;
 		$this->client->out( ' - Hooks: ' );
 		foreach( $module->hooks as $resource => $events ){
-			foreach( $events as $event => $functions ){
-				foreach( $functions as $function ){
-					if( !preg_match( '/\n/', $function ) )
-						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$function );
+			foreach( $events as $event => $hooks ){
+				foreach( $hooks as $hook ){
+					if( !preg_match( '/\n/', $hook->hook ) )
+						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->hook );
 					else
 						$this->client->out( '    - '.$resource.' > '.$event.' >> <func> !DEPRECATED!' );
 				}

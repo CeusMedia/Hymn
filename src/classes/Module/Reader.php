@@ -45,12 +45,12 @@ class Hymn_Module_Reader
 
 		$xml	= new SimpleXMLElement( file_get_contents( $filePath ) );
 		$obj	= new stdClass();
-		$obj->frameworks			= array( 'Hydrogen' => '<0.9' );
 		$obj->id					= $moduleId;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
 		$obj->deprecation			= array();
+		$obj->frameworks			= array();
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
@@ -218,10 +218,9 @@ class Hymn_Module_Reader
 
 	protected function readFrameworks( $obj, SimpleXMLElement $xml )
 	{
-		$frameworks	= $this->getAttribute( $xml, 'frameworks', '' );
+		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )
 			return;
-		$obj->frameworks	= array();
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
 		foreach( $list as $listItem ){
 			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
@@ -236,7 +235,10 @@ class Hymn_Module_Reader
 		foreach( $xml->hook as $hook ){
 			$resource	= $this->getAttribute( $hook, 'resource' );
 			$event		= $this->getAttribute( $hook, 'event' );
-			$obj->hooks[$resource][$event][]	= (string) $hook;
+			$obj->hooks[$resource][$event][]	= (object) array(
+				'level'	=> $this->getAttribute( $hook, 'level', 5 ),
+				'hook'	=> trim( (string) $hook, ' ' ),
+			);
 		}
 	}
 

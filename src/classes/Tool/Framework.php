@@ -57,23 +57,24 @@ class Hymn_Tool_Framework
 
 	public function checkModuleSupport( $module )
 	{
-		if( $this->version ){
-			if( !isset( $module->frameworks['Hydrogen'] ) ){
-				$message	= 'Module "%s" version %s is not installable for framework "Hydrogen"';
-				throw new RuntimeException( sprintf( $message, $module->id, $module->version ) );
-			}
-			$semver	= new Hymn_Tool_Semver();
-			$semver->setActualVersion( $this->version );
-			$semver->setSemanticVersion( $module->frameworks['Hydrogen'] );
-			if( !$semver->check() ){
-				$message	= 'Module "%1$s" version %2$s is not installable for framework version %4$s (needed: %3$s)';
-				throw new RuntimeException( vsprintf( $message, array(
-					$module->id,
-					$module->version,
-					$module->frameworks['Hydrogen'],
-					$this->version,
-				) ) );
-			}
+		if( $this->version === NULL )
+			return FALSE;
+		$frameworks	= $module->frameworks ? (array) $module->frameworks : [];
+		if( !isset( $frameworks['Hydrogen'] ) ){
+			$message	= 'Module "%s" version %s is not installable for framework "Hydrogen"';
+			throw new RuntimeException( sprintf( $message, $module->id, $module->version ) );
+		}
+		$semver	= new Hymn_Tool_Semver();
+		$semver->setActualVersion( $this->version );
+		$semver->setSemanticVersion( $frameworks['Hydrogen'] );
+		if( !$semver->check() ){
+			$message	= 'Module "%1$s" version %2$s is not installable for framework version %4$s (needed: %3$s)';
+			throw new RuntimeException( vsprintf( $message, array(
+				$module->id,
+				$module->version,
+				$frameworks['Hydrogen'],
+				$this->version,
+			) ) );
 		}
 	}
 
