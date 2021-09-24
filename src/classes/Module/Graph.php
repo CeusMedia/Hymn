@@ -43,10 +43,19 @@ class Hymn_Module_Graph
 	const STATUS_PRODUCED	= 3;
 	const STATUS_DRAWN		= 4;
 
+	/** @var		Hymn_Client				$client */
 	public $client;
+
+	/** @var		Hymn_Module_Library		$library */
 	public $library;
+
+	/** @var		array					$nodes */
 	public $nodes			= array();
+
+	/** @var		object					$flags */
 	protected $flags;
+
+	/** @var		integer					$status */
 	protected $status		= self::STATUS_EMPTY;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -69,6 +78,9 @@ class Hymn_Module_Graph
 	 */
 	public function addModule( $module, int $level = 0 )
 	{
+//		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
+//			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
+
 		if( array_key_exists( $module->id, $this->nodes ) ){										//  module has been added already
 			if( $this->nodes[$module->id]->level < $level )											//  this time the level is deeper
 				$this->nodes[$module->id]->level	= $level;										//  store deeper level
@@ -82,6 +94,14 @@ class Hymn_Module_Graph
 		);
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
+			//	 @todo remove this block after framework v0.8.8.2 is established
+			if( is_string( $relation ) ){															//  relation came from a reduced module source index
+				$neededModuleId	= $relation;														//  relation only holds module ID
+				$relation		= (object) [														//  simulate relation object
+					'type'		=> preg_match( '@/@', $relation ) ? 'package' : 'module',			//  detect packages and modules
+					'source'	=> NULL,
+				];
+			}
 			if( $relation->type !== 'module' )
 			 	continue;
 			if( $relation->source ){
@@ -241,6 +261,14 @@ class Hymn_Module_Graph
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
 			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
+				//	 @todo remove this block after framework v0.8.8.2 is established
+				if( is_string( $relation ) ){														//  relation came from a reduced module source index
+					$neededModuleId	= $relation;													//  relation only holds module ID
+					$relation		= (object) [													//  simulate relation object
+						'type'		=> preg_match( '@/@', $relation ) ? 'package' : 'module',		//  detect packages and modules
+						'source'	=> NULL,
+					];
+				}
 				if( $relation->type === 'module' ){
 					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
 					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node

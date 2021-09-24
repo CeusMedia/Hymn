@@ -36,11 +36,18 @@
  */
 abstract class Hymn_Command_Abstract
 {
+	/** @var	Hymn_Client					$client */
 	protected $client;
+
+	/** @var	Hymn_Module_Library|NULL	$library */
 	protected $library	= NULL;
+
 	protected $flags;
+
 	protected $locale;
+
 	protected $words;
+
 	protected $argumentOptions	= array();
 
 	public function getArgumentOptions()
@@ -220,8 +227,8 @@ abstract class Hymn_Command_Abstract
 		$config	= $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
 			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
-			if( $this->flags->veryVerbose )
-				$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );
+			if( $this->flags->force )																//  on force mode
+				$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
 			if( !isset( $config->sources ) || empty( $config->sources ) ){
 				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
 				$this->client->out( sprintf( $msg ) );												//  output warning

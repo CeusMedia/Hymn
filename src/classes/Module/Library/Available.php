@@ -39,12 +39,14 @@ class Hymn_Module_Library_Available
 {
 	const MODE_AUTO			= 0;
 	const MODE_FOLDER		= 1;
-	const MODE_INDEX		= 2;
+	const MODE_JSON			= 2;
+	const MODE_SERIAL		= 3;
 
 	const MODES				= [
 		self::MODE_AUTO,
 		self::MODE_FOLDER,
-		self::MODE_INDEX,
+		self::MODE_JSON,
+		self::MODE_SERIAL,
 	];
 
 	protected $client;
@@ -70,6 +72,7 @@ class Hymn_Module_Library_Available
 			'active'	=> $active,
 			'default'	=> $isDefault,
 			'title'		=> $title,
+			'date'		=> NULL,
 		);
 //		ksort( $this->shelves );
 	}
@@ -209,9 +212,7 @@ class Hymn_Module_Library_Available
 			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
 		$reader		= new Hymn_Module_Reader();
 		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
-		$module->absolutePath	= realpath( $pathname )."/";										//  extend found module by real source path
-		$module->pathname		= $pathname;														//  extend found module by relative path
-		$module->path			= $path.$pathname;													//  extebd found module by pseudo real path
+		$this->decorateModuleWithPaths( $module, $path );
 		return $module;																				//  return module
 	}
 
@@ -225,24 +226,58 @@ class Hymn_Module_Library_Available
 
 	//  --  PROTECTED  --  //
 
-	protected function listModulesInPath( string $path = '' ): array
+	protected function decorateModuleWithPaths( $module, $shelfPath )
 	{
-		$start	= microtime( TRUE );
-		$this->client->outVeryVerbose( 'Source Path: '.$path.PHP_EOL );
-		$indexFile	= $path.'/index.json';
+		$pathname	= str_replace( "_", "/", $module->id ).'/';										//  assume source module path from module ID
+		$module->absolutePath	= realpath( $shelfPath.$pathname )."/";								//  extend found module by real source path
+		$module->pathname		= $pathname;														//  extend found module by relative path
+		$module->path			= $shelfPath.$pathname;												//  extend found module by pseudo real path
+	}
+
+	protected function listModulesInShelf( $shelf ): array
+	{
+		$path	= $shelf->path;
+		$this->client->outVeryVerbose( '- Path: '.$path );
+		$fileJson	= $path.'/index.json';
+		$fileSerial	= $path.'/index.serial';
 		$mode		= $this->mode;
-		if( $mode === self::MODE_AUTO )
-			$mode	= file_exists( $indexFile ) ? self::MODE_INDEX : self::MODE_FOLDER;
+		if( $mode === self::MODE_AUTO ){
+			$mode	= self::MODE_FOLDER;
+			$mode	= file_exists( $fileJson ) ? self::MODE_JSON : $mode;
+			$mode	= file_exists( $fileSerial ) ? self::MODE_SERIAL : $mode;
+		}
 		$list	= array();
 		switch( $mode ){
-			case self::MODE_INDEX;
-				$this->client->outVeryVerbose( 'Source strategy: Index ('.$indexFile.')'.PHP_EOL );
-				$index	= json_decode( file_get_contents( $indexFile ) );
-				foreach( $index->modules as $module )
+			case self::MODE_SERIAL;
+				$this->client->outVeryVerbose( '- Strategy: serial file' );
+				$index	= unserialize( file_get_contents( $fileSerial ) );
+				foreach( $index->modules as $module ){
+					$module->frameworks		= (array) $module->frameworks;
+					$module->isDeprecated	= isset( $module->deprecation );
+					$this->decorateModuleWithPaths( $module, $path );
+				}
+				$list	= $index->modules;
+				break;
+			case self::MODE_JSON;
+				$this->client->outVeryVerbose( '- Strategy: JSON file' );
+				$index	= json_decode( file_get_contents( $fileJson ) );
+				foreach( $index->modules as $module ){
 					$list[$module->id]	= $module;
+					$module->config					= (array) $module->config;
+					$module->hooks					= (array) $module->hooks;
+					foreach( $module->hooks as $resource => $events )
+						$module->hooks[$resource]	= (array) $module->hooks[$resource];
+					foreach( $module->files as $category => $files )
+						$module->files->{$category}	=  (array) $files;
+					$module->relations->needs		= (array) $module->relations->needs;
+					$module->relations->supports	= (array) $module->relations->supports;
+					$module->isDeprecated			= isset( $module->deprecation );
+					$module->frameworks				= (array) $module->frameworks;
+					$this->decorateModuleWithPaths( $module, $path );
+				}
 				break;
 			case self::MODE_FOLDER:
-				$this->client->outVeryVerbose( 'Source strategy: Folder'.PHP_EOL );
+				$this->client->outVeryVerbose( '- Strategy: folder' );
 	//			if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
 	//				return $this->listModulesAvailable;									//  @todo realize shelves in cache
 				$iterator	= new RecursiveDirectoryIterator( $path );
@@ -256,7 +291,18 @@ class Hymn_Module_Library_Available
 				}
 				break;
 		}
-		$this->client->outVeryVerbose( 'Time: '.number_format( ( microtime( TRUE ) - $start ), 3 ).'s' );
+		$sourceTypesHavingMetaData = [self::MODE_SERIAL, self::MODE_JSON];				//  list of source types supporting source meta data
+		if( isset( $index ) && in_array( $mode, $sourceTypesHavingMetaData, TRUE ) ){	//  found source has meta data
+			$shelf	= $this->shelves[$shelf->id];
+			if( isset( $index->date ) && strlen( trim( $index->date ) ) )				//  source index has date
+				$shelf->date	= $index->date;											//  define date of shelf
+			if( isset( $index->url ) && strlen( trim( $index->url ) ) )					//  source index a hyperlink
+				$shelf->url	= $index->url;												//  define hyperlink of shelf
+			if( isset( $index->description ) && strlen( trim( $index->description ) ) )	//  source index has a description
+				$shelf->title	= strip_tags( $index->description );
+		}
+		if( empty( $module->frameworks ) || !isset( $module->frameworks['Hydrogen'] ) )
+			$module->frameworks['Hydrogen']	= '<0.9';
 //		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
 		return $list;
 	}
@@ -267,17 +313,40 @@ class Hymn_Module_Library_Available
 			return;																					//  skip this rerun
 		$this->modules	= array();																	//  reset module list
 		foreach( $this->shelves as $shelf ){														//  iterate sources
+			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $shelf->id ) );
 			if( !$shelf->active )																	//  if source if deactivated
 				continue;																			//  skip this source
 			$this->modules[$shelf->id]	= array();													//  prepare empty module list for source
-			foreach( $this->listModulesInPath( $shelf->path ) as $module ){							//  iterate modules in source path
+			foreach( $this->listModulesInShelf( $shelf ) as $module ){								//  iterate modules in source path
 				$module->sourceId	= $shelf->id;													//  extend found module by source ID
 				$module->sourcePath	= $shelf->path;													//  extend found module by source path
 				$module->sourceType	= $shelf->type;													//  extend found module by source type
 				$this->modules[$shelf->id][$module->id] = $module;									//  add found module to general module map
 				ksort( $this->modules[$shelf->id] );												//  sort source modules in general module map
 			}
+			$this->client->outVeryVerbose( vsprintf( '- Found %d modules', [
+				count( $this->modules[$shelf->id] )
+			] ) );
 		}
+		$this->client->printMemoryUsage( 'after loading module sources' );
 //		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
+}
+
+class CMF_Hydrogen_Environment_Resource_Module_Component_File
+{
+	public $file;
+	public $load;
+	public $level;
+	public $source;
+}
+class CMF_Hydrogen_Environment_Resource_Module_Component_Config
+{
+	public $key;
+	public $value;
+	public $type;
+	public $values;
+	public $mandatory;
+	public $protected;
+	public $title;
 }

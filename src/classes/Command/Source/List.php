@@ -54,13 +54,18 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 			$modules	= $library->getAvailableModules( $shelfId );
 			$this->client->out( array(
 				'* '.$shelfId.':',
-				'  - Title:   '.$shelf->title,
-				'  - Type:    '.ucfirst( $shelf->type ),
-				'  - Path:    '.$shelf->path,
-				'  - Active:  '.( $shelf->active ? 'yes' : 'no' ),
-				'  - Default: '.( $shelf->default ? 'yes' : 'no' ),
-				'  - Modules: '.count( $modules ),
+				'  - Title:    '.$shelf->title,
+				'  - Type:     '.ucfirst( $shelf->type ),
+				'  - Path:     '.$shelf->path,
+				'  - Active:   '.( $shelf->active ? 'yes' : 'no' ),
+				'  - Default:  '.( $shelf->default ? 'yes' : 'no' ),
+				'  - Modules:  '.count( $modules ),
 			) );
+			if( !empty( $shelf->date ) )
+				$this->client->out( '  - Date:     '.$shelf->date );
+			if( !empty( $shelf->url ) )
+				$this->client->out( '  - Link:     '.$shelf->url );
+
 			if( $this->flags->verbose ){
 				foreach( $modules as $moduleId => $module )
 					$this->client->out( '    - '.$moduleId.' ('.$module->version.')' );

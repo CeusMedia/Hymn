@@ -148,7 +148,7 @@ C2. Stamp Management
 Options:
 ------------------------------------------------------------------------------
 -d | --dry                 Actions are simulated only
--f | --force               Continue actions on error or warnings
+-f | --force               Continue actions on error or warnings + avoid any caches (incl. module source indices)
 -q | --quiet               Avoid any output
 -v | --verbose             Be verbose about taken steps
 -r | --recursive           Perform file actions recursively (used by test-syntax only)
