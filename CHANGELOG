@@ -1,8 +1,19 @@
 v0.9.9.4
-- Provide newest hymn client version in bin folder.
-- Disable foreign key checks on database-clear.
-- Update app-move to fix module sources in hymn file.
-
+- Core:
+	- Update module reader on frameworks and hooks.
+	- Extend module source folder handling by source cache support.
+	- Support module source index "JSON" to boost performance.
+	- Support module source index "serial" to maximize performance.
+- Commands:
+	- Allow to create a Git ignore file on init.
+	- Disable foreign key checks on database-clear.
+	- Update app-move to fix module sources in hymn file.
+	- Improve app-move in dry mode.
+- Quality
+	- Improve syntax test and verbosity.
+	- Refactor client and provide memory usage tracking.
+	- Add PHPStan and reach level 1.
+											
 v0.9.9.3
 - Fix dry mode app-move.
 - Support deprecation of modules and rank deprecated modules lower during installations.
