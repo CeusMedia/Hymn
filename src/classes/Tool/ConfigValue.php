@@ -16,9 +16,10 @@ class Hymn_Tool_ConfigValue
 	protected $value;
 	protected $type			= 'string';
 
-	public function __construct( $value = NULL, $type = NULL )
+	public function __construct( $value = NULL, ?string $type = NULL )
 	{
-		$this->setType( $type );
+		if( NULL !== $value)
+			$this->setType( $type );
 		$this->setValue( $value );
 	}
 
