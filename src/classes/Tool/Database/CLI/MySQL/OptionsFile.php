@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI.MySQL
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+*	@copyright		2014-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -86,7 +86,7 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 		return file_exists( $fileName );
 	}
 
-	public function remove( ?string $fileName = NULL ): bool
+	public function remove( ?string $fileName = NULL ): self
 	{
 		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
 		if( $this->has( $fileName ) )
