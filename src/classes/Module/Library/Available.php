@@ -274,7 +274,8 @@ class Hymn_Module_Library_Available
 					$module->relations->needs		= (array) $module->relations->needs;
 					$module->relations->supports	= (array) $module->relations->supports;
 					$module->isDeprecated			= isset( $module->deprecation );
-					$module->frameworks				= (array) $module->frameworks;
+					if( isset( $module->frameworks ) )
+						$module->frameworks			= (array) $module->frameworks;
 					$this->decorateModuleWithPaths( $module, $path );
 				}
 				break;
