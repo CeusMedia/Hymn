@@ -44,13 +44,13 @@ class Hymn_Tool_CLI_Question
 	protected $options		= array();
 	protected $break		= TRUE;
 
-	public function __construct( Hymn_Client $client, string $message, string $type = 'string', $default = NULL, array $options = array(), bool $break = TRUE )
+	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = array(), bool $break = TRUE )
 	{
 		$this->client	= $client;
 		$this->message	= $message;
 		$this->setType( $type );
 		$this->setDefault( $default );
-		$this->setOptions( $options );
+		$this->setOptions( $options ?? [] );
 		$this->setBreak( $break );
 	}
 
@@ -97,15 +97,15 @@ class Hymn_Tool_CLI_Question
 		return $this;
 	}
 
-	public function setDefault( bool $default = NULL ): self
+	public function setDefault( ?string $default = NULL ): self
 	{
 		$this->default	= $default;
 		return $this;
 	}
 
-	public function setOptions( array $options = array() ): self
+	public function setOptions( ?array $options = array() ): self
 	{
-		$this->options	= $options;
+		$this->options	= $options ?? [];
 		return $this;
 	}
 

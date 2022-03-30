@@ -40,94 +40,6 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	protected $answers	= array();
 	protected $pathPhar	= "phar://hymn.phar/";
 
-	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = TRUE )
-	{
-		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options, $break );
-		$this->answers[$key]	= $question->ask();
-	}
-
-	protected function configureDatabase()
-	{
-		$this->client->out( "Please enter database information:" );
-		$this->answer( 'database.driver', "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE );
-		$this->answer( 'database.host', "- Host", 'string', "localhost", NULL, FALSE );
-		$this->answer( 'database.port', "- Port", 'string', "3306", NULL, FALSE );
-		$this->answer( 'database.username', "- Username", 'string', NULL, NULL, FALSE );
-		$this->answer( 'database.password', "- Password", 'string', NULL, NULL, FALSE );
-		$this->answer( 'database.name', "- Database Name", 'string', NULL, NULL, FALSE );
-		$this->answer( 'database.prefix', "- Table Prefix", 'string', "", NULL, FALSE );
-	}
-
-	protected function createComposerFile()
-	{
-		$this->client->out( "Please enter more Application information:" );
-		$this->answer( 'app.author.name', "- Author Name", 'string', "John Doe", NULL, FALSE );
-		$this->answer( 'app.author.email', "- Author Email", 'string', "<john.doe@example.com>", NULL, FALSE );
-		$command	= 'composer init --name %s --author "%s %s"';
-		$command	= sprintf( $command,
-			escapeshellarg( $this->answers['app.package'] ),
-			$this->answers['app.author.name'],
-			$this->answers['app.author.email']
-		);
-		exec( $command );
-		$this->client->out( "Composer file has been created." );
-	}
-
-	protected function createConfigFile()
-	{
-		$this->client->out( "Please enter more Application information:" );
-		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
-		$this->answer( 'app.language', "- Language", 'string', "de", array( 'en', 'de' ), FALSE );
-		$useModuleCache	= in_array( $this->answers['app.install.mode'], array( 'live' ) );
-		mkdir( 'config' );
-		copy( $this->pathPhar."templates/config/.htaccess", 'config/.htaccess' );
-		copy( $this->pathPhar."templates/config/config.ini", 'config/config.ini' );
-		$content	= file_get_contents( 'config/config.ini' );
-		$content	= str_replace( "%appTitle%", $this->answers['app.title'], $content );
-		$content	= str_replace( "%appVersion%", $this->answers['app.version'], $content );
-		$content	= str_replace( "%appUrl%", $this->answers['app.url'], $content );
-		$content	= str_replace( "%localeAllowed%", $this->answers['app.language'], $content );
-		$content	= str_replace( "%localeDefault%", $this->answers['app.language'], $content );
-		$content	= str_replace( "%systemModuleCache%", $useModuleCache ? 'yes' : 'no', $content );
-		file_put_contents( 'config/config.ini', $content );
-		$this->client->out( "Config file has been created." );
-	}
-
-	protected function createGitIgnoreFile()
-	{
-		copy( $this->pathPhar."templates/gitignore", '.gitignore' );
-		$this->client->out( "Git ignore file has been created." );
-	}
-
-	protected function createMakeFile()
-	{
-		copy( $this->pathPhar."templates/Makefile", 'Makefile' );
-		$content	= file_get_contents( 'Makefile' );
-		$content	= str_replace( "%appName%", $this->answers['app.name'], $content );
-		$content	= str_replace( "%appVersion%", $this->answers['app.version'], $content );
-		file_put_contents( 'Makefile', $content );
-		$this->client->out( "Make file has been created." );
-	}
-
-	protected function createUnitFile()
-	{
-		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
-		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
-		$pathSource	= rtrim( trim( $pathSource ), '/' );
-		Hymn_Module_Files::createPath( $pathSource );
-		copy( $this->pathPhar."templates/phpunit.xml", 'phpunit.xml' );
-		$content	= file_get_contents( 'phpunit.xml' );
-		$content	= str_replace( "%appKey%", $this->answers['app.key'], $content );
-		$content	= str_replace( "%pathSource%", $pathSource, $content );
-		$content	= str_replace( "%pathTarget%", $pathTarget, $content );
-		file_put_contents( 'phpunit.xml', $content );
-		$this->client->out( "Configuration file for PHPUnit has been created." );
-		if( $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE ) ){
-			copy( $this->pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
-			$this->client->out( "Empty bootstrap file for PHPUnit test classes has been created." );
-		}
-	}
-
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -235,5 +147,93 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "Done." );
 		$this->client->out( "Now you can execute commands like install module sources using 'hymn source-add'." );
 		$this->client->out( "" );																	//  print empty line as optical separator
+	}
+
+	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = TRUE )
+	{
+		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options, $break );
+		$this->answers[$key]	= $question->ask();
+	}
+
+	protected function configureDatabase()
+	{
+		$this->client->out( "Please enter database information:" );
+		$this->answer( 'database.driver', "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE );
+		$this->answer( 'database.host', "- Host", 'string', "localhost", NULL, FALSE );
+		$this->answer( 'database.port', "- Port", 'string', "3306", NULL, FALSE );
+		$this->answer( 'database.username', "- Username", 'string', NULL, NULL, FALSE );
+		$this->answer( 'database.password', "- Password", 'string', NULL, NULL, FALSE );
+		$this->answer( 'database.name', "- Database Name", 'string', NULL, NULL, FALSE );
+		$this->answer( 'database.prefix', "- Table Prefix", 'string', "", NULL, FALSE );
+	}
+
+	protected function createComposerFile()
+	{
+		$this->client->out( "Please enter more Application information:" );
+		$this->answer( 'app.author.name', "- Author Name", 'string', "John Doe", NULL, FALSE );
+		$this->answer( 'app.author.email', "- Author Email", 'string', "<john.doe@example.com>", NULL, FALSE );
+		$command	= 'composer init --name %s --author "%s %s"';
+		$command	= sprintf( $command,
+			escapeshellarg( $this->answers['app.package'] ),
+			$this->answers['app.author.name'],
+			$this->answers['app.author.email']
+		);
+		exec( $command );
+		$this->client->out( "Composer file has been created." );
+	}
+
+	protected function createConfigFile()
+	{
+		$this->client->out( "Please enter more Application information:" );
+		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
+		$this->answer( 'app.language', "- Language", 'string', "de", array( 'en', 'de' ), FALSE );
+		$useModuleCache	= in_array( $this->answers['app.install.mode'], array( 'live' ) );
+		mkdir( 'config' );
+		copy( $this->pathPhar."templates/config/.htaccess", 'config/.htaccess' );
+		copy( $this->pathPhar."templates/config/config.ini", 'config/config.ini' );
+		$content	= file_get_contents( 'config/config.ini' );
+		$content	= str_replace( "%appTitle%", $this->answers['app.title'], $content );
+		$content	= str_replace( "%appVersion%", $this->answers['app.version'], $content );
+		$content	= str_replace( "%appUrl%", $this->answers['app.url'], $content );
+		$content	= str_replace( "%localeAllowed%", $this->answers['app.language'], $content );
+		$content	= str_replace( "%localeDefault%", $this->answers['app.language'], $content );
+		$content	= str_replace( "%systemModuleCache%", $useModuleCache ? 'yes' : 'no', $content );
+		file_put_contents( 'config/config.ini', $content );
+		$this->client->out( "Config file has been created." );
+	}
+
+	protected function createGitIgnoreFile()
+	{
+		copy( $this->pathPhar."templates/gitignore", '.gitignore' );
+		$this->client->out( "Git ignore file has been created." );
+	}
+
+	protected function createMakeFile()
+	{
+		copy( $this->pathPhar."templates/Makefile", 'Makefile' );
+		$content	= file_get_contents( 'Makefile' );
+		$content	= str_replace( "%appName%", $this->answers['app.name'], $content );
+		$content	= str_replace( "%appVersion%", $this->answers['app.version'], $content );
+		file_put_contents( 'Makefile', $content );
+		$this->client->out( "Make file has been created." );
+	}
+
+	protected function createUnitFile()
+	{
+		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
+		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
+		$pathSource	= rtrim( trim( $pathSource ), '/' );
+		Hymn_Module_Files::createPath( $pathSource );
+		copy( $this->pathPhar."templates/phpunit.xml", 'phpunit.xml' );
+		$content	= file_get_contents( 'phpunit.xml' );
+		$content	= str_replace( "%appKey%", $this->answers['app.key'], $content );
+		$content	= str_replace( "%pathSource%", $pathSource, $content );
+		$content	= str_replace( "%pathTarget%", $pathTarget, $content );
+		file_put_contents( 'phpunit.xml', $content );
+		$this->client->out( "Configuration file for PHPUnit has been created." );
+		if( $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE ) ){
+			copy( $this->pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
+			$this->client->out( "Empty bootstrap file for PHPUnit test classes has been created." );
+		}
 	}
 }
