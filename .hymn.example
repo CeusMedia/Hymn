@@ -2,14 +2,14 @@
 	"application": {
 		"title": "My Example Project",
 		"url": "http://example.org/myProjectPath/",
-		"uri": "/var/www/myProjectPath/"
+		"uri": "/var/www/myProjectPath/",
 		"installMode": "dev",
 		"installType": "link"
 	},
 	"sources": {
-		"Local_CM_Public": {
+		"CeusMedia_Public": {
 			"active": true,
-			"title": "Local copy of public module library maintained by Ceus Media",
+			"title": "Public module library maintained by Ceus Media",
 			"type": "folder",
 			"path": ""
 		}
@@ -17,7 +17,7 @@
 	"modules": {
 		"App_Site": {},
 		"Resource_Database": {
-			"sourceId": "Local_CM_Public",
+			"sourceId": "CeusMedia_Public",
 			"config": {
 				"access.username": "username",
 				"access.password": "password"

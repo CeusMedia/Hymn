@@ -9,78 +9,75 @@ PWD					= $(shell pwd)
 DATE				= `date +'%Y-%m-%d'`
 
 MODS_CM_PUBLIC		= vendor/ceus-media/hydrogen-modules/
-MODS_CM_PROTECTED	= vendor/ceus-media/hydrogen-modules-protected/
+MODS_CM_NONFREE		= vendor/ceus-media/hydrogen-modules-nonfree/
+MODS_VENDOR_NAME	= vendor/vendor/name/
 MODS_PROJECT		= modules/
 
+#install: install-complete-and-empty
 
-install-complete-and-empty:
-	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
+
+install-complete-and-empty: .fallback-to-dev
+	@echo "Installing packages ..." && composer install --no-autoloader
 	@$(MAKE) -s configure
-	@$(MAKE) -s composer-install
-	@echo "Installing modules:" && hymn app-install
-	@cp .htaccess.dist .htaccess
+	@echo "Installing modules:" && hymn app-install -f
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
+	@echo "Checking packages ..." && composer update
+#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+	@$(MAKE) -s enable-clamav
+
+install-files-only: .fallback-to-dev
+	@echo "Installing packages ..." && composer install --no-dev --no-autoloader
+	@$(MAKE) -s configure
+	@echo "Installing modules:" && hymn app-install -f --db=no
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
+	@echo "Checking packages ..." && composer update --no-dev
+#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+
+install-files-and-load-database: .fallback-to-dev
+	@echo "Installing packages ..." && composer install --no-autoloader
+	@$(MAKE) -s configure
+	@echo "Installing modules:" && hymn app-install -f --db=no
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
 #	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
-	@hymn database-load
-	@echo "Settings permissions..." && $(MAKE) -s set-permissions
-	@echo "Generating autoloaders..." && composer dump-autoload
+	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
+	@echo "Checking packages ..." && composer update
+#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+	@echo "Importing database dump ..." && hymn database-load
+	@$(MAKE) -s enable-clamav
 
-install-files-only:
-	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
-	@$(MAKE) -s configure
-	@$(MAKE) -s composer-install
-	@echo "Installing modules:" && hymn app-install --db=no
-	@cp .htaccess.dist .htaccess
-	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
-	@echo "Settings permissions..." && $(MAKE) -s set-permissions
-	@echo "Generating autoloaders..." && composer dump-autoload
-
-install-files-and-load-database:
-	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
-	@$(MAKE) -s configure
-	@$(MAKE) -s composer-install
-	@echo "Installing modules:" && hymn app-install --db=no
-	@cp .htaccess.dist .htaccess
-	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
-	@hymn database-load
-	@echo "Settings permissions..." && $(MAKE) -s set-permissions
-	@echo "Generating autoloaders..." && composer dump-autoload
-
-build:
-	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev || true
+build: .fallback-to-dev
+	@echo "Installing packages ..." && composer install --no-dev --no-autoloader
 	@$(MAKE) -s set-install-type-copy
-	@$(MAKE) -s detect-application-uri && $(MAKE) -s detect-sources
-	@$(MAKE) -s composer-install
-	@echo "Installing modules:" && hymn app-install
-	@cp .htaccess.dist .htaccess
+	@$(MAKE) -s configure
+	@echo "Installing modules:" && hymn app-install -f --db=no
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
 #	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
-	@hymn database-load
-	@hymn database-dump install.sql
-	@$(MAKE) -s set-rights
-	@echo "Generating autoloaders..." && $(MAKE) -s composer-update
-	@test -f config/doc.xml && $(MAKE) -s doc || true
+	@echo "Checking packages ..." && composer update --no-dev
+	@echo "Generating autoloaders ..." && composer dump-autoload
+#	@echo "Creating database import ..." && hymn database-load && hymn database-dump install.sql
+	@test -f config/doc.xml && echo "Generation docs ..." && $(MAKE) -s doc || true
+	@$(MAKE) -s set-rights && cp .htaccess.dist .htaccess
 	@$(MAKE) -s .build-cleanup
-	@echo "Creating archive files..."
+	@echo "Creating archive files ..."
 	@cd .. && zip -r -q ${PATH_FRONTEND}_${DATE}.zip ${PATH_FRONTEND}
 	@cd .. && tar -czf ${PATH_FRONTEND}_${DATE}.tgz ${PATH_FRONTEND}
-	@echo "Removing project files..."
-	@cd .. && rm -Rf ${PATH_FRONTEND}
+	@echo "Removing project files ..." && cd .. && rm -Rf ${PATH_FRONTEND}
 
 update:
 	@$(MAKE) -s composer-update
-	@test -d ${MODS_CM_PROTECTED} && cd ${MODS_CM_PROTECTED} && echo "Updating protected modules..." && svn up -q . || true
-	@$(MAKE) -s set-rights
 	@hymn app-update
 	@test -d ${PATH_BACKEND} && cd ${PATH_BACKEND} && hymn app-update
 	@$(MAKE) -s set-permissions
 
 doc:
 	@test ! -f vendor/ceus-media/doc-creator/doc-creator.php && echo "DocCreator is not installed" || true
-	@test ! -f vendor/ceus-media/doc-creator/doc-creator.php && echo "No config file set for DocCreator (missing config/doc.xml)" || true
-	@test -f vendor/ceus-media/doc-creator/doc-creator.php && test -f config/doc.xml && vendor/ceus-media/doc-creator/doc-creator.php --config-file=config/doc.xml || true
+	@test ! -f config/doc.xml && echo "No config file set for DocCreator (missing config/doc.xml)" || true
+	@test -f vendor/ceus-media/doc-creator/doc-creator.php && test -f config/doc.xml &&\
+		echo "Generation docs ..." && vendor/ceus-media/doc-creator/doc-creator.php --config-file=config/doc.xml || true
 
 dump-static:
 #	wget -q --show-progress --progress=dot -m https://DOMAIN.TLD/
@@ -95,8 +92,7 @@ dump-static:
 set-permissions:
 	@$(MAKE) -s set-ownage
 	@$(MAKE) -s set-rights
-	@$(MAKE) -s enable-clamav
-	@test -f job.php && chmod +x job.php || true
+	@test ! -f .htaccess && test -f .htaccess.dist && cp .htaccess.dist .htaccess || true
 
 set-ownage:
 	@test ${shell hymn config-get system.user} && sudo chown -R ${shell hymn config-get system.user} . || true
@@ -105,10 +101,13 @@ set-ownage:
 set-rights:
 	@find . -type d -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_DIR}
 	@find . -type f -not -path "./vendor*" -print0 | xargs -0 xargs chmod ${PERMS_FILE}
-#	@test -d ${MODS_CM_PROTECTED} && cd ${MODS_CM_PROTECTED} && find . -type f -print0 | xargs -0 xargs chmod ${PERMS_LIB} >/dev/null 2>&1 || true
+	@test -f job.php && chmod +x job.php || true
+	@test -e logs && chmod -R  g+w logs
 
 enable-clamav:
-	@cat /etc/passwd | grep clamav > /dev/null && ( groups clamav | grep ${shell hymn config-get system.group} > /dev/null && true || ( adduser clamav ${shell hymn config-get system.group} && sudo service clamav-daemon restart ) ) || true
+	@cat /etc/passwd | grep clamav > /dev/null && test -f .hymn && (\
+		groups clamav | grep ${shell hymn config-get system.group} > /dev/null && true || (\
+			adduser clamav ${shell hymn config-get system.group} && sudo service clamav-daemon restart ) ) || true
 
 
 ##  PUBLIC: SETTERS
@@ -163,8 +162,7 @@ configure-ask: detect-application-uri detect-application-url detect-sources
 	@$(MAKE) -s .apply-application-url-to-config
 
 detect-application-uri:
-	@echo
-	@echo Set application URI to ${PWD}/ by detection.
+#	@echo Set application URI to ${PWD}/.
 	@hymn config-set application.uri ${PWD}/
 	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set application.uri ${PWD}/${PATH_BACKEND}/
 
@@ -173,12 +171,22 @@ detect-application-url:
 	@$(MAKE) -s .apply-application-url-to-config
 
 detect-sources:
-	@hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC}
-	@test -d ${MODS_CM_PROTECTED} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
-	@test -d ${MODS_PROJECT} && hymn config-set sources.Project.path $(shell hymn config-get application.uri)modules/ || true
-	@test -f ${PATH_BACKEND}/.hymn && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
-	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_CM_PROTECTED} && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_PROTECTED} || true
-	@test -f ${PATH_BACKEND}/.hymn && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&  hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
+	@test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} &&\
+		hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
+	@test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} &&\
+		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
+	@test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} &&\
+		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
+	@test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} &&\
+		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} && cd ${PATH_BACKEND} &&\
+		hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} && cd ${PATH_BACKEND} &&\
+		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} && cd ${PATH_BACKEND} &&\
+		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&\
+		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
 
 ask-system-group:
 	@echo
@@ -266,19 +274,16 @@ composer-update-dev:
 	@cd ${PATH_BACKEND} && htpasswd -Bb .htpasswd USER2 PASSWORD2
 
 .build-cleanup:
-	@rm -Rf vendor/michelf
+	@test ! -z ${MODS_CM_PUBLIC} && rm -Rf ${MODS_CM_PUBLIC} || true
+	@test ! -z ${MODS_CM_NONFREE} && rm -Rf ${MODS_CM_NONFREE} || true
+	@test ! -z ${MODS_VENDOR_NAME} && rm -Rf ${MODS_VENDOR_NAME} || true
+	@test ! -z ${MODS_PROJECT} && rm -Rf ${MODS_PROJECT} || true
+	@rm -Rf config/sql config/dumps .git .svn
+	@rm -f .hymn* composer.* Makefile .*.dist config/doc.xml
+	@cd ${PATH_BACKEND} && rm -Rf .svn
+	@cd ${PATH_BACKEND} && rm -f .hymn* composer.* Makefile .*.dist config/doc.xml
 	@rm -Rf vendor/ceus-media/doc-creator
-	@rm -Rf vendor/ceus-media/hydra
 	@rm -Rf vendor/ceus-media/hydrogen-themes
-	@rm -Rf ${MODS_CM_PUBLIC}
-	@rm -Rf ${MODS_CM_PROTECTED}
-	@rm -Rf ${MODS_PROJECT}
-	@rm -Rf config/sql
-	@rm -Rf hydra Hydra
-	@rm -Rf .svn
-	@rm -Rf .svn ${PATH_BACKEND}/.svn
-	@rm -f .hymn* ${PATH_BACKEND}/.hymn*
-	@rm -f .*.dist ${PATH_BACKEND}/*.dist
-	@rm -f composer.* ${PATH_BACKEND}/composer.*
-	@rm -f Makefile ${PATH_BACKEND}/Makefile
-	@rm -f config/doc.xml ${PATH_BACKEND}/config/doc.xml
+
+.fallback-to-dev:
+	@test ! -f .hymn && $(MAKE) -s set-install-mode-dev && echo "Setting dev mode by fallback" || true
