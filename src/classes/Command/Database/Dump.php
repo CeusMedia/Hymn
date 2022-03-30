@@ -38,6 +38,14 @@
  */
 class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
+	protected $argumentOptions	= array(
+		'prefix'		=> array(
+			'pattern'	=> '/^--prefix=(\S*)$/',
+			'resolve'	=> '\\1',
+			'default'	=> NULL,
+		),
+	);
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags: database-no
@@ -74,8 +82,9 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		}
 
 		$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );							//  get CLI handler for MySQL
-		if( $arguments->getOption( 'prefix' ) )
-			$mysql->setPrefixPlaceholder( $arguments->getOption( 'prefix' ) );
+		$prefix		= trim( $arguments->getOption( 'prefix' ) );
+		if( strlen( $prefix ) )
+			$mysql->setPrefixPlaceholder( $prefix );
 
 		if( $this->flags->verbose ){
 			$this->client->out( array(

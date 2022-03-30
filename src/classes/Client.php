@@ -99,11 +99,6 @@ class Hymn_Client
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
 		),
-		'prefix'		=> array(
-			'pattern'	=> '/^--prefix=(\S*)$/',
-			'resolve'	=> '\\1',
-			'default'	=> NULL,
-		),
 		'quiet'		=> array(
 			'pattern'	=> '/^-q|--quiet$/',
 			'resolve'	=> TRUE,
