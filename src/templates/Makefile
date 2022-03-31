@@ -15,7 +15,6 @@ MODS_PROJECT		= modules/
 
 #install: install-complete-and-empty
 
-
 install-complete-and-empty: .fallback-to-dev
 	@echo "Installing packages ..." && composer install --no-autoloader
 	@$(MAKE) -s configure
@@ -23,8 +22,8 @@ install-complete-and-empty: .fallback-to-dev
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
-	@echo "Checking packages ..." && composer update
-#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+	@echo "Checking packages ..." && composer update --no-autoloader
+	@echo "Generating autoloaders ..." && composer dump-autoload -o
 	@$(MAKE) -s enable-clamav
 
 install-files-only: .fallback-to-dev
@@ -34,18 +33,18 @@ install-files-only: .fallback-to-dev
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
-	@echo "Checking packages ..." && composer update --no-dev
-#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+	@echo "Checking packages ..." && composer update --no-dev --no-autoloader
+	@echo "Generating autoloaders ..." && composer dump-autoload -o
 
 install-files-and-load-database: .fallback-to-dev
 	@echo "Installing packages ..." && composer install --no-autoloader
 	@$(MAKE) -s configure
 	@echo "Installing modules:" && hymn app-install -f --db=no
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
 	@echo "Setting permissions ..." && $(MAKE) -s set-permissions
-	@echo "Checking packages ..." && composer update
-#	@echo "Generating autoloaders ..." && composer dump-autoload -o
+	@echo "Checking packages ..." && composer update --no-autoloader
+	@echo "Generating autoloaders ..." && composer dump-autoload -o
 	@echo "Importing database dump ..." && hymn database-load
 	@$(MAKE) -s enable-clamav
 
@@ -55,9 +54,9 @@ build: .fallback-to-dev
 	@$(MAKE) -s configure
 	@echo "Installing modules:" && hymn app-install -f --db=no
 	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-install || true
-#	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
-	@echo "Checking packages ..." && composer update --no-dev
-	@echo "Generating autoloaders ..." && composer dump-autoload
+	@test -d ${PATH_BACKEND} && $(MAKE) -s .backend-secure || true
+	@echo "Checking packages ..." && composer update --no-dev --no-autoloader
+	@echo "Generating autoloaders ..." && composer dump-autoload -o
 #	@echo "Creating database import ..." && hymn database-load && hymn database-dump install.sql
 	@test -f config/doc.xml && echo "Generation docs ..." && $(MAKE) -s doc || true
 	@$(MAKE) -s set-rights && cp .htaccess.dist .htaccess
@@ -171,22 +170,14 @@ detect-application-url:
 	@$(MAKE) -s .apply-application-url-to-config
 
 detect-sources:
-	@test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} &&\
-		hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
-	@test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} &&\
-		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
-	@test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} &&\
-		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
-	@test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} &&\
-		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
-	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} && cd ${PATH_BACKEND} &&\
-		hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
-	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} && cd ${PATH_BACKEND} &&\
-		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
-	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} && cd ${PATH_BACKEND} &&\
-		hymn config-set sources.CeusMedia_Protected.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
-	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} &&\
-		hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
+	@test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} && hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
+	@test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} && hymn config-set sources.CeusMedia_Nonfree.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
+	@test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} && hymn config-set sources.Vendor_Name.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
+	@test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} && hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_PUBLIC} && test -d ${MODS_CM_PUBLIC} && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Public.path $(shell hymn config-get application.uri)${MODS_CM_PUBLIC} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_CM_NONFREE} && test -d ${MODS_CM_NONFREE} && cd ${PATH_BACKEND} && hymn config-set sources.CeusMedia_Nonfree.path $(shell hymn config-get application.uri)${MODS_CM_NONFREE} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_VENDOR_NAME} && test -d ${MODS_VENDOR_NAME} && cd ${PATH_BACKEND} && hymn config-set sources.Vendor_Name.path $(shell hymn config-get application.uri)${MODS_VENDOR_NAME} || true
+	@test ! -z ${PATH_BACKEND} && test -f ${PATH_BACKEND}/.hymn && test ! -z ${MODS_PROJECT} && test -d ${MODS_PROJECT} && cd ${PATH_BACKEND} && hymn config-set sources.Project.path $(shell hymn config-get application.uri)${MODS_PROJECT} || true
 
 ask-system-group:
 	@echo
