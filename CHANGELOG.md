@@ -1,4 +1,14 @@
-v0.9.9.4
+# Change Log
+
+## v0.9.9.5
+- Apply defined module sources from hymn file on install.
+- Add command init-makefile.
+- Update make file template.
+- Update PHPUnit and PHPStan.
+- Ease framework support handling.
+- Move prefix argument to command.
+
+## v0.9.9.4
 - Core:
 	- Update module reader on frameworks and hooks.
 	- Extend module source folder handling by source cache support.
@@ -13,8 +23,8 @@ v0.9.9.4
 	- Improve syntax test and verbosity.
 	- Refactor client and provide memory usage tracking.
 	- Add PHPStan and reach level 1.
-											
-v0.9.9.3
+										
+## v0.9.9.3
 - Fix dry mode app-move.
 - Support deprecation of modules and rank deprecated modules lower during installations.
 - Keep order of sources on loading up.
@@ -22,11 +32,11 @@ v0.9.9.3
 - Update code doc to 2021.
 - Extract client configuration handling from client class.
 
-v0.9.9.2
+## v0.9.9.2
 - Support relations to composer packages.
 - Prepare support for versioned relations.
 
-v0.9.9.1
+## v0.9.9.1
 - Dump app stamps as pretty JSON.
 - Extend module info relations by neededBy.
 - Extend modules-search verbosity.
@@ -34,19 +44,19 @@ v0.9.9.1
 - Create modules graph from installed modules (instead of configured modules).
 - Remove deprecated classes and methods.
 
-v0.9.9.0
+## v0.9.9.0
 - Support self upgrade/downgrade to given version.
 - Add hymn as binary in package definition.
 - Fix bug in list of installed modules: shelf ID is ignored.
 - Fix bug in module installer.
 
-v0.9.8.9
+## v0.9.8.9
 - Split module library for available and installed modules.
 - Extract output methods from client to own tool class.
 - Add new command database-keep to remove outdated database dumps.
 - Remove symlinks on module uninstall even if target is not existing anymore.
 
-v0.9.8.8
+## v0.9.8.8
 - Support command specific argument options.
 - Add shortcut to client output methods in all command classes (via abstract command class).
 - Add new command app-clear to remove module cache, job locks and logs.
@@ -55,12 +65,12 @@ v0.9.8.8
 	- removes job locks
 	- removes logs (not yet implemented)
 
-v0.9.8.7
+## v0.9.8.7
 - Finish support of linked database resource modules in hymn file.
 - Restructure CLI classes and MySQL file handling.
 - Extract finding latest stamp or database file to own tool class.
 
-v0.9.8.6
+## v0.9.8.6
 - Extend module-info by related modules (in verbose mode).
 - On module update remove modules which are not needed anymore.
 - Support PHP <7.
@@ -68,7 +78,7 @@ v0.9.8.6
 - Add command app-stamp-info and extract module info class from command module-info.
 - Add new command stamp-diff to compare stamp against available modules.
 
-v0.9.8.5
+## v0.9.8.5
 - Fix bug in semantic versioning.
 - Update bootstrap for PHPUnit.
 - Fix bug in command for module info.
