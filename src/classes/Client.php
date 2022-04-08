@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static $language			= 'en';
 
-	public static $version			= '0.9.9.5b';
+	public static $version			= '0.9.9.5c';
 
 	/** @var	Hymn_Tool_CLI_Arguments 	$arguments		Parsed CLI arguments and options */
 	public $arguments;
@@ -394,9 +394,10 @@ class Hymn_Client
 	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
 	{
 		$commandOptions	= call_user_func( array( $commandObject, 'getArgumentOptions' ) );			//  get command specific argument options
-		if( $commandOptions )
+		if( $commandOptions ){
 			$this->parseArguments( $this->originalArguments, $commandOptions, TRUE );				//  parse original arguments again with command specific options
-		$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
+			$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
+		}
 	}
 
 	protected function dispatch()

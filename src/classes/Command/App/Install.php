@@ -108,7 +108,10 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					continue;
 				}
 			}
-//			$sourceId	= $this->detectModuleSource( $module->id );
+			$sourceId	= $this->detectModuleSource( $module->id );
+			$sourceId	= $this->client->getModuleInstallShelf( $module->id, $activeShelfIds, $sourceId );
+			$module		= $library->getAvailableModule( $module->id, $sourceId );
+
 			if( empty( $module->sourceId ) ){
 				$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );
 				continue;
@@ -123,7 +126,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$module->version,
 					$installType
 				) );
-			$installer->install( $module, $installType, $module->sourceId );
+			$installer->install( $module, $installType );
 		}
 
 /*		//  todo: custom install mode: define SQL to import in hymn file
