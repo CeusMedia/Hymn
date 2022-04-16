@@ -44,6 +44,11 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			'resolve'	=> '\\1',
 			'default'	=> NULL,
 		),
+		'path'		=> array(
+			'pattern'	=> '/^--path=(\S*)$/',
+			'resolve'	=> '\\1',
+			'default'	=> NULL,
+		),
 	);
 
 	/**
@@ -63,28 +68,23 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 		$dbc			= $this->client->getDatabase();
 		$arguments		= $this->client->arguments;
-		$pathConfig		= $this->client->getConfigPath();
-		$defaultPath	= $pathConfig.'sql/';
 
-		$fileName	= $arguments->getArgument( 0 );
+		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
+
+		$fileName		= $arguments->getArgument( 0 );
 		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
-			$fileName	= $defaultPath;																//  set default path
+			$fileName	= $path;																	//  set path from option or default
 		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
 			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';							//  generate stamped file name
 		if( dirname( $fileName) )																	//  path is not existing
 			exec( 'mkdir -p '.dirname( $fileName ) );												//  create path
 
-		$prefix		= $dbc->getConfig( 'prefix' );
-		$tables		= '';																			//  no table selection by default
-		if( $prefix ){																				//  prefix has been set
-			foreach( $dbc->getTables( $prefix ) as $table )											//  iterate found tables with prefix
-				$tables	.= ' '.escapeshellarg( $table );											//  collect table as escaped shell arg
-		}
-
 		$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );							//  get CLI handler for MySQL
-		$prefix		= trim( $arguments->getOption( 'prefix' ) );
+		$prefix		= trim( $arguments->getOption( 'prefix', $dbc->getConfig( 'prefix' ) ) );
 		if( strlen( $prefix ) )
 			$mysql->setPrefixPlaceholder( $prefix );
+
+		$tablesToSkip	= $this->getTablesToSkip();
 
 		if( $this->flags->verbose ){
 			$this->client->out( array(
@@ -94,10 +94,12 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 				'Table prefix: '.( $prefix ? $prefix : '(none)' ),									//  show table prefix from config
 				'Access as:    '.$dbc->getConfig( 'username' ),										//  show username from config
 			) );
+			if( $tablesToSkip )
+				$this->client->out( 'Skip tables:  '.join( ', ', $tablesToSkip ) );
 			$this->client->out( 'Dumping export file ...' );
 		}
 
-		$result	= $mysql->exportToFileWithPrefix( $fileName, $prefix );
+		$result	= $mysql->exportToFileWithPrefix( $fileName, $prefix, $tablesToSkip );
 		if( $result->code !== 0 )
 			return $this->client->out( 'Dumping export failed: '.join( PHP_EOL, $result->output ) );
 		if( $this->flags->dry ){
@@ -108,5 +110,19 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 		}
 		return $this->client->out( 'Dumped export file to '.$fileName.' ('.$fileSize.')' );
+	}
+
+	protected function getTablesToSkip(): array
+	{
+		$list		= [];
+		$library	= $this->getLibrary();
+		foreach( $library->listInstalledModules() as $module ){
+			if( isset( $module->config['onDatabaseDumpSkipTables'] ) ){
+				$tables = $module->config['onDatabaseDumpSkipTables']->value;
+				foreach( preg_split( '/\s*,\s*/', $tables ) as $table )
+					$list[]	= $table;
+			}
+		}
+		return $list;
 	}
 }

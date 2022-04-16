@@ -1,5 +1,8 @@
 # Change Log
 
+## v0.9.9.6
+- Allow to skip database tables on dump by module config. 
+
 ## v0.9.9.5
 - Apply defined module sources from hymn file on install.
 - Add command init-makefile.
@@ -23,7 +26,7 @@
 	- Improve syntax test and verbosity.
 	- Refactor client and provide memory usage tracking.
 	- Add PHPStan and reach level 1.
-										
+
 ## v0.9.9.3
 - Fix dry mode app-move.
 - Support deprecation of modules and rank deprecated modules lower during installations.

@@ -62,6 +62,8 @@ class Hymn_Command_Config_Set extends Hymn_Command_Config_Get implements Hymn_Co
 			$value	= trim( $this->ask( 'Value for "'.$key.'"', 'string', $current ) );
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
+		if( in_array( $key, ['application.uri'], TRUE ) )											//  force trailing slash
+			$value	= rtrim( $value, '/' ).'/';
 		if( $current === $value )
 			return $this->client->outVerbose( 'No change made' );
 

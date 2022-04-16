@@ -48,14 +48,17 @@ class Hymn_Tool_Database_CLI_MySQL
 		$this->optionsFile	= new Hymn_Tool_Database_CLI_MySQL_OptionsFile( $client );
 	}
 
-	public function exportToFile( string $fileName, string $tablePrefix = '' )
+	public function exportToFile( string $fileName, string $tablePrefix = '', array $tablesToSkip = array() )
 	{
 		$dbc			= $this->client->getDatabase();
 		$optionsFile	= NULL;
 		$tables			= '';																		//  no table selection by default
-		if( $tablePrefix )																			//  table prefix has been set and is not empty
+		$usePrefix		= strlen( trim( $tablePrefix ) ) !== 0;
+		$useSkip		= count( $tablesToSkip ) !== 0;
+		if( $usePrefix || $useSkip )																//  table prefix has been set or there are tables to skip
 			foreach( $dbc->getTables( $tablePrefix ) as $table )									//  iterate found tables with prefix
-				$tables	.= ' '.escapeshellarg( $table );											//  collect table as escaped shell arg
+				if( !in_array( $table, $tablesToSkip, TRUE ) )										//  table shall not be skipped
+					$tables	.= ' '.escapeshellarg( $table );										//  collect table as escaped shell arg
 		if( $this->useTempOptionsFile ){
 			$optionsFile	= new Hymn_Tool_Database_CLI_MySQL_OptionsFile( $this->client );
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
@@ -90,9 +93,9 @@ class Hymn_Tool_Database_CLI_MySQL
 		return $result;
 	}
 
-	public function exportToFileWithPrefix( string $fileName, ?string $prefix = NULL )
+	public function exportToFileWithPrefix( string $fileName, ?string $prefix = NULL, array $tablesToSkip = array() )
 	{
-		$result	= $this->exportToFile( $fileName, $prefix );
+		$result	= $this->exportToFile( $fileName, $prefix, $tablesToSkip );
 		$this->insertPrefixInFile( $fileName, $prefix );
 		return $result;
 	}
