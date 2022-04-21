@@ -36,6 +36,9 @@ A1. Project Creation and Source Management
 - source-remove KEY                           Remove module source from Hymn file
 - source-enable [-dfqv] SOURCE                Enable source in Hymn file
 - source-disable [-dfqv] SOURCE               Disable source in Hymn file
+- source-index [-v] SOURCE                    Show index of source if available
+- source-index-clear SOURCE                   Remove source index files
+- source-index-create SOURCE                  Generate source index files
 
 A2. Project Setup and Information
 ------------------------------------------------------------------------------

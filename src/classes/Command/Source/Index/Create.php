@@ -35,7 +35,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
+class Hymn_Command_Source_Index_Create extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
 {
 	/**
 	 *	Execute this command.
@@ -59,33 +59,18 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 
 		$this->out( sprintf( 'Path: %1$s', $shelf->path ) );
 
-		$jsonFile	= $shelf->path.'index.json';
-		if( file_exists( $jsonFile ) ){
-			$this->out( 'Found index JSON file.' );
-			if( $this->flags->verbose )
-				$this->printSettings( json_decode( file_get_contents( $jsonFile ) ) );
-		}
+		$settings		= new Hymn_Tool_SourceIndex_IniReader( $shelf->path );
+		$moduleFilter	= new Hymn_Tool_SourceIndex_ModuleFilter( $shelf->path );
+		$modules		= $moduleFilter->filter( $modules );
 
-		$serialFile	= $shelf->path.'index.serial';
-		if( file_exists( $serialFile ) ){
-			$this->out( 'Found index serial file.' );
-			if( $this->flags->verbose )
-				$this->printSettings( unserialize( file_get_contents( $serialFile )) );
-		}
+		$this->out( 'Creating index JSON file...' );
+		$jsonRenderer	= new Hymn_Tool_SourceIndex_JsonRenderer( $settings );
+		$jsonRenderer->setSettings( $settings )->setModules( $modules );
+		file_put_contents( $shelf->path.'index.json', $jsonRenderer->render() );
 
-//		if( !$this->flags->quiet )
-//			$this->client->out( 'Source "'.$shelf->id.'" has been enabled.' );
-	}
-
-	protected function printSettings( $settings )
-	{
-		unset( $settings->modules );
-		$data	= (array) $settings;
-		if( count( $data ) ){
-			foreach( $data as $key => $value )
-				if( $value !== NULL )
-				$this->out( ' - '.str_pad( $key.':', 14, ' ', STR_PAD_RIGHT ).$value );
-			$this->out( '' );
-		}
+		$this->out( 'Creating index serial file...' );
+		$serialRenderer	= new Hymn_Tool_SourceIndex_SerialRenderer( $settings );
+		$serialRenderer->setSettings( $settings )->setModules( $modules );
+		file_put_contents( $shelf->path.'index.serial', $serialRenderer->render() );
 	}
 }
