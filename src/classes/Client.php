@@ -278,7 +278,7 @@ class Hymn_Client
 		return $type;
 	}
 
-	public function getModuleInstallShelf( string $moduleId, array $availableShelfIds, string $defaultInstallShelfId )
+	public function getModuleInstallShelf( string $moduleId, array $availableShelfIds, ?string $defaultInstallShelfId = NULL )
 	{
 		if( !count( $availableShelfIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );
@@ -289,8 +289,9 @@ class Hymn_Client
 				if( in_array( $modules->$moduleId->source, $availableShelfIds ) )					//  configured shelf source has requested module
 					return $modules->$moduleId->source;												//  return configured source shelf
 
-		if( in_array( $defaultInstallShelfId, $availableShelfIds ) )								//  default shelf has requested module
-			return $defaultInstallShelfId;															//  return default shelf
+		if( $defaultInstallShelfId !== NULL )														//  default shelf given
+			if( in_array( $defaultInstallShelfId, $availableShelfIds ) )							//  default shelf has requested module
+				return $defaultInstallShelfId;														//  return default shelf
 
 		return current( $availableShelfIds );														//  return first available shelf
 	}
