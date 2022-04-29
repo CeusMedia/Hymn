@@ -77,13 +77,13 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			foreach( $config->modules as $moduleId => $moduleConfig ){
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
-				$this->client->outVerbose( 'Module ID: '.$moduleId );
 				$sourceId	= $this->detectModuleSource( $moduleId );
-				$this->client->outVerbose( 'Source ID: '.$sourceId );
 				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
-				if( $module->isActive )
+				if( $module->isActive ){
 					$relation->addModule( $module );
+					$this->client->outVerbose( '- implies module '.$moduleId.' (from '.$sourceId.')' );
+				}
 			}
 		}
 
@@ -110,7 +110,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 			$sourceId	= $this->detectModuleSource( $module->id );
 			$sourceId	= $this->client->getModuleInstallShelf( $module->id, $activeShelfIds, $sourceId );
-			$module		= $library->getAvailableModule( $module->id, $sourceId );
+			$module		= $library->getUncachedAvailableModuleFromShelf( $module->id, $sourceId );
 
 			if( empty( $module->sourceId ) ){
 				$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );

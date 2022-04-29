@@ -102,14 +102,33 @@ class Hymn_Module_Library
 		return $this->available->getDefaultShelf();
 	}
 
-	public function getShelf( string $moduleId, bool $withModules = FALSE )
+	public function getShelf( string $shelfId, bool $withModules = FALSE )
 	{
-		return $this->available->getShelf( $moduleId, $withModules );
+		return $this->available->getShelf( $shelfId, $withModules );
 	}
 
 	public function getShelves( array $filters = array(), bool $withModules = FALSE ): array
 	{
 		return $this->available->getShelves( $filters, $withModules );
+	}
+
+	/**
+	 *	Reads an available (within a shelf) module directly from source folder, bypassing any caches.
+	 *	This is handy, if full module information is needed, e.G. on installation.
+	 *	The pure module data structure will be extended by shelf information.
+	 *	@access		public
+	 *	@param		string		$moduleId
+	 *	@param		string		$shelfId
+	 *	@return		object		Uncached module data object
+	 */
+	public function getUncachedAvailableModuleFromShelf( string $moduleId, string $shelfId )
+	{
+		$shelf		= $this->getShelf( $shelfId );								//  get shelf
+		$module		= $this->available->readModule( $shelf->path, $moduleId );	//  try to read module from source folder
+		$module->sourceId	= $shelf->id;										//  extend found module by source ID
+		$module->sourcePath	= $shelf->path;										//  extend found module by source path
+		$module->sourceType	= $shelf->type;										//  extend found module by source type
+		return $module;
 	}
 
 	public function isAvailableModuleInShelf( string $moduleId, string $shelfId ): bool

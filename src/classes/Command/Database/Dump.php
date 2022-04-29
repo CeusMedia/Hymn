@@ -76,7 +76,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			$fileName	= $path;																	//  set path from option or default
 		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
 			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';							//  generate stamped file name
-		if( dirname( $fileName) )																	//  path is not existing
+		if( !dirname( $fileName) )																	//  path is not existing
 			exec( 'mkdir -p '.dirname( $fileName ) );												//  create path
 
 		$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );							//  get CLI handler for MySQL

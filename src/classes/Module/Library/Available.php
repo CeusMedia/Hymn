@@ -181,11 +181,11 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 
-	public function getShelf( string $moduleId, bool $withModules = FALSE )
+	public function getShelf( string $shelfId, bool $withModules = FALSE )
 	{
-		if( !array_key_exists( $moduleId, $this->shelves ) )
-			throw new DomainException( 'Invalid source ID: '.$moduleId );
-		$shelf	= $this->shelves[$moduleId];
+		if( !array_key_exists( $shelfId, $this->shelves ) )
+			throw new DomainException( 'Invalid source ID: '.$shelfId );
+		$shelf	= $this->shelves[$shelfId];
 		if( !$withModules )
 			unset( $shelf->modules );
 		return $shelf;
@@ -202,18 +202,6 @@ class Hymn_Module_Library_Available
 			$list[$shelfId]	= $this->getShelf( $shelfId, $withModules );							//  enlist shelf
 		}
 		return $list;																				//  return list of found shelves
-	}
-
-	public function readModule( string $path, string $moduleId )
-	{
-		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
-		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
-		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
-		$reader		= new Hymn_Module_Reader();
-		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
-		$this->decorateModuleWithPaths( $module, $path );
-		return $module;																				//  return module
 	}
 
 	public function setMode( int $mode ): self
@@ -331,6 +319,18 @@ class Hymn_Module_Library_Available
 		}
 		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after loading module sources' ) );
 //		ksort( $this->modules );																	//  sort general module map by source IDs
+	}
+
+	protected function readModule( string $path, string $moduleId )
+	{
+		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
+		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
+		if( !file_exists( $filename ) )																//  assume module config file is not existing
+			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
+		$reader		= new Hymn_Module_Reader();
+		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
+		$this->decorateModuleWithPaths( $module, $path );
+		return $module;																				//  return module
 	}
 }
 
