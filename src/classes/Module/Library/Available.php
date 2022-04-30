@@ -204,6 +204,18 @@ class Hymn_Module_Library_Available
 		return $list;																				//  return list of found shelves
 	}
 
+	public function readModule( string $path, string $moduleId )
+	{
+		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
+		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
+		if( !file_exists( $filename ) )																//  assume module config file is not existing
+			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
+		$reader		= new Hymn_Module_Reader();
+		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
+		$this->decorateModuleWithPaths( $module, $path );
+		return $module;																				//  return module
+	}
+
 	public function setMode( int $mode ): self
 	{
 		if( !in_array( $mode, self::MODES, TRUE ) )
@@ -319,18 +331,6 @@ class Hymn_Module_Library_Available
 		}
 		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after loading module sources' ) );
 //		ksort( $this->modules );																	//  sort general module map by source IDs
-	}
-
-	protected function readModule( string $path, string $moduleId )
-	{
-		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
-		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
-		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
-		$reader		= new Hymn_Module_Reader();
-		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
-		$this->decorateModuleWithPaths( $module, $path );
-		return $module;																				//  return module
 	}
 }
 
