@@ -61,7 +61,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 
 		/*  fetch arguments  */
 		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
-		if( $moduleIds ){
+		if( $moduleIds && '*' !== $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcarded modules
 			foreach( $moduleIds as $moduleId ){
