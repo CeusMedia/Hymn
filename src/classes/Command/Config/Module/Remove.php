@@ -50,7 +50,7 @@ class Hymn_Command_Config_Module_Remove extends Hymn_Command_Abstract implements
 		$filename	= Hymn_Client::$fileName;
 		$config	= json_decode( file_get_contents( $filename ) );
 
-		$module	= $this->client->arguments->getArgument( 0 );
+		$module	= $this->client->arguments->getArgument();
 		$module	= str_replace( ":", "_", $module );
 		if( !strlen( trim( $module ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
@@ -62,7 +62,7 @@ class Hymn_Command_Config_Module_Remove extends Hymn_Command_Abstract implements
 		if( isset( $config->modules->{$module} ) )
 			return;
 
-		$config->modules->{$module}	= (object) array();
+		$config->modules->{$module}	= (object) [];
 		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
 		clearstatcache();
 	}

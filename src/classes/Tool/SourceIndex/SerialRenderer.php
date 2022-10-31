@@ -11,10 +11,10 @@
 class Hymn_Tool_SourceIndex_SerialRenderer
 {
 	/**	@var	array		$modules */
-	protected $modules	= [];
+	protected array $modules	= [];
 
-	/**	@var	Hymn_Tool_SourceIndex_IniReader	$settings */
-	protected $settings;
+	/**	@var	Hymn_Tool_SourceIndex_IniReader|NULL	$settings */
+	protected ?Hymn_Tool_SourceIndex_IniReader $settings;
 
 	/**
 	 *	@access		public

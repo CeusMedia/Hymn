@@ -60,8 +60,8 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 			}
 			$relation->addModule( $module );
 		}
-		$listInstalled	= array();
-		$listRequired	= array();
+		$listInstalled	= [];
+		$listRequired	= [];
 		$modules	= $relation->getOrder();
 //		$this->client->out( count( $modules )." modules required:" );
 		foreach( $modules as $module ){

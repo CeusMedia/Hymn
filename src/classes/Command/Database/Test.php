@@ -54,7 +54,7 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 		return $this->client->out( "Database is NOT connected." );
 	}
 
-	public static function test( Hymn_Client $client )
+	public static function test( Hymn_Client $client ): bool
 	{
 		$dbc		= $client->getDatabase();
 		if( !$dbc->isConnected() )

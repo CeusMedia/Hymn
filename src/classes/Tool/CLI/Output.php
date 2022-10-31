@@ -41,7 +41,7 @@ class Hymn_Tool_CLI_Output
 
 	public $flags;
 
-	protected $client;
+	protected Hymn_Client $client;
 
 	protected $words;
 
@@ -79,7 +79,7 @@ class Hymn_Tool_CLI_Output
 	public function out( $lines = NULL, bool $newLine = TRUE )
 	{
 		if( is_null( $lines ) )
-			$lines	= array();
+			$lines	= [];
 		if( !is_array( $lines ) ){																	//  output content is not a list
 			if( is_bool( $lines ) )																	//  output is booleann
 				$lines	= $lines ? 'yes' : 'no';													//  convert to string
@@ -106,7 +106,7 @@ class Hymn_Tool_CLI_Output
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = array() )
+	public function outDeprecation( $lines = [] )
 	{
 		if( !is_array( $lines ) ){
 			if( !is_string( $lines ) )

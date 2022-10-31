@@ -36,7 +36,7 @@
  */
 interface Hymn_Command_Interface
 {
-	public function getArgumentOptions();
+	public function getArgumentOptions(): array;
 
 	/**
 	 *	Execute this command.

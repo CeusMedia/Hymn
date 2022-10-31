@@ -1,9 +1,9 @@
 <?php
 class Hymn_Tool_TempFile
 {
-	protected $prefix;
+	protected string $prefix;
 
-	protected $filePath;
+	protected ?string $filePath		= NULL;
 
 	public function __construct( string $prefix = '' )
 	{

@@ -50,7 +50,7 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE, NULL );
 		$this->client->arguments->parse();
 
-		$path		= $this->client->arguments->getArgument( 0 );
+		$path		= $this->client->arguments->getArgument();
 		$recursive	= $this->client->arguments->getOption( 'recursive' );
 		if( $path && !file_exists( $path ) ){
 			$this->client->outError( sprintf(

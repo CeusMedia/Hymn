@@ -36,9 +36,9 @@
  */
 class Hymn_Tool_Framework
 {
-	protected $isInstalled			= FALSE;
-	protected $version				= NULL;
-	protected $defaultFrameworkPath	= 'vendor/ceus-media/hydrogen-framework/';
+	protected bool $isInstalled				= FALSE;
+	protected ?string $version				= NULL;
+	protected string $defaultFrameworkPath	= 'vendor/ceus-media/hydrogen-framework/';
 
 	public function __construct()
 	{
@@ -55,8 +55,9 @@ class Hymn_Tool_Framework
 		return $this->isInstalled;
 	}
 
-	public function checkModuleSupport( $module )
+	public function checkModuleSupport( object $module ): bool
 	{
+		return TRUE;
 		if( $this->version === NULL )
 			return FALSE;
 		$frameworks	= $module->frameworks ? (array) $module->frameworks : [];
@@ -76,11 +77,12 @@ class Hymn_Tool_Framework
 				$this->version,
 			) ) );
 		}
+		return TRUE;
 	}
 
-	protected function detect( ?string $pathToFramework = NULL, bool $strict = TRUE )
+	protected function detect( ?string $pathToFramework = NULL, bool $strict = TRUE ): bool
 	{
-		$pathFramework	= $pathToFramework ? $pathToFramework : $this->defaultFrameworkPath;
+		$pathFramework	= $pathToFramework ?: $this->defaultFrameworkPath;
 		$filePath		= $pathFramework.'hydrogen.ini';
 		if( !file_exists( $filePath ) ){
 			if( $strict )
@@ -100,5 +102,6 @@ class Hymn_Tool_Framework
 		}
 		$this->version		= $ini['project']['version'];
 		$this->isInstalled	= TRUE;
+		return TRUE;
 	}
 }

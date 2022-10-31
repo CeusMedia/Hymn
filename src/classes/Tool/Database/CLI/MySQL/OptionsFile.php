@@ -37,16 +37,16 @@
  */
 class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 {
-	protected $defaultFileName		= '.mysqlOptions.cfg';
-	protected $actualFileName;
-	protected $client;
+	protected string $defaultFileName		= '.mysqlOptions.cfg';
+	protected string $actualFileName;
+	protected Hymn_Client $client;
 
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
 	}
 
-	public function create( ?string $fileName = NULL, bool $strict = TRUE )
+	public function create( ?string $fileName = NULL, bool $strict = TRUE ): self
 	{
 		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
 		if( file_exists( $fileName ) && $strict ){
@@ -62,7 +62,7 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 			'user'		=> 'username',
 			'password'	=> 'password',
 		);
-		$optionList		= array();
+		$optionList		= [];
 		foreach( $map as $optionsKey => $dbaKey ){
 			$trimmedValue 	= trim( $dbc->getConfig( $dbaKey ) );
 			if( strlen( $trimmedValue ) )

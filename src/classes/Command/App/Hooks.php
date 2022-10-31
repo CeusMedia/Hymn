@@ -50,7 +50,7 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !file_exists( Hymn_Client::$fileName ) )
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
-		$list			= array();
+		$list			= [];
 		$library		= $this->getLibrary();
 		$inlineFuncs	= 0;
 		foreach( $library->listInstalledModules() as $moduleId => $module ){

@@ -37,13 +37,13 @@
  */
 class Hymn_Module_Diff
 {
-	protected $client;
-	protected $config;
-	protected $library;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected ?object $config;
+	protected Hymn_Module_Library $library;
+	protected object $flags;
 
-	protected $modulesAvailable			= array();
-	protected $modulesInstalled			= array();
+	protected array $modulesAvailable			= [];
+	protected array $modulesInstalled			= [];
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -57,7 +57,7 @@ class Hymn_Module_Diff
 		);
 	}
 
-	public function compareConfigByModules( $sourceModule, $targetModule )
+	public function compareConfigByModules( object $sourceModule, object $targetModule ): array
 	{
 		if( !isset( $sourceModule->config ) )
 			throw new InvalidArgumentException( 'Given source module object is invalid' );
@@ -65,7 +65,7 @@ class Hymn_Module_Diff
 			throw new InvalidArgumentException( 'Given target module object is invalid' );
 		$skipProperties		= array( 'title', 'values', 'original', 'default' );
 
-		$list			= array();
+		$list			= [];
 		$configSource	= (array) $sourceModule->config;
 		$configTarget	= (array) $targetModule->config;
 
@@ -89,7 +89,7 @@ class Hymn_Module_Diff
 				);
 			}
 			else if( $item != $configSource[$item->key] ){
-				$changes	= array();
+				$changes	= [];
 				foreach( $item as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
 						continue;
@@ -119,7 +119,7 @@ class Hymn_Module_Diff
 		return $list;
 	}
 
-	public function compareSqlByIds( $sourceModuleId, $targetModuleId )
+	public function compareSqlByIds( string $sourceModuleId, string $targetModuleId ): array
 	{
 		$this->readModules();
 		if( !array_key_exists( $sourceModuleId, $this->modulesInstalled ) )
@@ -132,7 +132,7 @@ class Hymn_Module_Diff
 		return $this->compareSqlByModules( $sourceModule, $targetModule );
 	}
 
-	public function compareSqlByModules( $sourceModule, $targetModule )
+	public function compareSqlByModules( object $sourceModule, object $targetModule ): array
 	{
 		$helperSql	= new Hymn_Module_SQL( $this->client );
 		$scripts	= $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
@@ -142,7 +142,7 @@ class Hymn_Module_Diff
 		return $scripts;
 	}
 
-	protected function readModules( ?string $shelfId = NULL )
+	protected function readModules( ?string $shelfId = NULL ): void
 	{
 		if( !$this->modulesAvailable ){
 			$this->modulesInstalled	= $this->library->listInstalledModules( $shelfId );

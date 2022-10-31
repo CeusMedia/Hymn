@@ -47,13 +47,13 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 	{
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$term		= $this->client->arguments->getArgument( 0 );
+		$term		= $this->client->arguments->getArgument();
 		$shelfId	= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		$msgTotal		= '%d module(s) found in all module sources:';
 		$msgEntry		= '%s (%s)';
-		$modulesFound	= array();
+		$modulesFound	= [];
 
 		if( $shelfId ){
 			$msgTotal	= '%d module(s) found in module source "%s":';

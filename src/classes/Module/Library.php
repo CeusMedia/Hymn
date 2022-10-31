@@ -41,9 +41,9 @@ class Hymn_Module_Library
 	protected $listModulesInstalled	= NULL;
 	protected $useCache				= FALSE;
 
-	protected $client;
+	protected Hymn_Client $client;
 
-	protected $modules		= array();
+	protected $modules		= [];
 
 	/**
 	 * @var		Hymn_Module_Library_Available		$available
@@ -62,9 +62,9 @@ class Hymn_Module_Library
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
-	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL )
+	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
 	{
-		return $this->available->addShelf( $shelfId, $path, $type, $active, $title );
+		$this->available->addShelf( $shelfId, $path, $type, $active, $title );
 	}
 
 	public function getActiveShelves( bool $withModules = FALSE ): array
@@ -107,7 +107,7 @@ class Hymn_Module_Library
 		return $this->available->getShelf( $shelfId, $withModules );
 	}
 
-	public function getShelves( array $filters = array(), bool $withModules = FALSE ): array
+	public function getShelves( array $filters = [], bool $withModules = FALSE ): array
 	{
 		return $this->available->getShelves( $filters, $withModules );
 	}

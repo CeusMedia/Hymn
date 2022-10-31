@@ -72,9 +72,9 @@ class Hymn_Command_App_Info extends Hymn_Command_Abstract implements Hymn_Comman
 			$this->client->runCommand( 'modules-installed' );
 			$this->client->out( '' );
 			$this->client->runCommand( 'modules-updatable' );
-//			$this->client->runCommand( 'app-status', array(), array(), array( 'verbose', 'very-verbose' ) );
+//			$this->client->runCommand( 'app-status', [], [], array( 'verbose', 'very-verbose' ) );
 			$this->client->out( '' );
-			$this->client->runCommand( 'modules-required', array(), array(), array( 'verbose', 'very-verbose' ) );
+			$this->client->runCommand( 'modules-required', [], [], array( 'verbose', 'very-verbose' ) );
 		}
 	}
 }

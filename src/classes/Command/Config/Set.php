@@ -45,15 +45,17 @@ class Hymn_Command_Config_Set extends Hymn_Command_Config_Get implements Hymn_Co
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		$key		= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument();
 		$value		= $this->client->arguments->getArgument( 1 );
-		if( !strlen( trim( $key ) ) )
-			return $this->client->outError(
+		if( !strlen( trim( $key ) ) ) {
+			$this->client->outError(
 				'Missing first argument "key" is missing',
 				Hymn_Client::EXIT_ON_INPUT
 			);
+			return;
+		}
 
 		$config		= $this->loadConfig();
 		$current	= $this->getCurrentValue( $config, $key );
@@ -64,8 +66,10 @@ class Hymn_Command_Config_Set extends Hymn_Command_Config_Get implements Hymn_Co
 			$value	= substr( $value, 1, -1 );
 		if( in_array( $key, ['application.uri'], TRUE ) )											//  force trailing slash
 			$value	= rtrim( $value, '/' ).'/';
-		if( $current === $value )
-			return $this->client->outVerbose( 'No change made' );
+		if( $current === $value ){
+			$this->client->outVerbose( 'No change made' );
+			return;
+		}
 
 		$parts	= explode( '.', $key );
 		if( count( $parts ) === 3 )

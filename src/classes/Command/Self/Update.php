@@ -47,7 +47,7 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run()
 	{
-		$version	= $this->client->arguments->getArgument( 0 );
+		$version	= $this->client->arguments->getArgument();
 		$version	= strlen( trim( $version ) ) ? $version : 'master';
 		if( !$version === 'master' && !preg_match( '/^[0-9.]+$/', $version ) )
 			throw new InvalidArgumentException( 'No valid version given: '.$version );

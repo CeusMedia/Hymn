@@ -37,9 +37,9 @@
  */
 class Hymn_Tool_Test
 {
-	protected $client;
+	protected Hymn_Client $client;
 
-	protected static $shellCommands	= array(
+	protected static array $shellCommands	= array(
 		'graphviz'	=> array(
 			'command'	=> "dot -V",
 			'error'		=> 'Missing graphViz.',
@@ -61,7 +61,7 @@ class Hymn_Tool_Test
 			throw new RuntimeException( self::$shellCommands[$key]['error'] );
 	}
 
-	public function checkPhpfileSyntax( string $filePath )
+	public function checkPhpfileSyntax( string $filePath ): object
 	{
 		return static::staticCheckPhpfileSyntax( $filePath );
 	}
@@ -99,10 +99,10 @@ class Hymn_Tool_Test
 			throw new RuntimeException( 'Invalid PHP code has been found. Please check syntax!' );
 	}
 
-	public static function staticCheckPhpfileSyntax( string $filePath )
+	public static function staticCheckPhpfileSyntax( string $filePath ): object
 	{
 		$code		= 0;
-		$output		= array();
+		$output		= [];
 		$command	= "php -l ".$filePath/*." >/dev/null"*/." 2>&1";
 		@exec( $command, $output, $code );
 		$message	= 'Syntax error in file '.$filePath;
@@ -111,7 +111,7 @@ class Hymn_Tool_Test
 		if( isset( $output[2] ) && strlen( trim( $output[2] ) ) )
 			$message	= $output[2];
 		return (object) array(
-			'valid'		=> $code === 0 ? TRUE : FALSE,
+			'valid'		=> $code === 0,
 			'code'		=> $code,
 			'message'	=> $message,
 			'output'	=> $output,

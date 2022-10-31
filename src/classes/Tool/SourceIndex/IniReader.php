@@ -10,10 +10,12 @@
  */
 class Hymn_Tool_SourceIndex_IniReader
 {
-	/**	@var	string		$fileName	Name of settings file */
-	protected $fileName	= '.index.ini';
+	protected array $data;
 
-	protected $empty	= [
+	/**	@var	string		$fileName	Name of settings file */
+	protected string $fileName	= '.index.ini';
+
+	protected array $empty	= [
 		'id'				=> NULL,
 		'title'				=> NULL,
 		'url'				=> NULL,

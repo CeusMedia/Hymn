@@ -78,9 +78,9 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->sources ) )
-			$config->sources	= (object) array();
+			$config->sources	= (object) [];
 
-		$shelf			= array();
+		$shelf			= [];
 		$connectable	= FALSE;
 		do{
 			foreach( $this->questions as $question ){												//  iterate questions
@@ -91,7 +91,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 					$question['label'],
 					$question['type'],
 					$shelf[$question['key']],														//  preset default or custom value
-					isset( $question['options'] ) ? $question['options'] : array(),					//  realize options
+					isset( $question['options'] ) ? $question['options'] : [],					//  realize options
 					FALSE																			//  no break = inline question
 				);
 				$shelf[$question['key']]	= $input->ask();										//  assign given value

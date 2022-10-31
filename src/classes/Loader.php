@@ -37,7 +37,7 @@
  */
 class Hymn_Loader
 {
-	protected $path			= 'phar://hymn.phar/';
+	protected string $path			= 'phar://hymn.phar/';
 
 	public function __construct()
 	{

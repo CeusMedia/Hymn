@@ -65,11 +65,11 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 		}
 		$modulesNeeded	= array_keys( $relation->getOrder() );
 
-		$modulesInstalled = array();
+		$modulesInstalled = [];
 		foreach( $library->listInstalledModules() as $module )
 			$modulesInstalled[]	= $module->id;
 		$modules	= array_diff( $modulesInstalled, $modulesNeeded );
-		$lines	= array();
+		$lines	= [];
 		if( count( $modules )){
 			$lines[]	= 'Found '.count( $modules ).' unneeded modules:';
 			foreach( $modules as $module )

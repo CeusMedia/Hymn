@@ -38,18 +38,18 @@
  */
 class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $argumentOptions	= array(
-		'prefix'		=> array(
+	protected array $argumentOptions	= [
+		'prefix'		=> [
 			'pattern'	=> '/^--prefix=(\S*)$/',
 			'resolve'	=> '\\1',
 			'default'	=> NULL,
-		),
-		'path'		=> array(
+		],
+		'path'		=> [
 			'pattern'	=> '/^--path=(\S*)$/',
 			'resolve'	=> '\\1',
 			'default'	=> NULL,
-		),
-	);
+		],
+	];
 
 	/**
 	 *	Execute this command.
@@ -63,15 +63,15 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return $this->client->out( 'Database can NOT be connected.' );
+		if( !Hymn_Command_Database_Test::test( $this->client ) ){
+			$this->client->out( 'Database can NOT be connected.' );
+			return;
+		}
 
-		$dbc			= $this->client->getDatabase();
-		$arguments		= $this->client->arguments;
-
-		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
-
-		$fileName		= $arguments->getArgument( 0 );
+		$dbc		= $this->client->getDatabase();
+		$arguments	= $this->client->arguments;
+		$path		= $arguments->getOption( 'path' ) ?? $this->client->getConfigPath().'sql/';	//  get path from option or default
+		$fileName	= $arguments->getArgument();
 		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
 			$fileName	= $path;																	//  set path from option or default
 		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
@@ -80,7 +80,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			exec( 'mkdir -p '.dirname( $fileName ) );												//  create path
 
 		$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );							//  get CLI handler for MySQL
-		$prefix		= trim( $arguments->getOption( 'prefix', $dbc->getConfig( 'prefix' ) ) );
+		$prefix		= trim( $arguments->getOption( 'prefix' ) ?? $dbc->getConfig( 'prefix' ) );
 		if( strlen( $prefix ) )
 			$mysql->setPrefixPlaceholder( $prefix );
 

@@ -47,7 +47,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run()
 	{
-		$pathName	= $this->client->arguments->getArgument( 0 );
+		$pathName	= $this->client->arguments->getArgument();
 		$type		= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
@@ -80,9 +80,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$this->showRemovedModule( $type, $moduleChange->module );
 	}
 
-	protected function detectModuleChanges( $stamp, array $modules ): array
+	protected function detectModuleChanges( object $stamp, array $modules ): array
 	{
-		$moduleChanges	= array();
+		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) ){
 				$moduleChanges[$module->id]	= (object) array(
@@ -104,7 +104,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		return $moduleChanges;
 	}
 
-	protected function getInstalledModules( ?string $shelfId = NULL )
+	protected function getInstalledModules( ?string $shelfId = NULL ): array
 	{
 		$modules	= $this->getLibrary()->listInstalledModules( $shelfId );
 		$message	= 'Found '.count( $modules ).' installed modules.';
@@ -114,7 +114,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		return $modules;
 	}
 
-	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL )
+	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL ): ?string
 	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
 		$path		= preg_replace( '@\.+/@', '', $path );
@@ -136,9 +136,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		protected
 	 *	@param		$pathName		...
 	 *	@param		$shelfId		...
-	 *	@return		array
+	 *	@return		object
 	 */
-	protected function getStamp( $pathName, string $shelfId )
+	protected function getStamp( string $pathName, string $shelfId ): object
 	{
 		if( $pathName ){
 			$fileName	= NULL;
@@ -164,7 +164,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@param		object		$module		Module that has been added (maybe from library)
 	 *	@return		void
 	 */
-	protected function showAddedModule( string $type, $module )
+	protected function showAddedModule( string $type, object $module ): void
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
 		if( !$this->flags->quiet )
@@ -198,7 +198,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@param		object		$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( string $type, $moduleOld, $moduleNew )
+	protected function showChangedModule( string $type, object $moduleOld, object $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
@@ -257,7 +257,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@param		object		$module		Module that has been removed (maybe from stamp)
 	 *	@return		void
 	 */
-	protected function showRemovedModule( $type, $module )
+	protected function showRemovedModule( string $type, object $module ): void
 	{
 		$this->client->outError( 'showRemovedModule: Not implemented, yet.' );
 	}

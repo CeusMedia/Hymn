@@ -37,20 +37,20 @@
 abstract class Hymn_Command_Abstract
 {
 	/** @var	Hymn_Client					$client */
-	protected $client;
+	protected Hymn_Client $client;
 
 	/** @var	Hymn_Module_Library|NULL	$library */
-	protected $library	= NULL;
+	protected ?Hymn_Module_Library $library	= NULL;
 
-	protected $flags;
+	protected object $flags;
 
-	protected $locale;
+	protected Hymn_Tool_Locale $locale;
 
-	protected $words;
+	protected object $words;
 
-	protected $argumentOptions	= array();
+	protected array $argumentOptions	= [];
 
-	public function getArgumentOptions()
+	public function getArgumentOptions(): array
 	{
 		return $this->argumentOptions;
 	}
@@ -75,7 +75,7 @@ abstract class Hymn_Command_Abstract
 
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
 		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
-		$this->words	= (object) array();
+		$this->words	= (object) [];
 		if( $this->locale->hasWords( $localeKey ) )
 			$this->words	= $this->locale->loadWords( $localeKey );
 		$this->__onInit();
@@ -101,7 +101,7 @@ abstract class Hymn_Command_Abstract
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = array() )
+	public function outDeprecation( $lines = [] ): void
 	{
 		$this->client->outDeprecation( $lines );
 	}
@@ -109,11 +109,11 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out error message.
 	 *	@access		public
-	 *	@param		string			$message		Error message to print
-	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
+	 *	@param		string		    	$message		Error message to print
+	 *	@param		integer|NULL		$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
-	public function outError( string $message, ?int $exitCode = NULL )
+	public function outError( string $message, ?int $exitCode = NULL ): void
 	{
 		$this->client->outError( $message, $exitCode );
 	}
@@ -125,7 +125,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE )
+	public function outVerbose( $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVerbose( $lines, $newLine );
 	}
@@ -137,7 +137,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE )
+	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVeryVerbose( $lines, $newLine );
 	}
@@ -154,7 +154,7 @@ abstract class Hymn_Command_Abstract
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = [], bool $break = FALSE ): string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
@@ -175,9 +175,9 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		string		$shelfId		ID of shelf or all [all,*] (default)
-	 *	@param		boolean		$strict			Flag: throw exception if shelf ID is not existing
-	 *	@return		???
+	 *	@param		string|NULL		$shelfId		ID of shelf or all [all,*] (default)
+	 *	@param		boolean			$strict			Flag: throw exception if shelf ID is not existing
+	 *	@return		string|FALSE|NULL
 	 *	@throws		\RangeException				if shelf ID is given and not existing
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
@@ -200,14 +200,14 @@ abstract class Hymn_Command_Abstract
 	 *	Reduce all available modules in library (from all source) to map by module ID.
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
-	 *	@param		...			$shelfId	...
-	 *	@return		array					Map of modules by ID
+	 *	@param		string|NULL			$shelfId	...
+	 *	@return		array				Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
 	protected function getAvailableModulesMap( ?string $shelfId = NULL ): array
 	{
 		$library	= $this->getLibrary();															//  try to load sources into a library
-		$moduleMap	= array();																		//  prepare empty list of available modules
+		$moduleMap	= [];																		//  prepare empty list of available modules
 		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
 		return $moduleMap;																			//  return map of modules by ID
@@ -222,7 +222,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean		$forceReload	Flag: reload library (optional, not default)
 	 *	@return		Hymn_Module_Library			Library of available modules in found sources
 	 */
-	protected function getLibrary( bool $forceReload = FALSE )
+	protected function getLibrary( bool $forceReload = FALSE ): Hymn_Module_Library
 	{
 		$config	= $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
@@ -256,9 +256,9 @@ abstract class Hymn_Command_Abstract
 		return $this->library;																		//  return loaded library
 	}
 
-	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds )
+	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds ): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $givenModuleIds as $givenModuleId ){
 			if( !substr_count( $givenModuleId, '*' ) ){
 				if( in_array( $givenModuleId, $availableModuleIds ) ){

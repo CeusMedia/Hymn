@@ -1,20 +1,20 @@
 <?php
 class Hymn_Tool_ConfigValue
 {
-	const COMPARED_UNDONE			= 0;
-	const COMPARED_EQUAL			= 1;
-	const COMPARED_UNEQUAL			= 2;
-	const COMPARED_UNSET_BOTH		= 4;
-	const COMPARED_UNSET_SELF		= 8;
-	const COMPARED_UNSET_OTHER		= 16;
-	const COMPARED_EMPTY_BOTH		= 32;
-	const COMPARED_EMPTY_SELF		= 64;
-	const COMPARED_EMPTY_OTHER		= 128;
-	const COMPARED_MISMATCH_TYPE	= 256;
-	const COMPARED_MISMATCH_LENGTH	= 512;
+	public const COMPARED_UNDONE			= 0;
+	public const COMPARED_EQUAL				= 1;
+	public const COMPARED_UNEQUAL			= 2;
+	public const COMPARED_UNSET_BOTH		= 4;
+	public const COMPARED_UNSET_SELF		= 8;
+	public const COMPARED_UNSET_OTHER		= 16;
+	public const COMPARED_EMPTY_BOTH		= 32;
+	public const COMPARED_EMPTY_SELF		= 64;
+	public const COMPARED_EMPTY_OTHER		= 128;
+	public const COMPARED_MISMATCH_TYPE		= 256;
+	public const COMPARED_MISMATCH_LENGTH	= 512;
 
 	protected $value;
-	protected $type			= 'string';
+	protected string $type			= 'string';
 
 	public function __construct( $value = NULL, ?string $type = NULL )
 	{
@@ -62,7 +62,7 @@ class Hymn_Tool_ConfigValue
 		return static::COMPARED_UNEQUAL;
 	}
 
-	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE )
+	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): bool
 	{
 		if( !$this->is() || !$value->is() )
  			return FALSE;
@@ -71,7 +71,7 @@ class Hymn_Tool_ConfigValue
 		return $this->getValue( TRUE ) !== $value->getValue( TRUE );
 	}
 
-	public function equalsToIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE )
+	public function equalsToIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): bool
 	{
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}

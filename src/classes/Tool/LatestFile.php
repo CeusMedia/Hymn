@@ -37,26 +37,26 @@
  */
 class Hymn_Tool_LatestFile
 {
-	protected $acceptedFileNames	= array();
-	protected $fileNamePattern;
+	protected array $acceptedFileNames	= [];
+	protected string $fileNamePattern;
 	protected $path;
-	protected $client;
+	protected Hymn_Client $client;
 
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
 	}
 
-	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = array() ): ?string
+	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = [] ): ?string
 	{
-		$path		= $path ? $path : $this->path;
+		$path		= $path ?: $this->path;
 		$pattern	= $fileNamePattern ? $fileNamePattern : $this->fileNamePattern;
 		$accepted	= $acceptedFileNames ? $acceptedFileNames : $this->acceptedFileNames;
 		if( !$path )
 			throw new RuntimeException( 'No path set or given' );
 		if( !$pattern && !$accepted )
 			throw new RuntimeException( 'Neither file pattern nor accepted files set or given' );
-		$list	= array();
+		$list	= [];
 		$index	= new DirectoryIterator( $path );
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -74,7 +74,7 @@ class Hymn_Tool_LatestFile
 		return NULL;
 	}
 
-	public function setAcceptedFileNames( array $fileNames = array() ): self
+	public function setAcceptedFileNames( array $fileNames = [] ): self
 	{
 		$this->acceptedFileNames	= $fileNames;
 		return $this;

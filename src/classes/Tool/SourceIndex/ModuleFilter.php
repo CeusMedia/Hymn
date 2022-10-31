@@ -21,10 +21,10 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 	];
 
 	/**	@var	integer		$mode			Index mode */
-	protected $mode	= self::MODE_REDUCED;
+	protected int $mode		= self::MODE_REDUCED;
 
 	/**	@var	string		$pathSource		Path to module source root */
-	protected $pathSource;
+	protected string $pathSource;
 
 	/**
 	 *	@access		public
@@ -38,13 +38,14 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 
 	/**
 	 *	@access		public
-	 *	@param		integer|NULL	$mode		Index mode to set, see constants MODES
+	 *	@param		array			$modules		...
+	 *	@param		integer|NULL	$mode			Index mode to set, see constants MODES
 	 *	@return		array
 	 */
 	public function filter( array $modules, ?int $mode = NULL ): array
 	{
 		$mode	= $mode ?? $this->mode;
-		$list	= array();
+		$list	= [];
 //		$regExp	= '@^'.preg_quote( $this->pathSource, '@' ).'@';
 		foreach( $modules as $module ){
 //			/** @var string $modulePath */

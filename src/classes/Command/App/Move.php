@@ -37,12 +37,10 @@
  */
 class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	const ACTION_CREATE_FOLDER	= 1;
-	const ACTION_MOVE_FILE		= 2;
-	const ACTION_LINK_FILE		= 3;
-	const ACTION_REMOVE_FOLDER	= 4;
-
-	protected $regExpSource;
+	public const ACTION_CREATE_FOLDER	= 1;
+	public const ACTION_MOVE_FILE		= 2;
+	public const ACTION_LINK_FILE		= 3;
+	public const ACTION_REMOVE_FOLDER	= 4;
 
 	/**
 	 *	Execute this command.
@@ -163,7 +161,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$config->application->uri	= $dest;
 
 		$this->client->outVerbose( "  - update module sources in hymn file" );
-		foreach( $config->sources as $sourceKey => $sourceData )
+		foreach( $config->sources as $sourceData )
 			foreach( $sourceData as $key => $value )
 				if( $key === 'path' )
 					$sourceData->path	= preg_replace( $sourceUriRegex, $dest, $value );

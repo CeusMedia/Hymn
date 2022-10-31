@@ -38,7 +38,7 @@
 class Hymn_Tool_XML_Validator
 {
 	/**	@var		array		$error		Array of Error Information */
-	protected $error	= array();
+	protected $error	= [];
 
 	/**
 	 *	Returns last error line.

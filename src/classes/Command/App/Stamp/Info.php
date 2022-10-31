@@ -47,7 +47,7 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run()
 	{
-		$pathName	= $this->client->arguments->getArgument( 0 );
+		$pathName	= $this->client->arguments->getArgument();
 		$types		= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
@@ -78,7 +78,7 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 			$this->client->out( 'Module: '.$module->title );
 			$this->client->out( str_repeat( '-', 48 ) );
 
-			$frameworks = array();
+			$frameworks = [];
 			foreach( $module->frameworks as $frameworkIdentifier => $frameworkVersion )
 				$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
 			$frameworks = join( ' | ', $frameworks );
@@ -128,9 +128,9 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		protected
 	 *	@param		$pathName		...
 	 *	@param		$shelfId		...
-	 *	@return		array
+	 *	@return		object
 	 */
-	protected function getStamp( string $pathName, string $shelfId )
+	protected function getStamp( string $pathName, string $shelfId ): object
 	{
 		if( $pathName ){
 			$fileName	= NULL;

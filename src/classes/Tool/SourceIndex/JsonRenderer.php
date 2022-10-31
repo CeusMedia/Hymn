@@ -11,13 +11,13 @@
 class Hymn_Tool_SourceIndex_JsonRenderer
 {
 	/**	@var	array		$modules */
-	protected $modules	= [];
+	protected array $modules	= [];
 
-	/**	@var	Hymn_Tool_SourceIndex_IniReader	$settings */
-	protected $settings;
+	/**	@var	Hymn_Tool_SourceIndex_IniReader|NULL	$settings */
+	protected ?Hymn_Tool_SourceIndex_IniReader $settings;
 
 	/**	@var	boolean		$printPretty */
-	protected $printPretty	= FALSE;
+	protected bool $printPretty	= FALSE;
 
 	/**
 	 *	@access		public

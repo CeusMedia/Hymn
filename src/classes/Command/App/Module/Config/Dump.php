@@ -57,7 +57,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 
 		$index	= new DirectoryIterator( $pathConfig."modules" );
 		$reader	= new Hymn_Module_Reader();
-		$list	= array();
+		$list	= [];
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
 				continue;
@@ -66,7 +66,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 			$module	= $reader->load( $entry->getPathname(), $id );
 			if( $module->config || in_array( $id, $knownModules ) ){
-				$list[$id]	= array( 'config' => (object) array() );
+				$list[$id]	= array( 'config' => (object) [] );
 				foreach( $module->config as $pair )
 					$list[$id]['config']->{$pair->key}	= $pair->value;
 			}

@@ -1,7 +1,7 @@
 <?php
 class Hymn_Tool_Database_PDO
 {
-	protected $client;
+	protected Hymn_Client $client;
 	protected $dba;
 	protected $dbc;
 
@@ -179,7 +179,7 @@ class Hymn_Tool_Database_PDO
 
 	/*  --  PROTECTED  --  */
 
-	protected function ask( string $message, string $type = 'string', $default = NULL, array $options = array(), bool $break = TRUE ): string
+	protected function ask( string $message, string $type = 'string', $default = NULL, array $options = [], bool $break = TRUE ): string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,

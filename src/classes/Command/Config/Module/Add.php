@@ -45,12 +45,12 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$filename	= Hymn_Client::$fileName;
 		$config		= json_decode( file_get_contents( $filename ) );
 
-		$moduleName	= $this->client->arguments->getArgument( 0 );
+		$moduleName	= $this->client->arguments->getArgument();
 		if( !strlen( trim( $moduleName ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
 		$moduleId	= str_replace( ":", "_", $moduleName );
@@ -64,10 +64,10 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 			throw new RuntimeException( sprintf( 'Module "%s" is not available', $moduleId ) );
 
 		$module			= $availableModules[$moduleId];
-		$moduleObject	= (object) array();
+		$moduleObject	= (object) [];
 		$msg			= 'Adding module "%s" (%s) from source "%s"';
 		$this->client->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
-		$moduleConfigValues	= array();
+		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
 			$question		= new Hymn_Tool_CLI_Question(

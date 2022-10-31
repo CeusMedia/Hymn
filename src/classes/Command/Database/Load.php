@@ -55,7 +55,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
 			return $this->client->out( 'Database can NOT be connected.' );
 
-		$pathName		= $this->client->arguments->getArgument( 0 );
+		$pathName		= $this->client->arguments->getArgument();
 		if( $pathName && file_exists( $pathName ) ){
 			if( is_dir( $pathName ) )
 				$fileName	= $this->getLatestDump( $pathName );

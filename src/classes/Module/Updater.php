@@ -37,11 +37,11 @@
  */
 class Hymn_Module_Updater
 {
-	protected $client;
-	protected $config;
-	protected $library;
-	protected $isLiveCopy	= FALSE;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected ?object $config;
+	protected Hymn_Module_Library $library;
+	protected bool $isLiveCopy	= FALSE;
+	protected object $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -80,7 +80,7 @@ class Hymn_Module_Updater
 	 */
 	public function getUpdatableModules( string $shelfId = NULL ): array
 	{
-		$outdated		= array();																	//  prepare list of outdated modules
+		$outdated		= [];																	//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $shelfId ) as $installed ){					//  iterate installed modules
 			$source		= $installed->installSource;												//  get source of installed module
 			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
@@ -110,11 +110,11 @@ class Hymn_Module_Updater
 			throw new RuntimeException( $message );
 		}
 
-		$hymnModuleConfig	= array();
+		$hymnModuleConfig	= [];
 		if( isset( $this->config->modules->{$module->id}->config ) )
 			$hymnModuleConfig	= $this->config->modules->{$module->id}->config;
 
-		$inputValues		= array();																//  prepare list of values to change
+		$inputValues		= [];																//  prepare list of values to change
 		foreach( $moduleSource->config as $configKey => $configData ){
 			$valueConfig			= new Hymn_Tool_ConfigValue();//@type
 			$valueCurrent			= new Hymn_Tool_ConfigValue();
@@ -142,7 +142,7 @@ class Hymn_Module_Updater
 			if( $changedOnly && !$valueCurrent->differsFromIfBothSet( $valueSuggest ) )				//  module value is not newer than config
 				continue;																			//  skip to next
 
-			$questionAnswers	= array();
+			$questionAnswers	= [];
 			$this->client->out( '- Config key "'.$configKey.'":' );
 			$questionDefault	= 'd';
 			$questionAnswers[]	= 'd';
@@ -228,15 +228,15 @@ class Hymn_Module_Updater
 			$localModule->path	= $appUri;
 
 			$availableModules	= $this->library->getAvailableModules();							//  get list of all available modules
-			$availableModuleMap	= array();															//  prepare map of available modules
+			$availableModuleMap	= [];															//  prepare map of available modules
 			foreach( $availableModules as $availableModule )										//  iterate module list
 				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
 
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 
 			//  --  MODULES TO UNINSTALL
-			$installedModules	= array();
-			$neededModules		= array();
+			$installedModules	= [];
+			$neededModules		= [];
 			foreach( $localModule->relations->needs as $moduleId => $relation )
 				if( $relation->type === 'module' )													//  only if relation is a module
 					$installedModules[$moduleId]	= $relation;

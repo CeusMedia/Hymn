@@ -37,7 +37,7 @@
  */
 class Hymn_Module_Library_Installed
 {
-	protected $client;
+	protected Hymn_Client $client;
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -58,7 +58,7 @@ class Hymn_Module_Library_Installed
 	{
 //		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
 //			return self::$listModulesInstalled;									//  @todo realize shelves in cache
-		$list			= array();
+		$list			= [];
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		if( file_exists( $pathModules ) ){
 			$iterator	= new RecursiveDirectoryIterator( realpath( $pathModules ) );
@@ -77,7 +77,7 @@ class Hymn_Module_Library_Installed
 		return $list;
 	}
 
-	public function has( string $moduleId, string $shelfId = NULL )
+	public function has( string $moduleId, string $shelfId = NULL ): bool
 	{
 		$list	= $this->getAll( $shelfId );
 		return array_key_exists( $moduleId, $list );

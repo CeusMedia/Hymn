@@ -102,10 +102,10 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 
 	/**
 	 *	Create a child element with CDATA value
-	 *	@param		string		$name			The name of the child element to add.
-	 *	@param		string		$cdata_text		The CDATA value of the child element.
-	 *	@param		string		$nsPrefix		Namespace prefix of child element
-	 *	@param		string		$nsURI			Namespace URI of child element
+	 *	@param		string			$name			The name of the child element to add.
+	 *	@param		string			$text			The CDATA value of the child element.
+	 *	@param		string|NULL		$nsPrefix		Namespace prefix of child element
+	 *	@param		string|NULL		$nsURI			Namespace URI of child element
 	 *	@return		SimpleXMLElement
 	 *	@reprecated	use addChild instead
 	 */
@@ -164,7 +164,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 */
 	public function getAttributeNames( ?string $nsPrefix = NULL ): array
 	{
-		$list	= array();
+		$list	= [];
 		$data	= $nsPrefix ? $this->attributes( $nsPrefix, TRUE ) : $this->attributes();
 		foreach( $data as $name => $value )
 			$list[] = $name;
@@ -179,7 +179,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 */
 	public function getAttributes( ?string $nsPrefix = NULL ): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $this->attributes( $nsPrefix, TRUE ) as $name => $value )
 			$list[$name]	= (string) $value;
 		return $list;
@@ -297,7 +297,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 
 	/**
 	 *	Add CDATA text in a node
-	 *	@param		string		$cdata_text		The CDATA value to add
+	 *	@param		string		$text		The CDATA value to add
 	 */
 	private function addCData( string $text )
 	{

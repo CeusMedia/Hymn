@@ -38,8 +38,8 @@
  */
 class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $installType	= "link";
-	protected $installMode	= "dev";
+	protected string $installType	= "link";
+	protected string $installMode	= "dev";
 
 	/**
 	 *	Execute this command.
@@ -49,7 +49,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$config				= $this->client->getConfig();											//  shortcut hymn config
 		$library			= $this->getLibrary();													//  get module library instance
@@ -59,8 +59,10 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( $this->flags->dry )
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		if( !$listInstalled )																		//  application has no installed modules
-			return $this->client->out( "No installed modules found" );								//  not even one module is installed, no update
+		if( !$listInstalled ){																		//  application has no installed modules
+			$this->client->out( "No installed modules found" );								//  not even one module is installed, no update
+			return;
+		}
 
 //		$start		= microtime( TRUE );
 
@@ -70,7 +72,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$outdatedModules	= array();																//  prepare empty list of updatable modules
+		$outdatedModules	= [];																//  prepare empty list of updatable modules
 		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
 			$source				= $installedModule->installSource;									//  get installed module
 			$availableModule	= $library->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
@@ -94,7 +96,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$outdatedModuleIds	= array_keys( $outdatedModules );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );		//  replace wildcarded modules
 
-			$modulesToUpdate	= array();															//  start with empty list again
+			$modulesToUpdate	= [];															//  start with empty list again
 			foreach( $moduleIds as $moduleId ){														//  iterate given modules
 				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
 					$this->client->out( sprintf(

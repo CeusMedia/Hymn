@@ -36,9 +36,9 @@
  */
 class Hymn_Tool_Semver
 {
-	protected $actualVersion;
-	protected $semanticVersion;
-	protected $defaultOperator		= '=';
+	protected string $actualVersion;
+	protected string $semanticVersion;
+	protected string $defaultOperator		= '=';
 
 	public function __construct()
 	{
@@ -84,7 +84,7 @@ class Hymn_Tool_Semver
 		$version		= $semanticVersion;
 		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';
 		if( preg_match( $patternPrefix, $semanticVersion ) ){
-			$matches	= array();
+			$matches	= [];
 			preg_match( $patternPrefix, $semanticVersion, $matches );
 			$operator	= $matches[1];
 			$version	= $matches[2];

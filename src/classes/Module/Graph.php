@@ -37,26 +37,26 @@
  */
 class Hymn_Module_Graph
 {
-	const STATUS_EMPTY		= 0;
-	const STATUS_CHANGED	= 1;
-	const STATUS_LINKED		= 2;
-	const STATUS_PRODUCED	= 3;
-	const STATUS_DRAWN		= 4;
+	public const STATUS_EMPTY		= 0;
+	public const STATUS_CHANGED		= 1;
+	public const STATUS_LINKED		= 2;
+	public const STATUS_PRODUCED	= 3;
+	public const STATUS_DRAWN		= 4;
 
 	/** @var		Hymn_Client				$client */
-	public $client;
+	public Hymn_Client $client;
 
 	/** @var		Hymn_Module_Library		$library */
-	public $library;
+	public Hymn_Module_Library $library;
 
 	/** @var		array					$nodes */
-	public $nodes			= array();
+	public array $nodes						= [];
 
 	/** @var		object					$flags */
-	protected $flags;
+	protected object $flags;
 
 	/** @var		integer					$status */
-	protected $status		= self::STATUS_EMPTY;
+	protected int $status					= self::STATUS_EMPTY;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -76,7 +76,7 @@ class Hymn_Module_Graph
 	 *	@param		integer			$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( $module, int $level = 0 )
+	public function addModule( object $module, int $level = 0 )
 	{
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
@@ -89,8 +89,8 @@ class Hymn_Module_Graph
 		$this->nodes[$module->id]	= (object) array(												//  add module to node list by module ID
 			'module'	=> $module,																	//  … store module data object
 			'level'		=> $level,																	//  … store load level
-			'in'		=> array(),																	//  … store ingoing module links
-			'out'		=> array(),																	//  … store outgoing module links
+			'in'		=> [],																	//  … store ingoing module links
+			'out'		=> [],																	//  … store outgoing module links
 		);
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
@@ -134,7 +134,7 @@ class Hymn_Module_Graph
 			$this->realizeRelations();
 
 		/*  calculate maximum relation depth  */
-		$list	= array();
+		$list	= [];
 		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
 //			if( $this->flags->verbose && !$this->flags->quiet )
@@ -153,7 +153,7 @@ class Hymn_Module_Graph
 		krsort( $list );																			//  sort module order list
 
 		/*  collect modules by installation order  */
-		$modules	= array();																		//  prepare empty module list
+		$modules	= [];																		//  prepare empty module list
 		foreach( array_values( $list ) as $id )														//  iterate module order list
 			$modules[$id]	= $this->nodes[$id]->module;											//  collect module by installation order
 		return $modules;																			//  return list of modules by installation order
@@ -165,8 +165,8 @@ class Hymn_Module_Graph
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
-		$nodes	= array();
-		$edges	= array();
+		$nodes	= [];
+		$edges	= [];
 		foreach( $this->nodes as $id => $node ){
 			$label		= 'label="'.$node->module->title.'"';
 			$nodes[]	= $node->module->id.' ['.$label.' '.$nodeStyle.'];';
@@ -174,12 +174,12 @@ class Hymn_Module_Graph
 				$edges[]	= $node->module->id.' -> '.$out->module->id.' []';
 		}
 		$options	= "\n\t".'rankdir="LR"';
-		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
-		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
-		$graph		= "digraph {".$options.$nodes.$edges."\n}";
 		$this->status	= self::STATUS_PRODUCED;
 		if( $this->flags->verbose && !$this->flags->quiet )
 			$this->client->out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
+		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
+		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
+		$graph		= "digraph {".$options.$nodes.$edges."\n}";
 		if( $targetFile ){
 			file_put_contents( $targetFile, $graph );
 			if( !$this->flags->quiet )
@@ -225,7 +225,7 @@ class Hymn_Module_Graph
 	 *	@param		integer		$level		Counter of recursion level, 0 by default.
 	 *	@return		object|NULL				Object if looping node or null if no loop found
 	 */
-	protected function checkForLoop( $node, int $level = 0, array $steps = array() )
+	protected function checkForLoop( object $node, int $level = 0, array $steps = [] )
 	{
 		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
 			return (object) array(																	//  return loop data ...
@@ -248,7 +248,7 @@ class Hymn_Module_Graph
 	{
 		$count	= $level;
 		if( count( $node->in ) ){
-			$ways	= array();
+			$ways	= [];
 			foreach( $node->in as $parent )
 				$ways[]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
 			$count	= max( $ways );

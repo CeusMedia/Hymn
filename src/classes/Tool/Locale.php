@@ -36,20 +36,21 @@
  */
 class Hymn_Tool_Locale
 {
-	const TYPE_UNKNOWN	= 0;
-	const TYPE_TEXT		= 1;
-	const TYPE_WORDS	= 2;
+	public const TYPE_UNKNOWN	= 0;
+	public const TYPE_TEXT		= 1;
+	public const TYPE_WORDS		= 2;
 
-	protected $baseUri		= 'phar://hymn.phar/locales/';
+	protected string $baseUri		= 'phar://hymn.phar/locales/';
 	protected $language;
 	protected $version;
 
 	/**
 	 *	Constructor, shortcutting client version and language.
 	 *	@access		public
-	 *	@return		object
+	 *	@param		string|NULL		$language
+	 *	@return		void
 	 */
-	public function __construct( $language = NULL )
+	public function __construct( ?string $language = NULL )
 	{
 		if( is_null( $language ) )
 			$language		= Hymn_Client::$language;
@@ -159,7 +160,7 @@ class Hymn_Tool_Locale
 		$text		= file_get_contents( $filePath );							//  read existing words file
 		$text		= str_replace( "%version%", $this->version, $text );		//  insert client version
 		$text		= str_replace( "%language%", $this->language, $text );		//  insert client language
-		$words		= parse_ini_string( $text, FALSE );							//  parse ini structure in plain mode
+		$words		= parse_ini_string( $text );							//  parse ini structure in plain mode
 		return (object) $words;													//  return words map as object
 	}
 

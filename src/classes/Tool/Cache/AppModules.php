@@ -37,8 +37,8 @@
  */
 class Hymn_Tool_Cache_AppModules
 {
-	protected $client;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected object $flags;
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -53,7 +53,7 @@ class Hymn_Tool_Cache_AppModules
 	/**
 	 *	Remove app module cache file.
 	 *	@access		public
-	 *	@param		string		$outputPrefix		Perfix of verbose message
+	 *	@param		string		$outputPrefix		Prefix of verbose message
 	 *	@return		bool|NULL
 	 */
 	public function invalidate( string $outputPrefix = '' ): ?bool

@@ -37,7 +37,7 @@
  */
 class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $answers	= array();
+	protected $answers	= [];
 	protected $pathPhar	= "phar://hymn.phar/";
 
 	/**
@@ -85,9 +85,9 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 				'installType'	=> $this->answers['app.install.type'],
 				'installMode'	=> $this->answers['app.install.mode'],
 			),
-			'sources'		=> (object) array(),
-			'modules'		=> (object) array(),
-			'database'		=> (object) array(),
+			'sources'		=> (object) [],
+			'modules'		=> (object) [],
+			'database'		=> (object) [],
 			'system'		=> (object) array(
 				'user'			=> $this->answers['system.user'],
 				'group'			=> $this->answers['system.group'],
@@ -149,7 +149,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->client->out( "" );																	//  print empty line as optical separator
 	}
 
-	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = TRUE )
+	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, array $options = [], bool $break = TRUE )
 	{
 		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options, $break );
 		$this->answers[$key]	= $question->ask();

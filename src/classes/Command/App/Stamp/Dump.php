@@ -33,7 +33,7 @@
  *	@copyright		2017-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -47,10 +47,10 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run()
 	{
-//		$key	= $this->client->arguments->getArgument( 0 );
+//		$key	= $this->client->arguments->getArgument();
 		$library	= $this->getLibrary();
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$shelfId	= $this->client->arguments->getArgument( 0 );
+		$shelfId	= $this->client->arguments->getArgument();
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 		$datetime	= date( 'Y-m-d_H:i:s' );
 
@@ -68,7 +68,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
 
 		ksort( $modules );
-		$data	= (object) array( 'modules' => array() );
+		$data	= (object) array( 'modules' => [] );
 		foreach( $modules as $module ){
 			unset( $module->versionAvailable );
 			unset( $module->versionInstalled );

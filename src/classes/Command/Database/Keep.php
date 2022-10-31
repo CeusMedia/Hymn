@@ -56,7 +56,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$this->client->arguments->registerOption( 'yearly', '/^--yearly=(\d+)$/', '\\1', 0 );
 		$this->client->arguments->parse();
 
-		$arg1			= $this->client->arguments->getArgument( 0 );
+		$arg1			= $this->client->arguments->getArgument();
 		$keepDaily		= abs( $this->client->arguments->getOption( 'daily' ) );
 		$keepWeekly		= abs( $this->client->arguments->getOption( 'weekly' ) );
 		$keepMonthly	= abs( $this->client->arguments->getOption( 'monthly' ) );
@@ -71,7 +71,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$pathName	= rtrim( $pathName, '/' ).'/';
 
 		/*  --  LIST ALL FILES  --  */
-		$index	= array();
+		$index	= [];
 		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
 		foreach( new DirectoryIterator( $pathName ) as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -102,7 +102,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$nrWeekly	= 0;
 		$nrMonthly	= 0;
 		$nrYearly	= 0;
-		$list		= array();
+		$list		= [];
 		foreach( $index as $fileName => $file ){
 			$nrDaily	+= 1;
 			$nrWeekly	+= $file->isWeekly ? 1 : 0;

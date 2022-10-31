@@ -37,8 +37,8 @@
  */
 class Hymn_Module_SQL
 {
-	protected $client;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected object $flags;
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -55,18 +55,18 @@ class Hymn_Module_SQL
 	 *	Return list of SQL statements to execute on module update.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object 		$module				Object of library module to install
+	 *	@param		object		$module				Object of library module to install
 	 *	@return		array		List of SQL statements to execute on module installation
 	 */
-	public function getModuleInstallSql( $module ): array
+	public function getModuleInstallSql( object $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $module->sql as $sql )																//  first run: install
 			if( $sql->event == "install" && trim( $sql->sql ) )										//  is an install script
@@ -108,18 +108,18 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and returns list of uninstall scripts.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object 		$installedModule	Object of locally installed module
+	 *	@param		object		$installedModule	Object of locally installed module
 	 *	@return		array		List of SQL statements to execute on module uninstallation
 	 */
-	public function getModuleUninstallSql( $installedModule ): array
+	public function getModuleUninstallSql( object $installedModule ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $installedModule->sql as $sql )													//  first run: uninstall
 			if( $sql->event == "uninstall" && trim( $sql->sql ) )									//  is an uninstall script
@@ -151,15 +151,15 @@ class Hymn_Module_SQL
 	 *	@param		object		$module				Object of library module to update to
 	 *	@return		array		List of SQL statements to execute on module update
 	 */
-	public function getModuleUpdateSql( $installedModule, $module ): array
+	public function getModuleUpdateSql( object $installedModule, object $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= $installedModule->version;													//  start by version of currently installed module
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $module->sql as $sql ){															//  iterate SQL scripts
 			if( $sql->event == "update" && trim( $sql->sql ) ){										//  is an update script
@@ -178,11 +178,10 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object 		$module				Object of nodule to install
-	 *	@param		object 		$module				Object of nodule to install
-	 *	@throws		RuntimeException		if target file is not readable
+	 *	@param		object		$module			Object of module to install
+	 *	@throws		RuntimeException			if target file is not readable
 	 */
-	public function runModuleInstallSql( $module )
+	public function runModuleInstallSql( object $module )
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
@@ -201,10 +200,10 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and executes uninstall scripts.
 	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object 		$installedModule	Object of locally installed module
+	 *	@param		object		$installedModule	Object of locally installed module
 	 *	@return		void
 	 */
-	public function runModuleUninstallSql( $installedModule )
+	public function runModuleUninstallSql( object $installedModule ): void
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
@@ -224,14 +223,14 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object 		$installedModule	Object of locally installed module
-	 *	@param		object 		$module				Object of library module to update to
+	 *	@param		object		$installedModule	Object of locally installed module
+	 *	@param		object		$module				Object of library module to update to
 	 *	@param		boolean		$tryMode			Flag: force no changes, only try (default: no)
 	 *	@return		void
 	 *	@todo		implement SQL checks or in try mode nothing is done
 	 *	@todo		also maybe add transactions
 	 */
-	public function runModuleUpdateSql( $installedModule, $module, bool $tryMode = FALSE )
+	public function runModuleUpdateSql( object $installedModule, object $module, bool $tryMode = FALSE ): void
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
@@ -260,7 +259,7 @@ class Hymn_Module_SQL
 	 *	@return		string							PDO driver used by database connection
 	 *	@throws		\RuntimeException				if no database connection driver is set
 	 */
-	protected function checkDriver()
+	protected function checkDriver(): string
 	{
 		$dbc	= $this->client->getDatabase();														//  shortcut database resource of client
 		$driver	= $dbc->getConfig( 'driver' );														//  get configured database driver
@@ -282,8 +281,8 @@ class Hymn_Module_SQL
 		$dbc->connect( TRUE );
 		$prefix		= $dbc->getConfig( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
-		$statements = array();
-		$buffer		= array();
+		$statements = [];
+		$buffer		= [];
 		while( count( $lines ) ){
 			$line = array_shift( $lines );
 			if( !trim( $line ) )
@@ -291,7 +290,7 @@ class Hymn_Module_SQL
 			$buffer[]	= $dbc->applyTablePrefixToSql( trim( $line ), $prefix );
 			if( preg_match( '/;$/', trim( $line ) ) ){
 				$statements[]	= join( "\n", $buffer );
-				$buffer			= array();
+				$buffer			= [];
 			}
 			if( !count( $lines ) && $buffer )
 				$statements[]	= join( "\n", $buffer ).';';

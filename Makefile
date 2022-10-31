@@ -29,7 +29,7 @@ install-link: uninstall ## installs PHAR file in system (/usr/local/bin) by link
 
 uninstall:
 	@test -f /usr/local/bin/hymn && echo "Removing hymn in /usr/local/bin" && sudo rm -f /usr/local/bin/hymn || true
-	@test -l /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
+	@test -L /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
 
 test-units:
 	@./vendor/bin/phpunit

@@ -41,7 +41,7 @@ define( 'SIZE_GIGABYTE', pow( 1024, 3 ) );
 class Hymn_Tool_FileSize
 {
 	/**	@var		array		$unitBytes		List of Byte Units */
-	public static $unitBytes	= array(
+	public static array $unitBytes	= array(
 		'B',
 		'KB',
 		'MB',
@@ -61,7 +61,7 @@ class Hymn_Tool_FileSize
 	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
 	 *	@access		public
 	 *	@static
-	 *	@param		float		$float			Number of bytes
+	 *	@param		string		$filePath		...
 	 *	@param		int			$precision		Number of floating point digits
 	 *	@param		string		$indent			Space between number and unit
 	 *	@param		float		$edge			Factor of next higher unit when to break
@@ -82,7 +82,7 @@ class Hymn_Tool_FileSize
 	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
 	 *	@access		public
 	 *	@static
-	 *	@param		float		$float			Number of bytes
+	 *	@param		int			$bytes			Number of bytes
 	 *	@param		int			$precision		Number of floating point digits
 	 *	@param		string		$indent			Space between number and unit
 	 *	@param		float		$edge			Factor of next higher unit when to break

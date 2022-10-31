@@ -47,7 +47,7 @@ class Hymn_Command_App_Base_Config_Enable extends Hymn_Command_Abstract implemen
 	 */
 	public function run()
 	{
-		$key		= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument();
 		$pathConfig	= $this->client->getConfigPath();
 
 		if( !strlen( trim( $key ) ) )

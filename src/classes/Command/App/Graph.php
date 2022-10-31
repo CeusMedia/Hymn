@@ -37,7 +37,7 @@
  */
 class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $installType	= "link";
+	protected string $installType	= "link";
 
 	/**
 	 *	Execute this command.

@@ -1,6 +1,6 @@
 <?php
 /**
- *	Compares installed against available modules to sollect outdated modules.
+ *	Compares installed against available modules to collect outdated modules.
  *	Shows outdated modules with logged changes, if available and verbose.
  *
  *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
@@ -26,7 +26,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	Compares installed against available modules to sollect outdated modules.
+ *	Compares installed against available modules to collect outdated modules.
  *	Shows outdated modules with logged changes, if available and verbose.
  *
  *	@category		Tool
@@ -40,8 +40,8 @@
  */
 class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	const CODE_NONE					= 0;
-	const CODE_MODULES_OUTDATED		= 1;
+	public const CODE_NONE					= 0;
+	public const CODE_MODULES_OUTDATED		= 1;
 
 	/**
 	 *	Execute this command.
@@ -49,9 +49,9 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	Missing flags: database-no?(if new 3rd arg would be target database), quiet?
 	 *	@todo		implement missing flags
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int
 	 */
-	public function run()
+	public function run(): int
 	{
 	//	$config			= $this->client->getConfig();
 
@@ -73,7 +73,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
-		$moduleId	= trim( $this->client->arguments->getArgument( 0 ) );							//  get module id as first argument
+		$moduleId	= trim( $this->client->arguments->getArgument() );								//  get module id as first argument
 		if( strlen( $moduleId = trim( $moduleId ) ) )												//  a module ID has been given
 			return $this->runForSingleModule( $outdatedModules, $moduleId );						//  run status for single module
 		return $this->runForAllModules( $outdatedModules );											//  run status for all (outdated) modules
@@ -93,7 +93,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 			return;
 		$this->client->out( $indent.'Changes:' );
 		foreach( $changes as $change ){
-			$version	= str_pad( $change->version, 9, ' ', STR_PAD_RIGHT );
+			$version	= str_pad( $change->version, 9 );
 			$this->client->out( sprintf( $indent.' - %s %s', $version, $change->note ) );
 		}
 	}

@@ -37,9 +37,9 @@
  */
 class Hymn_Module_Files
 {
-	protected $client;
-	protected $config;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected ?object $config;
+	protected object $flags;
 
 	/**
 	 *	Constructor.
@@ -69,7 +69,7 @@ class Hymn_Module_Files
 	 *	@return		void
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( $module, string $installType = 'link', bool $tryMode = FALSE ): bool
+	public function copyFiles( object $module, string $installType = 'link', bool $tryMode = FALSE ): bool
 	{
 		if( $this->flags->noFiles )
 			return TRUE;
@@ -161,11 +161,11 @@ class Hymn_Module_Files
 	 *	If not awaiting an available module, an installed module can be given.
 	 *	Mapped source and target paths are identical in this case.
 	 *	@access		protected
-	 *	@param 		object 		$module		Module object
+	 *	@param		object		$module		Module object
 	 *	@return		array
 	 *	@todo   	change behaviour of styles without source: install into common instead of theme
 	 */
-	protected function prepareModuleFileMap( $module, bool $awaitAvailableModule = TRUE )
+	protected function prepareModuleFileMap( object $module, bool $awaitAvailableModule = TRUE ): array
 	{
 		if( !is_object( $module ) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
@@ -177,9 +177,9 @@ class Hymn_Module_Files
 
 		$pathSource		= $module->path;
 		$pathTarget		= $this->config->application->uri;
-		$layoutTheme	= isset( $this->config->layoutTheme ) ? $this->config->layoutTheme : 'common';
-		$layoutPrimer	= isset( $this->config->layoutPrimer ) ? $this->config->layoutPrimer : 'primer';
-		$map			= array();
+		$layoutTheme	= $this->config->layoutTheme ?? 'common';
+		$layoutPrimer	= $this->config->layoutPrimer ?? 'primer';
+		$map			= [];
 		$skipSources	= array( 'lib', 'styles-lib', 'scripts-lib', 'url' );
 		foreach( $module->files as $fileType => $files ){
 			foreach( $files as $file ){
@@ -266,18 +266,18 @@ class Hymn_Module_Files
 	 *	Removed installed files of module.
 	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
-	 *	@param 		object 		$module			Module object
+	 *	@param		object		$module			Module object
 	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		void
 	 *	@throws		RuntimeException			if target file is not readable
 	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	public function removeFiles( $module, bool $tryMode = FALSE )
+	public function removeFiles( object $module, bool $tryMode = FALSE ): void
 	{
 		if( $this->flags->noFiles )
-			return TRUE;
+			return;
 		$fileMap	= $this->prepareModuleFileMap( $module, FALSE );								//  get list of installed module files
-		foreach( array_values( $fileMap ) as $target ){												//  iterate target file list
+		foreach( $fileMap as $target ){												//  iterate target file list
 			if( !file_exists( $target ) && !is_link( $target ) )
 				continue;
 			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable

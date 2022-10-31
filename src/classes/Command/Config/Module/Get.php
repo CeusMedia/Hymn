@@ -48,7 +48,7 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 	public function run()
 	{
 		$config		= $this->client->getConfig();
-		$key		= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument();
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 

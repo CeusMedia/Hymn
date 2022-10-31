@@ -37,12 +37,12 @@
  */
 class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $questions	= array(
+	protected array $questions	= array(
 		'driver'	=> array(
 			'key'		=> 'driver',
 			'label'		=> "- PDO Driver",
 			'type'		=> 'string',
-			'options'	=> array(),
+			'options'	=> [],
 		),
 		array(
 			'key'		=> 'host',
@@ -91,23 +91,23 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->database ) )
-			$config->database	= (object) array();
+			$config->database	= (object) [];
 		$dba	= $config->database;
 
-		$dba->driver	= isset( $dba->driver ) ? $dba->driver : "mysql";
-		$dba->host		= isset( $dba->host ) ? $dba->host : "localhost";
-		$dba->port		= isset( $dba->port ) ? $dba->port : "3306";
-		$dba->name		= isset( $dba->name ) ? $dba->name : NULL;
-		$dba->prefix	= isset( $dba->prefix ) ? $dba->prefix : NULL;
-		$dba->username	= isset( $dba->username ) ? $dba->username : NULL;
-		$dba->password	= isset( $dba->password ) ? $dba->password : NULL;
+		$dba->driver	= $dba->driver ?? "mysql";
+		$dba->host		= $dba->host ?? "localhost";
+		$dba->port		= $dba->port ?? "3306";
+		$dba->name		= $dba->name ?? NULL;
+		$dba->prefix	= $dba->prefix ?? NULL;
+		$dba->username	= $dba->username ?? NULL;
+		$dba->password	= $dba->password ?? NULL;
 
 		$this->questions['driver']['options']	= pdo_drivers();//PDO::getAvailableDrivers();
 		$connectable	= FALSE;
 		do{																							//  do in loop
 			foreach( $this->questions as $question ){														//  iterate questions
 				$default	= $dba->{$question['key']};												//  shortcut default
-				$options	= isset( $question['options'] ) ? $question['options'] : array();		//  realize options
+				$options	= $question['options'] ?? [];		//  realize options
 				$input		= new Hymn_Tool_CLI_Question(												//  ask for value
 					$this->client,
 					$question['label'],

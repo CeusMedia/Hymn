@@ -49,7 +49,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 	{
 		$filename   = Hymn_Client::$fileName;
 		$config		= $this->client->getConfig();
-		$key		= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument();
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 		$parts		= explode( ".", $key );
@@ -62,9 +62,9 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 		$availableModules	= $this->getAvailableModulesMap();
 
 		if( !isset( $config->modules->{$moduleId} ) )
-			$config->modules->{$moduleId}	= (object) array();
+			$config->modules->{$moduleId}	= (object) [];
 		if( !isset( $config->modules->{$moduleId}->config ) )
-			$config->modules->{$moduleId}->config	= (object) array();
+			$config->modules->{$moduleId}->config	= (object) [];
 		if( !isset( $config->modules->{$moduleId}->config->{$configKey} ) )
 			$config->modules->{$moduleId}->config->{$configKey}	= NULL;
 
@@ -72,7 +72,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 		$configType		= 'string';
 		$configDefault	= NULL;
-		$configValues	= array();
+		$configValues	= [];
 		if( array_key_exists( $moduleId, $availableModules ) ){
 			$moduleConfig	= $availableModules[$moduleId]->config;
 			if( isset( $moduleConfig[$configKey] ) ){

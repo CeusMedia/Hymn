@@ -47,7 +47,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 */
 	public function run()
 	{
-		$pathName	= $this->client->arguments->getArgument( 0 );
+		$pathName	= $this->client->arguments->getArgument();
 		$type		= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
@@ -80,7 +80,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 
 	protected function detectModuleChanges( $stamp, $modules ): array
 	{
-		$moduleChanges	= array();
+		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) )
 				continue;

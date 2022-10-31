@@ -37,7 +37,7 @@
  */
 class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $installType	= "link";
+	protected string $installType	= "link";
 
 	/**
 	 *	Execute this command.
@@ -47,7 +47,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 	//	$config				= $this->client->getConfig();
 	//	$this->client->getDatabase()->connect();													//  setup connection to database
@@ -56,14 +56,16 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$listInstalled		= $this->library->listInstalledModules();								//  get list of installed modules
-		if( !$listInstalled )																		//  application has no installed modules
-			return $this->client->out( "No installed modules found" );								//  not even one module is installed, no update
+		if( !$listInstalled ) {																		//  application has no installed modules
+			$this->client->out("No installed modules found");									//  not even one module is installed, no update
+			return;
+		}
 
 		/*  fetch arguments  */
 		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
 		if( $moduleIds && '*' !== $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
-			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcarded modules
+			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcard modules
 			foreach( $moduleIds as $moduleId ){
 				if( !array_key_exists( $moduleId, $listInstalled ) ){
 					$this->client->out( "Module '".$moduleId."' is not installed." );
@@ -112,7 +114,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 
 	private function uninstallModuleById( string $moduleId, array $listInstalled )
 	{
-		$neededBy	= array();
+		$neededBy	= [];
 		foreach( $listInstalled as $installedModuleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
 				if( $installedModule->relations->needs[$moduleId]->type === 'module' )

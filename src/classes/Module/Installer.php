@@ -37,11 +37,11 @@
  */
 class Hymn_Module_Installer
 {
-	protected $client;
-	protected $config;
-	protected $library;
-	protected $isLiveCopy	= FALSE;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected Hymn_Module_Library $library;
+	protected ?object $config;
+	protected bool $isLiveCopy				= FALSE;
+	protected object $flags;
 	protected $app;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -84,7 +84,7 @@ class Hymn_Module_Installer
 	 *	@param		object		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( $module )
+	public function configure( object $module )
 	{
 		$source		= $module->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
@@ -106,12 +106,12 @@ class Hymn_Module_Installer
 		}
 
 		//  get configured module config pairs
-		$configModule	= (object) array();
+		$configModule	= (object) [];
 		if( isset( $this->config->modules->{$module->id} ) )									//  module not mentioned in hymn file
 			if( isset( $this->config->modules->{$module->id}->config ) )
 				$configModule	= $this->config->modules->{$module->id}->config;
 
-		$changeSet	= array();
+		$changeSet	= [];
 		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
 			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type
 			$isBoolean		= in_array( $dataType, array( 'boolean', 'bool' ) );				//  note whether module config value is boolean

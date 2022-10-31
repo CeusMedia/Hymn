@@ -37,14 +37,14 @@
  */
 class Hymn_Tool_CLI_Question
 {
-	protected $client;
+	protected Hymn_Client $client;
 	protected $message;
 	protected $type			= 'string';
 	protected $default		= NULL;
-	protected $options		= array();
+	protected $options		= [];
 	protected $break		= TRUE;
 
-	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = array(), bool $break = TRUE )
+	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
 	{
 		$this->client	= $client;
 		$this->message	= $message;
@@ -103,7 +103,7 @@ class Hymn_Tool_CLI_Question
 		return $this;
 	}
 
-	public function setOptions( ?array $options = array() ): self
+	public function setOptions( ?array $options = [] ): self
 	{
 		$this->options	= $options ?? [];
 		return $this;

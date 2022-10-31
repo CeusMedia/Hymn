@@ -37,7 +37,7 @@
  */
 class Hymn_Module_Reader
 {
-	public function load( string $filePath, string $moduleId )
+	public function load( string $filePath, string $moduleId ): object
 	{
 		$validator	= new Hymn_Tool_XML_Validator();
 		if( !$validator->validateFile( $filePath ) )
@@ -49,34 +49,34 @@ class Hymn_Module_Reader
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
-		$obj->deprecation			= array();
-		$obj->frameworks			= array();
+		$obj->deprecation			= [];
+		$obj->frameworks			= [];
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
-		$obj->versionLog			= array();
+		$obj->versionLog			= [];
 		$obj->isInstalled			= FALSE;
 		$obj->isActive				= TRUE;
-		$obj->companies				= array();
-		$obj->authors				= array();
-		$obj->licenses				= array();
+		$obj->companies				= [];
+		$obj->authors				= [];
+		$obj->licenses				= [];
 		$obj->price					= (string) $xml->price;
 		$obj->icon					= NULL;
 		$obj->files					= new stdClass();
-		$obj->files->classes		= array();
-		$obj->files->locales		= array();
-		$obj->files->templates		= array();
-		$obj->files->styles			= array();
-		$obj->files->scripts		= array();
-		$obj->files->images			= array();
-		$obj->files->files			= array();
-		$obj->config				= array();
+		$obj->files->classes		= [];
+		$obj->files->locales		= [];
+		$obj->files->templates		= [];
+		$obj->files->styles			= [];
+		$obj->files->scripts		= [];
+		$obj->files->images			= [];
+		$obj->files->files			= [];
+		$obj->config				= [];
 		$obj->relations				= new stdClass();
-		$obj->relations->needs		= array();
-		$obj->relations->supports	= array();
-		$obj->sql					= array();
-		$obj->links					= array();
-		$obj->hooks					= array();
+		$obj->relations->needs		= [];
+		$obj->relations->supports	= [];
+		$obj->sql					= [];
+		$obj->links					= [];
+		$obj->hooks					= [];
 		$obj->installType			= 0;
 		$obj->installDate			= NULL;
 		$obj->installSource			= NULL;
@@ -99,7 +99,7 @@ class Hymn_Module_Reader
 		return $obj;
 	}
 
-	public static function loadStatic( string $filePath, string $moduleId )
+	public static function loadStatic( string $filePath, string $moduleId ): object
 	{
 		$reader	= new Hymn_Module_Reader();
 		return $reader->load( $filePath, $moduleId );
@@ -114,15 +114,15 @@ class Hymn_Module_Reader
 		return $default;
 	}
 
-	protected function getAttributes( SimpleXMLElement $xmlNode, ?string $nsPrefix = NULL )
+	protected function getAttributes( SimpleXMLElement $xmlNode, ?string $nsPrefix = NULL ): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $xmlNode->attributes( $nsPrefix, TRUE ) as $name => $value )
 			$list[$name]	= (string) $value;
 		return $list;
 	}
 
-	protected function hasAttribute( SimpleXMLElement $xmlNode, string $attributeName, ?string $nsPrefix = NULL )
+	protected function hasAttribute( SimpleXMLElement $xmlNode, string $attributeName, ?string $nsPrefix = NULL ) : bool
 	{
 		$attributes	= $this->getAttributes( $xmlNode, $nsPrefix );
 		return isset( $attributes[$attributeName] );
@@ -158,7 +158,7 @@ class Hymn_Module_Reader
 			$key		= $this->getAttribute( $pair, 'name' );
 			$type		= $this->getAttribute( $pair, 'type', 'string' );
 			$values		= $this->getAttribute( $pair, 'values', '' );
-			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
+			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : [];			//  split value on comma if set
 			$title		= $this->getAttribute( $pair, 'title' );
 			if( !$title && $this->hasAttribute( $pair, 'info' ) )
 				$title	= $this->getAttribute( $pair, 'info' );
@@ -173,8 +173,8 @@ class Hymn_Module_Reader
 				'mandatory'		=> $this->getAttribute( $pair, 'mandatory', FALSE ),
 				'protected'		=> $this->getAttribute( $pair, 'protected', FALSE ),
 				'title'			=> $title,
-				'default'		=> $this->getAttribute( $pair, 'default', NULL ),
-				'original'		=> $this->getAttribute( $pair, 'original', NULL ),
+				'default'		=> $this->getAttribute( $pair, 'default' ),
+				'original'		=> $this->getAttribute( $pair, 'original' ),
 			);
 		}
 	}
@@ -218,7 +218,7 @@ class Hymn_Module_Reader
 
 	protected function readFrameworks( $obj, SimpleXMLElement $xml )
 	{
-		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:<0.9' );
+		$frameworks	= $this->getAttribute( $xml, 'frameworks', '' );
 		if( !strlen( trim( $frameworks ) ) )
 			return;
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
@@ -319,7 +319,7 @@ class Hymn_Module_Reader
 	{
 		foreach( $xml->sql as $sql ){
 			$event		= $this->getAttribute( $sql, 'on' );
-			$to			= $this->getAttribute( $sql, 'version-to', NULL );
+			$to			= $this->getAttribute( $sql, 'version-to' );
 			$version	= $this->getAttribute( $sql, 'version', $to );
 			$type		= $this->getAttribute( $sql, 'type', '*' );
 

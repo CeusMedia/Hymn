@@ -49,7 +49,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 	{
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$moduleId	= $this->client->arguments->getArgument( 0 );
+		$moduleId	= $this->client->arguments->getArgument();
 		$sourceId	= $this->client->arguments->getArgument( 1 );
 
 		if( !strlen( trim( $moduleId ) ) )
@@ -80,7 +80,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 
 		$availableModule	= $modulesAvailable[$moduleId];
 
-		$frameworks	= array();
+		$frameworks	= [];
 		foreach( $availableModule->frameworks as $frameworkIdentifier => $frameworkVersion )
 			$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
 		$frameworks	= join( ' | ', $frameworks );

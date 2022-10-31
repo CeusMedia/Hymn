@@ -37,9 +37,9 @@
  */
 class Hymn_Module_Config
 {
-	protected $client;
-	protected $library;
-	protected $flags;
+	protected Hymn_Client $client;
+	protected Hymn_Module_Library $library;
+	protected object $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -67,7 +67,7 @@ class Hymn_Module_Config
 		return $module->config;
 	}
 
-	public function set( string $moduleId, string $configKey, $configValue )
+	public function set( string $moduleId, string $configKey, $configValue ): void
 	{
 		$this->get( $moduleId, $configKey );
 		$target		= $this->client->getConfigPath().'modules/'.$moduleId.'.xml';

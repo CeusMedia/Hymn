@@ -47,7 +47,7 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	 */
 	public function run()
 	{
-		$key		= $this->client->arguments->getArgument( 0 );
+		$key		= $this->client->arguments->getArgument();
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 		$config		= $this->loadConfig();
@@ -56,21 +56,21 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	}
 
 	/*  --  PROTECTED  --  */
-	protected function getCurrentValue( $config, string $key )
+	protected function getCurrentValue( object $config, string $key )
 	{
 		$parts	= explode( ".", $key );
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
-				$config->{$parts[0]}	= (object) array();
+				$config->{$parts[0]}	= (object) [];
 			if( !isset( $config->{$parts[0]}->{$parts[1]} ) )
-				$config->{$parts[0]}->{$parts[1]}	= (object) array();
+				$config->{$parts[0]}->{$parts[1]}	= (object) [];
 			if( !isset( $config->{$parts[0]}->{$parts[1]}->{$parts[2]} ) )
 				$config->{$parts[0]}->{$parts[1]}->{$parts[2]}	= NULL;
 			return $config->{$parts[0]}->{$parts[1]}->{$parts[2]};
 		}
 		else if( count( $parts ) === 2 ){
 			if( !isset( $config->{$parts[0]} ) )
-				$config->{$parts[0]}	= (object) array();
+				$config->{$parts[0]}	= (object) [];
 			if( !isset( $config->{$parts[0]}->{$parts[1]} ) )
 				$config->{$parts[0]}->{$parts[1]}	= NULL;
 			return $config->{$parts[0]}->{$parts[1]};

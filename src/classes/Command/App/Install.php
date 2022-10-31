@@ -37,7 +37,7 @@
  */
 class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $installType	= "link";
+	protected string $installType	= "link";
 
 	/**
 	 *	Execute this command.
@@ -145,13 +145,13 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$defaultId	= $library->getDefaultShelf();
 		if( !empty( $config->modules->{$moduleId}->source ) ){
 			$sourceByHymn	= trim( $config->modules->{$moduleId}->source );
-			if( $library->isAvailableModuleInShelf( $moduleId, $sourceByHymn, FALSE ) )
+			if( $library->isAvailableModuleInShelf( $moduleId, $sourceByHymn ) )
 				return $sourceByHymn;
 		}
 /*		if( $library->isInstalledModule( $moduleId ) ){
 		}*/
 		if( $defaultId ){
-			if( $library->isAvailableModuleInShelf( $moduleId, $defaultId, FALSE ) )
+			if( $library->isAvailableModuleInShelf( $moduleId, $defaultId ) )
 				return $defaultId;
 		}
 		$moduleSourceIds	= array_keys( $library->getAvailableModuleShelves( $moduleId ) );

@@ -46,11 +46,11 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 	 *	Missing flags: quiet, verbose
 	 *	@todo		implement missing flags
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int
 	 */
-	public function run()
+	public function run(): int
 	{
-		$type		= $this->client->arguments->getArgument( 0 );
+		$type		= $this->client->arguments->getArgument();
 		$shelfId	= $this->client->arguments->getArgument( 1 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
@@ -154,7 +154,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 		return static::CODE_MODULES_OUTDATED;
 	}
 
-	protected function formatValue( $value, string $type )
+	protected function formatValue( string $value, string $type )
 	{
 		if( $type === 'string' ){
 			if( !preg_match( '/^[A-Z:_]+$/', $value ) ){

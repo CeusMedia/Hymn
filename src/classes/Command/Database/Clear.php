@@ -49,8 +49,10 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return $this->client->out( "Database can NOT be connected." );
+		if( !Hymn_Command_Database_Test::test( $this->client ) ) {
+			$this->client->out("Database can NOT be connected.");
+			return;
+		}
 
 		$dbc	= $this->client->getDatabase();
 		$prefix	= $dbc->getConfig( 'prefix' );
@@ -61,8 +63,10 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 			return;
 		}
 		if( !( $this->flags->force ) ){
-			if( $this->flags->quiet )
-				return $this->client->out( "Quiet mode needs force mode (-f|--force)" );
+			if( $this->flags->quiet ){
+				$this->client->out( "Quiet mode needs force mode (-f|--force)" );
+				return;
+			}
 			$this->client->out( "Database tables:" );
 			foreach( $tables as $table )
 				$this->client->out( "- ".$table );

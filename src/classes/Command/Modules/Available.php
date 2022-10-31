@@ -48,7 +48,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 	public function run()
 	{
 		$library	= $this->getLibrary();
-		$shelfId	= $this->client->arguments->getArgument( 0 );
+		$shelfId	= $this->client->arguments->getArgument();
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 
 		$modules	= $library->getAvailableModules( $shelfId );

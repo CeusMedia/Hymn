@@ -33,46 +33,45 @@
  *	@copyright		2014-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Client
 {
-	const FLAG_VERY_VERBOSE		= 1;
-	const FLAG_VERBOSE			= 2;
-	const FLAG_QUIET			= 4;
-	const FLAG_DRY				= 8;
-	const FLAG_FORCE			= 16;
-	const FLAG_NO_DB			= 32;
-	const FLAG_NO_FILES			= 64;
-	const FLAG_NO_INTERACTION	= 128;
+	public const FLAG_VERY_VERBOSE		= 1;
+	public const FLAG_VERBOSE			= 2;
+	public const FLAG_QUIET				= 4;
+	public const FLAG_DRY				= 8;
+	public const FLAG_FORCE				= 16;
+	public const FLAG_NO_DB				= 32;
+	public const FLAG_NO_FILES			= 64;
+	public const FLAG_NO_INTERACTION	= 128;
 
-	const EXIT_ON_END			= 0;
-	const EXIT_ON_LOAD			= 1;
-	const EXIT_ON_SETUP			= 2;
-	const EXIT_ON_RUN			= 4;
-	const EXIT_ON_INPUT			= 8;
-	const EXIT_ON_EXEC			= 16;
-	const EXIT_ON_OUTPUT		= 32;
+	public const EXIT_ON_END			= 0;
+	public const EXIT_ON_LOAD			= 1;
+	public const EXIT_ON_SETUP			= 2;
+	public const EXIT_ON_RUN			= 4;
+	public const EXIT_ON_INPUT			= 8;
+	public const EXIT_ON_EXEC			= 16;
+	public const EXIT_ON_OUTPUT			= 32;
 
-	public static $fileName			= '.hymn';
+	public static string $fileName				= '.hymn';
 
-	public static $outputMethod		= 'print';
+	public static string $outputMethod			= 'print';
 
-	public static $language			= 'en';
+	public static string $language				= 'en';
 
-	public static $version			= '0.9.9.6c';
+	public static string $version				= '0.9.9.6c';
 
-	/** @var	Hymn_Tool_CLI_Arguments 	$arguments		Parsed CLI arguments and options */
-	public $arguments;
+	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
+	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
 
-	public $flags					= 0;
+	public int $flags							= 0;
 
-	public $locale;
+	public ?Hymn_Tool_Locale $locale			= NULL;
 
-	public $memoryUsageAtStart;
+	public int $memoryUsageAtStart				= 0;
 
-
-	protected $baseArgumentOptions	= array(
+	protected array $baseArgumentOptions		= array(
 		'db'		=> array(
 			'pattern'	=> '/^--db=(\S+)$/',
 			'resolve'	=> '\\1',
@@ -134,7 +133,7 @@ class Hymn_Client
 		)
 	);
 
-	protected static $commandWithoutConfig	= array(
+	protected static array $commandWithoutConfig	= array(
 		//  APP CREATION
 		'init',
 		//  SELF MANAGEMENT
@@ -144,22 +143,22 @@ class Hymn_Client
 		'version',
 	);
 
-	protected $config;
+	protected ?object $config						= NULL;
 
-	protected $database;
+	protected ?Hymn_Tool_Database_PDO $database		= NULL;
 
-	protected $framework;
+	protected ?Hymn_Tool_Framework $framework		= NULL;
 
-	protected $words;
+	protected ?object $words;
 
-	protected $isLiveCopy			= FALSE;
+	protected bool $isLiveCopy						= FALSE;
 
-	protected $originalArguments	= array();
+	protected array $originalArguments				= [];
 
-	/** @var	Hymn_Tool_CLI_Output	$output */
-	protected $output;
+	/** @var	Hymn_Tool_CLI_Output|NULL			$output */
+	protected ?Hymn_Tool_CLI_Output $output			= NULL;
 
-	protected $exit;
+	protected bool $exit;
 
 	/**
 	 *	Constructor.
@@ -216,7 +215,7 @@ class Hymn_Client
 		return $this->framework;
 	}
 
-	public function getConfig()
+	public function getConfig(): ?object
 	{
 		if( !$this->config )
 			$this->readConfig();
@@ -310,14 +309,14 @@ class Hymn_Client
 	}
 
 	/**
-	 *	Prints out deprecation message of one ore more lines.
+	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( array $lines = array() )
+	public function outDeprecation( $lines = [] )
 	{
 		$this->output->outDeprecation( $lines );
 	}
@@ -358,7 +357,7 @@ class Hymn_Client
 		$this->output->outVeryVerbose( $lines, $newLine );
 	}
 
-	public function runCommand( string $command, array $arguments = array(), array $addOptions = array(), array $ignoreOptions = array() )
+	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] )
 	{
 		if( $this->flags & self::FLAG_VERY_VERBOSE )
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
@@ -454,7 +453,7 @@ class Hymn_Client
 		return $className;
 	}
 
-	protected function parseArguments( $arguments, array $options = array(), bool $force = FALSE )
+	protected function parseArguments( $arguments, array $options = [], bool $force = FALSE )
 	{
 		$options	= array_merge( $this->baseArgumentOptions, $options );
 		if( $this->arguments && !$force )

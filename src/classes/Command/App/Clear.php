@@ -37,7 +37,7 @@
  */
 class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $argumentOptions	= array(
+	protected array $argumentOptions	= array(
 		'age'		=> array(
 			'pattern'	=> '/^--age=(\S+)$/',
 			'resolve'	=> '\\1',
