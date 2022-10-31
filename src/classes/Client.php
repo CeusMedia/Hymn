@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '0.9.9.6c';
+	public static string $version				= '0.9.10a';
 
 	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
 	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
