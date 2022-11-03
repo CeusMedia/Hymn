@@ -154,14 +154,14 @@ abstract class Hymn_Command_Abstract
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = [], bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
 			$message,
 			$type,
 			$default,
-			$options,
+			$options ?? [],
 			$break
 		);
 		return $question->ask();
