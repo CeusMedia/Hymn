@@ -23,59 +23,62 @@
     ],
     "require-dev": {
         "phpunit/phpunit": "^9",
-        "phpstan/phpstan": "^1"
+        "phpstan/phpstan": "^1",
+        "phpstan/phpstan-strict-rules": "*",
+        "php-parallel-lint/php-parallel-lint": "^1.3 | dev-master",
+        "rector/rector": "*"
     },
     "scripts": {
-        "create:phar": [
+        "dev:install-quiet": "composer install --quiet",
+        "dev:update-quiet": "composer update --quiet",
+        "phar:create": [
             "@dev:install-quiet",
             "test -f hymn.phar && rm hymn.phar",
             "php build/create.php --mode=prod && chmod +x hymn.phar"
         ],
-        "create:phar-dev": [
+        "phar:create-dev": [
             "@dev:install-quiet",
             "test -f hymn.phar && rm hymn.phar",
             "php build/create.php --mode=dev && chmod +x hymn.phar"
         ],
-        "dev:install-quiet": "composer install --quiet",
-        "dev:update-quiet": "composer update --quiet",
-        "dev:phpunit": [
-            "@dev:install-quiet",
-            "XDEBUG_MODE=on php vendor/bin/phpunit"
-        ],
-        "dev:phpstan": [
+        "test:stan": [
             "@dev:install-quiet",
             "XDEBUG_MODE=off vendor/bin/phpstan analyze --verbose"
         ],
-        "dev:phpstan-clear": [
+        "test:stan-clear": [
             "@dev:install-quiet",
             "XDEBUG_MODE=off vendor/bin/phpstan clear-result-cache --verbose"
         ],
-        "dev:phpstan-save": [
+        "test:stan-save": [
             "@dev:instal-quietl",
             "XDEBUG_MODE=off vendor/bin/phpstan analyse --configuration util/phpstan.neon --generate-baseline util/phpstan-baseline.neon --verbose"
         ],
-        "dev:rector": [
+        "test:rector": [
             "@dev:install-quiet",
             "vendor/bin/rector --config=util/rector.php --clear-cache --dry-run"
         ],
-        "dev:rector-fix": [
+        "test:rector-fix": [
             "@dev:install-quiet",
             "vendor/bin/rector --config=util/rector.php --clear-cache "
         ],
-        "dev:test-syntax": [
+        "test:syntax": [
             "@dev:install-quiet",
             "vendor/bin/parallel-lint . -j 10 --colors --exclude vendor"
+        ],
+        "test:unit": [
+            "@dev:install-quiet",
+            "XDEBUG_MODE=on php vendor/bin/phpunit"
         ]
     },
     "scripts-descriptions": {
-        "dev:phar": "Create productive version of PHAR file locally",
-        "dev:phar-dev": "Create development version of PHAR file locally",
         "dev:install": "Installs project dependencies for Development stage",
         "dev:update": "Updates project dependencies for Development stage",
-        "dev:unit": "Run unit tests",
-        "dev:phpstan": "Validate codebase with PHPStan",
-        "dev:phpstan-clear": "Clear PHPStan cache",
-        "dev:phpstan-save": "Store current results in ignore list",
-        "dev:test-syntax": "Validate code base syntax using PHP linter"
+        "phar:create": "Create productive version of PHAR file locally",
+        "phar:create-dev": "Create development version of PHAR file locally",
+        "test:stan": "Validate codebase with PHPStan",
+        "test:stan-clear": "Clear PHPStan cache",
+        "test:stan-save": "Store current results in ignore list",
+        "test:syntax": "Validate code base syntax using PHP linter",
+        "test:unit": "Run unit tests"
     }
 }

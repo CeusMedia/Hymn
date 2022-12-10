@@ -10,6 +10,7 @@
  */
 class Hymn_Tool_SourceIndex_IniReader
 {
+	/**	@var	array		$data */
 	protected array $data;
 
 	/**	@var	string		$fileName	Name of settings file */
@@ -21,9 +22,6 @@ class Hymn_Tool_SourceIndex_IniReader
 		'url'				=> NULL,
 		'description'		=> NULL,
 	];
-
-	/**	@var	array		$data */
-	protected $data			= [];
 
 	/**
 	 *	@access		public
