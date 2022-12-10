@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -89,7 +89,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 		foreach( $outdatedModules as $outdatedModule ){
 			$sourceModule	= $listInstalled[$outdatedModule->id];
 			$targetModule	= $this->getLibrary()->getAvailableModule( $outdatedModule->id );
-			if( in_array( $type, array( NULL, 'all', 'sql', 'db', 'database' ) ) ){
+			if( in_array( $type, [NULL, 'all', 'sql', 'db', 'database'] ) ){
 				if( ( $scripts = $diff->compareSqlByModules( $sourceModule, $targetModule ) ) ){
 					$this->client->outVerbose( vsprintf( ' - Module: %s: v%s -> v%s (%d update(s))', array(
 						$targetModule->id,
@@ -110,7 +110,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 					$this->client->outVerbose( '' );
 				}
 			}
-			else if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
+			else if( in_array( $type, [NULL, 'all', 'config'] ) ){
 				$changes	= $keys = $diff->compareConfigByModules( $sourceModule, $targetModule );
 				if( $changes ){
 					if( !$this->flags->quiet )

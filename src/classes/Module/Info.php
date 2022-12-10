@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -64,7 +64,7 @@ class Hymn_Module_Info
 
 	public function showModuleFiles( $module )
 	{
-		$list	= array();
+		$list	= [];
 		if( isset( $module->files ) ){
 			foreach( $module->files as $sectionKey => $sectionFiles ){
 				if( !count( $sectionFiles ) )
@@ -72,7 +72,7 @@ class Hymn_Module_Info
 				$list[]	= '    - '.ucfirst( $sectionKey );
 				foreach( $sectionFiles as $file ){
 					$line	= $file->file;
-					$attr	= array();
+					$attr	= [];
 					if( $sectionKey === 'styles' ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
@@ -119,13 +119,13 @@ class Hymn_Module_Info
 
 	public function showModuleRelations( Hymn_Module_Library $library, $module )
 	{
-		$module->relations->requiredBy	= array();
+		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
 				if( $installedModule->relations->needs[$module->id]->type === 'module' )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
-		$module->relations->neededBy	= array();
+		$module->relations->neededBy	= [];
 		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
 			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
 				if( $availableModule->relations->needs[$moduleId]->type === 'module' )

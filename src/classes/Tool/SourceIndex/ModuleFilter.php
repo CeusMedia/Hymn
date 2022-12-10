@@ -1,12 +1,12 @@
 <?php
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 class Hymn_Tool_SourceIndex_ModuleFilter
 {
@@ -44,7 +44,7 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 	public function filter( array $modules, ?int $mode = NULL ): array
 	{
 		$mode	= $mode ?? $this->mode;
-		$list	= array();
+		$list	= [];
 //		$regExp	= '@^'.preg_quote( $this->pathSource, '@' ).'@';
 		foreach( $modules as $module ){
 //			/** @var string $modulePath */

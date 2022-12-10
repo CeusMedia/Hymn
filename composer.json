@@ -18,9 +18,53 @@
     "minimum-stability": "dev",
     "bin": [
         "bin/hymn"
-	],
+    ],
     "require-dev": {
         "phpunit/phpunit": "^9",
         "phpstan/phpstan": "^1"
+    },
+    "scripts": {
+        "phar:create": [
+            "test -f hymn.phar && rm hymn.phar",
+            "php build/create.php && chmod +x hymn.phar"
+        ],
+        "phar:create-dev": [
+            "test -f hymn.phar && rm hymn.phar",
+            "php build/create.php --mode=dev && chmod +x hymn.phar"
+        ],
+        "phar:install-copy": [
+            "@dev:uninstall",
+            "sudo cp $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+        ],
+        "phar:install-link": [
+            "@dev:uninstall",
+            "sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+        ],
+        "phar:uninstall": [
+            "test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn",
+            "test -l /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn"
+        ],
+        "test:phpstan": [
+            "vendor/bin/phpstan analyse --configuration phpstan.neon --xdebug"
+        ],
+        "test:phpstan-save-baseline": [
+            "vendor/bin/phpstan analyse --configuration phpstan.neon --generate-baseline phpstan-baseline.neon"
+        ],
+        "test:syntax": [
+            "hymn test-syntax && echo Result: OK || echo Result: FAILED"
+        ],
+        "test:syntax-verbose": [
+            "hymn test-syntax -vv && echo Result: OK || echo Result: FAILED"
+        ],
+        "test:units": [
+            "./vendor/bin/phpunit"
+        ],
+        "dev:update": [
+            "echo \"Currently installed: \" && hymn version",
+            "git fetch && git checkout hymn.phar && touch stashing && git stash --include-untracked -q && git rebase && git stash pop -q && rm stashing && $(MAKE) -s create-phar"
+        ]
+    },
+    "scripts-description": {
+        "dev:create-phar": "create productive version of PHAR file locally"
     }
 }

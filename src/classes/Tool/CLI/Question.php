@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -41,10 +41,10 @@ class Hymn_Tool_CLI_Question
 	protected $message;
 	protected $type			= 'string';
 	protected $default		= NULL;
-	protected $options		= array();
+	protected $options		= [];
 	protected $break		= TRUE;
 
-	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = array(), bool $break = TRUE )
+	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
 	{
 		$this->client	= $client;
 		$this->message	= $message;
@@ -56,16 +56,16 @@ class Hymn_Tool_CLI_Question
 
 	public function ask()
 	{
-		$typeIsBoolean	= in_array( $this->type, array( 'bool', 'boolean' ) );
-		$typeIsInteger	= in_array( $this->type, array( 'int', 'integer' ) );
-		$typeIsNumber	= in_array( $this->type, array( 'float', 'double', 'decimal' ) );
+		$typeIsBoolean	= in_array( $this->type, ['bool', 'boolean'] );
+		$typeIsInteger	= in_array( $this->type, ['int', 'integer'] );
+		$typeIsNumber	= in_array( $this->type, ['float', 'double', 'decimal'] );
 		$default		= $this->default;
 		$message		= $this->message;
 		$options		= $this->options;
 		if( $typeIsBoolean ){
-			$options	= array( 'y', 'n' );
+			$options	= ['y', 'n'];
 			$default	= 'no';
-			if( in_array( strtolower( $this->default ), array( 'y', 'yes', '1' ) ) )
+			if( in_array( strtolower( $this->default ), ['y', 'yes', '1'] ) )
 				$default	= 'yes';
 		}
 		if( /*!$typeIsBoolean && */strlen( trim( $default ) ) )
@@ -83,7 +83,7 @@ class Hymn_Tool_CLI_Question
 		}
 		while( $options && is_null( $default ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
-			$input	= in_array( strtolower( $input ), array( 'y', 'yes', '1' ) );
+			$input	= in_array( strtolower( $input ), ['y', 'yes', '1'] );
 		if( $typeIsInteger )
 			$input	= (int) $input;
 		if( $typeIsNumber )
@@ -103,7 +103,7 @@ class Hymn_Tool_CLI_Question
 		return $this;
 	}
 
-	public function setOptions( ?array $options = array() ): self
+	public function setOptions( ?array $options = [] ): self
 	{
 		$this->options	= $options ?? [];
 		return $this;

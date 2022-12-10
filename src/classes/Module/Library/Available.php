@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -51,8 +51,8 @@ class Hymn_Module_Library_Available
 
 	protected $client;
 	protected $mode			= self::MODE_AUTO;
-	protected $modules		= array();
-	protected $shelves		= array();
+	protected $modules		= [];
+	protected $shelves		= [];
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -63,7 +63,7 @@ class Hymn_Module_Library_Available
 	{
 		if( in_array( $shelfId, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Source already set by ID: '.$shelfId );
-		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
+		$activeShelves	= $this->getShelves( ['default' => TRUE] );
 		$isDefault		= $active && !count( $activeShelves );
 		$this->shelves[$shelfId]	= (object) array(
 			'id'		=> $shelfId,
@@ -82,7 +82,7 @@ class Hymn_Module_Library_Available
 		$this->loadModulesInShelves();
 		if( $shelfId )
 			return $this->getFromShelf( $moduleId, $shelfId, $strict );
-		$candidates	= array();
+		$candidates	= [];
 		foreach( $this->modules as $shelfId => $shelfModules )
 			foreach( $shelfModules as $shelfModuleId => $shelfModule )
 				if( $shelfModuleId === $moduleId )
@@ -100,17 +100,17 @@ class Hymn_Module_Library_Available
 
 	public function getActiveShelves( bool $withModules = FALSE ): array
 	{
-		return $this->getShelves( array( 'active' => TRUE ), $withModules );
+		return $this->getShelves( ['active' => TRUE], $withModules );
 	}
 
 	public function getAll( string $shelfId = NULL ): array
 	{
 		$this->loadModulesInShelves();
-		$list	= array();
+		$list	= [];
 		if( $shelfId ){
 			if( !isset( $this->modules[$shelfId] ) )
 				throw new DomainException( 'Invalid source ID: '.$shelfId );
-			$modules	= array();
+			$modules	= [];
 			foreach( $this->modules[$shelfId] as $module ){
 				$module->sourceId	= $shelfId;
 				$list[$module->id]	= $module;
@@ -126,7 +126,7 @@ class Hymn_Module_Library_Available
 			}
 		}
 		ksort( $list );
-		$modules	= array();
+		$modules	= [];
 		foreach( array_values( $list ) as $module )
 			$modules[$module->id] = $module;
 		return $modules;
@@ -159,7 +159,7 @@ class Hymn_Module_Library_Available
 	public function getModuleLogChanges( string $moduleId, string $shelfId, string $versionInstalled, string $versionAvailable ): array
 	{
 		$module	= $this->get( $moduleId, $shelfId );
-		$list	= array();
+		$list	= [];
 		foreach( $module->versionLog as $change ){
 			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is to lower than installed
 				continue;
@@ -173,7 +173,7 @@ class Hymn_Module_Library_Available
 	public function getModuleShelves( string $moduleId ): array
 	{
 		$this->loadModulesInShelves();
-		$list	= array();
+		$list	= [];
 		foreach( $this->modules as $shelfId => $modules ){
 			if( array_key_exists($moduleId, $modules ) )
 				$list[$shelfId]	= $modules[$moduleId];
@@ -191,9 +191,9 @@ class Hymn_Module_Library_Available
 		return $shelf;
 	}
 
-	public function getShelves( array $filters = array(), bool $withModules = FALSE ): array
+	public function getShelves( array $filters = [], bool $withModules = FALSE ): array
 	{
-		$list	= array();																			//  prepare empty shelf list
+		$list	= [];																			//  prepare empty shelf list
 		foreach( $this->shelves as $shelfId => $shelf ){											//  iterate known shelves
 			foreach( $filters as $filterKey => $filterValue )										//  iterate given filters
 				if( property_exists( $shelf, $filterKey ) )											//  filter key is shelf property
@@ -248,7 +248,7 @@ class Hymn_Module_Library_Available
 			$mode	= file_exists( $fileJson ) ? self::MODE_JSON : $mode;
 			$mode	= file_exists( $fileSerial ) ? self::MODE_SERIAL : $mode;
 		}
-		$list	= array();
+		$list	= [];
 		switch( $mode ){
 			case self::MODE_SERIAL;
 				$this->client->outVeryVerbose( '- Strategy: serial file' );
@@ -312,12 +312,12 @@ class Hymn_Module_Library_Available
 	{
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
-		$this->modules	= array();																	//  reset module list
+		$this->modules	= [];																	//  reset module list
 		foreach( $this->shelves as $shelf ){														//  iterate sources
 			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $shelf->id ) );
 			if( !$shelf->active )																	//  if source if deactivated
 				continue;																			//  skip this source
-			$this->modules[$shelf->id]	= array();													//  prepare empty module list for source
+			$this->modules[$shelf->id]	= [];													//  prepare empty module list for source
 			foreach( $this->listModulesInShelf( $shelf ) as $module ){								//  iterate modules in source path
 				$module->sourceId	= $shelf->id;													//  extend found module by source ID
 				$module->sourcePath	= $shelf->path;													//  extend found module by source path

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,14 +30,14 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
 class Hymn_Tool_LatestFile
 {
-	protected $acceptedFileNames	= array();
+	protected $acceptedFileNames	= [];
 	protected $fileNamePattern;
 	protected $path;
 	protected $client;
@@ -47,7 +47,7 @@ class Hymn_Tool_LatestFile
 		$this->client	= $client;
 	}
 
-	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = array() ): ?string
+	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = [] ): ?string
 	{
 		$path		= $path ? $path : $this->path;
 		$pattern	= $fileNamePattern ? $fileNamePattern : $this->fileNamePattern;
@@ -56,7 +56,7 @@ class Hymn_Tool_LatestFile
 			throw new RuntimeException( 'No path set or given' );
 		if( !$pattern && !$accepted )
 			throw new RuntimeException( 'Neither file pattern nor accepted files set or given' );
-		$list	= array();
+		$list	= [];
 		$index	= new DirectoryIterator( $path );
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -65,7 +65,7 @@ class Hymn_Tool_LatestFile
 				return $path.$entry->getFilename();
 			if( !$pattern || !preg_match( $pattern, $entry->getFilename() ) )
 				continue;
-			$key		= str_replace( array( '_', '-' ), '_', $entry->getFilename() );
+			$key		= str_replace( ['_', '-'], '_', $entry->getFilename() );
 			$list[$key]	= $entry->getFilename();
 		}
 		krsort( $list );
@@ -74,7 +74,7 @@ class Hymn_Tool_LatestFile
 		return NULL;
 	}
 
-	public function setAcceptedFileNames( array $fileNames = array() ): self
+	public function setAcceptedFileNames( array $fileNames = [] ): self
 	{
 		$this->acceptedFileNames	= $fileNames;
 		return $this;

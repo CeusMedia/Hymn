@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -38,11 +38,11 @@
  */
 class Hymn_Tool_CLI_Arguments
 {
-	protected $arguments	= array();
+	protected $arguments	= [];
 
-	protected $options	= array();
+	protected $options	= [];
 
-	public function __construct( $arguments = NULL, array $options = array() )
+	public function __construct( $arguments = NULL, array $options = [] )
 	{
 		if( !is_array( $options ) )
 			throw new InvalidArgumentException( 'Options must be given as array' );
@@ -73,7 +73,7 @@ class Hymn_Tool_CLI_Arguments
 
 	public function getOptions(): array
 	{
-		$options	= array();
+		$options	= [];
 		foreach( $this->options as $key => $option ){
 			$options[$key]	= $option['value'];
 		}
@@ -124,7 +124,7 @@ class Hymn_Tool_CLI_Arguments
 //	}
 
 	/** @todo change behavior of values (string) while includes and excludes are array, already */
-	public function registerOption( string $key, $pattern, $resolve, $default = NULL, $values = NULL, array $includes = array(), array $excludes = array() )
+	public function registerOption( string $key, $pattern, $resolve, $default = NULL, $values = NULL, array $includes = [], array $excludes = [] )
 	{
 		$this->options[$key]	= array(
 			'pattern'	=> $pattern,
@@ -185,7 +185,7 @@ class Hymn_Tool_CLI_Arguments
 
 	protected function getEnumerationFromArrayKeyIfSet( array $array, $key ): array
 	{
-		$list	= array();
+		$list	= [];
 		if( array_key_exists( $key, $array ) && !is_null( $array[$key] ) ){
 			$list	= $array[$key];
 			if( !is_array( $list ) )

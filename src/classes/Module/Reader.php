@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -49,34 +49,34 @@ class Hymn_Module_Reader
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
-		$obj->deprecation			= array();
-		$obj->frameworks			= array();
+		$obj->deprecation			= [];
+		$obj->frameworks			= [];
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
-		$obj->versionLog			= array();
+		$obj->versionLog			= [];
 		$obj->isInstalled			= FALSE;
 		$obj->isActive				= TRUE;
-		$obj->companies				= array();
-		$obj->authors				= array();
-		$obj->licenses				= array();
+		$obj->companies				= [];
+		$obj->authors				= [];
+		$obj->licenses				= [];
 		$obj->price					= (string) $xml->price;
 		$obj->icon					= NULL;
 		$obj->files					= new stdClass();
-		$obj->files->classes		= array();
-		$obj->files->locales		= array();
-		$obj->files->templates		= array();
-		$obj->files->styles			= array();
-		$obj->files->scripts		= array();
-		$obj->files->images			= array();
-		$obj->files->files			= array();
-		$obj->config				= array();
+		$obj->files->classes		= [];
+		$obj->files->locales		= [];
+		$obj->files->templates		= [];
+		$obj->files->styles			= [];
+		$obj->files->scripts		= [];
+		$obj->files->images			= [];
+		$obj->files->files			= [];
+		$obj->config				= [];
 		$obj->relations				= new stdClass();
-		$obj->relations->needs		= array();
-		$obj->relations->supports	= array();
-		$obj->sql					= array();
-		$obj->links					= array();
-		$obj->hooks					= array();
+		$obj->relations->needs		= [];
+		$obj->relations->supports	= [];
+		$obj->sql					= [];
+		$obj->links					= [];
+		$obj->hooks					= [];
 		$obj->installType			= 0;
 		$obj->installDate			= NULL;
 		$obj->installSource			= NULL;
@@ -116,7 +116,7 @@ class Hymn_Module_Reader
 
 	protected function getAttributes( SimpleXMLElement $xmlNode, ?string $nsPrefix = NULL )
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $xmlNode->attributes( $nsPrefix, TRUE ) as $name => $value )
 			$list[$name]	= (string) $value;
 		return $list;
@@ -158,13 +158,13 @@ class Hymn_Module_Reader
 			$key		= $this->getAttribute( $pair, 'name' );
 			$type		= $this->getAttribute( $pair, 'type', 'string' );
 			$values		= $this->getAttribute( $pair, 'values', '' );
-			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : array();			//  split value on comma if set
+			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : [];			//  split value on comma if set
 			$title		= $this->getAttribute( $pair, 'title' );
 			if( !$title && $this->hasAttribute( $pair, 'info' ) )
 				$title	= $this->getAttribute( $pair, 'info' );
 			$value		= trim( (string) $pair );
-			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
-				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+			if( in_array( strtolower( $type ), ['boolean', 'bool'] ) )						//  value is boolean
+				$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );		//  value is not negative
 			$obj->config[$key]	= (object) array(
 				'key'			=> trim( $key ),
 				'type'			=> trim( strtolower( $type ) ),
@@ -218,7 +218,7 @@ class Hymn_Module_Reader
 
 	protected function readFrameworks( $obj, SimpleXMLElement $xml )
 	{
-		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:<0.9' );
+		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:>=0.8' );
 		if( !strlen( trim( $frameworks ) ) )
 			return;
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
@@ -244,9 +244,9 @@ class Hymn_Module_Reader
 
 	protected function readInstallation( $obj, SimpleXMLElement $xml )
 	{
-		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );				//  note install type
-		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );		//  note install date
-		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );					//  note install source
+		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );			//  note install type
+		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );	//  note install date
+		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );				//  note install source
 	}
 
 	protected function readLicenses( $obj, SimpleXMLElement $xml )
@@ -288,7 +288,7 @@ class Hymn_Module_Reader
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) array(													//  append version log entry
 				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> $this->getAttribute( $entry, 'version' ),									//  extract entry version
+				'version'	=> $this->getAttribute( $entry, 'version' ),							//  extract entry version
 			);
 		}
 	}
@@ -329,7 +329,7 @@ class Hymn_Module_Reader
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
-				if( in_array( $event, array( 'install', 'update' ) ) )
+				if( in_array( $event, ['install', 'update'] ) )
 					$key	= $event.":".$version.'@'.$type;
 				$obj->sql[$key] = (object) array(
 					'event'		=> $event,

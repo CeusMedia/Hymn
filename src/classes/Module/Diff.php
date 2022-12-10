@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -42,8 +42,8 @@ class Hymn_Module_Diff
 	protected $library;
 	protected $flags;
 
-	protected $modulesAvailable			= array();
-	protected $modulesInstalled			= array();
+	protected $modulesAvailable			= [];
+	protected $modulesInstalled			= [];
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -63,9 +63,9 @@ class Hymn_Module_Diff
 			throw new InvalidArgumentException( 'Given source module object is invalid' );
 		if( !isset( $targetModule->config ) )
 			throw new InvalidArgumentException( 'Given target module object is invalid' );
-		$skipProperties		= array( 'title', 'values', 'original', 'default' );
+		$skipProperties		= ['title', 'values', 'original', 'default'];
 
-		$list			= array();
+		$list			= [];
 		$configSource	= (array) $sourceModule->config;
 		$configTarget	= (array) $targetModule->config;
 
@@ -89,7 +89,7 @@ class Hymn_Module_Diff
 				);
 			}
 			else if( $item != $configSource[$item->key] ){
-				$changes	= array();
+				$changes	= [];
 				foreach( $item as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
 						continue;

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -38,28 +38,28 @@
 class Hymn_Tool_BaseConfigEditor
 {
 	/**	@var		array			$added					Added Properties */
-	protected $added				= array();
+	protected $added				= [];
 
 	/**	@var		array			$comments				List of collected Comments */
-	protected $comments				= array();
+	protected $comments				= [];
 
 	/**	@var		array			$deleted				Deleted Properties */
-	protected $deleted				= array();
+	protected $deleted				= [];
 
 	/**	@var		array			$disabled				List of disabled Properties */
-	protected $disabled				= array();
+	protected $disabled				= [];
 
 	/**	@var		string			$fileName				URI of Ini File */
 	protected $fileName;
 
 	/**	@var		array			$lines					List of collected Lines */
-	protected $lines				= array();
+	protected $lines				= [];
 
 	/**	@var		array			$properties				List of collected Properties */
-	protected $properties			= array();
+	protected $properties			= [];
 
 	/**	@var		array			$renamed				Renamed Properties */
-	protected $renamed				= array();
+	protected $renamed				= [];
 
 	/**	@var		boolean			$reservedWords			Flag: use reserved words */
 	protected $reservedWords		= TRUE;
@@ -193,7 +193,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function getCommentedProperties( bool $activeOnly = TRUE ): array
 	{
-		$list = array();
+		$list = [];
 		foreach( $this->properties as $key => $value ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
 				continue;
@@ -226,7 +226,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function getProperties( bool $activeOnly = TRUE ): array
 	{
-		$properties	= array();
+		$properties	= [];
 		foreach( $this->properties as $key => $value ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
 				continue;
@@ -257,7 +257,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function getPropertyList( bool $activeOnly = TRUE ): array
 	{
-		$list = array();
+		$list = [];
 		foreach( array_keys( $this->properties ) as $key ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
 				continue;
@@ -342,12 +342,12 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	protected function read()
 	{
-		$this->comments		= array();
-		$this->disabled		= array();
-		$this->lines		= array();
-		$this->properties	= array();
-		$this->lines		= array();
-		$this->comments		= array();
+		$this->comments		= [];
+		$this->disabled		= [];
+		$this->lines		= [];
+		$this->properties	= [];
+		$this->lines		= [];
+		$this->comments		= [];
 		$commentOpen		= 0;
 		$lines				= preg_split( '/\r?\n/', file_get_contents( $this->fileName ) );
 		foreach( $lines as $line ){
@@ -380,9 +380,9 @@ class Hymn_Tool_BaseConfigEditor
 
 				//  --  CONVERT PROTECTED VALUES  --  //
 				if( $this->reservedWords ){
-					if( in_array( strtolower( $value ), array( 'yes', 'true' ) ) )
+					if( in_array( strtolower( $value ), ['yes', 'true'] ) )
 						$value	= TRUE;
-					else if( in_array( strtolower( $value ), array( 'no', 'false' ) ) )
+					else if( in_array( strtolower( $value ), ['no', 'false'] ) )
 						$value	= FALSE;
 					else if( strtolower( $value ) === "null" )
 						$value	= NULL;
@@ -401,7 +401,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	protected function write(): int
 	{
-		$newLines	= array();
+		$newLines	= [];
 		foreach( $this->lines as $line ){
 			if( preg_match( $this->patternProperty, $line ) ){
 				$pos		= strpos( $line, "=" );
@@ -440,9 +440,9 @@ class Hymn_Tool_BaseConfigEditor
 		if( $result === FALSE )
 			throw new RuntimeException( 'File "'.$this->fileName.'" could not been written' );
 
-		$this->added	= array();
-		$this->deleted	= array();
-		$this->renamed	= array();
+		$this->added	= [];
+		$this->deleted	= [];
+		$this->renamed	= [];
 		$this->read();
 		return $result;
 	}

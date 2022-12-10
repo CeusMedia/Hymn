@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -50,7 +50,7 @@ class Hymn_Module_Graph
 	public $library;
 
 	/** @var		array					$nodes */
-	public $nodes			= array();
+	public $nodes			= [];
 
 	/** @var		object					$flags */
 	protected $flags;
@@ -89,8 +89,8 @@ class Hymn_Module_Graph
 		$this->nodes[$module->id]	= (object) array(												//  add module to node list by module ID
 			'module'	=> $module,																	//  … store module data object
 			'level'		=> $level,																	//  … store load level
-			'in'		=> array(),																	//  … store ingoing module links
-			'out'		=> array(),																	//  … store outgoing module links
+			'in'		=> [],																	//  … store ingoing module links
+			'out'		=> [],																	//  … store outgoing module links
 		);
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
@@ -134,7 +134,7 @@ class Hymn_Module_Graph
 			$this->realizeRelations();
 
 		/*  calculate maximum relation depth  */
-		$list	= array();
+		$list	= [];
 		$max	= pow( 10, 8 ) - 1;
 		foreach( $this->nodes as $id => $node ){
 //			if( $this->flags->verbose && !$this->flags->quiet )
@@ -153,7 +153,7 @@ class Hymn_Module_Graph
 		krsort( $list );																			//  sort module order list
 
 		/*  collect modules by installation order  */
-		$modules	= array();																		//  prepare empty module list
+		$modules	= [];																		//  prepare empty module list
 		foreach( array_values( $list ) as $id )														//  iterate module order list
 			$modules[$id]	= $this->nodes[$id]->module;											//  collect module by installation order
 		return $modules;																			//  return list of modules by installation order
@@ -165,8 +165,8 @@ class Hymn_Module_Graph
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
-		$nodes	= array();
-		$edges	= array();
+		$nodes	= [];
+		$edges	= [];
 		foreach( $this->nodes as $id => $node ){
 			$label		= 'label="'.$node->module->title.'"';
 			$nodes[]	= $node->module->id.' ['.$label.' '.$nodeStyle.'];';
@@ -225,7 +225,7 @@ class Hymn_Module_Graph
 	 *	@param		integer		$level		Counter of recursion level, 0 by default.
 	 *	@return		object|NULL				Object if looping node or null if no loop found
 	 */
-	protected function checkForLoop( $node, int $level = 0, array $steps = array() )
+	protected function checkForLoop( $node, int $level = 0, array $steps = [] )
 	{
 		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
 			return (object) array(																	//  return loop data ...
@@ -248,7 +248,7 @@ class Hymn_Module_Graph
 	{
 		$count	= $level;
 		if( count( $node->in ) ){
-			$ways	= array();
+			$ways	= [];
 			foreach( $node->in as $parent )
 				$ways[]	= $this->countModuleEdgesToRoot( $this->nodes[$parent->id], $level + 1 );
 			$count	= max( $ways );

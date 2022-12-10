@@ -1,24 +1,28 @@
 <?php
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 class Hymn_Tool_SourceIndex_IniReader
 {
 	/**	@var	string		$fileName	Name of settings file */
-	protected $fileName	= '.index.ini';
+	protected $fileName		= '.index.ini';
 
-	protected $empty	= [
+	/**	@var	null[]		$empty		... */
+	protected $empty		= [
 		'id'				=> NULL,
 		'title'				=> NULL,
 		'url'				=> NULL,
 		'description'		=> NULL,
 	];
+
+	/**	@var	array		$data */
+	protected $data			= [];
 
 	/**
 	 *	@access		public

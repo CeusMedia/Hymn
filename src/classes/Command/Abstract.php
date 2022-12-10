@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -48,7 +48,7 @@ abstract class Hymn_Command_Abstract
 
 	protected $words;
 
-	protected $argumentOptions	= array();
+	protected $argumentOptions	= [];
 
 	public function getArgumentOptions()
 	{
@@ -75,7 +75,7 @@ abstract class Hymn_Command_Abstract
 
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
 		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
-		$this->words	= (object) array();
+		$this->words	= (object) [];
 		if( $this->locale->hasWords( $localeKey ) )
 			$this->words	= $this->locale->loadWords( $localeKey );
 		$this->__onInit();
@@ -101,7 +101,7 @@ abstract class Hymn_Command_Abstract
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = array() )
+	public function outDeprecation( $lines = [] )
 	{
 		$this->client->outDeprecation( $lines );
 	}
@@ -154,7 +154,7 @@ abstract class Hymn_Command_Abstract
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = array(), bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, array $options = [], bool $break = FALSE ): string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
@@ -184,7 +184,7 @@ abstract class Hymn_Command_Abstract
 	 */
 	protected function evaluateShelfId( ?string $shelfId = NULL, bool $strict = TRUE )
 	{
-		$all	= array( 'all', '*' );
+		$all	= ['all', '*'];
 		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
 			return NULL;
 		$library	= $this->getLibrary();
@@ -207,7 +207,7 @@ abstract class Hymn_Command_Abstract
 	protected function getAvailableModulesMap( ?string $shelfId = NULL ): array
 	{
 		$library	= $this->getLibrary();															//  try to load sources into a library
-		$moduleMap	= array();																		//  prepare empty list of available modules
+		$moduleMap	= [];																		//  prepare empty list of available modules
 		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
 		return $moduleMap;																			//  return map of modules by ID
@@ -258,7 +258,7 @@ abstract class Hymn_Command_Abstract
 
 	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds )
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $givenModuleIds as $givenModuleId ){
 			if( !substr_count( $givenModuleId, '*' ) ){
 				if( in_array( $givenModuleId, $availableModuleIds ) ){

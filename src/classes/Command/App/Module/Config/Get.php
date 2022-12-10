@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -87,11 +87,11 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 
 	protected function renderValue( $item ): string
 	{
-		if( in_array( $item->type, array( 'bool', 'boolean' ) ) )
+		if( in_array( $item->type, ['bool', 'boolean'] ) )
 			return $item->value ? 'yes' : 'no';
-		if( in_array( $item->type, array( 'int', 'integer' ) ) )
+		if( in_array( $item->type, ['int', 'integer'] ) )
 			return (int) $item->value;
-		if( in_array( $item->type, array( 'float', 'single', 'double' ) ) )
+		if( in_array( $item->type, ['float', 'single', 'double'] ) )
 			return (float) $item->value;
 		return (string) $item->value;
 	}

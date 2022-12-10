@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -64,10 +64,10 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 			throw new RuntimeException( sprintf( 'Module "%s" is not available', $moduleId ) );
 
 		$module			= $availableModules[$moduleId];
-		$moduleObject	= (object) array();
+		$moduleObject	= (object) [];
 		$msg			= 'Adding module "%s" (%s) from source "%s"';
 		$this->client->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
-		$moduleConfigValues	= array();
+		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
 			$question		= new Hymn_Tool_CLI_Question(
@@ -79,10 +79,10 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 				FALSE																				//  no break = inline question
 			);
 			$actualValue	= trim( $question->ask() );
-			if( in_array( $moduleConfig->type, array( 'bool', 'boolean' ) ) ){
+			if( in_array( $moduleConfig->type, ['bool', 'boolean'] ) ){
 				$actualValue	= $actualValue ? 'yes' : 'no';
 				$defaultValue	= 'no';
-				if( in_array( $moduleConfig->value, array( 'yes', '1' ) ) )
+				if( in_array( $moduleConfig->value, ['yes', '1'] ) )
 					$defaultValue	= 'yes';
 			}
 			if( $actualValue !== $defaultValue )

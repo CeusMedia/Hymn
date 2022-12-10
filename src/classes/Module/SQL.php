@@ -2,7 +2,7 @@
 /**
  *	Manager for module SQL scripts.
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -61,12 +61,12 @@ class Hymn_Module_SQL
 	public function getModuleInstallSql( $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $module->sql as $sql )																//  first run: install
 			if( $sql->event == "install" && trim( $sql->sql ) )										//  is an install script
@@ -114,12 +114,12 @@ class Hymn_Module_SQL
 	public function getModuleUninstallSql( $installedModule ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $installedModule->sql ) || !count( $installedModule->sql ) )					//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $installedModule->sql as $sql )													//  first run: uninstall
 			if( $sql->event == "uninstall" && trim( $sql->sql ) )									//  is an uninstall script
@@ -154,12 +154,12 @@ class Hymn_Module_SQL
 	public function getModuleUpdateSql( $installedModule, $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return array();																			//  quit here and return empty list
+			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= $installedModule->version;													//  start by version of currently installed module
-		$scripts	= array();																		//  prepare empty list for collected scripts
+		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $module->sql as $sql ){															//  iterate SQL scripts
 			if( $sql->event == "update" && trim( $sql->sql ) ){										//  is an update script
@@ -282,8 +282,8 @@ class Hymn_Module_SQL
 		$dbc->connect( TRUE );
 		$prefix		= $dbc->getConfig( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
-		$statements = array();
-		$buffer		= array();
+		$statements = [];
+		$buffer		= [];
 		while( count( $lines ) ){
 			$line = array_shift( $lines );
 			if( !trim( $line ) )
@@ -291,7 +291,7 @@ class Hymn_Module_SQL
 			$buffer[]	= $dbc->applyTablePrefixToSql( trim( $line ), $prefix );
 			if( preg_match( '/;$/', trim( $line ) ) ){
 				$statements[]	= join( "\n", $buffer );
-				$buffer			= array();
+				$buffer			= [];
 			}
 			if( !count( $lines ) && $buffer )
 				$statements[]	= join( "\n", $buffer ).';';

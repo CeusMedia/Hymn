@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -71,7 +71,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$pathName	= rtrim( $pathName, '/' ).'/';
 
 		/*  --  LIST ALL FILES  --  */
-		$index	= array();
+		$index	= [];
 		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
 		foreach( new DirectoryIterator( $pathName ) as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -102,7 +102,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$nrWeekly	= 0;
 		$nrMonthly	= 0;
 		$nrYearly	= 0;
-		$list		= array();
+		$list		= [];
 		foreach( $index as $fileName => $file ){
 			$nrDaily	+= 1;
 			$nrWeekly	+= $file->isWeekly ? 1 : 0;

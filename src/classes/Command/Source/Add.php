@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -49,7 +49,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			'label'		=> "- Source type",
 			'type'		=> 'string',
 			'default'	=> 'folder',
-			'options'	=> array( "folder" ),
+			'options'	=> ["folder"],
 		),
 		array(
 			'key'		=> 'path',
@@ -78,9 +78,9 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->sources ) )
-			$config->sources	= (object) array();
+			$config->sources	= (object) [];
 
-		$shelf			= array();
+		$shelf			= [];
 		$connectable	= FALSE;
 		do{
 			foreach( $this->questions as $question ){												//  iterate questions
@@ -91,7 +91,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 					$question['label'],
 					$question['type'],
 					$shelf[$question['key']],														//  preset default or custom value
-					isset( $question['options'] ) ? $question['options'] : array(),					//  realize options
+					isset( $question['options'] ) ? $question['options'] : [],					//  realize options
 					FALSE																			//  no break = inline question
 				);
 				$shelf[$question['key']]	= $input->ask();										//  assign given value

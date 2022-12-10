@@ -1,17 +1,17 @@
 <?php
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021 Ceus Media
+ *	@copyright	2021-2022 Ceus Media
  */
 class Hymn_Tool_SourceIndex_JsonRenderer
 {
 	/**	@var	array		$modules */
-	protected $modules	= [];
+	protected $modules		= [];
 
 	/**	@var	Hymn_Tool_SourceIndex_IniReader	$settings */
 	protected $settings;
