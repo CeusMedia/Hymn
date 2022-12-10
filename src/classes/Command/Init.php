@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -58,8 +58,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->answer( 'app.url.protocol', "- HTTP Protocol", 'string', "http://", NULL, FALSE );
 		$this->answer( 'app.url.host', "- HTTP Host", 'string', "example.com", NULL, FALSE );
 		$this->answer( 'app.url.path', "- HTTP Path", 'string', "/", NULL, FALSE );
-		$this->answer( 'app.install.type', "- Installation Type", 'string', "link", array( 'copy', 'link' ), FALSE );
-		$this->answer( 'app.install.mode', "- Installation Mode", 'string', "dev", array( 'dev', 'live', 'test' ), FALSE );
+		$this->answer( 'app.install.type', "- Installation Type", 'string', "link", ['copy', 'link'], FALSE );
+		$this->answer( 'app.install.mode', "- Installation Mode", 'string', "dev", ['dev', 'live', 'test'], FALSE );
 		$this->answers['app.url']	= join( array(
 			$this->answers['app.url.protocol'],
 			$this->answers['app.url.host'],
@@ -186,8 +186,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	{
 		$this->client->out( "Please enter more Application information:" );
 		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
-		$this->answer( 'app.language', "- Language", 'string', "de", array( 'en', 'de' ), FALSE );
-		$useModuleCache	= in_array( $this->answers['app.install.mode'], array( 'live' ) );
+		$this->answer( 'app.language', "- Language", 'string', "de", ['en', 'de'], FALSE );
+		$useModuleCache	= in_array( $this->answers['app.install.mode'], ['live'] );
 		mkdir( 'config' );
 		copy( $this->pathPhar."templates/config/.htaccess", 'config/.htaccess' );
 		copy( $this->pathPhar."templates/config/config.ini", 'config/config.ini' );

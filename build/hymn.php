@@ -5,4 +5,3 @@ require_once 'phar://hymn.phar/Command/Interface.php';							//  preload command
 
 new Hymn_Loader();																//  load hymn classes
 new Hymn_Client( array_slice( $argv, 1 ) );										//  start hymn client
-?>

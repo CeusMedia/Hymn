@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -156,7 +156,7 @@ class Hymn_Tool_Database_CLI_MySQL
 	{
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
-		$callback	= array( $this, '_callbackReplacePrefix' );										//  create replace callback
+		$callback	= [$this, '_callbackReplacePrefix'];										//  create replace callback
 
 		rename( $fileName, $fileName."_" );															//  move dump file to source file
 		$fpIn		= fopen( $fileName."_", "r" );													//  open source file
@@ -199,7 +199,7 @@ class Hymn_Tool_Database_CLI_MySQL
 		$resultCode		= 0;
 		$resultOutput	= [];
 		exec( escapeshellarg( $command ).' '.$line, $resultOutput, $resultCode );
-		return (object) array( 'code' => $resultCode, 'output' => $resultOutput );
+		return (object) ['code' => $resultCode, 'output' => $resultOutput];
 	}
 
 	protected function getTempFileWithAppliedTablePrefix( string $sourceFile, string $prefix ): string
@@ -207,7 +207,7 @@ class Hymn_Tool_Database_CLI_MySQL
 		$this->client->outVerbose( 'Applying table prefix to import file ...' );
 //		$this->client->outVerbose( 'Applying table prefix ...' );
 		$tempName	= $sourceFile.'.tmp';
-		$fpIn		= fopen( $sourceFile, 'r' );													//  open source file
+		$fpIn		= fopen( $sourceFile, 'r' );												//  open source file
 		$fpOut		= fopen( $tempName, 'a' );													//  prepare empty target file
 		while( !feof( $fpIn ) ){																//  read input file until end
 			$line	= fgets( $fpIn );															//  read line buffer

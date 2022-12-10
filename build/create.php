@@ -3,7 +3,7 @@
 require_once __DIR__.'/../src/classes/Tool/Test.php';
 
 /*  --  ARGUMENTS  --  */
-$modes		= array( 'prod', 'dev' );
+$modes		= ['prod', 'dev'];
 $options	= array_merge( array(
 	'mode'		=> 'prod',
 ), getopt( "", preg_split( '/\|/', 'mode:|locale:' ) ) );
@@ -16,8 +16,8 @@ $pharFileName	= 'hymn.phar';
 $pharFilePath	= $rootPath.'/'.$pharFileName;
 $mainFileName	= 'hymn.php';
 $stubFileName	= __DIR__.'/'.'stub.php';
-$filesToAdd		= array();
-$pathsToAdd		= array( 'locales', 'templates' );
+$filesToAdd		= [];
+$pathsToAdd		= ['locales', 'templates'];
 
 foreach( $pathsToAdd as $pathToAdd ){
 	$directory	= new RecursiveDirectoryIterator( $rootPath."/src/".$pathToAdd, RecursiveDirectoryIterator::SKIP_DOTS );
@@ -32,7 +32,7 @@ foreach( $pathsToAdd as $pathToAdd ){
 $pharFlags	= FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::KEY_AS_FILENAME;
 $archive	= new Phar( $pharFilePath, $pharFlags, $pharFileName );
 $stub		= $options['mode'] === 'prod' ? php_strip_whitespace( $stubFileName ) : file_get_contents( $stubFileName );
-$stub		= strtr( $stub, array( '[pharFileName]' => $pharFileName, '[mainFileName]' => $mainFileName ) );
+$stub		= strtr( $stub, ['[pharFileName]' => $pharFileName, '[mainFileName]' => $mainFileName] );
 
 $archive->startBuffering();
 $archive->setStub( "#!/usr/bin/env php".PHP_EOL.$stub );
@@ -84,4 +84,3 @@ print( vsprintf( 'Done building version %3$s-%4$s into %1$s (%2$s).', array(
 	Hymn_Client::$version,
 	$options['mode'],
 ) ).PHP_EOL );
-?>

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -75,7 +75,7 @@ class Hymn_Client
 		'db'		=> array(
 			'pattern'	=> '/^--db=(\S+)$/',
 			'resolve'	=> '\\1',
-			'values'	=> array( 'yes', 'no', 'only' ),
+			'values'	=> ['yes', 'no', 'only'],
 			'default'	=> 'yes',
 		),
 		'dry'		=> array(
@@ -123,7 +123,7 @@ class Hymn_Client
 		'interactive'	=> array(
 			'pattern'	=> '/^--interactive=(\S+)$/',
 			'resolve'	=> '\\1',
-			'values'	=> array( 'yes', 'no' ),
+			'values'	=> ['yes', 'no'],
 			'default'	=> 'yes',
 		),
 		'comment'	=> array(
@@ -316,7 +316,7 @@ class Hymn_Client
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = [] )
+	public function outDeprecation( array $lines = [] )
 	{
 		$this->output->outDeprecation( $lines );
 	}
@@ -361,7 +361,7 @@ class Hymn_Client
 	{
 		if( $this->flags & self::FLAG_VERY_VERBOSE )
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
-		$args	= array( $command );
+		$args	= [$command];
 		foreach( $arguments as $argument )
 			$args[]	= $argument;
 
@@ -393,7 +393,7 @@ class Hymn_Client
 
 	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
 	{
-		$commandOptions	= call_user_func( array( $commandObject, 'getArgumentOptions' ) );			//  get command specific argument options
+		$commandOptions	= call_user_func( [$commandObject, 'getArgumentOptions'] );			//  get command specific argument options
 		if( $commandOptions ){
 			$this->parseArguments( $this->originalArguments, $commandOptions, TRUE );				//  parse original arguments again with command specific options
 			$this->arguments->removeArgument( 0 );														//  remove the first argument which is the command itself
@@ -418,7 +418,7 @@ class Hymn_Client
 						$this->words->errorCommandClassNotImplementingInterface,
 						$className
 					) );
-				$commandObject		= $reflectedClass->newInstanceArgs( array( $this ) );			//  create object of reflected class
+				$commandObject		= $reflectedClass->newInstanceArgs( [$this] );			//  create object of reflected class
 				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
 				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
 				$this->applyCommandOptionsToArguments( $commandObject );							//  extend argument options by command specific options
@@ -495,7 +495,7 @@ class Hymn_Client
 	{
 		if( class_exists( 'Locale' ) ){
 			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
-			if( in_array( $language, array( 'en', 'de' ) ) )
+			if( in_array( $language, ['en', 'de'] ) )
 				self::$language	= $language;
 		}
 		$this->locale		= new Hymn_Tool_Locale( self::$language );

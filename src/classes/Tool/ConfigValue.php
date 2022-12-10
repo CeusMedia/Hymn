@@ -79,7 +79,7 @@ class Hymn_Tool_ConfigValue
 	public function getValue( bool $asTrimmedString = FALSE )
 	{
 		if( $asTrimmedString ){
-			if( in_array( $this->type, array( 'bool', 'boolean' ) ) )
+			if( in_array( $this->type, ['bool', 'boolean'] ) )
 				return $this->value ? 'yes' : 'no';
 			return trim( $this->value );
 		}
@@ -110,8 +110,8 @@ class Hymn_Tool_ConfigValue
 	{
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );
-		if( in_array( strtolower( $this->type ), array( 'boolean', 'bool' ) ) )					//  value is boolean
-			$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
+			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
 		$this->value	= $value;
 		return $this;
 	}
@@ -120,7 +120,7 @@ class Hymn_Tool_ConfigValue
 	{
 		$value		= trim( (string) $value );
 		if( $this->type === 'bool' )															//  value is boolean
-			$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
 		else
 			$value	= settype( $value, $this->type );
 		$this->value	= $value;
@@ -129,8 +129,8 @@ class Hymn_Tool_ConfigValue
 
 	public function setType( string $type )
 	{
-		$types		= array( 'bool', 'int', 'double', 'float', 'string', 'null' );
-		$shortmap	= array( 'boolean' => 'bool', 'integer' => 'int' );
+		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
+		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
 		$type		= is_null( $type ) ? 'string' : $type;
 		$type		= trim( strtolower( $type ) );
 		$type		= strlen( $type ) > 0 ? $type : 'string';

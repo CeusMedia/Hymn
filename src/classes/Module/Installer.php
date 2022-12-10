@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -114,7 +114,7 @@ class Hymn_Module_Installer
 		$changeSet	= [];
 		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
 			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type
-			$isBoolean		= in_array( $dataType, array( 'boolean', 'bool' ) );				//  note whether module config value is boolean
+			$isBoolean		= in_array( $dataType, ['boolean', 'bool'] );						//  note whether module config value is boolean
 			$isMandatory	= $moduleConfigData->mandatory === 'yes';							//  note whether module config value is mandatory
 			$isInConfig		= isset( $configModule->{$moduleConfigKey} );						//  note whether config value is set in hymn file
 			$value			= $moduleConfigData->value;											//  note original module config value
@@ -122,9 +122,9 @@ class Hymn_Module_Installer
 			if( $isBoolean && $isInConfig ){													//  overriden boolean module config value by hymn file
 				$valueAsString	= strtolower( trim( $configValue ) );
 				$configValue	= NULL;
-				if( in_array( $valueAsString, array( 'no', 'false', '0' ) ) )
+				if( in_array( $valueAsString, ['no', 'false', '0'] ) )
 					$configValue	= FALSE;
-				else if( in_array( $valueAsString, array( 'yes', 'true', '1' ) ) )
+				else if( in_array( $valueAsString, ['yes', 'true', '1'] ) )
 					$configValue	= TRUE;
 			}
 			$hasValue	= strlen( $configValue ) > 0;

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -63,7 +63,7 @@ class Hymn_Module_Library_Available
 	{
 		if( in_array( $shelfId, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Source already set by ID: '.$shelfId );
-		$activeShelves	= $this->getShelves( array( 'default' => TRUE ) );
+		$activeShelves	= $this->getShelves( ['default' => TRUE] );
 		$isDefault		= $active && !count( $activeShelves );
 		$this->shelves[$shelfId]	= (object) array(
 			'id'		=> $shelfId,
@@ -100,7 +100,7 @@ class Hymn_Module_Library_Available
 
 	public function getActiveShelves( bool $withModules = FALSE ): array
 	{
-		return $this->getShelves( array( 'active' => TRUE ), $withModules );
+		return $this->getShelves( ['active' => TRUE], $withModules );
 	}
 
 	public function getAll( string $shelfId = NULL ): array

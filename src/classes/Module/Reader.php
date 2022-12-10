@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -163,8 +163,8 @@ class Hymn_Module_Reader
 			if( !$title && $this->hasAttribute( $pair, 'info' ) )
 				$title	= $this->getAttribute( $pair, 'info' );
 			$value		= trim( (string) $pair );
-			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
-				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+			if( in_array( strtolower( $type ), ['boolean', 'bool'] ) )						//  value is boolean
+				$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );		//  value is not negative
 			$obj->config[$key]	= (object) array(
 				'key'			=> trim( $key ),
 				'type'			=> trim( strtolower( $type ) ),
@@ -218,7 +218,7 @@ class Hymn_Module_Reader
 
 	protected function readFrameworks( $obj, SimpleXMLElement $xml )
 	{
-		$frameworks	= $this->getAttribute( $xml, 'frameworks', '' );
+		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:>=0.8' );
 		if( !strlen( trim( $frameworks ) ) )
 			return;
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
@@ -244,9 +244,9 @@ class Hymn_Module_Reader
 
 	protected function readInstallation( $obj, SimpleXMLElement $xml )
 	{
-		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );				//  note install type
-		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );		//  note install date
-		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );					//  note install source
+		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );			//  note install type
+		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );	//  note install date
+		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );				//  note install source
 	}
 
 	protected function readLicenses( $obj, SimpleXMLElement $xml )
@@ -288,7 +288,7 @@ class Hymn_Module_Reader
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) array(													//  append version log entry
 				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> $this->getAttribute( $entry, 'version' ),									//  extract entry version
+				'version'	=> $this->getAttribute( $entry, 'version' ),							//  extract entry version
 			);
 		}
 	}
@@ -329,7 +329,7 @@ class Hymn_Module_Reader
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
-				if( in_array( $event, array( 'install', 'update' ) ) )
+				if( in_array( $event, ['install', 'update'] ) )
 					$key	= $event.":".$version.'@'.$type;
 				$obj->sql[$key] = (object) array(
 					'event'		=> $event,

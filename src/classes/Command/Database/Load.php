@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -114,7 +114,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		if( !file_exists( $path ) )
 			throw new RuntimeException( 'Path is not existing: '.$path );
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
-		$finder->setAcceptedFileNames( array( 'latest.sql' ) );
+		$finder->setAcceptedFileNames( ['latest.sql'] );
 		$finder->setFileNamePattern( '/^dump_[0-9:_-]+\.sql$/' );
 		$this->client->outVerbose( 'Scanning folder '.$path.'...' );
 		return $finder->find( $path );

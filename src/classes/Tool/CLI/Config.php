@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2021 Christian Würker
+ *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -128,12 +128,12 @@ class Hymn_Tool_CLI_Config
 		foreach( $modules as $moduleId => $configPrefix ){											//  iterate given or found resource module registrations
 		//	$this->outVeryVerbose( 'Applying database config to module '.$moduleId.' ...' );		//  tell about this in very verbose mode
 			if( !isset( $this->config->modules->{$moduleId} ) )										//  registered module is not installed
-				$this->config->modules->{$moduleId}	= (object) [];								//  create an empty module definition in loaded module list
+				$this->config->modules->{$moduleId}	= (object) [];									//  create an empty module definition in loaded module list
 			$module	= $this->config->modules->{$moduleId};											//  shortcut module definition
 			if( !isset( $module->config ) )															//  module definition has not configuration
-				$module->config	= (object) [];													//  create an empty configuration in module definition
+				$module->config	= (object) [];														//  create an empty configuration in module definition
 			foreach( $this->config->database as $key => $value )									//  iterate database access information from hymn file
-				if( !in_array( $key, array( 'modules' ) ) )											//  skip the found list of resource modules to apply exactly this method to
+				if( !in_array( $key, ['modules'] ) )												//  skip the found list of resource modules to apply exactly this method to
 					$module->config->{$configPrefix.$key}	= $value;								//  set database access information in resource module configuration
 		}
 		return TRUE;

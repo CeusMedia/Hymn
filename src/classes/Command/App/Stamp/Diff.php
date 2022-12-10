@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2021 Christian Würker
+ *	@copyright		2017-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -127,7 +127,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
-		$finder->setAcceptedFileNames( array( 'latest.json' ) );
+		$finder->setAcceptedFileNames( ['latest.json'] );
 		return $finder->find( $path );
 	}
 
@@ -169,7 +169,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$sql	= new Hymn_Module_SQL( $this->client );
 		if( !$this->flags->quiet )
 			$this->client->out( ' - Module added: '.$module->id );
-		if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
+		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			$scripts	= $sql->getModuleInstallSql( $module );
 			if( $scripts ){
 				if( !$this->flags->quiet )
@@ -186,7 +186,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-		if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
+		if( in_array( $type, [NULL, 'all', 'config'] ) ){
 		}
 	}
 
@@ -203,7 +203,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
 			$this->client->out( ' - Module changed: '.$moduleNew->id );
-		if( in_array( $type, array( NULL, 'all', 'sql' ) ) ){
+		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
 				if( !$this->flags->quiet )
 					$this->client->out( '   SQL: '.count( $scripts ).' update(s):' );
@@ -221,12 +221,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-		if( in_array( $type, array( NULL, 'all', 'config' ) ) ){
+		if( in_array( $type, [NULL, 'all', 'config'] ) ){
 			$changes	= $keys = $diff->compareConfigByModules( $moduleOld, $moduleNew );
 			foreach( $changes as $change ){
 				if( $change->status === 'removed' ){
 					$message	= '   - %s has been removed.';
-					$this->client->out( vsprintf( $message, array( $change->key ) ) );
+					$this->client->out( vsprintf( $message, [$change->key] ) );
 				}
 				else if( $change->status === 'added' ){
 					$message	= '   - %s has been added with default value: %s';
