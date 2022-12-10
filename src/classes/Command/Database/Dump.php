@@ -69,9 +69,13 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$dbc			= $this->client->getDatabase();
 		$arguments		= $this->client->arguments;
 
-		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
+//		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
+		$defaultPath	= $this->client->getConfigPath().'sql/';
+		$path			= $arguments->getOption( 'path' );											//  get path from option
+		$path			= $path ? $path : $defaultPath;												//  ... or default
 
-		$fileName		= $arguments->getArgument( 0 );
+		$fileName		= (string) $arguments->getArgument( 0 );
+
 		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
 			$fileName	= $path;																	//  set path from option or default
 		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
