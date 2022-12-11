@@ -41,6 +41,18 @@
             "test -f hymn.phar && rm hymn.phar",
             "php build/create.php --mode=dev && chmod +x hymn.phar"
         ],
+        "phar:install-copy": [
+            "@dev:uninstall",
+            "sudo cp $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+        ],
+        "phar:install-link": [
+            "@dev:uninstall",
+            "sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+        ],
+        "phar:uninstall": [
+            "test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn",
+            "test -l /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn"
+        ],
         "test:stan": [
             "@dev:install-quiet",
             "XDEBUG_MODE=off vendor/bin/phpstan analyze --verbose"
@@ -75,6 +87,9 @@
         "dev:update": "Updates project dependencies for Development stage",
         "phar:create": "Create productive version of PHAR file locally",
         "phar:create-dev": "Create development version of PHAR file locally",
+        "phar:install-copy": "Copy hymn.phar to /usr/local/bin",
+        "phar:install-link": "Link hymn.phar in /usr/local/bin",
+        "phar:uninstall": "Remove copy or link from /usr/local/bin",
         "test:stan": "Validate codebase with PHPStan",
         "test:stan-clear": "Clear PHPStan cache",
         "test:stan-save": "Store current results in ignore list",
