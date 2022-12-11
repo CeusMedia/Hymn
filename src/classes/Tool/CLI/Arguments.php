@@ -64,11 +64,11 @@ class Hymn_Tool_CLI_Arguments
 		return $this->arguments;
 	}
 
-	public function getOption( string $key )
+	public function getOption( string $key, ?string $default = NULL )
 	{
 		if( isset( $this->options[$key] ) )
 			return $this->options[$key]['value'];
-		return NULL;
+		return $default;
 	}
 
 	public function getOptions(): array

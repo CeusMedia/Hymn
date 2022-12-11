@@ -19,7 +19,7 @@ create-phar-dev: ## create development version of PHAR file locally
 
 install: install-link ## alias for install-link
 
-install-copy: uninstall unlink ## installs PHAR file in system (/usr/local/bin) by copy
+install-copy: uninstall ## installs PHAR file in system (/usr/local/bin) by copy
 	@echo "Installing hymn to /usr/local/bin"
 	@sudo cp $(shell pwd)/hymn.phar /usr/local/bin/hymn
 
@@ -28,8 +28,8 @@ install-link: uninstall ## installs PHAR file in system (/usr/local/bin) by link
 	@sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn
 
 uninstall:
+	@test -h /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
 	@test -f /usr/local/bin/hymn && echo "Removing hymn in /usr/local/bin" && sudo rm -f /usr/local/bin/hymn || true
-	@test -L /usr/local/bin/hymn && echo "Removing hymn symlink in /usr/local/bin" && sudo rm /usr/local/bin/hymn || true
 
 test-units:
 	@./vendor/bin/phpunit
