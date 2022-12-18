@@ -83,6 +83,7 @@ B2. App Instance & Module Management
 - app-graph                                   Render module relations graph (see config/modules.graph.png)
 - app-hooks                                   List registered event hooks of installed modules
 - app-move [-dv] DESTINATION [URL]            Move app to another folder (and adjust app base URL)
+- app-relink [-dv] SOURCE                     Fix links after manuel app movement (if link mode)
 - app-clear [-v] [CLEAR_TYPE+] [--age=MINS]   Clear cache, locks or logs
 
 B3. App Module Management
