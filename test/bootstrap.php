@@ -1,11 +1,11 @@
 <?php
 $path			= realpath( __DIR__.'/../src/classes' ).'/';
-$directories	= array(
+$directories	= [
 	'',
 	'Module',
 	'Command/App',
 	'Command',
-);
+];
 
 require_once $path.'Command/Interface.php';
 require_once $path.'Command/Abstract.php';

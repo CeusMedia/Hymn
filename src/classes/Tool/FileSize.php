@@ -41,7 +41,7 @@ define( 'SIZE_GIGABYTE', pow( 1024, 3 ) );
 class Hymn_Tool_FileSize
 {
 	/**	@var		array		$unitBytes		List of Byte Units */
-	public static array $unitBytes	= array(
+	public static array $unitBytes	= [
 		'B',
 		'KB',
 		'MB',
@@ -51,7 +51,7 @@ class Hymn_Tool_FileSize
 		'EB',
 		'ZB',
 		'YB'
-	);
+	];
 
 	/**
 	 *	Formats file size by switching to next higher unit if an set edge is reached.

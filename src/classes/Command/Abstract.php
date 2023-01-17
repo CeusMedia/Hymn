@@ -64,13 +64,13 @@ abstract class Hymn_Command_Abstract
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
-		);
+		];
 		$this->locale	= $this->client->getLocale();
 
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );

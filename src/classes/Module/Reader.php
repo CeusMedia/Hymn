@@ -194,7 +194,7 @@ class Hymn_Module_Reader
 	{
 		if( !$xml->files )
 			return;
-		$map	= array(
+		$map	= [
 			'class'		=> 'classes',
 			'locale'	=> 'locales',
 			'template'	=> 'templates',
@@ -202,7 +202,7 @@ class Hymn_Module_Reader
 			'script'	=> 'scripts',
 			'image'		=> 'images',
 			'file'		=> 'files',
-		);
+		];
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
 				$object	= (object) array(
@@ -270,7 +270,7 @@ class Hymn_Module_Reader
 			$rank		= $this->getAttribute( $link, 'rank', 10 );
 			$parent		= $this->getAttribute( $link, 'parent' );
 			$link		= $this->getAttribute( $link, 'link' );
-			$obj->links[]	= (object) array(
+			$obj->links[]	= (object) [
 				'parent'	=> $parent,
 				'access'	=> $access,
 				'language'	=> $language,
@@ -278,7 +278,7 @@ class Hymn_Module_Reader
 				'link'		=> $link,
 				'rank'		=> $rank,
 				'label'		=> $label,
-			);
+			];
 			(string) $link;
 		}
 	}

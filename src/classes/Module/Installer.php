@@ -50,12 +50,12 @@ class Hymn_Module_Installer
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
 		$this->app		= $this->config->application;											//  shortcut to application config
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
-		);
+		];
 
 /*		if( isset( $this->app->installMode ) )
 			$this->client->out( "Install Mode: ".$this->app->installMode );
@@ -66,12 +66,12 @@ class Hymn_Module_Installer
 			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )		//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy )
-			$this->client->out( array(
+			$this->client->out( [
 				'',
 				'ATTENTION: This build is a live installation in copy mode.',
 				'There is not uplink to commit file changes to source repository.',
 				'',
-			) );
+			] );
 	}
 
 	/**
@@ -142,10 +142,10 @@ class Hymn_Module_Installer
 				}
 				if( $this->client->flags & Hymn_Client::FLAG_NO_INTERACTION ){
 					$message	= 'Config value %s of module %s is missing but mandatory. Questioning is allowed in interactive mode, only.';
-					$this->client->outError( vsprintf( $message, array(
+					$this->client->outError( vsprintf( $message, [
 						$moduleConfigKey,
 						$module->id,
-					) ), Hymn_Client::EXIT_ON_RUN );
+					] ), Hymn_Client::EXIT_ON_RUN );
 				}
 				$question	= new Hymn_Tool_CLI_Question(											//  get new value from console
 					$this->client,

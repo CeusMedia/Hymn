@@ -40,10 +40,10 @@ class Hymn_Tool_Test
 	protected Hymn_Client $client;
 
 	protected static array $shellCommands	= array(
-		'graphviz'	=> array(
+		'graphviz'	=> [
 			'command'	=> "dot -V",
 			'error'		=> 'Missing graphViz.',
-		),
+		],
 	);
 
 	public function __construct( Hymn_Client $client )
@@ -110,11 +110,11 @@ class Hymn_Tool_Test
 			$message	= $output[0];
 		if( isset( $output[2] ) && strlen( trim( $output[2] ) ) )
 			$message	= $output[2];
-		return (object) array(
+		return (object) [
 			'valid'		=> $code === 0,
 			'code'		=> $code,
 			'message'	=> $message,
 			'output'	=> $output,
-		);
+		];
 	}
 }

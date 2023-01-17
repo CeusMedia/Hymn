@@ -78,23 +78,23 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 			$this->configureDatabase();
 
 		$data	= array(
-			'application'	=> (object) array(
+			'application'	=> (object) [
 				'title'			=> $this->answers['app.title'],
 				'url'			=> $this->answers['app.url'],
 				'uri'			=> $this->answers['app.uri'],
 				'installType'	=> $this->answers['app.install.type'],
 				'installMode'	=> $this->answers['app.install.mode'],
-			),
+			],
 			'sources'		=> (object) [],
 			'modules'		=> (object) [],
 			'database'		=> (object) [],
-			'system'		=> (object) array(
+			'system'		=> (object) [
 				'user'			=> $this->answers['system.user'],
 				'group'			=> $this->answers['system.group'],
-			),
+			],
 		);
 		if( isset( $this->answers['database.driver'] ) ){
-			$data['database']	= (object) array(
+			$data['database']	= (object) [
 				'driver'	=> $this->answers['database.driver'],
 				'host'		=> $this->answers['database.host'],
 				'port'		=> $this->answers['database.port'],
@@ -102,7 +102,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 				'password'	=> $this->answers['database.password'],
 				'name'		=> $this->answers['database.name'],
 				'prefix'	=> $this->answers['database.prefix'],
-			);
+			];
 
 		}
 		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );

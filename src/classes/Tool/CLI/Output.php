@@ -57,12 +57,12 @@ class Hymn_Tool_CLI_Output
 	{
 		$this->client	= $client;
 		$this->exit		= $exit;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
-		);
+		];
 		$this->words		= $this->client->getLocale()->loadWords( 'client' );
 
 		if( self::$outputMethod !== 'print' )

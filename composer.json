@@ -34,7 +34,8 @@
         "phar:create": [
             "@dev:install-quiet",
             "test -f hymn.phar && rm hymn.phar",
-            "php build/create.php --mode=prod && chmod +x hymn.phar"
+            "php build/create.php --mode=prod",
+            "chmod +x hymn.phar"
         ],
         "phar:create-dev": [
             "@dev:install-quiet",

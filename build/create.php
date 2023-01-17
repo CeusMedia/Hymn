@@ -4,9 +4,9 @@ require_once __DIR__.'/../src/classes/Tool/Test.php';
 
 /*  --  ARGUMENTS  --  */
 $modes		= ['prod', 'dev'];
-$options	= array_merge( array(
+$options	= array_merge( [
 	'mode'		=> 'prod',
-), getopt( "", preg_split( '/\|/', 'mode:|locale:' ) ) );
+], getopt( "", preg_split( '/\|/', 'mode:|locale:' ) ) );
 $options['mode']	= in_array( $options['mode'], $modes ) ? $options['mode'] : $modes[0];
 
 /*  --  SETUP  --  */

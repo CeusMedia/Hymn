@@ -43,12 +43,12 @@ class Hymn_Module_SQL
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'noDatabase'	=> $this->client->flags & Hymn_Client::FLAG_NO_DB,
-		);
+		];
 	}
 
 	/**

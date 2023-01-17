@@ -62,10 +62,10 @@ class Hymn_Module_Graph
 	{
 		$this->client	= $client;
 		$this->library	= $library;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
+		];
 	}
 
 	/**
@@ -107,11 +107,11 @@ class Hymn_Module_Graph
 			if( $relation->source ){
 				if( !$this->library->isAvailableModuleInShelf( $neededModuleId, $relation->source ) ){
 					$message	= 'Module %s needs module %s from source %s, which is missing.';
-					$this->client->outError( vsprintf( $message, array(
+					$this->client->outError( vsprintf( $message, [
 						$module->id,
 						$neededModuleId,
 						$relation->source,
-					) ), Hymn_Client::EXIT_ON_RUN );
+					] ), Hymn_Client::EXIT_ON_RUN );
 				}
 			}
 			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relation->source );		//  get module data object from module library

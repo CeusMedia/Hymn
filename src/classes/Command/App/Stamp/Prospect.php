@@ -99,11 +99,11 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 					) ) );
 					$version	= $sourceModule->version;
 					foreach( $scripts as $script ){
-						$this->client->outVerbose( vsprintf( '--  UPDATE %s: %s-> %s', array(
+						$this->client->outVerbose( vsprintf( '--  UPDATE %s: %s-> %s', [
 							$targetModule->id,
 							$version,
 							$script->version
-						) ) );
+						] ) );
 						$this->client->out( trim( $script->query ) );
 						$version	= $script->version;
 					}

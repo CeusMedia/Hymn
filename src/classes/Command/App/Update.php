@@ -106,12 +106,12 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				else if( !array_key_exists( $moduleId, $outdatedModules ) ){						//  module is not outdated, no update
 					if( $this->flags->force ){
 						$installedModule	= $listInstalled[$moduleId];
-						$modulesToUpdate[$moduleId]	= (object) array(
+						$modulesToUpdate[$moduleId]	= (object) [
 							'id'		=> $installedModule->id,
 							'installed'	=> $installedModule->version,
 							'available'	=> $installedModule->version,
 							'source'	=> $installedModule->installSource,
-						);
+						];
 					}
 					else{
 						$this->client->out( sprintf(
@@ -136,12 +136,12 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				continue;
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
-			$message		= vsprintf( 'Updating module "%s" from %s to %s as %s ...', array(
+			$message		= vsprintf( 'Updating module "%s" from %s to %s as %s ...', [
 				$module->id,
 				$update->installed,
 				$update->available,
 				$installType
-			) );
+			] );
 			$this->client->out( $message );
 			$updater->update( $module, $installType );
 		}

@@ -39,21 +39,21 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 {
 	protected $pathPhar			= "phar://hymn.phar/";
 	protected array $argumentOptions	= array(
-		'backend'		=> array(
+		'backend'		=> [
 			'pattern'	=> '/^-b|--backend/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
-		),
-		'public'		=> array(
+		],
+		'public'		=> [
 			'pattern'	=> '/^-p|--public/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
-		),
-		'nonfree'		=> array(
+		],
+		'nonfree'		=> [
 			'pattern'	=> '/^-n|--nonfree/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
-		),
+		],
 	);
 
 	/**

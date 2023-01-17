@@ -48,11 +48,11 @@ class Hymn_Module_Updater
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
+		];
 
 		$app		= $this->config->application;												//  shortcut to application config
 /*		if( isset( $app->installMode ) )
@@ -64,12 +64,12 @@ class Hymn_Module_Updater
 			if( isset( $app->installMode ) && $app->installMode === "live" )			//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy )
-			$this->client->out( array(
+			$this->client->out( [
 				'',
 				'ATTENTION: This build is a live installation in copy mode.',
 				'There is not uplink to commit file changes to source repository.',
 				'',
-			) );
+			] );
 	}
 
 	/**
@@ -103,10 +103,10 @@ class Hymn_Module_Updater
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
 		if( !$moduleSource ){
-			$message	= vsprintf( 'Module "%" is not available in source "%"', array(
+			$message	= vsprintf( 'Module "%" is not available in source "%"', [
 				$module->id,
 				$moduleInstalled->installSource
-			) );
+			] );
 			throw new RuntimeException( $message );
 		}
 

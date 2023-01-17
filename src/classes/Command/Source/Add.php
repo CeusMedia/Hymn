@@ -117,12 +117,12 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			return;
 		}
 		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources->{$shelfId} = (object) array(
+		$json->sources->{$shelfId} = (object) [
 			'active'	=> TRUE,
 			'title'		=> $shelf['title'],
 			'type'		=> $shelf['type'],
 			'path'		=> $shelf['path'],
-		);
+		];
 		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 		if( !$this->flags->quiet )
 			$this->client->out( 'Source "'.$shelfId.'" has been added.' );

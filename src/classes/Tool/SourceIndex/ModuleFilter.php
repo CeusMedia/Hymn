@@ -58,11 +58,11 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 			unset( $module->uri );
 			switch( $mode ){
 				case self::MODE_MINIMAL:
-					$module	= (object) array(
+					$module	= (object) [
 						'title'			=> $module->title,
 						'description'	=> $module->description,
 						'version'		=> $module->version,
-					);
+					];
 					break;
 				case self::MODE_REDUCED:
 					unset( $module->config );

@@ -50,11 +50,11 @@ class Hymn_Module_Diff
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
+		];
 	}
 
 	public function compareConfigByModules( object $sourceModule, object $targetModule ): array
@@ -71,22 +71,22 @@ class Hymn_Module_Diff
 
 		foreach( $configSource as $item ){
 			if( !isset( $configTarget[$item->key] ) ){
-				$list[]	= (object) array(
+				$list[]	= (object) [
 					'status'		=> 'removed',
 					'type'			=> $item->type,
 					'key'			=> $item->key,
 					'value'			=> $item->value,
-				);
+				];
 			}
 		}
 		foreach( $configTarget as $item ){
 			if( !isset( $configSource[$item->key] ) ){
-				$list[]	= (object) array(
+				$list[]	= (object) [
 					'status'		=> 'added',
 					'type'			=> $item->type,
 					'key'			=> $item->key,
 					'value'			=> $item->value,
-				);
+				];
 			}
 			else if( $item != $configSource[$item->key] ){
 				$changes	= [];
@@ -99,21 +99,21 @@ class Hymn_Module_Diff
 					if( isset( $configSource[$item->key]->{$property} ) )
 						$valueOld	= $configSource[$item->key]->{$property};
 					if( $valueOld !== $value ){
-						$changes[]	= (object) array(
+						$changes[]	= (object) [
 							'key'		=> $property,
 							'valueOld'	=> $valueOld,
 							'valueNew'	=> $value,
-						);
+						];
 					}
 				}
 				if( $changes )
-					$list[]	= (object) array(
+					$list[]	= (object) [
 						'status'		=> 'changed',
 						'type'			=> $item->type,
 						'key'			=> $item->key,
 						'value'			=> $item->value,
 						'properties'	=> $changes,
-					);
+					];
 			}
 		}
 		return $list;

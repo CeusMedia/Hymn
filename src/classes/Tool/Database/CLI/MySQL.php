@@ -161,6 +161,11 @@ class Hymn_Tool_Database_CLI_MySQL
 		rename( $fileName, $fileName."_" );															//  move dump file to source file
 		$fpIn		= fopen( $fileName."_", "r" );													//  open source file
 		$fpOut		= fopen( $fileName, "a" );														//  prepare empty target file
+		if( FALSE === $fpIn )
+			throw new RuntimeException( 'Failed to open read stream to '.$fileName.'_' );
+		if( FALSE === $fpOut )
+			throw new RuntimeException( 'Failed to open write stream to '.$fileName );
+
 		while( !feof( $fpIn ) ){																	//  read input file until end
 			$line	= fgets( $fpIn );																//  read line buffer
 			$line	= preg_replace_callback( $regExp, $callback, $line );							//  perform replace in buffer
@@ -209,6 +214,10 @@ class Hymn_Tool_Database_CLI_MySQL
 		$tempName	= $sourceFile.'.tmp';
 		$fpIn		= fopen( $sourceFile, 'r' );												//  open source file
 		$fpOut		= fopen( $tempName, 'a' );													//  prepare empty target file
+		if( FALSE === $fpIn )
+			throw new RuntimeException( 'Failed to open read stream to '.$sourceFile );
+		if( FALSE === $fpOut )
+			throw new RuntimeException( 'Failed to open write stream to '.$tempName );
 		while( !feof( $fpIn ) ){																//  read input file until end
 			$line	= fgets( $fpIn );															//  read line buffer
 			$line	= str_replace( '<%?prefix%>', $prefix, $line );								//  replace table prefix placeholder

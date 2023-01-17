@@ -85,20 +85,20 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) ){
-				$moduleChanges[$module->id]	= (object) array(
+				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'added',
 					'module'	=> $module,
-				);
+				];
 			}
 			else{
 				$oldModule	= $stamp->modules->{$module->id};
 				if( !version_compare( $oldModule->version, $module->version, '<' ) )
 					continue;
-				$moduleChanges[$module->id]	= (object) array(
+				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'changed',
 					'source'	=> $oldModule,
 					'target'	=> $module,
-				);
+				];
 			}
 		}
 		return $moduleChanges;
@@ -230,20 +230,20 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				}
 				else if( $change->status === 'added' ){
 					$message	= '   - %s has been added with default value: %s';
-					$this->client->out( vsprintf( $message, array(
+					$this->client->out( vsprintf( $message, [
 						$change->key,
 						$change->value
-					) ) );
+					] ) );
 				}
 				else if( $change->status === 'changed' ){
 					foreach( $change->properties as $property ){
 						$message	= '   - %s: %s has changed from %s to %s';
-						$this->client->out( vsprintf( $message, array(
+						$this->client->out( vsprintf( $message, [
 							$change->key,
 							$property->key,
 							$property->valueOld,
 							$property->valueNew
-						) ) );
+						] ) );
 					}
 				}
 			}
