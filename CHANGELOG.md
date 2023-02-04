@@ -1,5 +1,23 @@
 # Change Log
 
+## v0.9.11
+- New command: app-base-config-list
+- New command: database-console
+- New Hymn modes on build and run
+	- Flags: dev, prod, default: prod
+- Deny commands in production mode:
+	- app-uninstall
+	- database-clear
+	- database-config
+	- database-console
+	- database-keep
+	- database-load
+- Command version shows more on verbose mode
+- New CLI tool for rendering tables
+- PHAR compression of on dev mode
+- Going for PHPStan level 2
+- New command: changelog
+
 ## v0.9.9.6
 - Allow to skip database tables on dump by module config. 
 

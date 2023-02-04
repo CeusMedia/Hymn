@@ -59,7 +59,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 			$message	= 'No installed modules found.';
 			if( $shelfId )
 				$message	= 'No modules installed from source "'.$shelfId.'".';
-			$this->client->out( $message );															//  quit with message
+			$this->out( $message );															//  quit with message
 			return static::CODE_NONE;
 		}
 		else{
@@ -75,7 +75,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 			$message	= 'No installed modules are outdated.';
 			if( $shelfId )
 				$message	= 'No installed modules from source "'.$shelfId.'" are outdated.';
-			$this->client->out( $message );								//  quit with message
+			$this->out( $message );								//  quit with message
 			return static::CODE_NONE;
 		}
 		else{
@@ -104,7 +104,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 							$version,
 							$script->version
 						] ) );
-						$this->client->out( trim( $script->query ) );
+						$this->out( trim( $script->query ) );
 						$version	= $script->version;
 					}
 					$this->client->outVerbose( '' );
@@ -114,32 +114,32 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 				$changes	= $keys = $diff->compareConfigByModules( $sourceModule, $targetModule );
 				if( $changes ){
 					if( !$this->flags->quiet )
-						$this->client->out( ' - Module: '.$targetModule->id );
+						$this->out( ' - Module: '.$targetModule->id );
 					foreach( $changes as $change ){
 						if( $change->status === 'removed' ){
 							$message	= '   [-] %s (was: %s)';
-							$this->client->out( vsprintf( $message, array(
+							$this->out( vsprintf( $message, [
 								$change->key,
 								$this->formatValue( $change->value, $change->type ),
-							) ) );
+							] ) );
 						}
 						else if( $change->status === 'added' ){
 							$message	= '   [+] %s (value: %s)';
-							$this->client->out( vsprintf( $message, array(
+							$this->out( vsprintf( $message, [
 								$change->key,
 								$this->formatValue( $change->value, $change->type ),
-							) ) );
+							] ) );
 						}
 						else if( $change->status === 'changed' ){
 							foreach( $change->properties as $property ){
 								if( $property->key !== 'value' )
 									continue;
 								$message	= '   [$] %1$s => %3$s (was: %2$s)';
-								$this->client->out( vsprintf( $message, array(
+								$this->out( vsprintf( $message, [
 									$change->key,
 									$this->formatValue( $property->valueOld, $change->type ),
 									$this->formatValue( $property->valueNew, $change->type ),
-								) ) );
+								] ) );
 								break;
 							}
 						}
@@ -147,14 +147,14 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 				}
 			}
 			else {
-				$this->client->out( 'No valid type given (try: config or sql)' );
+				$this->out( 'No valid type given (try: config or sql)' );
 				return static::CODE_NONE;
 			}
 		}
 		return static::CODE_MODULES_OUTDATED;
 	}
 
-	protected function formatValue( string $value, string $type )
+	protected function formatValue( string $value, string $type ): string
 	{
 		if( $type === 'string' ){
 			if( !preg_match( '/^[A-Z:_]+$/', $value ) ){

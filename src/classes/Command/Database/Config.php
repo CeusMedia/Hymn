@@ -86,6 +86,8 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 	 */
 	public function run()
 	{
+		$this->denyOnProductionMode();
+
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		$config	= $this->client->getConfig();

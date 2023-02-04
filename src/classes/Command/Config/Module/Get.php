@@ -80,6 +80,6 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 		$settings->actual	= $settings->installed;													//  take possible value from installation
 		if( !is_null( $settings->configured ) )														//  module value is configured by Hymn file
 			$settings->actual	= $settings->configured;											//  take possible value from Hymn file
-		$this->client->out( $settings->actual, FALSE );												//  return actual value
+		$this->out( $settings->actual, FALSE );												//  return actual value
 	}
 }

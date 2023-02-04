@@ -47,7 +47,7 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 	public function run()
 	{
 		if( $this->flags->dry )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config			= json_decode( file_get_contents( Hymn_Client::$fileName ) );
 		if( $config->application->installType !== 'link' ){
@@ -62,16 +62,16 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		$sourceUriRegex	= '/^'.preg_quote( $sourcePath, '/' ).'/';
 		$destPath		= rtrim( getcwd(), '/' ).'/';
 
-		$this->client->out( "Move application" );
-		$this->client->out( "- from: ".$sourcePath );
-		$this->client->out( "- to:   ".$destPath );
+		$this->out( "Move application" );
+		$this->out( "- from: ".$sourcePath );
+		$this->out( "- to:   ".$destPath );
 
 		$this->client->outVerbose( $this->flags->dry ? "- would update hymn file" : "- updating hymn file" );
 		$this->updateHymnFile( $config, $sourceUriRegex, $destPath );
 
 		$this->client->outVerbose( $this->flags->dry ? "- would fix links" : "- fixing links" );
 		$this->fixLinks( $sourcePath, $sourceUriRegex, $destPath );
-		$this->client->out( "Done." );
+		$this->out( "Done." );
 	}
 
 	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' )

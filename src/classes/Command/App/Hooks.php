@@ -92,7 +92,7 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 		foreach( $list as $hook ) {
 			switch( $hook->type ){
 				case 'staticPublicFunctionCall':
-					$this->client->out( vsprintf( '- %s > %s >> [%s] %s', [
+					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
 						$hook->resource,
 						$hook->event,
 						$hook->moduleId,
@@ -100,7 +100,7 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 					] ) );
 					break;
 				case 'inlineFunction':
-					$this->client->out( vsprintf( '- %s > %s >> [%s] %s', [
+					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
 						$hook->resource,
 						$hook->event,
 						$hook->moduleId,

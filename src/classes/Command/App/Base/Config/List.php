@@ -35,36 +35,27 @@
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
-class Hymn_Command_App_Base_Config_Enable extends Hymn_Command_Abstract implements Hymn_Command_Interface
+class Hymn_Command_App_Base_Config_List extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
-	 *	Missing flags: dry, force, quiet, verbose
+	 *	Missing flags: verbose
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run()
 	{
-		$key		= $this->client->arguments->getArgument();
 		$pathConfig	= $this->client->getConfigPath();
-
-		if( !strlen( trim( $key ) ) )
-			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
-		$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
-
-		if( !$editor->hasProperty( $key, FALSE ) )
-			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
-		if( $editor->isActiveProperty( $key ) ){
-			if( !$this->flags->quiet )
-				$this->out( 'Base config key "'.$key.'" already is enabled' );
-			return;
+		$editor		= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
+		$pairs		= $editor->getProperties( FALSE );
+		ksort( $pairs );
+		foreach( $pairs as $key => $value ){
+			if( is_bool( $value ) )
+				$value	= $value ? 'yes' : 'no';
+			$keyLabel	= str_pad( $key, 20 );
+			$this->out( sprintf( '- %s = %s', $keyLabel, $value ) );
 		}
-		if( !$this->flags->dry ){
-			$editor->activateProperty( $key );
-			clearstatcache();
-		}
-		$this->client->outVerbose( 'Base config key "'.$key.'" disabled' );
 	}
 }

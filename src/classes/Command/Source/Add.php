@@ -113,7 +113,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'Source "'.$shelfId.'" would have been added.' );
+				$this->out( 'Source "'.$shelfId.'" would have been added.' );
 			return;
 		}
 		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
@@ -125,6 +125,6 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		];
 		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
 		if( !$this->flags->quiet )
-			$this->client->out( 'Source "'.$shelfId.'" has been added.' );
+			$this->out( 'Source "'.$shelfId.'" has been added.' );
 	}
 }

@@ -71,10 +71,11 @@ Having a valid Hymn config file, you execute these commands:
 
 B1. App Base Configuration Management
 ------------------------------------------------------------------------------
-- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
-- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
+- app-base-config-list                        Show settings from config.ini
 - app-base-config-get KEY                     Read setting from config.ini
 - app-base-config-set [-dqv] KEY VALUE        Save setting in config.ini
+- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
+- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
 
 B2. App Instance & Module Management
 ------------------------------------------------------------------------------

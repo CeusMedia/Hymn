@@ -73,7 +73,7 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 
 		if( !count( $listRequired ) ){
 			if( !$this->flags->verbose )
-				$this->client->out( 'All '.count( $listInstalled ).' required module(s) installed' );
+				$this->out( 'All '.count( $listInstalled ).' required module(s) installed' );
 		}
 		if( count( $listInstalled ) ){
 			$this->client->outVerbose( count( $listInstalled ).' required module(s) installed:' );
@@ -82,9 +82,9 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 			}
 		}
 		if( count( $listRequired ) ){
-			$this->client->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
+			$this->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
 			foreach( $listRequired as $module ){
-				$this->client->out( "- ".$module->id.'' );
+				$this->out( "- ".$module->id.'' );
 			}
 		}
 	}

@@ -50,7 +50,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	public function run()
 	{
 		if( $this->flags->dry && !$this->flags->quiet )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
 //		$this->client->getDatabase()->connect();													//  setup connection to database
@@ -73,7 +73,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 		else{
-			$this->client->out( 'Mode: Install ALL ('.count((array)$config->modules).')' );
+			$this->out( 'Mode: Install ALL ('.count((array)$config->modules).')' );
 			foreach( $config->modules as $moduleId => $moduleConfig ){
 				if( preg_match( "/^@/", $moduleId ) )
 					continue;
@@ -94,7 +94,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				$this->client->getFramework()->checkModuleSupport( $module );
 			}
 			catch( Exception $e ){
-				$this->client->out( 'Error: '.$e->getMessage().'.' );
+				$this->out( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
 				continue;
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id );
@@ -118,14 +118,13 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id, $installType );
 			if( !$this->flags->quiet )
-				$this->client->out( sprintf(
-					"%sInstalling module '%s' (from %s) version %s as %s ...",
+				$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
 					$this->flags->dry ? 'Dry: ' : '',
 					$module->id,
 					$module->sourceId,
 					$module->version,
 					$installType
-				) );
+				] ) );
 			$installer->install( $module, $installType );
 		}
 

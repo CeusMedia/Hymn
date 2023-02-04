@@ -50,7 +50,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		$pathConfig	= $this->client->getConfigPath();
 		$fileName	= Hymn_Client::$fileName;
 		if( !file_exists( $pathConfig."modules" ) )
-			return $this->client->out( "No modules installed" );
+			$this->outError( "No modules installed", Hymn_Client::EXIT_ON_SETUP );
 
 		$hymnFile		= json_decode( file_get_contents( $fileName ) );
 		$knownModules	= array_keys( (array) $hymnFile->modules );
@@ -74,6 +74,6 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		ksort( $list );
 		$hymnFile->modules	= $list;
 		file_put_contents( $fileName, json_encode( $hymnFile, JSON_PRETTY_PRINT ) );
-		return $this->client->out( "Configuration dumped to ".$fileName );
+		$this->out( "Configuration dumped to ".$fileName );
 	}
 }

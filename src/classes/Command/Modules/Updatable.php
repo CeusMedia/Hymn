@@ -33,8 +33,8 @@
  *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
- *	@todo 			handle relations (new relations after update)
+ *	@todo			code documentation
+ *	@todo			handle relations (new relations after update)
  */
 class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -61,22 +61,22 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 					- let module updater cache list on first listing, use cache later
 		*/
 		if( !$this->getLibrary()->listInstalledModules() )											//  application has no installed modules
-			return $this->client->out( "No installed modules found" );
+			$this->outError( "No installed modules found", Hymn_Client::EXIT_ON_SETUP );
 
-		$moduleUpdater	= new Hymn_Module_Updater( $this->client, $this->getLibrary() );			//  use module updater on current application installation
+		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$modulesUpdatable	= $moduleUpdater->getUpdatableModules();
 		if( !$modulesUpdatable ){
-			$this->client->out( 'No modules outdated.' );
+			$this->out( 'No modules outdated.' );
 			return;
 		}
 
-		$this->client->out( count( $modulesUpdatable ).' module(s) outdated:' );
+		$this->out( count( $modulesUpdatable ).' module(s) outdated:' );
 		foreach( $modulesUpdatable as $update ){												//  iterate list of outdated modules
-			$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
+			$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
 				$update->id,																	//  - module ID
 				$update->installed,																//  - currently installed version
 				$update->available																//  - available version
-			) ) );
+			] ) );
 		}
 	}
 }

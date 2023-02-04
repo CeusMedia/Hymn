@@ -49,13 +49,16 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run()
 	{
-		$fileName = NULL;
+		$this->denyOnProductionMode();
+
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			return $this->client->out( 'Database can NOT be connected.' );
 
-		$pathName		= $this->client->arguments->getArgument();
+		if( !Hymn_Command_Database_Test::test( $this->client ) )
+			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
+
+		$fileName	= NULL;
+		$pathName	= $this->client->arguments->getArgument();
 		if( $pathName && file_exists( $pathName ) ){
 			if( is_dir( $pathName ) )
 				$fileName	= $this->getLatestDump( $pathName );
@@ -64,41 +67,41 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			}
 		}
 		else if( file_exists( $this->defaultPath ) )
-			$fileName		= $this->getLatestDump( NULL );
+			$fileName		= $this->getLatestDump();
 		else
-			$this->client->outError( 'No loadable database file or folder found.', Hymn_Client::EXIT_ON_RUN );
+			$this->outError( 'No loadable database file or folder found.', Hymn_Client::EXIT_ON_RUN );
 
 //		$this->client->outVerbose( 'File: '.$fileName );
 		if( !( $fileName && file_exists( $fileName ) ) )
-			return $this->client->out( 'No loadable database file found.' );
+			$this->outError( 'No loadable database file found.', Hymn_Client::EXIT_ON_INPUT );
 
 		if( !is_readable( $fileName ) )
-			$this->client->outError( 'Missing read access to SQL script: '.$fileName );
+			$this->outError( 'Missing read access to SQL script: '.$fileName, Hymn_Client::EXIT_ON_EXEC );
 		try{
 			$dbc		= $this->client->getDatabase();
 			$prefix		= $dbc->getConfig( 'prefix' );											//  get table prefix from config
 			$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );						//  get CLI handler for MySQL
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 			if( $this->flags->verbose ){
-				$this->client->out( array(
+				$this->out( [
 					'Import file:  '.$fileName,														//  show import file name
 					'File size:    '.$fileSize,														//  show import file size
 					'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),		//  show server host and port from config
 					'Database:     '.$dbc->getConfig( 'name' ),										//  show database name from config
 					'Table prefix: '.( $prefix ? $prefix : '(none)' ),								//  show table prefix from config
 					'Access as:    '.$dbc->getConfig( 'username' ),									//  show username from config
-				) );
-				$this->client->out( 'Loading import file ...' );
+				] );
+				$this->out( 'Loading import file ...' );
 			}
 			else
-				$this->client->out( 'Loading import file '.$fileName.' ('.$fileSize.') ...' );
+				$this->out( 'Loading import file '.$fileName.' ('.$fileSize.') ...' );
 			if( $this->flags->dry )
-				$this->client->out( '-> Dry Mode: Import itself not executed.' );
+				$this->out( '-> Dry Mode: Import itself not executed.' );
 			else
 				$mysql->importFileWithPrefix( $fileName, $prefix );
 		}
 		catch( Exception $e ){
-			$this->client->out( 'Loading import file '.$fileName.' failed: '.$e->getMessage() );
+			$this->out( 'Loading import file '.$fileName.' failed: '.$e->getMessage() );
 		}
 	}
 
@@ -107,7 +110,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		$this->defaultPath		= $this->client->getConfigPath().'sql/';
 	}
 
-	protected function getLatestDump( ?string $path = NULL )
+	protected function getLatestDump( ?string $path = NULL ): ?string
 	{
 		$pathConfig	= $this->client->getConfigPath();
 		$path		= $path ? rtrim( $path, '/' ).'/' : $pathConfig.'sql/';

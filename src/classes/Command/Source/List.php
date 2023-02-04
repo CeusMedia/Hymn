@@ -49,10 +49,10 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	{
 		$library	= $this->getLibrary();
 		$shelves	= $library->getActiveShelves();
-		$this->client->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
+		$this->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
 		foreach( $shelves as $shelfId => $shelf ){
 			$modules	= $library->getAvailableModules( $shelfId );
-			$this->client->out( array(
+			$this->out( [
 				'* '.$shelfId.':',
 				'  - Title:    '.$shelf->title,
 				'  - Type:     '.ucfirst( $shelf->type ),
@@ -60,15 +60,15 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 				'  - Active:   '.( $shelf->active ? 'yes' : 'no' ),
 				'  - Default:  '.( $shelf->default ? 'yes' : 'no' ),
 				'  - Modules:  '.count( $modules ),
-			) );
+			] );
 			if( !empty( $shelf->date ) )
-				$this->client->out( '  - Date:     '.$shelf->date );
+				$this->out( '  - Date:     '.$shelf->date );
 			if( !empty( $shelf->url ) )
-				$this->client->out( '  - Link:     '.$shelf->url );
+				$this->out( '  - Link:     '.$shelf->url );
 
 			if( $this->flags->verbose ){
 				foreach( $modules as $moduleId => $module )
-					$this->client->out( '    - '.$moduleId.' ('.$module->version.')' );
+					$this->out( '    - '.$moduleId.' ('.$module->version.')' );
 			}
 		}
 	}

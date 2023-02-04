@@ -108,7 +108,7 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 			file_put_contents( $targetFileName, join( PHP_EOL, $lines ).PHP_EOL );
 		}
 
-		$this->client->out( "Make file has been created." );
-		$this->client->out( "" );															//  print empty line as optical separator
+		$this->out( "Make file has been created." );
+		$this->out( "" );															//  print empty line as optical separator
 	}
 }

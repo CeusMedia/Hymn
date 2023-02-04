@@ -60,7 +60,9 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '0.9.10';
+	public static string $version				= '0.9.11a';
+
+	public static string $mode					= 'prod';
 
 	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
 	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
@@ -71,69 +73,69 @@ class Hymn_Client
 
 	public int $memoryUsageAtStart				= 0;
 
-	protected array $baseArgumentOptions		= array(
-		'db'		=> array(
+	protected array $baseArgumentOptions		= [
+		'db'		=> [
 			'pattern'	=> '/^--db=(\S+)$/',
 			'resolve'	=> '\\1',
 			'values'	=> ['yes', 'no', 'only'],
 			'default'	=> 'yes',
-		),
-		'dry'		=> array(
+		],
+		'dry'		=> [
 			'pattern'	=> '/^-d|--dry/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
-		),
-		'file'		=> array(
+		],
+		'file'		=> [
 			'pattern'	=> '/^--file=(\S+)$/',
 			'resolve'	=> '\\1',
 			'default'	=> '.hymn',
-		),
-		'force'		=> array(
+		],
+		'force'		=> [
 			'pattern'	=> '/^-f|--force$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
-		),
-		'help'		=> array(
+		],
+		'help'		=> [
 			'pattern'	=> '/^-h|--help/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
-		),
-		'quiet'		=> array(
+		],
+		'quiet'		=> [
 			'pattern'	=> '/^-q|--quiet$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
 			'excludes'	=> 'verbose',
-		),
-		'verbose'	=> array(
+		],
+		'verbose'	=> [
 			'pattern'	=> '/^-v|--verbose$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
-		),
-		'very-verbose'	=> array(
+		],
+		'very-verbose'	=> [
 			'pattern'	=> '/^-vv|--very-verbose$/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
 			'includes'	=> 'verbose',
-		),
-		'version'	=> array(
+		],
+		'version'	=> [
 			'pattern'	=> '/^--version/',
 			'resolve'	=> TRUE,
 			'default'	=> NULL,
-		),
-		'interactive'	=> array(
+		],
+		'interactive'	=> [
 			'pattern'	=> '/^--interactive=(\S+)$/',
 			'resolve'	=> '\\1',
 			'values'	=> ['yes', 'no'],
 			'default'	=> 'yes',
-		),
-		'comment'	=> array(
+		],
+		'comment'	=> [
 			'pattern'	=> '/^--comment=(\S+)$/',
 			'resolve'	=> '\\1',
 			'default'	=> NULL,
-		)
-	);
+		]
+	];
 
-	protected static array $commandWithoutConfig	= array(
+	protected static array $commandWithoutConfig	= [
 		//  APP CREATION
 		'init',
 		//  SELF MANAGEMENT
@@ -141,7 +143,7 @@ class Hymn_Client
 		'self-update',
 		'test-syntax',
 		'version',
-	);
+	];
 
 	protected ?object $config						= NULL;
 
@@ -175,6 +177,9 @@ class Hymn_Client
 
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
+
+		if( file_exists( 'phar://hymn.phar/.mode' ) )
+			self::$mode	= file_get_contents( 'phar://hymn.phar/.mode' );
 
 		try{
 			$this->parseArguments( $arguments );
@@ -296,14 +301,14 @@ class Hymn_Client
 	}
 
 	/**
-	 *	Prints out message of one ore more lines.
+	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE )
+	public function out( $lines = NULL, bool $newLine = TRUE ): void
 	{
 		$this->output->out( $lines, $newLine );
 	}
@@ -311,12 +316,12 @@ class Hymn_Client
 	/**
 	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( array $lines = [] )
+	public function outDeprecation( array $lines = [] ): void
 	{
 		$this->output->outDeprecation( $lines );
 	}
@@ -325,10 +330,10 @@ class Hymn_Client
 	 *	Prints out error message.
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
-	 *	@param		integer			$exitCode		Exit with error code, if given, otherwise do not exit (default)
+	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
-	public function outError( string $message, ?int $exitCode = NULL )
+	public function outError( string $message, ?int $exitCode = NULL ): void
 	{
 		$this->output->outError( $message, $exitCode );
 	}
@@ -340,7 +345,7 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE )
+	public function outVerbose( $lines, bool $newLine = TRUE ): void
 	{
 		$this->output->outVerbose( $lines, $newLine );
 	}
@@ -352,7 +357,7 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE )
+	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
 	{
 		$this->output->outVeryVerbose( $lines, $newLine );
 	}

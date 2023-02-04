@@ -63,10 +63,9 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !Hymn_Command_Database_Test::test( $this->client ) ){
-			$this->client->out( 'Database can NOT be connected.' );
-			return;
-		}
+
+		if( !Hymn_Command_Database_Test::test( $this->client ) )
+			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
 
 		$dbc			= $this->client->getDatabase();
 		$arguments		= $this->client->arguments;
@@ -74,7 +73,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 //		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
 		$defaultPath	= $this->client->getConfigPath().'sql/';
 		$path			= $arguments->getOption( 'path' );											//  get path from option
-		$path			= $path ? $path : $defaultPath;												//  ... or default
+		$path			= $path ?: $defaultPath;												//  ... or default
 
 		$fileName		= (string) $arguments->getArgument( 0 );
 
@@ -93,29 +92,30 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$tablesToSkip	= $this->getTablesToSkip();
 
 		if( $this->flags->verbose ){
-			$this->client->out( array(
+			$this->out( [
 				'Export file:  '.$fileName,															//  show export file name
 				'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),			//  show server host and port from config
 				'Database:     '.$dbc->getConfig( 'name' ),											//  show database name from config
 				'Table prefix: '.( $prefix ? $prefix : '(none)' ),									//  show table prefix from config
 				'Access as:    '.$dbc->getConfig( 'username' ),										//  show username from config
-			) );
+			] );
 			if( $tablesToSkip )
-				$this->client->out( 'Skip tables:  '.join( ', ', $tablesToSkip ) );
-			$this->client->out( 'Dumping export file ...' );
+				$this->out( 'Skip tables:  '.join( ', ', $tablesToSkip ) );
+			$this->out( 'Dumping export file ...' );
 		}
 
 		$result	= $mysql->exportToFileWithPrefix( $fileName, $prefix, $tablesToSkip );
 		if( $result->code !== 0 )
-			return $this->client->out( 'Dumping export failed: '.join( PHP_EOL, $result->output ) );
+			$this->outError( 'Dumping export failed: '.join( PHP_EOL, $result->output ), Hymn_Client::EXIT_ON_EXEC );
 		if( $this->flags->dry ){
 			unlink( $fileName );
-			return $this->client->out( '-> Dry Mode: Database dump has been successful. Export file deleted' );
+			$this->out( '-> Dry Mode: Database dump has been successful. Export file deleted' );
+			return;
 		}
 		else {
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 		}
-		return $this->client->out( 'Dumped export file to '.$fileName.' ('.$fileSize.')' );
+		$this->out( 'Dumped export file to '.$fileName.' ('.$fileSize.')' );
 	}
 
 	protected function getTablesToSkip(): array

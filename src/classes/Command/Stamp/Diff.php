@@ -67,11 +67,11 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'No modules have changed.' );
+				$this->out( 'No modules have changed.' );
 			return;
 		}
 		if( !$this->flags->quiet )
-			$this->client->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
+			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'changed' )
@@ -161,11 +161,11 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
-			$this->client->out( ' - Module changed: '.$moduleNew->id );
+			$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
 				if( !$this->flags->quiet )
-					$this->client->out( '   SQL: '.count( $scripts ).' update(s):' );
+					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){
@@ -175,7 +175,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 						$version,
 						$script->version
 					) ) );
-					$this->client->out( trim( $script->query ) );
+					$this->out( trim( $script->query ) );
 					$version	= $script->version;
 				}
 			}
@@ -185,11 +185,11 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 			foreach( $changes as $change ){
 				if( $change->status === 'removed' ){
 					$message	= '   - %s has been removed.';
-					$this->client->out( vsprintf( $message, [$change->key] ) );
+					$this->out( vsprintf( $message, [$change->key] ) );
 				}
 				else if( $change->status === 'added' ){
 					$message	= '   - %s has been added with default value: %s';
-					$this->client->out( vsprintf( $message, [
+					$this->out( vsprintf( $message, [
 						$change->key,
 						$change->value
 					] ) );
@@ -197,7 +197,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 				else if( $change->status === 'changed' ){
 					foreach( $change->properties as $property ){
 						$message	= '   - %s: %s has changed from %s to %s';
-						$this->client->out( vsprintf( $message, [
+						$this->out( vsprintf( $message, [
 							$change->key,
 							$property->key,
 							$property->valueOld,

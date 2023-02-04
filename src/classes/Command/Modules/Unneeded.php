@@ -77,6 +77,6 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 		}
 		else
 			$lines[]	= 'Found no unneeded modules.';
-		$this->client->out( $lines );
+		$this->out( $lines );
 	}
 }

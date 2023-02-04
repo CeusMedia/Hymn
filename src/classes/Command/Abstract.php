@@ -82,9 +82,9 @@ abstract class Hymn_Command_Abstract
 	}
 
 	/**
-	 *	Prints out message of one ore more lines.
+	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
@@ -94,7 +94,7 @@ abstract class Hymn_Command_Abstract
 	}
 
 	/**
-	 *	Prints out deprecation message of one ore more lines.
+	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
@@ -109,7 +109,7 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out error message.
 	 *	@access		public
-	 *	@param		string		    	$message		Error message to print
+	 *	@param		string				$message		Error message to print
 	 *	@param		integer|NULL		$exitCode		Exit with error code, if given, otherwise do not exit (default)
 	 *	@return		void
 	 */
@@ -121,7 +121,7 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
@@ -133,7 +133,7 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
@@ -165,6 +165,12 @@ abstract class Hymn_Command_Abstract
 			$break
 		);
 		return $question->ask();
+	}
+
+	protected function denyOnProductionMode()
+	{
+		if( Hymn_Client::$mode === 'prod' )
+			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
 	protected function deprecate( $messageLines )

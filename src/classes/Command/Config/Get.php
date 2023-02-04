@@ -52,7 +52,7 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 		$config		= $this->loadConfig();
 		$current	= $this->getCurrentValue( $config, $key );
-		$this->client->out( $current );
+		$this->out( $current );
 	}
 
 	/*  --  PROTECTED  --  */

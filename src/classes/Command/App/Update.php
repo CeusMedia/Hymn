@@ -57,12 +57,10 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 
 		if( $this->flags->dry )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		if( !$listInstalled ){																		//  application has no installed modules
-			$this->client->out( "No installed modules found" );								//  not even one module is installed, no update
-			return;
-		}
+		if( !$listInstalled )																		//  application has no installed modules
+			$this->outError( "No installed modules found", Hymn_Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
 
 //		$start		= microtime( TRUE );
 
@@ -99,7 +97,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$modulesToUpdate	= [];															//  start with empty list again
 			foreach( $moduleIds as $moduleId ){														//  iterate given modules
 				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
-					$this->client->out( sprintf(
+					$this->out( sprintf(
 						"Module '%s' is not installed and cannot be updated",
 						$moduleId
 					) );
@@ -114,7 +112,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 						];
 					}
 					else{
-						$this->client->out( sprintf(
+						$this->out( sprintf(
 							"Module '%s' is not outdated and cannot be updated",
 							$moduleId
 						) );
@@ -132,7 +130,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$this->client->getFramework()->checkModuleSupport( $module );
 			}
 			catch( Exception $e ){
-				$this->client->out( 'Error: '.$e->getMessage().'.' );
+				$this->out( 'Error: '.$e->getMessage().'.' );					//  error, but continue, not exit
 				continue;
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id, $this->installType );
@@ -142,7 +140,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 				$update->available,
 				$installType
 			] );
-			$this->client->out( $message );
+			$this->out( $message );
 			$updater->update( $module, $installType );
 		}
 	}

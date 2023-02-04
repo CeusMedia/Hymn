@@ -47,29 +47,28 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run()
 	{
+		$this->denyOnProductionMode();
+
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !Hymn_Command_Database_Test::test( $this->client ) ) {
-			$this->client->out("Database can NOT be connected.");
-			return;
-		}
+
+		if( !Hymn_Command_Database_Test::test( $this->client ) )
+			$this->outError("Database can NOT be connected.", Hymn_Client::EXIT_ON_SETUP );
 
 		$dbc	= $this->client->getDatabase();
 		$prefix	= $dbc->getConfig( 'prefix' );
 		$tables	= $dbc->getTables( $prefix );
 		if( !$tables ){
 			if( !$this->flags->quiet )
-				$this->client->out( "Database is empty" );
+				$this->out( "Database is empty" );
 			return;
 		}
 		if( !( $this->flags->force ) ){
-			if( $this->flags->quiet ){
-				$this->client->out( "Quiet mode needs force mode (-f|--force)" );
-				return;
-			}
-			$this->client->out( "Database tables:" );
+			if( $this->flags->quiet )
+				$this->outError( "Quiet mode needs force mode (-f|--force)", Hymn_Client::EXIT_ON_INPUT );
+			$this->out( "Database tables:" );
 			foreach( $tables as $table )
-				$this->client->out( "- ".$table );
+				$this->out( "- ".$table );
 			$question	= new Hymn_Tool_CLI_Question(
 				$this->client,
 				'Do you really want to drop these tables?',
@@ -90,6 +89,6 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		if( !$this->flags->dry )
 			$dbc->exec( 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' );
 		if( !$this->flags->quiet )
-			$this->client->out( "Database cleared" );
+			$this->out( "Database cleared" );
 	}
 }

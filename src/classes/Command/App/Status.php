@@ -66,7 +66,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		*/
 		$listInstalled	= $this->getLibrary()->listInstalledModules();								//  get list of installed modules
 		if( !$listInstalled ){																		//  application has no installed modules
-			$this->client->out( 'No installed modules found' );										//  quit with message
+			$this->out( 'No installed modules found' );										//  quit with message
 			return static::CODE_NONE;
 		}
 
@@ -91,10 +91,10 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		);
 		if( !count( $changes ) )
 			return;
-		$this->client->out( $indent.'Changes:' );
+		$this->out( $indent.'Changes:' );
 		foreach( $changes as $change ){
 			$version	= str_pad( $change->version, 9 );
-			$this->client->out( sprintf( $indent.' - %s %s', $version, $change->note ) );
+			$this->out( sprintf( $indent.' - %s %s', $version, $change->note ) );
 		}
 	}
 
@@ -120,15 +120,15 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 		if( !$this->flags->quiet ){
 			$message	= '%d updatable modules found:';
-			$this->client->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
+			$this->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
 		}
 		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
 			if( !$this->flags->quiet ){
-				$this->client->out( vsprintf( "- %s: %s -> %s", array(								//  print outdated module and:
+				$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
 					$update->id,																	//  - module ID
 					$update->installed,																//  - currently installed version
 					$update->available																//  - available version
-				) ) );
+				] ) );
 				if( $this->flags->verbose )
 					$this->printModuleUpdateChangelog( $update, '  ' );
 			}
@@ -150,16 +150,16 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	protected function runForSingleModule( array $outdatedModules, string $moduleId ): int
 	{
 		if( !$this->getLibrary()->isInstalledModule( $moduleId ) ){
-			$this->client->out( 'Module '.$moduleId.' is not installed.' );
+			$this->out( 'Module '.$moduleId.' is not installed.' );
 			return static::CODE_NONE;
 		}
 		if( !array_key_exists( $moduleId, $outdatedModules ) ){
-			$this->client->out( 'Module is up-to-date.' );
+			$this->out( 'Module is up-to-date.' );
 			return static::CODE_NONE;
 		}
 		$update	= $outdatedModules[$moduleId];
-		$this->client->out( 'Version installed: '.$update->installed );
-		$this->client->out( 'Version available: '.$update->available );
+		$this->out( 'Version installed: '.$update->installed );
+		$this->out( 'Version available: '.$update->available );
 		if( $this->flags->verbose )
 			$this->printModuleUpdateChangelog( $update );
 		return static::CODE_MODULES_OUTDATED;
