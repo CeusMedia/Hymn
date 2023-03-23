@@ -43,16 +43,16 @@
             "php build/create.php --mode=dev && chmod +x hymn.phar"
         ],
         "phar:install-copy": [
-            "@dev:uninstall",
-            "sudo cp $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+            "@phar:uninstall",
+            "sudo cp hymn.phar /usr/local/bin/hymn"
         ],
         "phar:install-link": [
-            "@dev:uninstall",
-            "sudo ln -sf $(shell pwd)/hymn.phar /usr/local/bin/hymn"
+            "@phar:uninstall",
+            "sudo ln -sf hymn.phar /usr/local/bin/hymn"
         ],
         "phar:uninstall": [
-            "test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn",
-            "test -l /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn"
+            "test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn || true",
+            "test -L /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn || true"
         ],
         "test:stan": [
             "@dev:install-quiet",
