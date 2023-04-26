@@ -407,7 +407,7 @@ class Hymn_Client
 
 	protected function dispatch()
 	{
-		$calledAction	= trim( $this->arguments->getArgument( 0 ) );								//  get called command
+		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
 			try{
