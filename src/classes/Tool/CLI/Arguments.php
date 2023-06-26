@@ -165,9 +165,12 @@ class Hymn_Tool_CLI_Arguments
 		}
 	}
 
-	public function setArgument( int $nr = 0, $value )
+	public function setArgument( int $nr, $value ): self
 	{
+		if( $nr < 0 )
+			throw new RangeException( 'Argument number must not be negative' );
 		$this->arguments[$nr]	= $value;
+		return $this;
 	}
 
 	public function unregisterOption( $key )

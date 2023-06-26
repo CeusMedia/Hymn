@@ -47,7 +47,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@throws		RuntimeException		if attribute is already set
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
-	public function addAttribute( $name, $value = NULL, $nsPrefix = NULL, ?string $nsURI = NULL )
+	public function addAttribute( $name, $value = NULL, $nsPrefix = NULL, ?string $nsURI = NULL ): void
 	{
 		$key	= $nsPrefix ? $nsPrefix.':'.$name : $name;
 		if( $nsPrefix ){
@@ -227,7 +227,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 		return FALSE;
 	}
 
-	public function remove()
+	public function remove(): void
 	{
 		$dom	= dom_import_simplexml( $this );
 		$dom->parentNode->removeChild( $dom );
@@ -277,8 +277,9 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	/**
 	 *	Returns Text Value.
 	 *	@access		public
+	 *	@return		void
 	 */
-	public function setValue( string $value, bool $cdata = FALSE )
+	public function setValue( string $value, bool $cdata = FALSE ): void
 	{
 		if( !is_string( $value ) && $value !== NULL )
 			throw new InvalidArgumentException( 'Value must be a string or NULL - '.gettype( $value ).' given' );
@@ -298,8 +299,9 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	/**
 	 *	Add CDATA text in a node
 	 *	@param		string		$text		The CDATA value to add
+	 *	@return		void
 	 */
-	private function addCData( string $text )
+	private function addCData( string $text ): void
 	{
 		$node		= dom_import_simplexml( $this );
 		$document	= $node->ownerDocument;
