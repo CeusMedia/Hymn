@@ -244,8 +244,9 @@ class Hymn_Module_Reader
 
 	protected function readInstallation( $obj, SimpleXMLElement $xml )
 	{
+		$installDate		= $this->getAttribute( $xml->version, 'install-date', '' );
+		$obj->installDate	= $installDate ? strtotime( $installDate ) : '';						//  note install date
 		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );			//  note install type
-		$obj->installDate	= strtotime( $this->getAttribute( $xml->version, 'install-date' ) );	//  note install date
 		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );				//  note install source
 	}
 
