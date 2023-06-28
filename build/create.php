@@ -74,10 +74,10 @@ foreach( $iterator as $entry ){
 print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
 
 file_put_contents( $rootPath."/build/.mode", $options['mode'] );
-file_put_contents( $rootPath."/build/.mode", $options['mode'] );
 
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
 $archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
+$archive->addFile( $rootPath.'/build/.mode', '.mode' );
 if( $options['mode'] !== 'dev' )
 	$archive->compressFiles( Phar::GZ );
 $archive->stopBuffering();
