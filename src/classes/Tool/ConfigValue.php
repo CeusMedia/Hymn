@@ -13,10 +13,10 @@ class Hymn_Tool_ConfigValue
 	public const COMPARED_MISMATCH_TYPE		= 256;
 	public const COMPARED_MISMATCH_LENGTH	= 512;
 
-	protected $value;
+	protected ?string $value		= NULL;
 	protected string $type			= 'string';
 
-	public function __construct( $value = NULL, ?string $type = NULL )
+	public function __construct( string $value = NULL, ?string $type = NULL )
 	{
 		if( NULL !== $value)
 			$this->setType( $type );
@@ -76,8 +76,8 @@ class Hymn_Tool_ConfigValue
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}
 
-	public function getValue( bool $asTrimmedString = FALSE )
-	{
+	public function getValue( bool $asTrimmedString = FALSE ): string
+  {
 		if( $asTrimmedString ){
 			if( in_array( $this->type, ['bool', 'boolean'] ) )
 				return $this->value ? 'yes' : 'no';
@@ -106,8 +106,8 @@ class Hymn_Tool_ConfigValue
 	/**
 	 *	@deprecated		use setValue and setType instead
 	 */
-	public function set( $value, string $type = NULL )
-	{
+	public function set( $value, string $type = NULL ): static
+  {
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );
 		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
@@ -116,8 +116,8 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
-	public function setValue( $value )
-	{
+	public function setValue( $value ): static
+  {
 		$value		= trim( (string) $value );
 		if( $this->type === 'bool' )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
@@ -127,8 +127,8 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
-	public function setType( string $type )
-	{
+	public function setType( ?string $type = NULL ): static
+  {
 		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
 		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
 		$type		= is_null( $type ) ? 'string' : $type;

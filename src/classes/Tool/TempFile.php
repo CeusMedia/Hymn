@@ -30,8 +30,9 @@ class Hymn_Tool_TempFile
 		return $this->filePath;
 	}
 
-	public function setPrefix( string $prefix )
+	public function setPrefix( string $prefix ): self
 	{
 		$this->prefix	= $prefix;
+		return $this;
 	}
 }

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -45,7 +45,7 @@ class Hymn_Loader
 	}
 
 	//  method for recursive class loading
-	protected function loadClassesFromFolder( string $folder )
+	protected function loadClassesFromFolder( string $folder ): void
 	{
 		foreach( new DirectoryIterator( $this->path.$folder ) as $entry ){		//  iterate folder in path
 			$nodeName	= $entry->getFilename();								//  shortcut filename

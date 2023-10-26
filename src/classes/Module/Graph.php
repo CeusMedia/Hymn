@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -76,8 +76,8 @@ class Hymn_Module_Graph
 	 *	@param		integer			$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( object $module, int $level = 0 )
-	{
+	public function addModule( object $module, int $level = 0 ): void
+  {
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
 
@@ -98,7 +98,7 @@ class Hymn_Module_Graph
 			if( is_string( $relation ) ){															//  relation came from a reduced module source index
 				$neededModuleId	= $relation;														//  relation only holds module ID
 				$relation		= (object) [														//  simulate relation object
-					'type'		=> preg_match( '@/@', $relation ) ? 'package' : 'module',			//  detect packages and modules
+					'type'		=> str_contains($relation, '/') ? 'package' : 'module',			//  detect packages and modules
 					'source'	=> NULL,
 				];
 			}
@@ -154,14 +154,14 @@ class Hymn_Module_Graph
 
 		/*  collect modules by installation order  */
 		$modules	= [];																		//  prepare empty module list
-		foreach( array_values( $list ) as $id )														//  iterate module order list
+		foreach( $list as $id )														//  iterate module order list
 			$modules[$id]	= $this->nodes[$id]->module;											//  collect module by installation order
 		return $modules;																			//  return list of modules by installation order
 	}
 
 	//  @todo	make indepentent from need/support
-	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ )
-	{
+	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ ): string
+  {
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
@@ -225,8 +225,8 @@ class Hymn_Module_Graph
 	 *	@param		integer		$level		Counter of recursion level, 0 by default.
 	 *	@return		object|NULL				Object if looping node or null if no loop found
 	 */
-	protected function checkForLoop( object $node, int $level = 0, array $steps = [] )
-	{
+	protected function checkForLoop( object $node, int $level = 0, array $steps = [] ): ?object
+  {
 		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
 			return (object) array(																	//  return loop data ...
 				'module'	=> $node->module,														//  ... containing looping module

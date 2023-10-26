@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Reader
 {
@@ -128,7 +128,7 @@ class Hymn_Module_Reader
 		return isset( $attributes[$attributeName] );
 	}
 
-	protected function readAuthors( $obj, SimpleXMLElement $xml )
+	protected function readAuthors( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->author as $author ){
 			$email	= $this->getAttribute( $author, 'email', '' );
@@ -141,7 +141,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readCompanies( $obj, SimpleXMLElement $xml )
+	protected function readCompanies( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->company as $company ){
 			$site	= $this->getAttribute( $company, 'site', '' );
@@ -152,7 +152,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readConfig( $obj, SimpleXMLElement $xml )
+	protected function readConfig( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->config as $pair ){
 			$key		= $this->getAttribute( $pair, 'name' );
@@ -179,7 +179,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readDeprecation( $obj, SimpleXMLElement $xml )
+	protected function readDeprecation( $obj, SimpleXMLElement $xml ): void
 	{
 		if( !isset( $xml->deprecation ) )
 			return;
@@ -190,7 +190,7 @@ class Hymn_Module_Reader
 		);
 	}
 
-	protected function readFiles( $obj, SimpleXMLElement $xml )
+	protected function readFiles( $obj, SimpleXMLElement $xml ): void
 	{
 		if( !$xml->files )
 			return;
@@ -216,7 +216,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readFrameworks( $obj, SimpleXMLElement $xml )
+	protected function readFrameworks( $obj, SimpleXMLElement $xml ): void
 	{
 		$frameworks	= $this->getAttribute( $xml, 'frameworks', 'Hydrogen:>=0.8' );
 		if( !strlen( trim( $frameworks ) ) )
@@ -230,7 +230,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readHooks( $obj, SimpleXMLElement $xml )
+	protected function readHooks( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->hook as $hook ){
 			$resource	= $this->getAttribute( $hook, 'resource' );
@@ -242,15 +242,15 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readInstallation( $obj, SimpleXMLElement $xml )
-	{
+  protected function readInstallation( $obj, SimpleXMLElement $xml ): void
+  {
 		$installDate		= $this->getAttribute( $xml->version, 'install-date', '' );
 		$obj->installDate	= $installDate ? strtotime( $installDate ) : '';									//  note install date
 		$obj->installType	= (int) $this->getAttribute( $xml->version, 'install-type' );			//  note install type
 		$obj->installSource	= $this->getAttribute( $xml->version, 'install-source' );				//  note install source
 	}
 
-	protected function readLicenses( $obj, SimpleXMLElement $xml )
+	protected function readLicenses( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->license as $license ){
 			$source	= $this->getAttribute( $license, 'source' );
@@ -261,7 +261,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readLinks( $obj, SimpleXMLElement $xml )
+	protected function readLinks( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->link as $link ){
 			$access		= $this->getAttribute( $link, 'access' );
@@ -280,11 +280,10 @@ class Hymn_Module_Reader
 				'rank'		=> $rank,
 				'label'		=> $label,
 			];
-			(string) $link;
 		}
 	}
 
-	protected function readLog( $obj, SimpleXMLElement $xml )
+	protected function readLog( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) array(													//  append version log entry
@@ -294,7 +293,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readRelations( $obj, SimpleXMLElement $xml )
+	protected function readRelations( $obj, SimpleXMLElement $xml ): void
 	{
 		if( $xml->relations ){
 			foreach( $xml->relations->needs as $moduleName )
@@ -316,7 +315,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected function readSql( $obj, SimpleXMLElement $xml )
+	protected function readSql( $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->sql as $sql ){
 			$event		= $this->getAttribute( $sql, 'on' );

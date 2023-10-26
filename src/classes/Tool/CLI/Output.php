@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,22 +30,22 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo				code documentation
  */
 class Hymn_Tool_CLI_Output
 {
-	public static $outputMethod		= 'print';
+	public static string $outputMethod		= 'print';
 
-	public $flags;
+	public object $flags;
 
 	protected Hymn_Client $client;
 
-	protected $words;
+	protected object $words;
 
-	protected $exit;
+	protected bool $exit;
 
 	/**
 	 *	Constructor.
@@ -76,12 +76,12 @@ class Hymn_Tool_CLI_Output
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE )
+	public function out( string|array|NULL $lines = NULL, bool $newLine = TRUE )
 	{
 		if( is_null( $lines ) )
 			$lines	= [];
 		if( !is_array( $lines ) ){																	//  output content is not a list
-			if( is_bool( $lines ) )																	//  output is booleann
+			if( is_bool( $lines ) )																	//  output is boolean
 				$lines	= $lines ? 'yes' : 'no';													//  convert to string
 			if( !is_string( $lines ) && !is_numeric( $lines ) ){									//  output content is neither a string nor numeric
 				throw new InvalidArgumentException( sprintf(										//  quit with exception
@@ -117,7 +117,7 @@ class Hymn_Tool_CLI_Output
 		}
 		$lines[0]	= $this->words->outPrefixDeprecation.$lines[0];
 		array_unshift( $lines, '' );
-		array_push( $lines, '' );
+		$lines[]	= '';
 		$this->out( $lines );
 	}
 
@@ -159,8 +159,8 @@ class Hymn_Tool_CLI_Output
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE )
-	{
+	public function outVeryVerbose( string|array|NULL $lines, bool $newLine = TRUE ): void
+  {
 		if( $this->flags->veryVerbose )																//  very verbose mode is on
 			$this->outVerbose( $lines, $newLine );
 	}

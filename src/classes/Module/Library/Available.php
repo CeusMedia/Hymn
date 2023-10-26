@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -59,8 +59,8 @@ class Hymn_Module_Library_Available
 		$this->client	= $client;
 	}
 
-	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL )
-	{
+	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
+  {
 		if( in_array( $shelfId, array_keys( $this->shelves ) ) )
 			throw new Exception( 'Source already set by ID: '.$shelfId );
 		$activeShelves	= $this->getShelves( ['default' => TRUE] );
@@ -161,9 +161,9 @@ class Hymn_Module_Library_Available
 		$module	= $this->get( $moduleId, $shelfId );
 		$list	= [];
 		foreach( $module->versionLog as $change ){
-			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is to lower than installed
+			if( version_compare( $change->version, $versionInstalled, '<=' ) )					//  log version is lower than installed
 				continue;
-			if( version_compare( $change->version, $versionAvailable, '>' ) )					//  log version is to higher than available
+			if( version_compare( $change->version, $versionAvailable, '>' ) )					//  log version is higher than available
 				continue;
 			$list[]	= $change;
 		}
@@ -204,8 +204,8 @@ class Hymn_Module_Library_Available
 		return $list;																				//  return list of found shelves
 	}
 
-	public function readModule( string $path, string $moduleId )
-	{
+	public function readModule( string $path, string $moduleId ): stdClass
+  {
 		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
@@ -226,8 +226,8 @@ class Hymn_Module_Library_Available
 
 	//  --  PROTECTED  --  //
 
-	protected function decorateModuleWithPaths( $module, $shelfPath )
-	{
+	protected function decorateModuleWithPaths( $module, $shelfPath ): void
+  {
 		$pathname	= str_replace( "_", "/", $module->id ).'/';										//  assume source module path from module ID
 		$module->absolutePath	= realpath( $shelfPath.$pathname )."/";								//  extend found module by real source path
 		$module->pathname		= $pathname;														//  extend found module by relative path
@@ -308,8 +308,8 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 
-	protected function loadModulesInShelves( bool $force = FALSE )
-	{
+	protected function loadModulesInShelves( bool $force = FALSE ): void
+  {
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
 		$this->modules	= [];																	//  reset module list

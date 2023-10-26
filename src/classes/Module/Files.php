@@ -2,7 +2,7 @@
 /**
  *	Manager for module files.
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -66,7 +66,7 @@ class Hymn_Module_Files
 	 *	@param 		object 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
 	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
-	 *	@return		void
+	 *	@return		bool
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
 	public function copyFiles( object $module, string $installType = 'link', bool $tryMode = FALSE ): bool
@@ -212,18 +212,11 @@ class Hymn_Module_Files
 							$file->source	= 'theme';
 						if( in_array( $file->source, $skipSources ) )
 							continue 2;
-						switch( $file->source ){
-							case 'common':
-								$theme	= "common";
-								break;
-							case 'primer':
-								$theme	= $layoutPrimer;
-								break;
-							case 'theme':
-							default:
-								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
-								break;
-						}
+						$theme = match ($file->source) {
+							'common' => "common",
+							'primer' => $layoutPrimer,
+							default => !empty($file->theme) ? $file->theme : $layoutTheme,
+						};
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) && !$this->flags->dry )
 							self::createPath( $path );

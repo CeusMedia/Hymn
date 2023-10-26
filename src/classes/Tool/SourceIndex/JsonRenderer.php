@@ -1,12 +1,12 @@
 <?php
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2022 Ceus Media
+ *	@copyright	2021-2023 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2022 Ceus Media
+ *	@copyright	2021-2023 Ceus Media
  */
 class Hymn_Tool_SourceIndex_JsonRenderer
 {
@@ -14,7 +14,7 @@ class Hymn_Tool_SourceIndex_JsonRenderer
 	protected array $modules	= [];
 
 	/**	@var	Hymn_Tool_SourceIndex_IniReader|NULL	$settings */
-	protected ?Hymn_Tool_SourceIndex_IniReader $settings;
+	protected ?Hymn_Tool_SourceIndex_IniReader		$settings;
 
 	/**	@var	boolean		$printPretty */
 	protected bool $printPretty	= FALSE;

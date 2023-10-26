@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -230,7 +230,7 @@ class Hymn_Client
 	public function getConfigPath(): string
 	{
 		$config	= $this->getConfig();
-		if( substr( $config->paths->config, 0, 1 ) === '/' )
+		if( str_starts_with( $config->paths->config, '/' ) )
 			return $config->paths->config;
 		return $config->application->uri.$config->paths->config;
 	}
@@ -247,8 +247,8 @@ class Hymn_Client
 		return $this->locale;
 	}
 
-	public function getMemoryUsage( string $position = '' )
-	{
+	public function getMemoryUsage( string $position = '' ): string
+  {
 		$bytes	= memory_get_usage();
 		if( !$this->memoryUsageAtStart )
 			$this->memoryUsageAtStart	= $bytes;
@@ -345,7 +345,7 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVerbose( array|string $lines, bool $newLine = TRUE ): void
 	{
 		$this->output->outVerbose( $lines, $newLine );
 	}
@@ -357,13 +357,13 @@ class Hymn_Client
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVeryVerbose( array|string $lines, bool $newLine = TRUE ): void
 	{
 		$this->output->outVeryVerbose( $lines, $newLine );
 	}
 
-	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] )
-	{
+	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] ): void
+  {
 		if( $this->flags & self::FLAG_VERY_VERBOSE )
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
 		$args	= [$command];
@@ -396,8 +396,8 @@ class Hymn_Client
 
 	/*  --  PROTECTED  --  */
 
-	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
-	{
+	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject ): void
+  {
 		$commandOptions	= call_user_func( [$commandObject, 'getArgumentOptions'] );			//  get command specific argument options
 		if( $commandOptions ){
 			$this->parseArguments( $this->originalArguments, $commandOptions, TRUE );				//  parse original arguments again with command specific options
@@ -405,8 +405,8 @@ class Hymn_Client
 		}
 	}
 
-	protected function dispatch()
-	{
+	protected function dispatch(): void
+  {
 		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
@@ -458,8 +458,8 @@ class Hymn_Client
 		return $className;
 	}
 
-	protected function parseArguments( $arguments, array $options = [], bool $force = FALSE )
-	{
+	protected function parseArguments( $arguments, array $options = [], bool $force = FALSE ): void
+  {
 		$options	= array_merge( $this->baseArgumentOptions, $options );
 		if( $this->arguments && !$force )
 			return;
@@ -487,8 +487,8 @@ class Hymn_Client
 			$this->flags	|= self::FLAG_NO_INTERACTION;
 	}
 
-	protected function readConfig( bool $forceReload = FALSE )
-	{
+	protected function readConfig( bool $forceReload = FALSE ): void
+  {
 		if( $this->config && !$forceReload )
 			return;
 
@@ -496,8 +496,8 @@ class Hymn_Client
 		$this->config	= $config->readConfig();
 	}
 
-	protected function realizeLanguage()
-	{
+	protected function realizeLanguage(): void
+  {
 		if( class_exists( 'Locale' ) ){
 			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
 			if( in_array( $language, ['en', 'de'] ) )

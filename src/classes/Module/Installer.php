@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -84,8 +84,8 @@ class Hymn_Module_Installer
 	 *	@param		object		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( object $module )
-	{
+	public function configure( object $module ): void
+  {
 		$source		= $module->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
@@ -98,7 +98,7 @@ class Hymn_Module_Installer
 
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XML_Element( $xml );
-		$type	= isset( $this->app->type ) ? $this->app->type : 1;
+		$type	= $this->app->type ?? 1;
 		if( !$this->flags->dry ){																//  if not in dry mode
 			$xml->version->setAttribute( 'install-type', $type );
 			$xml->version->setAttribute( 'install-source', $module->sourceId );
@@ -119,7 +119,7 @@ class Hymn_Module_Installer
 			$isInConfig		= isset( $configModule->{$moduleConfigKey} );						//  note whether config value is set in hymn file
 			$value			= $moduleConfigData->value;											//  note original module config value
 			$configValue	= $isInConfig ? $configModule->{$moduleConfigKey} : $value;			//  note configured nodule config value as string
-			if( $isBoolean && $isInConfig ){													//  overriden boolean module config value by hymn file
+			if( $isBoolean && $isInConfig ){													//  override boolean module config value by hymn file
 				$valueAsString	= strtolower( trim( $configValue ) );
 				$configValue	= NULL;
 				if( in_array( $valueAsString, ['no', 'false', '0'] ) )
@@ -179,7 +179,7 @@ class Hymn_Module_Installer
 			$node->setAttribute( 'default', $moduleConfigValue );								//  add attribute to note module default value
 			$node->setAttribute( 'original', $installationValue );								//  add attribute to note value during installation
 		}
-		if( !$this->flags->dry ){																//  no a dry run
+		if( !$this->flags->dry ){																//  not a dry run
 			$xml->saveXml( $target );															//  save changed DOM to module file
 			Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
 		}

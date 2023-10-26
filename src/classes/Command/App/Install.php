@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -67,6 +67,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			foreach( $moduleIds as $moduleId ){
 				$sourceId	= $this->detectModuleSource( $moduleId );
 				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
+				/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )
 					$relation->addModule( $module );
@@ -110,6 +111,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 			$sourceId	= $this->detectModuleSource( $module->id );
 			$sourceId	= $this->client->getModuleInstallShelf( $module->id, $activeShelfIds, $sourceId );
+			/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
 			$module		= $library->getUncachedAvailableModuleFromShelf( $module->id, $sourceId );
 
 			if( empty( $module->sourceId ) ){

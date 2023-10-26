@@ -15,7 +15,8 @@
         "ext-dom": "*",
         "ext-json": "*",
         "ext-pdo": "*",
-        "ext-simplexml": "*"
+        "ext-simplexml": "*",
+        "ext-xml": "*"
     },
     "minimum-stability": "dev",
     "bin": [

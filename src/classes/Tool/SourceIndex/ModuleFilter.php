@@ -1,12 +1,12 @@
 <?php
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2022 Ceus Media
+ *	@copyright	2021-2023 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2022 Ceus Media
+ *	@copyright	2021-2023 Ceus Media
  */
 class Hymn_Tool_SourceIndex_ModuleFilter
 {

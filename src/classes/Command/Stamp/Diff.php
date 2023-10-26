@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2022 Christian Würker
+ *	@copyright		2017-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2022 Christian Würker
+ *	@copyright		2017-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -53,6 +53,9 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 		$modules	= $this->getAvailableModules( $shelfId );									//  load available modules
+
+
+		/** @var object{modules: array} $stamp */
 		$stamp		= $this->getStamp( $pathName, $shelfId );
 
 		$stampModules	= (array) $stamp->modules;
@@ -128,11 +131,11 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		protected
 	 *	@param		string		$pathName		...
 	 *	@param		string		$shelfId		...
-	 *	@return		array
+	 *	@return		object
 	 */
-	protected function getStamp( string $pathName, string $shelfId ): array
+	protected function getStamp( string $pathName, string $shelfId ): object
 	{
-		if( $pathName ){
+		if( '' !== $pathName ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )
 				$fileName	= $this->getLatestStamp( NULL, $shelfId );
@@ -143,7 +146,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 		else
 			$fileName		= $this->getLatestStamp( NULL, $shelfId );
-		if( !( $fileName && file_exists( $fileName ) ) )
+		if( !( NULL !== $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
 		return json_decode( trim( file_get_contents( $fileName ) ) );

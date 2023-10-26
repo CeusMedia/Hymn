@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -145,15 +145,15 @@ class Hymn_Tool_Database_CLI_MySQL
 	public function importFileWithPrefix( string $fileName, ?string $prefix = NULL ): object
 	{
 		$dbc		= $this->client->getDatabase();
-		$prefix		= $prefix ? $prefix : $dbc->getConfig( 'prefix' );								//  get table prefix from config as fallback
+		$prefix		= $prefix ?: $dbc->getConfig( 'prefix' );								//  get table prefix from config as fallback
 		$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );				//  get file with applied table prefix
 		$result		= $this->importFile( $importFile );
 		@unlink( $importFile );
 		return $result;
 	}
 
-	public function insertPrefixInFile( string $fileName, string $prefix )
-	{
+	public function insertPrefixInFile( string $fileName, string $prefix ): void
+  {
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
 		$callback	= [$this, '_callbackReplacePrefix'];										//  create replace callback
@@ -186,7 +186,7 @@ class Hymn_Tool_Database_CLI_MySQL
 
 	public function setUseTempOptionsFile( bool $use ): self
 	{
-		$this->useTempOptionsFile	= (bool) $use;
+		$this->useTempOptionsFile	= $use;
 		return $this;
 	}
 

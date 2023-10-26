@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,19 +30,19 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
+ *	@copyright		2014-2023 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo				code documentation
  */
 class Hymn_Tool_CLI_Question
 {
 	protected Hymn_Client $client;
-	protected $message;
-	protected $type			= 'string';
-	protected $default		= NULL;
-	protected $options		= [];
-	protected $break		= TRUE;
+	protected string $message;
+	protected string $type			= 'string';
+	protected ?string $default		= NULL;
+	protected array $options		= [];
+	protected bool $break		= TRUE;
 
 	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
 	{
@@ -54,8 +54,8 @@ class Hymn_Tool_CLI_Question
 		$this->setBreak( $break );
 	}
 
-	public function ask()
-	{
+	public function ask(): float|bool|int|string
+  {
 		$typeIsBoolean	= in_array( $this->type, ['bool', 'boolean'] );
 		$typeIsInteger	= in_array( $this->type, ['int', 'integer'] );
 		$typeIsNumber	= in_array( $this->type, ['float', 'double', 'decimal'] );
