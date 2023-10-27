@@ -2,9 +2,7 @@
 class Hymn_Tool_Database_PDO
 {
 	protected Hymn_Client $client;
-
-  /** @var ?object{driver: string, host: string, port: int, name: string, prefix: string, username: string, password: string} $dba */
-	protected ?object $dba		= NULL;
+	protected ?Hymn_Tool_Database_Source $dba	= NULL;
 	protected ?PDO $dbc				= NULL;
 
 	protected array $dbaDefaults	= [
@@ -116,7 +114,7 @@ class Hymn_Tool_Database_PDO
 	 *	@see		http://php.net/manual/en/pdo.exec.php
 	 */
 	public function exec( string $statement ): int
-  {
+	{
 		$this->connect();
 		return $this->dbc->exec( $statement );
 	}
@@ -125,11 +123,11 @@ class Hymn_Tool_Database_PDO
 	 *	Returns database access configuration as object or a single pair by given key.
 	 *	@access		public
 	 *	@param		string|NULL		$key		Key to return single pair for (optional)
-	 *	@return		object|string
+	 *	@return		Hymn_Tool_Database_Source|string
 	 *	@throws		DomainException			if key is not set in configuration
 	 */
-	public function getConfig( string $key = NULL ): object|string
-  {
+	public function getConfig( string $key = NULL ): Hymn_Tool_Database_Source|string
+	{
 		$this->prepareConnection( FALSE );
 		if( !$this->dba )
 			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
@@ -218,8 +216,8 @@ class Hymn_Tool_Database_PDO
 	 *	@return		void
 	 */
 	protected function prepareConnection( bool $force = TRUE, bool $reset = FALSE ): void
-  {
-		if( $this->dba && !$reset )																	//  connection access already prepared and not forced to reset
+	{
+		if( NULL !== $this->dba && !$reset )																	//  connection access already prepared and not forced to reset
 			return;																					//  do nothing
 		$config				= $this->client->getConfig();											//  shortcut configuration from hymn file
 		$usesGlobalDbAccess	= !empty( $config->database->name );									//  atleast the database name is defined in hymn file
@@ -227,10 +225,11 @@ class Hymn_Tool_Database_PDO
 		$usesDefaultModule	= isset( $config->modules->Resource_Database->config );					//  pseudo-default resource module from CeusMedia:HydrogenModules is installed
 		if( $usesGlobalDbAccess ){																	//  use global database access information from hymn file first for better performance
 			$configAsArray	= (array) $config->database;											//  convert config object to array
-			$this->dba		= (object) array_merge( $this->dbaDefaults, $configAsArray );			//  set database access information from hymn file config
+			$merged	= array_merge( $this->dbaDefaults, $configAsArray );			//  set database access information from hymn file config
+			$this->dba	= Hymn_Tool_Database_Source::fromArray( $merged );			//  set database access information from hymn file config
 		}
 		else if( $usesDefaultModule ){																//  use the pseudo-default resource module first for better performance
-			$this->dba	= (object) $this->dbaDefaults;												//  prepare database access information using defaults as template
+			$this->dba = Hymn_Tool_Database_Source::fromArray( $this->dbaDefaults );				//  prepare database access information using defaults as template
 			foreach( $config->modules->Resource_Database->config as $key => $value )				//  iterate config pairs of installed database resource module
 				if( preg_match( '/^access\./', $key ) )												//  config key prefix is matching
 					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;				//  carry resource module config value to database access information
@@ -244,7 +243,7 @@ class Hymn_Tool_Database_PDO
 					list( $moduleId, $configPrefix ) = explode( ':', $moduleRegistration, 2 );	//  split module ID and config prefix into variables
 				if( !isset( $config->modules->{$moduleId} ) )										//  linked resource module is NOT installed
 					continue;																		//  skip this module registration
-				$this->dba		= (object) $this->dbaDefaults;										//  prepare database access information using defaults as template
+				$this->dba		= Hymn_Tool_Database_Source::fromArray( $this->dbaDefaults );		//  prepare database access information using defaults as template
 				$quotedPrefix	= preg_quote( $configPrefix, '/' );									//  quote resource module config key prefix prefix for preg operations
 				foreach( $config->modules->{$moduleId}->config as $key => $value ){					//  iterate config pairs of installed database resource module
 					if( $quotedPrefix ){															//  a resource module config key prefix has been registered
