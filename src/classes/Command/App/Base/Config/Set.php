@@ -71,7 +71,10 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 			$value	= trim( $question->ask() );
 		}
 		if( !$this->flags->dry ){
-			$editor->setProperty( $key, $value );
+			if( $editor->hasProperty() )
+				$editor->setProperty( $key, $value );
+			else
+				$editor->addProperty( $key, $value );
 			clearstatcache();
 		}
 		$this->client->outVerbose( 'Base config key "'.$key.'" set to "'.$value.'"' );
