@@ -65,7 +65,7 @@ class Hymn_Module_Library_Available
 			throw new Exception( 'Source already set by ID: '.$shelfId );
 		$activeShelves	= $this->getShelves( ['default' => TRUE] );
 		$isDefault		= $active && !count( $activeShelves );
-		$this->shelves[$shelfId]	= (object) array(
+		$this->shelves[$shelfId]	= (object) [
 			'id'		=> $shelfId,
 			'path'		=> $path,
 			'type'		=> $type,
@@ -73,7 +73,7 @@ class Hymn_Module_Library_Available
 			'default'	=> $isDefault,
 			'title'		=> $title,
 			'date'		=> NULL,
-		);
+		];
 //		ksort( $this->shelves );
 	}
 

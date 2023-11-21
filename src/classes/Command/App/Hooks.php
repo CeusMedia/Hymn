@@ -59,13 +59,13 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 					foreach( $functions as $function ){
 						if( !preg_match( '/\n/', $function ) ){
 							$id	= $resource.'_'.$event.'_'.$moduleId.'_'.$function;
-							$list[$id]	= (object) array(
+							$list[$id]	= (object) [
 								'moduleId'		=> $moduleId,
 								'resource'		=> $resource,
 								'event'			=> $event,
 								'type'			=> 'staticPublicFunctionCall',
 								'function'		=> $function,
-							);
+							];
 						}
 						else{
 							$inlineFuncs++;
@@ -75,13 +75,13 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 								$moduleId,
 								str_pad( $inlineFuncs, 4, '0', STR_PAD_LEFT ),
 							) );
-							$list[$id]	= (object) array(
+							$list[$id]	= (object) [
 								'moduleId'		=> $moduleId,
 								'resource'		=> $resource,
 								'event'			=> $event,
 								'type'			=> 'inlineFunction',
 								'function'		=> '<inline_function>',
-							);
+							];
 						}
 					}
 				}
@@ -92,20 +92,20 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 		foreach( $list as $hook ) {
 			switch( $hook->type ){
 				case 'staticPublicFunctionCall':
-					$this->client->out( vsprintf( '- %s > %s >> [%s] %s', array(
+					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
 						$hook->resource,
 						$hook->event,
 						$hook->moduleId,
 						$hook->function,
-					) ) );
+					] ) );
 					break;
 				case 'inlineFunction':
-					$this->client->out( vsprintf( '- %s > %s >> [%s] %s', array(
+					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
 						$hook->resource,
 						$hook->event,
 						$hook->moduleId,
 						'<inline_function> !DEPRECATED!',
-					) ) );
+					] ) );
 					break;
 			}
 		}

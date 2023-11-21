@@ -33,7 +33,7 @@
  *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -47,8 +47,16 @@ class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command
 	 */
 	public function run()
 	{
-		$this->client->out( Hymn_Client::$version.' ('.Hymn_Client::$language.')' );
-//		$this->client->out( "Working in: " . getCwd() );
-//		$this->client->out( "Hymn Path: " . __DIR__ );
+//		$this->client->out( Hymn_Client::$version.' ('.Hymn_Client::$language.')' );
+
+		if( $this->flags->verbose ){
+			$this->out( 'Version:   '.Hymn_Client::$version.'-'.Hymn_Client::$mode.' ('.Hymn_Client::$language.')' );
+			$this->out( 'Work Path: ' . getCwd() );
+			$this->out( 'Hymn Path: ' . str_replace( 'phar://', '', dirname( __DIR__ ) ) );
+		}
+		else {
+			$this->out( Hymn_Client::$version.'-'.Hymn_Client::$mode.' ('.Hymn_Client::$language.')' );
+		}
+
 	}
 }

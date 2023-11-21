@@ -49,17 +49,17 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run(): void
 	{
+		$this->denyOnProductionMode();
+
 	//	$config				= $this->client->getConfig();
 	//	$this->client->getDatabase()->connect();													//  setup connection to database
 
 		if( $this->flags->dry )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$listInstalled		= $this->library->listInstalledModules();								//  get list of installed modules
-		if( !$listInstalled ) {																		//  application has no installed modules
-			$this->client->out("No installed modules found");									//  not even one module is installed, no update
-			return;
-		}
+		if( !$listInstalled )																		//  application has no installed modules
+			$this->outError("No installed modules found", Hymn_Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
 
 		/*  fetch arguments  */
 		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
@@ -68,7 +68,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcard modules
 			foreach( $moduleIds as $moduleId ){
 				if( !array_key_exists( $moduleId, $listInstalled ) ){
-					$this->client->out( "Module '".$moduleId."' is not installed." );
+					$this->out( "Module '".$moduleId."' is not installed." );					//  error, but continue, not exit
 					continue;
 				}
 				$this->uninstallModuleById( $moduleId, $listInstalled );
@@ -124,17 +124,16 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		if( $neededBy && !$this->flags->force ) {
 			$list	= implode( ', ', $neededBy );
 			$msg	= "Module '%s' is needed by %d other modules (%s)";
-			$this->client->out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
+			$this->out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
 		}
 		else{
 			$module->path	= 'not_relevant/';
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			if( !$this->flags->quiet ) {
-				$this->client->out( sprintf(
-					'%sUninstalling module %s ...',
+				$this->out( vsprintf( '%sUninstalling module %s ...', [
 					$this->flags->dry ? 'Dry: ' : '',
 					$module->id
-				) );
+				] ) );
 			}
 			$installer->uninstall( $module );
 		}

@@ -45,11 +45,11 @@ class Hymn_Module_Config
 	{
 		$this->client	= $client;
 		$this->library	= $library;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
+		];
 	}
 
 	public function get( string $moduleId, string $configKey )

@@ -55,13 +55,13 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 		}
 		$dbc		= $this->client->getDatabase();
 		$lines		= array('[client]');
-		$map		= array(
+		$map		= [
 			'host'		=> 'host',
 			'port'		=> 'port',
 //			'database'	=> 'name',
 			'user'		=> 'username',
 			'password'	=> 'password',
-		);
+		];
 		$optionList		= [];
 		foreach( $map as $optionsKey => $dbaKey ){
 			$trimmedValue 	= trim( $dbc->getConfig( $dbaKey ) );

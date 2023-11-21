@@ -64,12 +64,12 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 			if( !$library->getShelves() )
 				$message	= 'No available modules found. No modules sources configured.';
 		}
-		$this->client->out( $message );
+		$this->out( $message );
 		foreach( $modules as $module ){
 			$line	= $module->id.' ('.$module->version.')';
-			if( isset( $module->isDeprecate ) && $module->isDeprecated )
+			if( isset( $module->isDeprecated ) && $module->isDeprecated )
 				$line	.= ' [deprecated]';
-			$this->client->out( '- '.$line );
+			$this->out( '- '.$line );
 		}
 	}
 }

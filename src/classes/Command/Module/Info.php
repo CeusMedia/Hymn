@@ -85,36 +85,36 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
 		$frameworks	= join( ' | ', $frameworks );
 
-		$this->client->out( $availableModule->title );
+		$this->out( $availableModule->title );
 		if( $availableModule->description )
-			$this->client->out( $availableModule->description );
-		$this->client->out( ' - Category:     '.$availableModule->category );
-		$this->client->out( ' - Source:       '.$availableModule->sourceId );
-		$this->client->out( ' - Version:      '.$availableModule->version );
-		$this->client->out( ' - Frameworks:   '.$frameworks );
+			$this->out( $availableModule->description );
+		$this->out( ' - Category:     '.$availableModule->category );
+		$this->out( ' - Source:       '.$availableModule->sourceId );
+		$this->out( ' - Version:      '.$availableModule->version );
+		$this->out( ' - Frameworks:   '.$frameworks );
 
 		if( $availableModule->isDeprecated ){
 			$deprecation	= (object) $availableModule->deprecation;
-			$this->client->out( ' - Deprecated:   with version '.$deprecation->version );
+			$this->out( ' - Deprecated:   with version '.$deprecation->version );
 			if( strlen( trim( $deprecation->message ) ) > 0 )
-				$this->client->out( '   - Message:    '.$deprecation->message );
+				$this->out( '   - Message:    '.$deprecation->message );
 			if( strlen( trim( $deprecation->url ) ) > 0 )
-				$this->client->out( '   - New URL:    '.$deprecation->url );
+				$this->out( '   - New URL:    '.$deprecation->url );
 		}
 
 		if( array_key_exists( $moduleId, $modulesInstalled ) ){
 			$installedModule	= $modulesInstalled[$moduleId];
-			$this->client->out( ' - Installed:' );
-			$this->client->out( '    - Version: '.$installedModule->version );
-			$this->client->out( '    - Source:  '.$installedModule->installSource );
-			$this->client->out( '    - Type:    '.$installTypes[$installedModule->installType] );
-			$this->client->out( '    - Date:    '.date( 'Y-m-d H:i:s', $installedModule->installDate ) );
+			$this->out( ' - Installed:' );
+			$this->out( '    - Version: '.$installedModule->version );
+			$this->out( '    - Source:  '.$installedModule->installSource );
+			$this->out( '    - Type:    '.$installTypes[$installedModule->installType] );
+			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', $installedModule->installDate ) );
 			$message	= ' - Updatable: no';
 			if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';
 				$message	= sprintf( $message, $installedModule->version, $availableModule->version );
 			}
-			$this->client->out( $message );
+			$this->out( $message );
 			$availableModule = $installedModule;
 		}
 

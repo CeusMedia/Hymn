@@ -123,11 +123,11 @@ class Hymn_Tool_BaseConfigEditor
 	public function addProperty( string $key, $value, string $comment = '', bool $state = TRUE ): bool
 	{
 		$key = ( $state ? "" : $this->signDisabled ).$key;
-		$this->added[] = array(
+		$this->added[] = [
 			"key"		=> $key,
 			"value"		=> $value,
 			"comment"	=> $comment,
-		);
+		];
 		return is_int( $this->write() );
 	}
 

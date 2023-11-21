@@ -48,16 +48,16 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 	public function run()
 	{
 		if( $this->client->flags && Hymn_Client::FLAG_DRY )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 	//	$config			= $this->client->getConfig();
 		$library		= $this->getLibrary();
 		$moduleId		= trim( $this->client->arguments->getArgument() );
 
 		if( !$moduleId )
-			$this->client->out( "No module id given" );
+			$this->outError( "No module id given", Hymn_Client::EXIT_ON_INPUT );
 		else if( !$library->isInstalledModule( $moduleId ) )
-			$this->client->out( "Module '".$moduleId."' is not installed" );
+			$this->outError( "Module '".$moduleId."' is not installed", Hymn_Client::EXIT_ON_SETUP );
 		else{
 			$moduleLocal	= $library->readInstalledModule( $moduleId );
 			$moduleSource	= $library->getAvailableModule( $moduleId, $moduleLocal->installSource );

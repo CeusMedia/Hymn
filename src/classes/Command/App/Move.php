@@ -53,7 +53,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 	public function run()
 	{
 		if( $this->flags->dry )
-			$this->client->out( "## DRY RUN: Simulated actions - no changes will take place." );
+			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$dest	= trim( $this->client->arguments->getArgument( 0 ) );
 		$url	= trim( $this->client->arguments->getArgument( 1 ) );
@@ -73,11 +73,11 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$source		= rtrim( $config->application->uri, '/' ).'/';
 		$sourceUriRegex	= '/^'.preg_quote( $source, '/' ).'/';
 
-		$this->client->out( "Move application" );
-		$this->client->out( "- from: ".$source );
-		$this->client->out( "- to:   ".$dest );
+		$this->out( "Move application" );
+		$this->out( "- from: ".$source );
+		$this->out( "- to:   ".$dest );
 		if( strlen( $url ) )
-			$this->client->out( "- URL:  ".$url );
+			$this->out( "- URL:  ".$url );
 
 		$this->updateConfigFile( $url );
 		$this->updateHymnFile( $config, $url, $sourceUriRegex, $dest );
@@ -90,8 +90,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 			$this->client->outVerbose( "- would fix links" );
 		}
 		$this->fixLinks( $source, $sourceUriRegex, $dest );
-		$this->client->out( "DONE!" );
-		$this->client->out( "Now run: cd ".$dest." && make set-permissions" );
+		$this->out( "DONE!" );
+		$this->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
 	protected function moveProject( string $source, string $dest )

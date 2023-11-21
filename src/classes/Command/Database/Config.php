@@ -38,12 +38,12 @@
 class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
 	protected array $questions	= array(
-		'driver'	=> array(
+		'driver'	=> [
 			'key'		=> 'driver',
 			'label'		=> "- PDO Driver",
 			'type'		=> 'string',
 			'options'	=> [],
-		),
+		],
 		array(
 			'key'		=> 'host',
 			'label'		=> "- Server Host",
@@ -86,6 +86,8 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 	 */
 	public function run()
 	{
+		$this->denyOnProductionMode();
+
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		$config	= $this->client->getConfig();

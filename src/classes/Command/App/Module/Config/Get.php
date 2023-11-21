@@ -64,24 +64,24 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 					$type	= preg_replace( '/^bool$/', 'boolean', $item->type );
 					$type	= preg_replace( '/^int$/', 'integer', $type );
 					$type	= preg_replace( '/^(double|single)$/', 'float', $type );
-					$this->client->out( ' - Key:       '.$item->key );
-					$this->client->out( ' - Value:     '.$this->renderValue( $item ) );
+					$this->out( ' - Key:       '.$item->key );
+					$this->out( ' - Value:     '.$this->renderValue( $item ) );
 					if( $item->values )
-						$this->client->out( ' - Values:     '.join( ', ', preg_split( '/\s*,\s*/', $item->values ) ) );
+						$this->out( ' - Values:     '.join( ', ', preg_split( '/\s*,\s*/', $item->values ) ) );
 					if( $item->title )
-						$this->client->out( ' - Title:      '.$item->title );
-					$this->client->out( ' - Type:      '.$type );
-					$this->client->out( ' - Protected: '.$item->protected );
-					$this->client->out( ' - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );
+						$this->out( ' - Title:      '.$item->title );
+					$this->out( ' - Type:      '.$type );
+					$this->out( ' - Protected: '.$item->protected );
+					$this->out( ' - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );
 				}
 				else
-					$this->client->out( $item->key.': '.$this->renderValue( $item ) );
+					$this->out( $item->key.': '.$this->renderValue( $item ) );
 			}
 		}
 		else{
 			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			$config			= $configurator->get( $moduleId, $configKey );
-			$this->client->out( $config->value );
+			$this->out( $config->value );
 		}
 	}
 

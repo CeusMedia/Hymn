@@ -66,7 +66,7 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$module			= $availableModules[$moduleId];
 		$moduleObject	= (object) [];
 		$msg			= 'Adding module "%s" (%s) from source "%s"';
-		$this->client->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
+		$this->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
 		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
@@ -93,6 +93,6 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$config->modules->{$module->id}	= $moduleObject;
 		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
 		clearstatcache();
-		$this->client->out( "Saved updated hymn file." );
+		$this->out( "Saved updated hymn file." );
 	}
 }

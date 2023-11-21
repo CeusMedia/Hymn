@@ -57,12 +57,12 @@ class Hymn_Tool_CLI_Output
 	{
 		$this->client	= $client;
 		$this->exit		= $exit;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
 			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
 			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
-		);
+		];
 		$this->words		= $this->client->getLocale()->loadWords( 'client' );
 
 		if( self::$outputMethod !== 'print' )
@@ -70,9 +70,9 @@ class Hymn_Tool_CLI_Output
 	}
 
 	/**
-	 *	Prints out message of one ore more lines.
+	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
 	 */
@@ -99,7 +99,7 @@ class Hymn_Tool_CLI_Output
 	}
 
 	/**
-	 *	Prints out deprecation message of one ore more lines.
+	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
 	 *	@param		array|string		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
@@ -141,7 +141,7 @@ class Hymn_Tool_CLI_Output
 	/**
 	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
@@ -155,7 +155,7 @@ class Hymn_Tool_CLI_Output
 	/**
 	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		array|string|NULL	$lines		List of message lines or one string
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */

@@ -37,7 +37,7 @@
  */
 class Hymn_Tool_CLI_Config
 {
-	static public array $pathDefaults	= array(
+	static public array $pathDefaults	= [
 		'config'		=> 'config/',
 		'classes'		=> 'classes/',
 		'images'		=> 'images/',
@@ -45,7 +45,7 @@ class Hymn_Tool_CLI_Config
 		'scripts'		=> 'scripts/',
 		'templates'		=> 'templates/',
 		'themes'		=> 'themes/',
-	);
+	];
 
 	public bool $isLiveCopy			= FALSE;
 

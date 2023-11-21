@@ -52,28 +52,28 @@ class Hymn_Command_App_Info extends Hymn_Command_Abstract implements Hymn_Comman
 
 		$config		= $this->client->getConfig();
 
-		$this->client->out( "Application Settings:" );
+		$this->out( "Application Settings:" );
 		foreach( $config->application as $key => $value ){
 			if( is_object( $value ) )
 				$value	= json_encode( $value, JSON_PRETTY_PRINT );
-			$this->client->out( "- ".$key." => ".$value );
+			$this->out( "- ".$key." => ".$value );
 		}
 		if( $this->flags->verbose ){
 			$framework	= $this->client->getFramework();
 			if( $framework->isInstalled() )
-				$this->client->out( 'Framework: Hydrogen v'.$framework->getVersion() );
+				$this->out( 'Framework: Hydrogen v'.$framework->getVersion() );
 			else
-				$this->client->out( 'Framework: - not installed -' );
+				$this->out( 'Framework: - not installed -' );
 		}
 		if( $this->flags->verbose ){
-			$this->client->out( '' );
+			$this->out( '' );
 			$this->client->runCommand( 'source-list' );
-			$this->client->out( '' );
+			$this->out( '' );
 			$this->client->runCommand( 'modules-installed' );
-			$this->client->out( '' );
+			$this->out( '' );
 			$this->client->runCommand( 'modules-updatable' );
 //			$this->client->runCommand( 'app-status', [], [], array( 'verbose', 'very-verbose' ) );
-			$this->client->out( '' );
+			$this->out( '' );
 			$this->client->runCommand( 'modules-required', [], [], ['verbose', 'very-verbose'] );
 		}
 	}

@@ -55,17 +55,17 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$modules	= $this->getInstalledModules( $shelfId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $shelfId );
 		if( $moduleId )
-			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId, $shelfId ) );
+			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId ) );
 
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
 			if( !$this->flags->quiet )
-				$this->client->out( 'No modules have changed.' );
+				$this->out( 'No modules have changed.' );
 			return;
 		}
 		if( !$this->flags->quiet )
-			$this->client->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
+			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'added' )
@@ -85,20 +85,20 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules->{$module->id} ) ){
-				$moduleChanges[$module->id]	= (object) array(
+				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'added',
 					'module'	=> $module,
-				);
+				];
 			}
 			else{
 				$oldModule	= $stamp->modules->{$module->id};
 				if( !version_compare( $oldModule->version, $module->version, '<' ) )
 					continue;
-				$moduleChanges[$module->id]	= (object) array(
+				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'changed',
 					'source'	=> $oldModule,
 					'target'	=> $module,
-				);
+				];
 			}
 		}
 		return $moduleChanges;
@@ -168,12 +168,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
 		if( !$this->flags->quiet )
-			$this->client->out( ' - Module added: '.$module->id );
+			$this->out( ' - Module added: '.$module->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			$scripts	= $sql->getModuleInstallSql( $module );
 			if( $scripts ){
 				if( !$this->flags->quiet )
-					$this->client->out( '   SQL: '.count( $scripts ).' installation(s):' );
+					$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
 				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
 				foreach( array_values( $scripts ) as $nr => $script ){
 					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s', array(
@@ -181,7 +181,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 						count( $scripts ),
 						$script->version
 					) ) );
-					$this->client->out( trim( $script->sql ) );
+					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}
 			}
@@ -202,11 +202,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
-			$this->client->out( ' - Module changed: '.$moduleNew->id );
+			$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
 				if( !$this->flags->quiet )
-					$this->client->out( '   SQL: '.count( $scripts ).' update(s):' );
+					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){
@@ -216,7 +216,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 						$version,
 						$script->version
 					) ) );
-					$this->client->out( trim( $script->query ) );
+					$this->out( trim( $script->query ) );
 					$version	= $script->version;
 				}
 			}
@@ -226,24 +226,24 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 			foreach( $changes as $change ){
 				if( $change->status === 'removed' ){
 					$message	= '   - %s has been removed.';
-					$this->client->out( vsprintf( $message, [$change->key] ) );
+					$this->out( vsprintf( $message, [$change->key] ) );
 				}
 				else if( $change->status === 'added' ){
 					$message	= '   - %s has been added with default value: %s';
-					$this->client->out( vsprintf( $message, array(
+					$this->out( vsprintf( $message, [
 						$change->key,
 						$change->value
-					) ) );
+					] ) );
 				}
 				else if( $change->status === 'changed' ){
 					foreach( $change->properties as $property ){
 						$message	= '   - %s: %s has changed from %s to %s';
-						$this->client->out( vsprintf( $message, array(
+						$this->out( vsprintf( $message, [
 							$change->key,
 							$property->key,
 							$property->valueOld,
 							$property->valueNew
-						) ) );
+						] ) );
 					}
 				}
 			}

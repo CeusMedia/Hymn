@@ -52,8 +52,8 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		$config		= $this->client->getConfig();
 
 		if( !( file_exists( "config" ) && is_writable( "config" ) ) )
-			return $this->client->out( "Configuration folder is either not existing or not writable" );
-		$this->client->outVerbose( "Loading all needed modules into graph…" );
+			$this->outError( "Configuration folder is either not existing or not writable", Hymn_Client::EXIT_ON_SETUP );
+		$this->outVerbose( "Loading all needed modules into graph…" );
 
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );

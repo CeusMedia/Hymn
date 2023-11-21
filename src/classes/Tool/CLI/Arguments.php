@@ -126,7 +126,7 @@ class Hymn_Tool_CLI_Arguments
 	/** @todo change behavior of values (string) while includes and excludes are array, already */
 	public function registerOption( string $key, $pattern, $resolve, $default = NULL, $values = NULL, array $includes = [], array $excludes = [] )
 	{
-		$this->options[$key]	= array(
+		$this->options[$key]	= [
 			'pattern'	=> $pattern,
 			'resolve'	=> $resolve,
 			'default'	=> $default,
@@ -134,7 +134,7 @@ class Hymn_Tool_CLI_Arguments
 			'value'		=> $default,
 			'includes'	=> $includes,
 			'excludes'	=> $excludes,
-		);
+		];
 	}
 
 	/** @todo change behavior of values (string) while includes and excludes are array, already */

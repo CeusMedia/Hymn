@@ -5,7 +5,7 @@ class Hymn_Tool_Database_PDO
 	protected $dba;
 	protected $dbc;
 
-	protected $dbaDefaults	= array(
+	protected $dbaDefaults	= [
 		'driver'		=> 'mysql',
 		'host'			=> 'localhost',
 		'port'			=> '3306',
@@ -14,7 +14,7 @@ class Hymn_Tool_Database_PDO
 		'username'		=> NULL,
 		'password'		=> NULL,
 		'modules'		=> '',
-	);
+	];
 
 	/**
 	 *	Constructor.
@@ -73,14 +73,14 @@ class Hymn_Tool_Database_PDO
 		}
 
 		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
-			$this->client->outError( vsprintf( 'PDO driver "%s" is not supported at the moment', array(
+			$this->client->outError( vsprintf( 'PDO driver "%s" is not supported at the moment', [
 				$this->dba->driver
-			) ), Hymn_Client::EXIT_ON_SETUP );
-		$dsn			= $this->dba->driver.':'.implode( ';', array(
+			] ), Hymn_Client::EXIT_ON_SETUP );
+		$dsn			= $this->dba->driver.':'.implode( ';', [
 			'host='.$this->dba->host,
 			'port='.$this->dba->port,
 //			'dbname='.$this->dba->name,
-		) );
+		] );
 		if( $this->dbc && $forceReset )
 			unset( $this->dbc );
 		$this->client->outVerbose( 'Connecting database ... ', FALSE );

@@ -75,21 +75,21 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 				continue;
 			if( $shelfId && $shelfId !== 'all' && $shelfId !== $module->installSource )
 				continue;
-			$this->client->out( 'Module: '.$module->title );
-			$this->client->out( str_repeat( '-', 48 ) );
+			$this->out( 'Module: '.$module->title );
+			$this->out( str_repeat( '-', 48 ) );
 
 			$frameworks = [];
 			foreach( $module->frameworks as $frameworkIdentifier => $frameworkVersion )
 				$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
 			$frameworks = join( ' | ', $frameworks );
 
-			$this->client->out( $module->title );
+			$this->out( $module->title );
 			if( $module->description )
-				$this->client->out( $module->description );
-			$this->client->out( ' - Category:     '.$module->category );
-			$this->client->out( ' - Source:       '.$module->installSource );
-			$this->client->out( ' - Version:      '.$module->version );
-			$this->client->out( ' - Frameworks:   '.$frameworks );
+				$this->out( $module->description );
+			$this->out( ' - Category:     '.$module->category );
+			$this->out( ' - Source:       '.$module->installSource );
+			$this->out( ' - Version:      '.$module->version );
+			$this->out( ' - Frameworks:   '.$frameworks );
 
 			$moduleInfo	= new Hymn_Module_Info( $this->client );
 			if( in_array( 'files', $types ) )
@@ -100,9 +100,9 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 				$moduleInfo->showModuleRelations( $this->getLibrary(), $module );
 			if( in_array( 'hooks', $types ) )
 				$moduleInfo->showModuleHook( $module );
-			$this->client->out( '' );
+			$this->out( '' );
 
-//			$this->client->out( json_encode( $module, JSON_PRETTY_PRINT ) );
+//			$this->out( json_encode( $module, JSON_PRETTY_PRINT ) );
 		}
 	}
 

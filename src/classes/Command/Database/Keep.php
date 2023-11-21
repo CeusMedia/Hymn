@@ -33,11 +33,11 @@
  *	@copyright		2014-2022 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $defaultPath;
+	protected string $defaultPath;
 
 	/**
 	 *	Execute this command.
@@ -49,6 +49,8 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	 */
 	public function run()
 	{
+		$this->denyOnProductionMode();
+
 		/*  --  REGISTER OPTIONS AND PARSE AGAIN  --  */
 		$this->client->arguments->registerOption( 'daily', '/^--daily=(\d+)$/', '\\1', 0 );
 		$this->client->arguments->registerOption( 'weekly', '/^--weekly=(\d+)$/', '\\1', 0);
@@ -79,7 +81,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$fileName	= $entry->getFilename();
 			if( preg_match( $regex, $fileName ) ){
 				$timestamp	= preg_replace( $regex, '\\2 \\3', $fileName );
-				$date		= new DateTime( $timestamp );
+				$date		= new KeepRuleDate( $timestamp );
 				$date->isWeekly		= FALSE;
 				$date->isMonthly	= FALSE;
 				$date->isYearly		= FALSE;
@@ -95,7 +97,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		krsort( $index );
 
 		if( !$keepDaily )
-			$this->client->outError( 'No daily rule given. Are database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
+			$this->client->outError( 'No daily rule given. All database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
 
 		/*  --  COLLECT FILES TO REMOVE  --  */
 		$nrDaily	= 0;
@@ -117,7 +119,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 				$list[]	= $fileName;
 		}
 		if( !$list )
-			$this->client->out( 'All database dumps were matching the rules and are kept.', Hymn_Client::EXIT_ON_RUN );
+			$this->out( 'All database dumps were matching the rules and are kept.', Hymn_Client::EXIT_ON_RUN );
 		foreach( $list as $fileName ){
 			$this->client->outVerbose( '- Removing: '.$fileName );
 			if( !$this->flags->dry )
@@ -125,13 +127,31 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		}
 		if( !$this->flags->quiet )
 			if( $this->flags->dry )
-				$this->client->out( count( $list ).' database dumps would have been removed.' );
+				$this->out( count( $list ).' database dumps would have been removed.' );
 			else
-				$this->client->out( count( $list ).' database dumps removed.' );
+				$this->out( count( $list ).' database dumps removed.' );
 	}
 
 	protected function __onInit()
 	{
 		$this->defaultPath	= $this->client->getConfigPath().'sql/';
 	}
+}
+
+class KeepRuleDate extends DateTime
+{
+	/**
+	 * @param		string					$datetime
+	 * @param		DateTimeZone|NULL		$timezone
+	 */
+	public function __construct( $datetime = 'now', DateTimeZone $timezone = null )
+	{
+		try{
+			parent::__construct( $datetime, $timezone );
+		} catch ( Exception $e ){}
+	}
+
+	public bool $isMonthly		= FALSE;
+	public bool $isWeekly		= FALSE;
+	public bool $isYearly		= FALSE;
 }

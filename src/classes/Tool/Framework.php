@@ -70,12 +70,12 @@ class Hymn_Tool_Framework
 		$semver->setSemanticVersion( $frameworks['Hydrogen'] );
 		if( !$semver->check() ){
 			$message	= 'Module "%1$s" version %2$s is not installable for framework version %4$s (needed: %3$s)';
-			throw new RuntimeException( vsprintf( $message, array(
+			throw new RuntimeException( vsprintf( $message, [
 				$module->id,
 				$module->version,
 				$frameworks['Hydrogen'],
 				$this->version,
-			) ) );
+			] ) );
 		}
 		return TRUE;
 	}

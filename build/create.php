@@ -4,9 +4,9 @@ require_once __DIR__.'/../src/classes/Tool/Test.php';
 
 /*  --  ARGUMENTS  --  */
 $modes		= ['prod', 'dev'];
-$options	= array_merge( array(
+$options	= array_merge( [
 	'mode'		=> 'prod',
-), getopt( "", preg_split( '/\|/', 'mode:|locale:' ) ) );
+], getopt( "", preg_split( '/\|/', 'mode:|locale:' ) ) );
 $options['mode']	= in_array( $options['mode'], $modes ) ? $options['mode'] : $modes[0];
 
 /*  --  SETUP  --  */
@@ -54,12 +54,12 @@ foreach( $iterator as $entry ){
 	if( !$entry->isDir() ){
 		$count++;
 		$filePath	= $entry->getPathname();
-		$message	= vsprintf( "\r".'[%4$s%%] %1$s', array(
+		$message	= vsprintf( "\r".'[%4$s%%] %1$s', [
 			str_replace( $rootPath.'/build/', 'src/', $filePath ),
 			$count,
 			$nrFiles,
 			str_pad( ceil( $count / $nrFiles * 100 ), 3, ' ', STR_PAD_LEFT ),
- 		) );
+		] );
 		print( str_pad( $message, $cols - 2, ' ' ) );
 		$syntax	= Hymn_Tool_Test::staticCheckPhpFileSyntax( $filePath );
 		if( !$syntax->valid ){
@@ -72,15 +72,20 @@ foreach( $iterator as $entry ){
 	}
 }
 print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
+
+file_put_contents( $rootPath."/build/.mode", $options['mode'] );
+
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
-//if( $options['mode'] !== 'dev' )
-$archive->compressFiles( Phar::GZ );
+$archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
+$archive->addFile( $rootPath.'/build/.mode', '.mode' );
+if( $options['mode'] !== 'dev' )
+	$archive->compressFiles( Phar::GZ );
 $archive->stopBuffering();
 shell_exec( "rm -rf ".$rootPath."/build/classes" );
 require_once __DIR__.'/../src/classes/Client.php';
-print( vsprintf( 'Done building version %3$s-%4$s into %1$s (%2$s).', array(
+print( vsprintf( 'Done building version %3$s-%4$s into %1$s (%2$s).'.PHP_EOL, [
 	$pharFileName,
 	round( filesize( $pharFileName ) / 1024, 1 ).'kB',
 	Hymn_Client::$version,
 	$options['mode'],
-) ).PHP_EOL );
+] ) );

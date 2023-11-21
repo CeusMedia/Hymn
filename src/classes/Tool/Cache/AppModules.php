@@ -43,11 +43,11 @@ class Hymn_Tool_Cache_AppModules
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
-		$this->flags	= (object) array(
+		$this->flags	= (object) [
 			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
 			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
 			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-		);
+		];
 	}
 
 	/**

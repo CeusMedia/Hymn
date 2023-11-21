@@ -71,10 +71,11 @@ Having a valid Hymn config file, you execute these commands:
 
 B1. App Base Configuration Management
 ------------------------------------------------------------------------------
-- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
-- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
+- app-base-config-list                        Show settings from config.ini
 - app-base-config-get KEY                     Read setting from config.ini
 - app-base-config-set [-dqv] KEY VALUE        Save setting in config.ini
+- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
+- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
 
 B2. App Instance & Module Management
 ------------------------------------------------------------------------------
@@ -99,9 +100,10 @@ B3. App Module Management
 B4. App Database Management
 ------------------------------------------------------------------------------
 - database-clear [-dfqv]                      Drop database tables
+- database-console [QUERY]                    Run SQL query
 - database-dump [PATH]                        Export database to SQL file
-- database-load [PATH|FILE]                   Import (specific or latest) SQL file
 - database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
+- database-load [PATH|FILE]                   Import (specific or latest) SQL file
 
 Keep Rules:
 --daily=[DAYS]             Number of daily dumps to keep

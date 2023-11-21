@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -30,36 +30,49 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2023 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo			code documentation
  */
-class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
+class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
 	/**
-	 *	Execute this command.
-	 *	Implements flags: database-no
-	 *	Missing flags: dry?(at least config valid), quiet, verbose
-	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run()
 	{
+		$this->denyOnProductionMode();
+
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
-		if( !self::test( $this->client ) )
-			$this->outError( "Database is NOT connected.", Hymn_Client::EXIT_ON_SETUP );
-		$this->out( "Database can be connected." );
-	}
 
-	public static function test( Hymn_Client $client ): bool
-	{
-		$dbc		= $client->getDatabase();
-		if( !$dbc->isConnected() )
-			$dbc->connect( TRUE );												//  force setup of new connection to database
-		$result	= $dbc->query( "SHOW TABLES" );
-		return is_array( $result->fetchAll() );
+		$dbc			= $this->client->getDatabase();
+		$arguments		= $this->client->arguments;
+
+		$query		= (string) $arguments->getArgument();
+		if( preg_match( '/DROP/i', $query ) )
+			$this->outError( 'DROP is not allowed', Hymn_Client::EXIT_ON_INPUT );
+		if( preg_match( '/DELETE/i', $query ) )
+			$this->outError( 'DELETE is not allowed', Hymn_Client::EXIT_ON_INPUT );
+
+		if( !Hymn_Command_Database_Test::test( $this->client ) )
+			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
+
+//		if( !$dbc->isConnected() )
+//			$dbc->connect( TRUE );												//  force setup of new connection to database
+
+		$result		= $dbc->query( $query );
+		$data		= $result->fetchAll( PDO::FETCH_ASSOC );
+		if( 0 === count( $data ) ) {
+			$this->out( 'Empty result.' );
+		} else {
+			$keys	= array_keys( reset( $data ) );
+			$table	= new Hymn_Tool_CLI_Table( $this->client );
+			$table->detectWidth();
+			print( $table->render( $data ).PHP_EOL );
+		}
 	}
 }
+
+
