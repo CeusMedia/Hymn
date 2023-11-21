@@ -55,8 +55,10 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
 
 		$editor	= new Hymn_Tool_BaseConfigEditor( $pathConfig."config.ini" );
-		if( !$editor->hasProperty( $key, FALSE ) )
+
+		if( !$this->flags->force && !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
+
 		$current	= $editor->getProperty( $key, FALSE );
 
 		if( !strlen( trim( $value ) ) ){

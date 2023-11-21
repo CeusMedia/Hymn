@@ -231,37 +231,39 @@ abstract class Hymn_Command_Abstract
 	protected function getLibrary( bool $forceReload = FALSE ): Hymn_Module_Library
 	{
 		$config	= $this->client->getConfig();
-		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
-			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
-			if( $this->flags->force )																//  on force mode
-				$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
-			if( !isset( $config->sources ) || empty( $config->sources ) ){
-				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
-				$this->client->out( sprintf( $msg ) );												//  output warning
-				return $this->library;																//  return empty library
-			}
-			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
-				if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
-					continue;																		//  skip this source
-				if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
-					$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
-					$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
-				}
-				else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
-					$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
-					$this->client->out( sprintf( $msg, $sourceId ) );									//  output warning
-				}
-				else{
-					$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
-					$type	= isset( $source->type ) ? $source->type : 'folder';					//  set default source type if not defined
-					$title	= isset( $source->title ) ? $source->title : '';						//  set source title
-					$this->library->addShelf( $sourceId, $source->path, $type, $active, $title );	//  add source as shelf in library
-				}
-			}
-		}
+		if( is_null( $this->library ) || $forceReload )												//  library not loaded yet or reload is forced
+			$this->readLibrary( $config );
 		return $this->library;																		//  return loaded library
 	}
 
+	protected function readLibrary( object $config )
+	{
+		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
+		if( $this->flags->force )																//  on force mode
+			$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
+		if( !isset( $config->sources ) || !is_array( $config->sources ) ){
+			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
+			return $this->library;																//  return empty library
+		}
+		foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
+			if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
+				continue;																		//  skip this source
+			if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
+				$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
+				$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
+			}
+			else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
+				$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
+				$this->client->out( sprintf( $msg, $sourceId ) );									//  output warning
+			}
+			else{
+				$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
+				$type	= $source->type ?? 'folder';											//  set default source type if not defined
+				$title	= $source->title ?? '';													//  set source title
+				$this->library->addShelf( $sourceId, $source->path, $type, $active, $title );	//  add source as shelf in library
+			}
+		}
+	}
 	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds ): array
 	{
 		$list	= [];
