@@ -241,7 +241,8 @@ abstract class Hymn_Command_Abstract
 		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 		if( $this->flags->force )																//  on force mode
 			$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
-		if( !isset( $config->sources ) || !is_array( $config->sources ) ){
+
+		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
 			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
 			return $this->library;																//  return empty library
 		}
