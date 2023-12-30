@@ -64,8 +64,7 @@ class Hymn_Client
 
 	public static string $mode					= 'prod';
 
-	public static string $phpBin				= '/usr/bin/php';
-//	public static string $phpBin				= '/opt/plesk/php/8.1/bin/php';
+	public static string $phpPath				= '/usr/bin/php';
 
 	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
 	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
@@ -182,7 +181,9 @@ class Hymn_Client
 		error_reporting( E_ALL );
 
 		if( file_exists( 'phar://hymn.phar/.mode' ) )
-			self::$mode	= file_get_contents( 'phar://hymn.phar/.mode' );
+			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' );
+		if( file_exists( 'phar://hymn.phar/.php' ) )
+			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' );
 
 		try{
 			$this->parseArguments( $arguments );

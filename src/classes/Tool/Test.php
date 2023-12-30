@@ -103,7 +103,7 @@ class Hymn_Tool_Test
 	{
 		$code		= 0;
 		$output		= [];
-		$command	= Hymn_Client::$phpBin." -l ".$filePath/*." >/dev/null"*/." 2>&1";
+		$command	= Hymn_Client::$phpPath." -l ".$filePath/*." >/dev/null"*/." 2>&1";
 		@exec( $command, $output, $code );
 		$message	= 'Syntax error in file '.$filePath;
 		if( isset( $output[0] ) && strlen( trim( $output[0] ) ) )

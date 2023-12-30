@@ -50,8 +50,13 @@ $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFile
 foreach( $filesToAdd as $item )
 	$archive->addFile( $rootPath.'/src/'.$item, $item );
 
+file_put_contents( $rootPath."/build/.mode", $options['mode'] );
+file_put_contents( $rootPath."/build/.php", $options['php'] );
+Hymn_Client::$phpPath	= $options['php'];
+
 shell_exec( "test -d ".$rootPath."/build/classes && rm -rf ".$rootPath."/build/classes || true" );
 shell_exec( "cp -r ".$rootPath."/src/classes ".$rootPath."/build/" );
+
 $directory	= new RecursiveDirectoryIterator( $rootPath."/build/classes", RecursiveDirectoryIterator::SKIP_DOTS );
 $iterator	= new RecursiveIteratorIterator( $directory, RecursiveIteratorIterator::CHILD_FIRST );
 $nrFiles	= 0;
@@ -82,9 +87,6 @@ foreach( $iterator as $entry ){
 	}
 }
 print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
-
-file_put_contents( $rootPath."/build/.mode", $options['mode'] );
-file_put_contents( $rootPath."/build/.php", $options['php'] );
 
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
 $archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
