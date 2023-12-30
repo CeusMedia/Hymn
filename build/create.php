@@ -45,7 +45,7 @@ $stub		= $options['mode'] === 'prod' ? php_strip_whitespace( $stubFileName ) : f
 $stub		= strtr( $stub, ['[pharFileName]' => $pharFileName, '[mainFileName]' => $mainFileName] );
 
 $archive->startBuffering();
-$archive->setStub( "#!".$options['php'].PHP_EOL.$stub );
+$archive->setStub( "#!".trim( $options['php'] ).PHP_EOL.$stub );
 $archive->addFromString( $mainFileName, file_get_contents( __DIR__.'/'.$mainFileName ) );
 foreach( $filesToAdd as $item )
 	$archive->addFile( $rootPath.'/src/'.$item, $item );
