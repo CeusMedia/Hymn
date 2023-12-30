@@ -1,4 +1,6 @@
 export PWD	:= $(shell pwd)
+export PHP  :=/usr/bin/env php
+#export PHP  :=/opt/plesk/php/8.1/bin/php
 
 
 help: ## show this help
@@ -11,7 +13,7 @@ create: create-phar ## alias for create-phar
 
 create-phar: ## create productive version of PHAR file locally
 	@test -f hymn.phar && rm hymn.phar || true
-	@php build/create.php --mode=${MODE} && chmod +x hymn.phar || true
+	@${PHP} build/create.php --mode=${MODE} --php="${PHP}" && chmod +x hymn.phar || true
 
 create-phar-dev: ## create development version of PHAR file locally
 	@test -f hymn.phar && rm hymn.phar || true

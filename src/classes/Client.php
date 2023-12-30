@@ -64,6 +64,9 @@ class Hymn_Client
 
 	public static string $mode					= 'prod';
 
+	public static string $phpBin				= '/usr/bin/php';
+//	public static string $phpBin				= '/opt/plesk/php/8.1/bin/php';
+
 	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
 	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
 
