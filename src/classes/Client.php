@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.0c';
+	public static string $version				= '1.0.0d';
 
 	public static string $mode					= 'prod';
 

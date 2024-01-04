@@ -49,7 +49,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 */
 	public function addAttribute( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): void
 	{
-		if( '' !== $namespace ?? '' ){
+		if( '' !== ( $namespace ?? '' ) ){
 			$namespaces	= $this->getDocNamespaces();
 			$key		= $namespace ? $namespace.':'.$qualifiedName : $qualifiedName;
 			if( $this->hasAttribute( $qualifiedName, $namespace ) )
@@ -62,7 +62,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 				parent::addAttribute( $key, $value, $nsURI );
 				return;
 			}
-			throw new RuntimeException( 'Namespace prefix is not registered and namespace URI is missing' );
+			throw new RuntimeException( 'Namespace prefix "'.$namespace.'" is not registered and namespace URI is missing' );
 		}
 		if( $this->hasAttribute( $qualifiedName ) )
 			throw new RuntimeException( 'Attribute "'.$qualifiedName.'" is already set' );

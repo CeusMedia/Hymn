@@ -52,9 +52,9 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		$moduleId	= $this->client->arguments->getArgument();
 		$sourceId	= $this->client->arguments->getArgument( 1 );
 
-		if( !strlen( trim( $moduleId ) ) )
+		if( !strlen( trim( $moduleId ?? '' ) ) )
 			$this->client->outError( 'No module ID given.', Hymn_Client::EXIT_ON_INPUT );
-		if( !strlen( trim( $sourceId ) ) )
+		if( !strlen( trim( $sourceId ?? '' ) ) )
 			$sourceId	= NULL;
 
 		$modulesAvailable	= $library->getAvailableModules( $sourceId );
@@ -108,7 +108,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$this->out( '    - Version: '.$installedModule->version );
 			$this->out( '    - Source:  '.$installedModule->installSource );
 			$this->out( '    - Type:    '.$installTypes[$installedModule->installType] );
-			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', $installedModule->installDate ) );
+			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->installDate ) );
 			$message	= ' - Updatable: no';
 			if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';
