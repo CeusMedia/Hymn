@@ -127,9 +127,7 @@ class Hymn_Module_Installer
 				else if( in_array( $valueAsString, ['yes', 'true', '1'] ) )
 					$configValue	= TRUE;
 			}
-			$hasValue	= strlen( $configValue ) > 0;
-			if( $isBoolean )
-				$hasValue	= $configValue !== NULL;
+			$hasValue	= $isBoolean ? NULL !== $configValue : '' !== trim( $configValue );
 			if( $isMandatory && !$hasValue ){
 				if( $this->flags->quiet ){														//  in quiet mode no input is allowed
 					if( $this->flags->force )													//  dont quit (with exception) in force mode
