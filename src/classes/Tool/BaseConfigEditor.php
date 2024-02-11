@@ -240,13 +240,15 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@access		public
 	 *	@param		string		$key			Key of Property
 	 *	@param		bool		$activeOnly		Flag: return only active Properties
-	 *	@return		string
+	 *	@return		string|NULL
 	 */
-	public function getProperty( string $key, bool $activeOnly = TRUE ): string
-  {
+	public function getProperty( string $key, bool $activeOnly = TRUE ): ?string
+	{
 		if( $activeOnly && !$this->isActiveProperty( $key ) )
 			throw new InvalidArgumentException( 'Property "'.$key.'" is not set or inactive' );
-		return $this->properties[$key];
+		if( isset( $this->properties[$key] ) )
+			return $this->properties[$key];
+		return $this->disabled[$key] ?? NULL;
 	}
 
 	/**
@@ -277,7 +279,7 @@ class Hymn_Tool_BaseConfigEditor
   {
 		if( $activeOnly )
 			return isset( $this->properties[$key] );
-		if( $this->hasProperty( $key ) )
+		if( isset( $this->properties[$key] ) )
 			return TRUE;
 		return isset( $this->disabled[$key] );
 	}
