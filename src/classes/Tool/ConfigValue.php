@@ -79,7 +79,7 @@ class Hymn_Tool_ConfigValue
 	public function getValue( bool $asTrimmedString = FALSE ): string
   {
 		if( $asTrimmedString ){
-			if( in_array( $this->type, ['bool', 'boolean'] ) )
+			if( in_array( $this->type, ['bool', 'boolean'], TRUE ) )
 				return $this->value ? 'yes' : 'no';
 			return trim( $this->value );
 		}
@@ -99,7 +99,7 @@ class Hymn_Tool_ConfigValue
 	public function is( bool $hasValue = FALSE ): bool
 	{
 		if( $hasValue )
-			return strlen( trim( $this->value ) ) > 0;
+			return 0 !== strlen( trim( $this->value ) );
 		return $this->value !== NULL;
 	}
 
@@ -135,7 +135,7 @@ class Hymn_Tool_ConfigValue
 		$type		= trim( strtolower( $type ) );
 		$type		= strlen( $type ) > 0 ? $type : 'string';
 		$type		= array_key_exists( $type, $shortmap ) ? $shortmap[$type] : $type;
-		if( !in_array( $type, $types ) )
+		if( !in_array( $type, $types, TRUE ) )
 			throw new DomainException( 'Invalid config value type: '.$type );
 		$this->type	= $type;
 		return $this;

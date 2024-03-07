@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -42,6 +42,7 @@ abstract class Hymn_Command_Abstract
 	/** @var	Hymn_Module_Library|NULL	$library */
 	protected ?Hymn_Module_Library $library	= NULL;
 
+	/** @var object{dry: bool, force: bool, quiet: bool, verbose: bool, veryVerbose: bool} $flags */
 	protected object $flags;
 
 	protected Hymn_Tool_Locale $locale;
@@ -65,14 +66,15 @@ abstract class Hymn_Command_Abstract
 	{
 		$this->client	= $client;
 		$this->flags	= (object) [
-			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
-			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
+			'dry'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'force'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
+			'quiet'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'veryVerbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE ),
 		];
 		$this->locale	= $this->client->getLocale();
 
+		/** @var string $localeKey */
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
 		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
 		$this->words	= (object) [];
@@ -84,13 +86,15 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
+	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE )
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
 		$this->client->out( $lines, $newLine );
+		return $this;
 	}
 
 	/**
@@ -101,7 +105,7 @@ abstract class Hymn_Command_Abstract
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = [] ): void
+	public function outDeprecation( string|array $lines = [] ): void
 	{
 		$this->client->outDeprecation( $lines );
 	}

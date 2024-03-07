@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
@@ -38,21 +38,21 @@
  */
 class Hymn_Tool_CLI_Arguments
 {
-	protected array $arguments	= [];
+	protected array $arguments;
 
 	protected array $options	= [];
 
-	public function __construct( $arguments = NULL, array $options = [] )
+	public function __construct( ?array $arguments = NULL, array $options = [] )
 	{
 		if( !is_array( $options ) )
 			throw new InvalidArgumentException( 'Options must be given as array' );
 		$this->registerOptions( $options );
 //		if( $arguments )
-		$this->arguments	= $arguments;
+		$this->arguments	= $arguments ?? [];
 		$this->parse( $arguments );
 	}
 
-	public function getArgument( int $index = 0 )
+	public function getArgument( int $index = 0 ): ?string
 	{
 		if( isset( $this->arguments[$index] ) )
 			return $this->arguments[$index];
@@ -64,7 +64,12 @@ class Hymn_Tool_CLI_Arguments
 		return $this->arguments;
 	}
 
-	public function getOption( string $key, ?string $default = NULL )
+	/**
+	 *	@param		string			$key
+	 *	@param		string|NULL		$default
+	 *	@return		string|int|float|bool|NULL
+	 */
+	public function getOption( string $key, ?string $default = NULL ): string|int|float|bool|NULL
 	{
 		if( isset( $this->options[$key] ) )
 			return $this->options[$key]['value'];
@@ -89,8 +94,8 @@ class Hymn_Tool_CLI_Arguments
 		return TRUE;
 	}
 
-	public function parse( $arguments = NULL ): void
-  {
+	public function parse( ?array $arguments = NULL ): void
+	{
 		$arguments	= is_null( $arguments ) ? $this->arguments : $arguments;
 		foreach( $arguments as $nr => $argument ){
 			foreach( $this->options as $key => $option ){
@@ -124,8 +129,8 @@ class Hymn_Tool_CLI_Arguments
 //	}
 
 	/** @todo change behavior of values (string) while includes and excludes are array, already */
-	public function registerOption( string $key, $pattern, $resolve, $default = NULL, $values = NULL, array $includes = [], array $excludes = [] ): void
-  {
+	public function registerOption( string $key, string $pattern, string|bool $resolve, string|bool|NULL $default = NULL, ?array $values = NULL, array $includes = [], array $excludes = [] ): void
+	{
 		$this->options[$key]	= [
 			'pattern'	=> $pattern,
 			'resolve'	=> $resolve,
@@ -139,7 +144,7 @@ class Hymn_Tool_CLI_Arguments
 
 	/** @todo change behavior of values (string) while includes and excludes are array, already */
 	public function registerOptions( array $options ): void
-  {
+	{
 		foreach( $options as $key => $rules ){
 			if( !isset( $rules['pattern']  ) )
 				throw new RangeException( 'Option "'.$key.'" is missing rule "pattern"' );
@@ -158,14 +163,14 @@ class Hymn_Tool_CLI_Arguments
 	}
 
 	public function removeArgument( int $nr ): void
-  {
+	{
 		if( isset( $this->arguments[$nr] ) ){
 			unset( $this->arguments[$nr] );
 			$this->arguments	= array_values( $this->arguments );
 		}
 	}
 
-	public function setArgument( int $nr, $value ): self
+	public function setArgument( int $nr, string $value ): self
 	{
 		if( $nr < 0 )
 			throw new RangeException( 'Argument number must not be negative' );
@@ -173,26 +178,33 @@ class Hymn_Tool_CLI_Arguments
 		return $this;
 	}
 
-	public function unregisterOption( $key ): void
-  {
+	/**
+	 *	@param		string		$key
+	 *	@return		self
+	 */
+	public function unregisterOption( string $key ): self
+	{
 		if( !isset( $this->options[$key] ) )
 			throw new RangeException( 'Option "'.$key.'" is not registered' );
 		unset( $this->options[$key] );
+		return $this;
 	}
 
 	public function unregisterOptions( array $keys ): void
-  {
+	{
 		foreach( $keys as $key )
 			$this->unregisterOption( $key );
 	}
 
-	protected function getEnumerationFromArrayKeyIfSet( array $array, $key ): array
+	protected function getEnumerationFromArrayKeyIfSet( array $array, string $key ): array
 	{
 		$list	= [];
 		if( array_key_exists( $key, $array ) && !is_null( $array[$key] ) ){
 			$list	= $array[$key];
 			if( !is_array( $list ) )
-				$list	= preg_split( '/\s*,\s*/', $list );
+				$list	= array_map( static function( string $entry ): string {
+					return trim( $entry );
+				}, explode( ',', $list ) );
 		}
 		return $list;
 	}

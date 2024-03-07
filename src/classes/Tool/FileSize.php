@@ -2,7 +2,7 @@
 /**
  *	Formats Numbers intelligently and adds Units to Bytes and Seconds.
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -34,7 +34,7 @@ define( 'SIZE_GIGABYTE', pow( 1024, 3 ) );
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -71,7 +71,9 @@ class Hymn_Tool_FileSize
 	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'File "'.$filePath.'" is not existing' );
-		return self::formatBytes( filesize( $filePath ), $precision, $indent, $edge );
+		/** @var int $size */
+		$size	= filesize( $filePath );
+		return self::formatBytes( $size, $precision, $indent, $edge );
 	}
 
 	/**
@@ -99,10 +101,7 @@ class Hymn_Tool_FileSize
 			$unitKey ++;														//  step to next Unit
 			$float	/= 1024;													//  calculate Value in new Unit
 		}
-		if( is_int( $precision ) )												//  Precision is set
-			$float	= round( $float, $precision );								//  round Value
-		if( is_string( $indent ) )												//  Indention is set
-			$float	= $float.$indent.self::$unitBytes[$unitKey];				//  append Unit
-		return $float;															//  return resulting Value
+		$float	= round( $float, $precision );									//  round Value
+		return $float.$indent.self::$unitBytes[$unitKey];						//  append Unit and return
 	}
 }

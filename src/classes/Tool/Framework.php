@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2021-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2021-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2021-2023 Christian Würker
+ *	@copyright		2021-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -58,7 +58,7 @@ class Hymn_Tool_Framework
 	public function checkModuleSupport( object $module ): bool
 	{
 		return TRUE;
-		if( $this->version === NULL )
+/*		if( NULL === $this->version )
 			return FALSE;
 		$frameworks	= $module->frameworks ? (array) $module->frameworks : [];
 		if( !isset( $frameworks['Hydrogen'] ) ){
@@ -77,12 +77,12 @@ class Hymn_Tool_Framework
 				$this->version,
 			] ) );
 		}
-		return TRUE;
+		return TRUE;*/
 	}
 
 	protected function detect( ?string $pathToFramework = NULL, bool $strict = TRUE ): bool
 	{
-		$pathFramework	= $pathToFramework ?: $this->defaultFrameworkPath;
+		$pathFramework	= $pathToFramework ?? $this->defaultFrameworkPath;
 		$filePath		= $pathFramework.'hydrogen.ini';
 		if( !file_exists( $filePath ) ){
 			if( $strict )

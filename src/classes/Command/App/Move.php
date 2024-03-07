@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,17 +30,17 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	public const ACTION_CREATE_FOLDER	= 1;
+/*	public const ACTION_CREATE_FOLDER	= 1;
 	public const ACTION_MOVE_FILE		= 2;
 	public const ACTION_LINK_FILE		= 3;
-	public const ACTION_REMOVE_FOLDER	= 4;
+	public const ACTION_REMOVE_FOLDER	= 4;*/
 
 	/**
 	 *	Execute this command.
@@ -50,13 +50,13 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( $this->flags->dry )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$dest	= trim( $this->client->arguments->getArgument( 0 ) );
-		$url	= trim( $this->client->arguments->getArgument( 1 ) );
+		$dest	= trim( $this->client->arguments->getArgument( 0 ) ?? '' );
+		$url	= trim( $this->client->arguments->getArgument( 1 ) ?? '' );
 		$url	= $url ? rtrim( $url, '/' ).'/' : '';
 
 		if( !strlen( trim( $dest ) ) )
@@ -67,7 +67,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		if( file_exists( $dest ) )
 			throw new RuntimeException( 'Destination folder is already existing.' );
 
-		$config		= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+		$config		= Hymn_Tool_ConfigFile::read();
 		if( !isset( $config->application->uri ) || !strlen( trim( $config->application->uri ) ) )
 			throw new RuntimeException( 'No application URI configured.' );
 		$source		= rtrim( $config->application->uri, '/' ).'/';
@@ -76,11 +76,11 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->out( "Move application" );
 		$this->out( "- from: ".$source );
 		$this->out( "- to:   ".$dest );
-		if( strlen( $url ) )
+		if( 0 !== strlen( $url ) )
 			$this->out( "- URL:  ".$url );
 
 		$this->updateConfigFile( $url );
-		$this->updateHymnFile( $config, $url, $sourceUriRegex, $dest );
+		$this->updateHymnFile( $config, $sourceUriRegex, $dest, $url );
 		$this->moveProject( $source, $dest );
 
 		if( !$this->flags->dry ){
@@ -94,22 +94,9 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->out( "Now run: cd ".$dest." && make set-permissions" );
 	}
 
-	protected function moveProject( string $source, string $dest )
+	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' ): void
 	{
-		if( $this->flags->dry ){
-			$this->client->outVerbose( "- would move from ".$source." to ".$dest );
-			return;
-		}
-		$this->client->outVerbose( "- moving folders, files and links" );
-		rename( $source, $dest );
-	}
-
-	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' )
-	{
-		if( !$this->flags->dry )
-			$index	= new DirectoryIterator( $dest.$path );
-		else
-			$index	= new DirectoryIterator( $source.$path );
+		$index	= new DirectoryIterator( $this->flags->dry ? $source.$path : $dest.$path );
 		foreach( $index as $entry ){
 			$pathName	= $entry->getPathname();
 			if( $entry->isDot() )
@@ -117,10 +104,11 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 			if( $entry->isDir() )
 				$this->fixLinks( $source, $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
 			else if( is_link( $pathName ) ){
-				$link = readlink( $pathName );
-				if( preg_match( $sourceUriRegex, $link ) ){
+				$link = (string) readlink( $pathName );
+				if( 0 !== preg_match( $sourceUriRegex, $link ) ){
 					$link	= preg_replace( $sourceUriRegex, $dest, $link );
-					$this->client->outVeryVerbose( '  - '.preg_replace( $sourceUriRegex, '', readlink( $pathName ) ) );
+					$line	= '  - '.preg_replace( $sourceUriRegex, '', (string) readlink( $pathName ) );
+					$this->client->outVeryVerbose( $line );
 					if( !$this->flags->dry ){
 						unlink( $pathName );
 						symlink( $link, $pathName );
@@ -130,7 +118,17 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		}
 	}
 
-	protected function updateConfigFile( string $url )
+	protected function moveProject( string $source, string $dest ): void
+	{
+		if( $this->flags->dry ){
+			$this->client->outVerbose( "- would move from ".$source." to ".$dest );
+			return;
+		}
+		$this->client->outVerbose( "- moving folders, files and links" );
+		rename( $source, $dest );
+	}
+
+	protected function updateConfigFile( string $url ): void
 	{
 		if( !strlen( $url ) )
 			return;
@@ -147,7 +145,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		}
 	}
 
-	protected function updateHymnFile( $config, string $url, string $sourceUriRegex, string $dest )
+	protected function updateHymnFile( Hymn_Structure_Config $config, string $sourceUriRegex, string $dest, string $url ): void
 	{
 		if( !$this->flags->dry )
 			$this->client->outVerbose( "- updating hymn file" );
@@ -161,10 +159,15 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$config->application->uri	= $dest;
 
 		$this->client->outVerbose( "  - update module sources in hymn file" );
-		foreach( $config->sources as $sourceData )
-			foreach( $sourceData as $key => $value )
-				if( $key === 'path' )
-					$sourceData->path	= preg_replace( $sourceUriRegex, $dest, $value );
+		foreach( $config->sources as $sourceKey => $source ){
+			/**
+			 * @var string $key
+			 * @var string $value
+			 */
+			foreach( get_object_vars( $source ) as $key => $value )
+				if( 'path' === $key )
+					$source->path	= (string) preg_replace( $sourceUriRegex, $dest, $value );
+		}
 
 		if( !$this->flags->dry ){
 			$json	= json_encode( $config, JSON_PRETTY_PRINT );

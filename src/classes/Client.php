@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -60,14 +60,14 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.0f';
+	public static string $version				= '1.0.0g';
 
 	public static string $mode					= 'prod';
 
 	public static string $phpPath				= '/usr/bin/php';
 
-	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
-	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
+	/** @var	Hymn_Tool_CLI_Arguments 		$arguments		Parsed CLI arguments and options */
+	public Hymn_Tool_CLI_Arguments $arguments;
 
 	public int $flags							= 0;
 
@@ -147,12 +147,13 @@ class Hymn_Client
 		'version',
 	];
 
-	protected ?object $config						= NULL;
+	protected ?Hymn_Structure_Config $config		= NULL;
 
 	protected ?Hymn_Tool_Database_PDO $database		= NULL;
 
 	protected ?Hymn_Tool_Framework $framework		= NULL;
 
+	/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string}  */
 	protected ?object $words;
 
 	protected bool $isLiveCopy						= FALSE;
@@ -181,9 +182,9 @@ class Hymn_Client
 		error_reporting( E_ALL );
 
 		if( file_exists( 'phar://hymn.phar/.mode' ) )
-			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' );
+			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' ) ?: 'prod';
 		if( file_exists( 'phar://hymn.phar/.php' ) )
-			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' );
+			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' ) ?: '/usr/bin/env php';
 
 		try{
 			$this->parseArguments( $arguments );
@@ -204,7 +205,7 @@ class Hymn_Client
 				$this->parseArguments( $arguments, [], TRUE );
 			}
 
-			self::$fileName		= $this->arguments->getOption( 'file' );
+			self::$fileName		= (string) $this->arguments->getOption( 'file' );
 			$this->dispatch();
 		}
 		catch( Exception $e ){
@@ -224,15 +225,14 @@ class Hymn_Client
 		return $this->framework;
 	}
 
-	public function getConfig(): ?object
+	public function getConfig(): Hymn_Structure_Config
 	{
-		if( !$this->config )
-			$this->readConfig();
-		return $this->config;
+		return $this->config ?? $this->readConfig();
 	}
 
 	public function getConfigPath(): string
 	{
+		/** @var object{application: array, modules: array, database: array, paths: object{config: string}}|null $config */
 		$config	= $this->getConfig();
 		if( str_starts_with( $config->paths->config, '/' ) )
 			return $config->paths->config;
@@ -246,7 +246,7 @@ class Hymn_Client
 		return $this->database;
 	}
 
-	public function getLocale(): Hymn_Tool_Locale
+	public function getLocale(): ?Hymn_Tool_Locale
 	{
 		return $this->locale;
 	}
@@ -307,27 +307,29 @@ class Hymn_Client
 	/**
 	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
+	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE ): void
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
-		$this->output->out( $lines, $newLine );
+		$this->output?->out( $lines, $newLine );
+		return $this;
 	}
 
 	/**
 	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
-	 *	@param		array		$lines		List of message lines or one string
+	 *	@param		string|array		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outDeprecation( array $lines = [] ): void
+	public function outDeprecation( string|array $lines = [] ): self
 	{
-		$this->output->outDeprecation( $lines );
+		$this->output?->outDeprecation( $lines );
+		return $this;
 	}
 
 	/**
@@ -335,39 +337,42 @@ class Hymn_Client
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
 	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outError( string $message, ?int $exitCode = NULL ): void
+	public function outError( string $message, ?int $exitCode = NULL ): self
 	{
-		$this->output->outError( $message, $exitCode );
+		$this->output?->outError( $message, $exitCode );
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
 	 */
-	public function outVerbose( array|string $lines, bool $newLine = TRUE ): void
+	public function outVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): self
 	{
-		$this->output->outVerbose( $lines, $newLine );
+		$this->output?->outVerbose( $lines, $newLine );
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
 	 */
-	public function outVeryVerbose( array|string $lines, bool $newLine = TRUE ): void
+	public function outVeryVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): self
 	{
-		$this->output->outVeryVerbose( $lines, $newLine );
+		$this->output?->outVeryVerbose( $lines, $newLine );
+		return $this;
 	}
 
 	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] ): void
-  {
+	{
 		if( $this->flags & self::FLAG_VERY_VERBOSE )
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
 		$args	= [$command];
@@ -401,7 +406,7 @@ class Hymn_Client
 	/*  --  PROTECTED  --  */
 
 	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject ): void
-  {
+	{
 		$commandOptions	= call_user_func( [$commandObject, 'getArgumentOptions'] );			//  get command specific argument options
 		if( $commandOptions ){
 			$this->parseArguments( $this->originalArguments, $commandOptions, TRUE );				//  parse original arguments again with command specific options
@@ -410,7 +415,7 @@ class Hymn_Client
 	}
 
 	protected function dispatch(): void
-  {
+	{
 		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
 			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
@@ -462,11 +467,9 @@ class Hymn_Client
 		return $className;
 	}
 
-	protected function parseArguments( $arguments, array $options = [], bool $force = FALSE ): void
-  {
+	protected function parseArguments( array $arguments, array $options = [], bool $force = FALSE ): void
+	{
 		$options	= array_merge( $this->baseArgumentOptions, $options );
-		if( $this->arguments && !$force )
-			return;
 		$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $options );
 
 		if( $force )
@@ -492,22 +495,24 @@ class Hymn_Client
 	}
 
 	protected function readConfig( bool $forceReload = FALSE ): void
-  {
+	{
 		if( $this->config && !$forceReload )
 			return;
 
-		$config	= new Hymn_Tool_CLI_Config( $this );
+		$config			= new Hymn_Tool_CLI_Config( $this );
 		$this->config	= $config->readConfig();
 	}
 
 	protected function realizeLanguage(): void
-  {
+	{
 		if( class_exists( 'Locale' ) ){
 			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
 			if( in_array( $language, ['en', 'de'] ) )
 				self::$language	= $language;
 		}
 		$this->locale		= new Hymn_Tool_Locale( self::$language );
-		$this->words		= $this->locale->loadWords( 'client' );
+		/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string} $words */
+		$words				= $this->locale->loadWords( 'client' );
+		$this->words		= $words;
 	}
 }

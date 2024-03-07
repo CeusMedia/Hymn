@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2021-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2021-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2021-2023 Christian Würker
+ *	@copyright		2021-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,14 +30,14 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 class Hymn_Tool_Semver
 {
-	protected string $actualVersion;
-	protected string $semanticVersion;
+	protected ?string $actualVersion		= NULL;
+	protected ?string $semanticVersion		= NULL;
 	protected string $defaultOperator		= '=';
 
 	public function __construct()
@@ -46,9 +46,9 @@ class Hymn_Tool_Semver
 
 	public function check(): bool
 	{
-		if( !$this->actualVersion )
+		if( NULL === $this->actualVersion )
 			throw new RuntimeException( 'No actual version set' );
-		if( !$this->semanticVersion )
+		if( NULL === $this->semanticVersion )
 			throw new RuntimeException( 'No semantic version set' );
 		return static::staticCheck(
 			$this->actualVersion,
@@ -66,7 +66,7 @@ class Hymn_Tool_Semver
 	public function setDefaultOperator( string $operator ): self
 	{
 		$validOperators	= ['^', '>', '<', '>=', '<=', '<>', '!=', '==', '='];
-		if( !in_array( $operator, $validOperators ) )
+		if( !in_array( $operator, $validOperators, TRUE ) )
 			throw new InvalidArgumentException( 'Unsupported operator: '.$operator );
 		$this->defaultOperator	= $operator;
 		return $this;
@@ -83,9 +83,9 @@ class Hymn_Tool_Semver
 		$operator		= $defaultOperator;
 		$version		= $semanticVersion;
 		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';
-		if( preg_match( $patternPrefix, $semanticVersion ) ){
-			$matches	= [];
-			preg_match( $patternPrefix, $semanticVersion, $matches );
+		$matches	= [];
+		preg_match( $patternPrefix, $semanticVersion, $matches );
+		if( 0 !== count( $matches ) ){
 			$operator	= $matches[1];
 			$version	= $matches[2];
 		}

@@ -25,7 +25,7 @@ class Hymn_Tool_TempFile
 
 	public function getFilePath(): string
 	{
-		if( !$this->filePath )
+		if( NULL === $this->filePath )
 			throw new RuntimeException( 'No temp file created, yet' );
 		return $this->filePath;
 	}

@@ -2,7 +2,7 @@
 /**
  *	Locale singleton handler.
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -41,29 +41,27 @@ class Hymn_Tool_Locale
 	public const TYPE_WORDS		= 2;
 
 	protected string $baseUri		= 'phar://hymn.phar/locales/';
-	protected ?string $language	= NULL;
-	protected ?string $version	= NULL;
+	protected string $language;
+	protected string $version;
 
 	/**
 	 *	Constructor, shortcutting client version and language.
 	 *	@access		public
-	 *	@param		string|NULL		$language
+	 *	@param		?string		$language
 	 *	@return		void
 	 */
-	public function __construct( ?string $language = NULL )
+	public function __construct( string $language = NULL )
 	{
-		if( is_null( $language ) )
-			$language		= Hymn_Client::$language;
-		$this->language		= $language;
 		$this->version		= Hymn_Client::$version;
+		$this->setLanguage( $language ?? Hymn_Client::$language );
 	}
 
 	/**
 	 *	Returns language currently set for locale.
 	 *	@access		public
-	 *	@return		string		Language currently set for locale
+	 *	@return		?string		Language currently set for locale
 	 */
-	public function getLanguage(): string
+	public function getLanguage(): ?string
 	{
 		return $this->language;
 	}
@@ -105,11 +103,11 @@ class Hymn_Tool_Locale
 	/**
 	 *	Tries to load locale file by path and type.
 	 *	@access		public
-	 *	@param		string		$path		Path of text file
-	 *	@return		string		Content of locale file
-	 *	@throws		RuntimeException		if text file is not existing
+	 *	@param		string				$path		Path of text file
+	 *	@return		string|object		Content of locale file
+	 *	@throws		RuntimeException	if text file is not existing
 	 */
-	public function load( string $path, int $type ): string
+	public function load( string $path, int $type ): string|object
 	{
 		if( $type === static::TYPE_TEXT )
 			return $this->loadText( $path );
@@ -135,10 +133,11 @@ class Hymn_Tool_Locale
 			) );
 		}
 		$filePath	= $this->baseUri.$this->language.'/'.$path.'.txt';
-		$text		= file_get_contents( $filePath );							//  read existing text file
+		/** @var string $text */
+		$text		= file_get_contents( $filePath );								//  read existing text file
 		$text		= str_replace( "%version%", $this->version, $text );		//  insert client version
-		$text		= str_replace( "%language%", $this->language, $text );		//  insert client language
-		return $text;															//  return text as string
+		$text		= str_replace( "%language%", $this->language, $text );	//  insert client language
+		return $text;																//  return text as string
 	}
 
 	/**
@@ -157,11 +156,12 @@ class Hymn_Tool_Locale
 			) );
 		}
 		$filePath	= $this->baseUri.$this->language.'/'.$path.'.ini';
-		$text		= file_get_contents( $filePath );							//  read existing words file
+		/** @var string $text */
+		$text		= file_get_contents( $filePath );								//  read existing words file
 		$text		= str_replace( "%version%", $this->version, $text );		//  insert client version
-		$text		= str_replace( "%language%", $this->language, $text );		//  insert client language
-		$words		= parse_ini_string( $text );							//  parse ini structure in plain mode
-		return (object) $words;													//  return words map as object
+		$text		= str_replace( "%language%", $this->language, $text );	//  insert client language
+		$words		= parse_ini_string( $text );									//  parse ini structure in plain mode
+		return (object) $words;														//  return words map as object
 	}
 
 	/**
