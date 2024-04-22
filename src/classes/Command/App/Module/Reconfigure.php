@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -45,9 +45,9 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		if( $this->client->flags && Hymn_Client::FLAG_DRY )
+		if( $this->client->flags & Hymn_Client::FLAG_DRY )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 	//	$config			= $this->client->getConfig();

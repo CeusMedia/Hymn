@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.0g';
+	public static string $version				= '1.0.0h';
 
 	public static string $mode					= 'prod';
 
@@ -227,12 +227,12 @@ class Hymn_Client
 
 	public function getConfig(): Hymn_Structure_Config
 	{
-		return $this->config ?? $this->readConfig();
+		$this->readConfig();
+		return $this->config;
 	}
 
 	public function getConfigPath(): string
 	{
-		/** @var object{application: array, modules: array, database: array, paths: object{config: string}}|null $config */
 		$config	= $this->getConfig();
 		if( str_starts_with( $config->paths->config, '/' ) )
 			return $config->paths->config;
@@ -275,14 +275,10 @@ class Hymn_Client
 
 	public function getModuleInstallType( string $moduleId, string $defaultInstallType = 'copy' ): string
 	{
-		$type	= $defaultInstallType;
-		if( isset( $this->config->application->{'installType'} ) )
-			$type	= $this->config->application->{'installType'};
-		else if( isset( $this->config->modules->{'@installType'} ) )								//  @deprecated: use application->type instead
-			$type	= $this->config->modules->{'@installType'};										//  @todo to be removed in 1.0
-		else if( isset( $this->config->modules->$moduleId ) )
-			if( isset( $this->config->modules->$moduleId->{'installType'} ) )
-				$type	= $this->config->modules->$moduleId->{'installType'};
+		$type	= $this->config->application->installType ?? $defaultInstallType;
+		if( isset( $this->config->modules[$moduleId] ) )
+			if( NULL !== $this->config->modules[$moduleId]->installType )
+				$type	= $this->config->modules[$moduleId]->installType;
 		return $type;
 	}
 

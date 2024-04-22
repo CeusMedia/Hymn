@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Self
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,13 +31,13 @@
  *	@package		CeusMedia.Hymn.Command.Self
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
 class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $pharDownloadUrl	= 'https://github.com/CeusMedia/Hymn/raw/<VERSION>/hymn.phar';
+	protected string $pharDownloadUrl	= 'https://github.com/CeusMedia/Hymn/raw/<VERSION>/hymn.phar';
 
 	/**
 	 *	Execute this command.
@@ -45,16 +45,16 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$version	= $this->client->arguments->getArgument();
 		$version	= strlen( trim( $version ) ) ? $version : 'master';
-		if( !$version === 'master' && !preg_match( '/^[0-9.]+$/', $version ) )
+		if( 'master' !== $version && !preg_match( '/^[0-9.]+$/', $version ) )
 			throw new InvalidArgumentException( 'No valid version given: '.$version );
 		$urlHymn	= str_replace( '<VERSION>', $version, $this->pharDownloadUrl );
 		$pathFile	= $this->getHymnFilePath();
 		if( !$pathFile )
-			throw new Exception( 'Hymn not found' );
+			throw new RuntimeException( 'Hymn not found' );
 		if( !$this->flags->quiet ){
 			$this->out( 'Version installed: '.Hymn_Client::$version );
 			$this->out( 'Download: '.$urlHymn );
@@ -69,7 +69,7 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 		}
 	}
 
-	protected function downloadFile( string $url, string $file )
+	protected function downloadFile( string $url, string $file ): void
 	{
 		if( !( $fpSave = @fopen( $file, 'wb' ) ) )													//  try to open target file for writing
 			throw new RuntimeException( 'Permission denied to change '.$file );						//  otherwise quit with exception
@@ -81,13 +81,15 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 		fclose( $fpLoad );																			//  close connection to source URL
 	}
 
-	protected function getHymnFilePath()
+	protected function getHymnFilePath(): ?string
 	{
 		exec( 'whereis hymn', $output/*, $b*/ );
 		if( is_array( $output ) && count( $output ) ){
 			foreach( $output as $line ){
 				if( preg_match( '/^hymn: (.+)$/', $line ) ){
-					return preg_replace( '/^hymn: /', '', $line );
+					/** @var string $line */
+					$line	= preg_replace( '/^hymn: /', '', $line );
+					return $line;
 				}
 			}
 		}

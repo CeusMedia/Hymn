@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -80,16 +80,18 @@ class Hymn_Module_Files
 			self::createPath( dirname( $target ) );
 			$pathNameIn	= realpath( $source );
 			$pathOut	= dirname( $target );
-			if( $installType === "link" ){
+
+			if( !$pathNameIn )
+				throw new Exception( 'Source file '.$source.' is not existing' );
+			if( !is_readable( $pathNameIn ) )
+				throw new Exception( 'Source file '.$source.' is not readable' );
+			if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
+				throw new Exception( 'Target path '.$pathOut.' is not creatable' );
+
+			if( 'link' === $installType ){
 //				try{
-					if( !$pathNameIn )
-						throw new Exception( 'Source file '.$source.' is not existing' );
-					if( !is_readable( $pathNameIn ) )
-						throw new Exception( 'Source file '.$source.' is not readable' );
 //					if( !is_executable( $pathNameIn ) )
 //						throw new Exception( 'Source file '.$source.' is not executable' );
-					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
-						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 						if( file_exists( $target ) ){
 							if( is_file( $target ) && !is_link( $target ) && !$this->flags->force )
@@ -111,12 +113,6 @@ class Hymn_Module_Files
 			}
 			else{
 //				try{
-					if( !$pathNameIn )
-						throw new Exception( 'Source file '.$source.' is not existing' );
-					if( !is_readable( $pathNameIn ) )
-						throw new Exception( 'Source file '.$source.' is not readable' );
-					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
-						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 /*						if( file_exists( $target ) ){
 							if( is_file( $target ) && !$this->flags->force )
@@ -164,7 +160,7 @@ class Hymn_Module_Files
 	 *	@access		protected
 	 *	@param		object		$module		Module object
 	 *	@return		array
-	 *	@todo   	change behaviour of styles without source: install into common instead of theme
+	 *	@todo		change behaviour of styles without source: install into common instead of theme
 	 */
 	protected function prepareModuleFileMap( object $module, bool $awaitAvailableModule = TRUE ): array
 	{
@@ -213,10 +209,10 @@ class Hymn_Module_Files
 							$file->source	= 'theme';
 						if( in_array( $file->source, $skipSources ) )
 							continue 2;
-						$theme = match ($file->source) {
-							'common' => "common",
-							'primer' => $layoutPrimer,
-							default => !empty($file->theme) ? $file->theme : $layoutTheme,
+						$theme = match( $file->source ){
+							'common'	=> "common",
+							'primer'	=> $layoutPrimer,
+							default		=> !empty( $file->theme ) ? $file->theme : $layoutTheme,
 						};
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) && !$this->flags->dry )

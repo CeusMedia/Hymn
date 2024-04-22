@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
@@ -50,8 +50,7 @@ class Hymn_Module_Library_Installed
 		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
 			throw new RangeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		$reader			= new Hymn_Module_Reader();
-		return $reader->load( $filename, $moduleId );
+		return Hymn_Module_Reader::load( $filename, $moduleId );
 	}
 
 	public function getAll( string $shelfId = NULL ): array

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -52,11 +52,12 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		if( !file_exists( $pathConfig."modules" ) )
 			$this->outError( "No modules installed", Hymn_Client::EXIT_ON_SETUP );
 
-		$hymnFile		= json_decode( file_get_contents( $fileName ) );
-		$knownModules	= array_keys( (array) $hymnFile->modules );
+//		$hymnFile		= json_decode( file_get_contents( $fileName ) );
+		$hymnFile		= Hymn_Tool_ConfigFile::read( $fileName );
+		/** @var string[] $knownModules */
+		$knownModules	= array_keys( $hymnFile->modules );
 
 		$index	= new DirectoryIterator( $pathConfig."modules" );
-		$reader	= new Hymn_Module_Reader();
 		$list	= [];
 		foreach( $index as $entry ){
 			if( $entry->isDir() || $entry->isDot() )
@@ -64,16 +65,16 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 			if( !preg_match( "/\.xml$/", $entry->getFilename() ) )
 				continue;
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-			$module	= $reader->load( $entry->getPathname(), $id );
+			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
 			if( $module->config || in_array( $id, $knownModules ) ){
-				$list[$id]	= array( 'config' => (object) [] );
+				$list[$id]	= new Hymn_Structure_Config_Module();
 				foreach( $module->config as $pair )
-					$list[$id]['config']->{$pair->key}	= $pair->value;
+					$list[$id]->config[$pair->key]	= $pair->value;
 			}
 		}
 		ksort( $list );
 		$hymnFile->modules	= $list;
-		file_put_contents( $fileName, json_encode( $hymnFile, JSON_PRETTY_PRINT ) );
+		Hymn_Tool_ConfigFile::save( $hymnFile, $fileName );
 		$this->out( "Configuration dumped to ".$fileName );
 	}
 }

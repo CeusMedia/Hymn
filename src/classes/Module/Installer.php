@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -39,10 +39,10 @@ class Hymn_Module_Installer
 {
 	protected Hymn_Client $client;
 	protected Hymn_Module_Library $library;
+	protected Hymn_Structure_Config_Application $app;
 	protected ?object $config;
 	protected bool $isLiveCopy				= FALSE;
 	protected object $flags;
-	protected $app;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -106,19 +106,19 @@ class Hymn_Module_Installer
 		}
 
 		//  get configured module config pairs
-		$configModule	= (object) [];
-		if( isset( $this->config->modules->{$module->id} ) )									//  module not mentioned in hymn file
-			if( isset( $this->config->modules->{$module->id}->config ) )
-				$configModule	= $this->config->modules->{$module->id}->config;
+		$configModule	= [];
+		if( isset( $this->config->modules[$module->id] ) )									//  module not mentioned in hymn file
+			if( isset( $this->config->modules[$module->id]->config ) )
+				$configModule	= $this->config->modules[$module->id]->config;
 
 		$changeSet	= [];
 		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
 			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type
 			$isBoolean		= in_array( $dataType, ['boolean', 'bool'] );						//  note whether module config value is boolean
 			$isMandatory	= $moduleConfigData->mandatory === 'yes';							//  note whether module config value is mandatory
-			$isInConfig		= isset( $configModule->{$moduleConfigKey} );						//  note whether config value is set in hymn file
+			$isInConfig		= isset( $configModule[$moduleConfigKey] );						//  note whether config value is set in hymn file
 			$value			= $moduleConfigData->value;											//  note original module config value
-			$configValue	= $isInConfig ? $configModule->{$moduleConfigKey} : $value;			//  note configured nodule config value as string
+			$configValue	= $isInConfig ? $configModule[$moduleConfigKey] : $value;			//  note configured nodule config value as string
 			if( $isBoolean && $isInConfig ){													//  override boolean module config value by hymn file
 				$valueAsString	= strtolower( trim( $configValue ) );
 				$configValue	= NULL;

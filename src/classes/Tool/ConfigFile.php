@@ -16,7 +16,7 @@ class Hymn_Tool_ConfigFile
 
 		try{
 			/** @var object{application: ?object, sources: ?array, paths: ?array, modules: ?array, system: ?object, database: ?object} $object */
-			$object			= json_decode( $content, FALSE, 512, JSON_THROW_ON_ERROR );
+			$object	= json_decode( $content, FALSE, 512, JSON_THROW_ON_ERROR );
 		}
 		/** @noinspection PhpMultipleClassDeclarationsInspection */
 		catch( JsonException $e ){
@@ -29,16 +29,18 @@ class Hymn_Tool_ConfigFile
 			}*/
 			throw new RuntimeException( 'Configuration file "'.$filePath.'" is not valid JSON: '.$e->getMessage() );
 		}
-		return self::fromObject( $object );
+		return self::fromJsonObject( $object );
 	}
 
 	public static function save( Hymn_Structure_Config $config, ?string $filePath ): int
 	{
 		$filePath	= $filePath ?? Hymn_Client::$fileName;
 
-		$object		= self::fromConfig( $config );
 		try{
-			$json	= json_encode( $object, JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT );
+			$json	= json_encode(
+				self::toJsonObject( $config ),
+				JSON_THROW_ON_ERROR|JSON_PRETTY_PRINT
+			);
 		}
 		catch( JsonException $e ){
 /*			if( json_last_error() ){
@@ -62,7 +64,7 @@ class Hymn_Tool_ConfigFile
 	 * @param object{application: ?object, sources: ?array, paths: ?array, modules: ?array, system: ?object, database: ?object} $object
 	 * @return Hymn_Structure_Config
 	 */
-	protected static function fromObject( object $object ): Hymn_Structure_Config
+	protected static function fromJsonObject(object $object ): Hymn_Structure_Config
 	{
 		$config	= new Hymn_Structure_Config();
 		if( isset( $object->application ) ){
@@ -83,10 +85,10 @@ class Hymn_Tool_ConfigFile
 			/** @var object{title: string, type: string, path: string, active: bool} $sourceData */
 			foreach( $object->sources as $sourceKey => $sourceData ){
 				$source	= new Hymn_Structure_Config_Source();
-				$source->title	= $sourceData->title;
-				$source->type	= $sourceData->type;
-				$source->path	= $sourceData->path;
-				$source->active	= $sourceData->active ?? true;
+				$source->title	= $sourceData->title ?? '';
+				$source->type	= $sourceData->type ?? $source->type;
+				$source->path	= $sourceData->path ?? '';
+				$source->active	= $sourceData->active ?? TRUE;
 				$config->sources[$sourceKey]	= $source;
 			}
 		}
@@ -97,7 +99,7 @@ class Hymn_Tool_ConfigFile
 				if( isset( $moduleData->sourceId ) )
 					$module->sourceId	= $moduleData->sourceId;
 				if( isset( $moduleData->config ) )
-					$module->config		= $moduleData->config;
+					$module->config		= (array) $moduleData->config;
 				$config->modules[$moduleKey]	= $module;
 			}
 		}
@@ -109,34 +111,52 @@ class Hymn_Tool_ConfigFile
 			if( isset( $system->group ) )
 				$config->system->group	= $system->group;
 		}
-		if( isset( $object->application ) ){
+		if( isset( $object->database ) ){
 			/** @var object{title: string} $application */
-			$application	= $object->application;
-			$config->application->title	= $application->title ?? '';
+			$database	= $object->database;
+			$config->database->driver	= $database->driver ?? '';
+			$config->database->host		= $database->host ?? '';
+			$config->database->port		= $database->port ?? '';
+			$config->database->username	= $database->username ?? '';
+			$config->database->password	= $database->password ?? '';
+			$config->database->name		= $database->name ?? '';
+			$config->database->prefix	= $database->prefix ?? '';
+			$config->database->modules	= $database->modules ?? '';
 		}
 		return $config;
 	}
 
-	protected static function fromConfig( Hymn_Structure_Config $config ): object
+	protected static function toJsonObject(Hymn_Structure_Config $config ): object
 	{
 		$object	= (object) [
-			'application'	=> (object) get_object_vars( $config->application ),
+			'application'	=> (object) array_filter( get_object_vars( $config->application ) ),
 			'sources'		=> [],
 			'modules'		=> [],
 		];
 
 		foreach( $config->sources as $sourceKey => $source )
-			$object->sources[$sourceKey] = get_object_vars( $source );
+			$object->sources[$sourceKey] = self::translateDataObjectToJsonObject( $source, [NULL] );
 
 		foreach( $config->modules as $moduleKey => $module )
-			$object->modules[$moduleKey] = get_object_vars( $module );
+			$object->modules[$moduleKey] = self::translateDataObjectToJsonObject( $module, [NULL, '', []] );
 
 		if( '' !== ( $config->system->user ?? '' ) || '' !== ( $config->system->group ?? '' ) )
-			$object->system		= (object) get_object_vars( $config->system );
+			$object->system		= self::translateDataObjectToJsonObject( $config->system, [NULL] );
 
-		if( '' !== $object->database->driver )
-			$object->database	= (object) get_object_vars( $config->database );
+		if( '' !== $config->database->driver )
+			$object->database	= self::translateDataObjectToJsonObject( $config->database, [NULL] );
 
 		return $object;
+	}
+
+	protected static function translateDataObjectToJsonObject( object $dataObject, array $filterValues = [] ): object
+	{
+		$data	= get_object_vars( $dataObject );
+		if( [] !== $filterValues ){
+			$data	= array_filter( $data, function( $value ) use ( $filterValues ){
+				return !in_array( $value, $filterValues, TRUE );
+			} );
+		}
+		return (object) $data;
 	}
 }

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
@@ -47,7 +47,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -118,8 +118,10 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			if( !( $isValidWeekly || $isValidMonthly || $isValidYearly ) )
 				$list[]	= $fileName;
 		}
-		if( !$list )
-			$this->out( 'All database dumps were matching the rules and are kept.', Hymn_Client::EXIT_ON_RUN );
+		if( !$list ){
+			$this->out( 'All database dumps were matching the rules and are kept.' );
+			exit( Hymn_Client::EXIT_ON_RUN );
+		}
 		foreach( $list as $fileName ){
 			$this->client->outVerbose( '- Removing: '.$fileName );
 			if( !$this->flags->dry )
@@ -132,7 +134,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 				$this->out( count( $list ).' database dumps removed.' );
 	}
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 		$this->defaultPath	= $this->client->getConfigPath().'sql/';
 	}

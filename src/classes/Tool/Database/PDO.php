@@ -110,10 +110,10 @@ class Hymn_Tool_Database_PDO
 	 *	Connects database if not done before..
 	 *	@access		public
 	 *	@param		string		$statement		Statement to execute
-	 *	@return		integer
+	 *	@return		integer|FALSE
 	 *	@see		http://php.net/manual/en/pdo.exec.php
 	 */
-	public function exec( string $statement ): int
+	public function exec( string $statement ): int|FALSE
 	{
 		$this->connect();
 		return $this->dbc->exec( $statement );
@@ -220,17 +220,17 @@ class Hymn_Tool_Database_PDO
 		if( NULL !== $this->dba && !$reset )																	//  connection access already prepared and not forced to reset
 			return;																					//  do nothing
 		$config				= $this->client->getConfig();											//  shortcut configuration from hymn file
-		$usesGlobalDbAccess	= !empty( $config->database->name );									//  atleast the database name is defined in hymn file
+		$usesGlobalDbAccess	= !empty( $config->database->name );									//  at least the database name is defined in hymn file
 		$usesLinkedModules	= !empty( $config->database->modules );									//  database resource modules are linked in hymn file
-		$usesDefaultModule	= isset( $config->modules->Resource_Database->config );					//  pseudo-default resource module from CeusMedia:HydrogenModules is installed
+		$usesDefaultModule	= isset( $config->modules['Resource_Database']->config );					//  pseudo-default resource module from CeusMedia:HydrogenModules is installed
 		if( $usesGlobalDbAccess ){																	//  use global database access information from hymn file first for better performance
 			$configAsArray	= (array) $config->database;											//  convert config object to array
-			$merged	= array_merge( $this->dbaDefaults, $configAsArray );			//  set database access information from hymn file config
-			$this->dba	= Hymn_Tool_Database_Source::fromArray( $merged );			//  set database access information from hymn file config
+			$merged	= array_merge( $this->dbaDefaults, $configAsArray );							//  set database access information from hymn file config
+			$this->dba	= Hymn_Tool_Database_Source::fromArray( $merged );							//  set database access information from hymn file config
 		}
 		else if( $usesDefaultModule ){																//  use the pseudo-default resource module first for better performance
 			$this->dba = Hymn_Tool_Database_Source::fromArray( $this->dbaDefaults );				//  prepare database access information using defaults as template
-			foreach( $config->modules->Resource_Database->config as $key => $value )				//  iterate config pairs of installed database resource module
+			foreach( $config->modules['Resource_Database']->config as $key => $value )				//  iterate config pairs of installed database resource module
 				if( preg_match( '/^access\./', $key ) )												//  config key prefix is matching
 					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;				//  carry resource module config value to database access information
 		}
@@ -241,11 +241,11 @@ class Hymn_Tool_Database_PDO
 				$configPrefix	= '';																//  ... and no config prefix as fallback (simplest situation)
 				if( str_contains( $moduleRegistration, ':' ) )										//  a prefix definition has been announced
 					list( $moduleId, $configPrefix ) = explode( ':', $moduleRegistration, 2 );	//  split module ID and config prefix into variables
-				if( !isset( $config->modules->{$moduleId} ) )										//  linked resource module is NOT installed
+				if( !isset( $config->modules[$moduleId] ) )										//  linked resource module is NOT installed
 					continue;																		//  skip this module registration
 				$this->dba		= Hymn_Tool_Database_Source::fromArray( $this->dbaDefaults );		//  prepare database access information using defaults as template
 				$quotedPrefix	= preg_quote( $configPrefix, '/' );									//  quote resource module config key prefix prefix for preg operations
-				foreach( $config->modules->{$moduleId}->config as $key => $value ){					//  iterate config pairs of installed database resource module
+				foreach( $config->modules[$moduleId]->config as $key => $value ){					//  iterate config pairs of installed database resource module
 					if( $quotedPrefix ){															//  a resource module config key prefix has been registered
 						if( !preg_match( '/^'.$quotedPrefix.'/', $key ) )							//  current module config key is not of registered prefix
 							continue;

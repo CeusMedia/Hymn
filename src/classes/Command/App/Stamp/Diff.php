@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -84,14 +84,14 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
-			if( !isset( $stamp->modules->{$module->id} ) ){
+			if( !isset( $stamp->modules[$module->id] ) ){
 				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'added',
 					'module'	=> $module,
 				];
 			}
 			else{
-				$oldModule	= $stamp->modules->{$module->id};
+				$oldModule	= $stamp->modules[$module->id];
 				if( !version_compare( $oldModule->version, $module->version, '<' ) )
 					continue;
 				$moduleChanges[$module->id]	= (object) [
@@ -140,7 +140,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 */
 	protected function getStamp( string $pathName, string $shelfId ): object
 	{
-		if( $pathName ){
+		if( '' !== trim( $pathName ) ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )
 				$fileName	= $this->getLatestStamp( NULL, $shelfId );
@@ -154,7 +154,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		if( !( $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return json_decode( trim( file_get_contents( $fileName ) ) );
+		return Hymn_Tool_ConfigFile::read( $fileName );
 	}
 
 	/**

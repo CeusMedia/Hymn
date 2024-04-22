@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2017-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -45,7 +45,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$pathName	= $this->client->arguments->getArgument();
 		$type		= $this->client->arguments->getArgument( 1 );
@@ -53,17 +53,14 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$shelfId	= $this->evaluateShelfId( $shelfId );
 		$modules	= $this->getAvailableModules( $shelfId );									//  load available modules
-
-
-		/** @var object{modules: array} $stamp */
 		$stamp		= $this->getStamp( $pathName, $shelfId );
 
 		$stampModules	= (array) $stamp->modules;
 		$this->client->outVerbose( 'Found '.count( $stampModules ).' modules in stamp.' );
 		if( $moduleId ){
-			if( !isset( $stamp->modules->{$moduleId} ) )
+			if( !isset( $stamp->modules[$moduleId] ) )
 				$this->client->outError( 'Module "'.$moduleId.'" is not in stamp.', Hymn_Client::EXIT_ON_RUN );
-			$stamp->modules	= (object) [$moduleId => $stamp->modules->{$moduleId}];
+			$stamp->modules	= (object) [$moduleId => $stamp->modules[$moduleId]];
 		}
 
 		/*  --  FIND MODULE CHANGES  --  */
@@ -85,9 +82,9 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
-			if( !isset( $stamp->modules->{$module->id} ) )
+			if( !isset( $stamp->modules[$module->id] ) )
 				continue;
-			$oldModule	= $stamp->modules->{$module->id};
+			$oldModule	= $stamp->modules[$module->id];
 			if( !version_compare( $oldModule->version, $module->version, '<' ) )
 				continue;
 			$moduleChanges[$module->id]	= (object) [
@@ -160,7 +157,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@param		object		$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( string $type, $moduleOld, $moduleNew )
+	protected function showChangedModule( string $type, $moduleOld, $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
@@ -184,7 +181,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 			}
 		}
 		if( in_array( $type, [NULL, 'all', 'config'] ) ){
-			$changes	= $keys = $diff->compareConfigByModules( $moduleOld, $moduleNew );
+			$changes	= $diff->compareConfigByModules( $moduleOld, $moduleNew );
 			foreach( $changes as $change ){
 				if( $change->status === 'removed' ){
 					$message	= '   - %s has been removed.';

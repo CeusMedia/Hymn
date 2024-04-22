@@ -57,15 +57,15 @@
         ],
         "test:stan": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=off vendor/bin/phpstan analyze --memory-limit=1G --verbose"
+            "XDEBUG_MODE=off vendor/bin/phpstan analyze --verbose"
         ],
         "test:stan-clear": [
             "@dev:install-quiet",
             "XDEBUG_MODE=off vendor/bin/phpstan clear-result-cache --verbose"
         ],
         "test:stan-save": [
-            "@dev:instal-quietl",
-            "XDEBUG_MODE=off vendor/bin/phpstan analyse --configuration util/phpstan.neon --generate-baseline util/phpstan-baseline.neon --verbose"
+            "@dev:install-quiet",
+            "XDEBUG_MODE=off vendor/bin/phpstan analyse --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon --verbose"
         ],
         "test:rector": [
             "@dev:install-quiet",

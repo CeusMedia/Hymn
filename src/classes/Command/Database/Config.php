@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -52,7 +52,8 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		array(
 			'key'		=> 'port',
 			'label'		=> "- Server Port",
-			'type'		=> 'integer',
+			'type'		=> 'string',
+			'default'	=> '',
 		),
 		array(
 			'key'		=> 'name',
@@ -84,7 +85,7 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -93,52 +94,29 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->database ) )
-			$config->database	= (object) [];
+			$config->database	= new Hymn_Structure_Config_Database();
 		$dba	= $config->database;
 
-		$dba->driver	= $dba->driver ?? "mysql";
-		$dba->host		= $dba->host ?? "localhost";
-		$dba->port		= $dba->port ?? "3306";
-		$dba->name		= $dba->name ?? NULL;
+/*		$dba->driver	= $dba->driver ?: 'mysql';
+		$dba->host		= '' === $dba->host ? 'localhost' : $dba->host;
+		$dba->port		= '' === $dba->port ? '3306' : $dba->port;
+		$dba->name		= '' === $dba->name ? NULL : '';
 		$dba->prefix	= $dba->prefix ?? NULL;
 		$dba->username	= $dba->username ?? NULL;
-		$dba->password	= $dba->password ?? NULL;
+		$dba->password	= $dba->password ?? NULL;*/
 
 		$this->questions['driver']['options']	= pdo_drivers();//PDO::getAvailableDrivers();
 		$connectable	= FALSE;
 		do{																							//  do in loop
-			foreach( $this->questions as $question ){														//  iterate questions
-				$default	= $dba->{$question['key']};												//  shortcut default
-				$options	= $question['options'] ?? [];		//  realize options
-				$input		= new Hymn_Tool_CLI_Question(												//  ask for value
-					$this->client,
-					$question['label'],
-					$question['type'],
-					$default,
-					$options,
-					FALSE
-				);
-				$dba->{$question['key']}	= $input->ask();											//  assign given value
+			/** @var array{key: string, label: string, type: string, default: NULL, options: array} $question */
+			foreach( $this->questions as $question ){												//  iterate questions
+				$answer	= $this->askQuestion( $question, $dba->{$question['key']} );				//  ask question
+				$dba->{$question['key']}	= $answer;												//  assign given value
 			}
-			$dsn			= $dba->driver.':'.implode( ";", array(									//  render PDO DSN
-				"host=".$dba->host,
-				"port=".$dba->port,
-	//			"dbname=".$this->dba->name,
-			) );
-			try{																					//  try to connect database server
-				if( $dbc = new PDO( $dsn, $dba->username, $dba->password ) ){						//  connection can be established
-//					$dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
-					if( !$dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() )			//  given database is not existing
-						$dbc->query( "CREATE DATABASE `".$dba->name."`" );							//  try to create database
-					if( $dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() ){			//  this time database is existing
-						$dbc->query( "USE `".$dba->name."`" );										//  switch to database
-						$result	= $dbc->query( "SHOW TABLES" );										//  try to read tables in database
-						if( is_object( $result ) && is_array( $result->fetchAll() ) )				//  read attempt has been successful
-							$connectable	= TRUE;													//  note connectability
-					}
-				}
-				if( !$connectable )																	//  still not connectable
-					$this->client->out( 'Database connection failed' );								//  show error message
+			try{
+				$connectable	= $this->connectDatabase( $dba ) instanceof PDO;					//  try to connect database server
+				if( !$connectable )
+					$this->client->out( 'Database connection failed' );						//  show error message
 			}
 			catch( Exception $e ){																	//  catch all exceptions
 				$this->client->out( 'Database connection error: '.$e->getMessage() );
@@ -146,8 +124,52 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 		}
 		while( !$connectable );																		//  repeat until connectable
 
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
+		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
 		$json->database	= $dba;
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
+	}
+
+	/**
+	 *	@param		array{key: string, label: string, type: string, default: NULL, options: array}	$question
+	 *	@param		bool|int|float|string|NULL														$default
+	 *	@return		float|bool|int|string
+	 */
+	protected function askQuestion( array $question, bool|int|float|string|NULL $default = NULL ): float|bool|int|string
+	{
+		$input		= new Hymn_Tool_CLI_Question(		//  create input for question answer
+			$this->client,
+			$question['label'],
+			$question['type'],
+			$default ?? ( $question['default'] ?? NULL ),
+			$question['options'] ?? NULL,
+			FALSE
+		);
+		return $input->ask();												//  ask for value
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Config_Database $dba
+	 *	@return		PDO|NULL
+	 */
+	protected function connectDatabase( Hymn_Structure_Config_Database $dba ): ?PDO
+	{
+		$dsn	= $dba->driver.':'.implode( ";", [									//  render PDO DSN
+			"host=".$dba->host,
+			"port=".$dba->port,
+//			"dbname=".$this->dba->name,
+		] );
+		$dbc = new PDO( $dsn, $dba->username, $dba->password );
+
+		//  connection can be established
+//		$dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
+		if( !$dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() )			//  given database is not existing
+			$dbc->query( "CREATE DATABASE `".$dba->name."`" );							//  try to create database
+		if( $dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() ){			//  this time database is existing
+			$dbc->query( "USE `".$dba->name."`" );										//  switch to database
+			$result	= $dbc->query( "SHOW TABLES" );										//  try to read tables in database
+			if( is_object( $result ) && is_array( $result->fetchAll() ) )				//  read attempt has been successful
+				return $dbc;													//  note connection positive status
+		}
+		return NULL;
 	}
 }

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  *	@todo    		implement option includes and excludes (using inference and recursion)
@@ -121,15 +121,10 @@ class Hymn_Tool_CLI_Arguments
 			}
 		}
 		$this->arguments	= array_values( $arguments );
-/* todo implement */
-//		$this->validateOptionClusions();
 	}
 
-//	protected function validateOptionClusions(){
-//	}
-
 	/** @todo change behavior of values (string) while includes and excludes are array, already */
-	public function registerOption( string $key, string $pattern, string|bool $resolve, string|bool|NULL $default = NULL, ?array $values = NULL, array $includes = [], array $excludes = [] ): void
+	public function registerOption( string $key, string $pattern, string|bool $resolve, int|float|string|bool|NULL $default = NULL, ?array $values = NULL, array $includes = [], array $excludes = [] ): void
 	{
 		$this->options[$key]	= [
 			'pattern'	=> $pattern,

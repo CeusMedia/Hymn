@@ -13,7 +13,7 @@ class Hymn_Tool_ConfigValue
 	public const COMPARED_MISMATCH_TYPE		= 256;
 	public const COMPARED_MISMATCH_LENGTH	= 512;
 
-	protected ?string $value		= NULL;
+	protected bool|int|float|string|NULL $value		= NULL;
 	protected string $type			= 'string';
 
 	public function __construct( string $value = NULL, ?string $type = NULL )
@@ -41,7 +41,7 @@ class Hymn_Tool_ConfigValue
 				return static::COMPARED_UNSET_OTHER;
 		}
 		if( !$this->hasValue() || !$value->hasValue() ){
-			if( !$this->hasValue() && !$value->is() )
+			if( !$this->hasValue() && !$value->hasValue() )
 				return static::COMPARED_EMPTY_BOTH;
 			if( !$this->hasValue() )
 				return static::COMPARED_EMPTY_SELF;
@@ -93,14 +93,14 @@ class Hymn_Tool_ConfigValue
 
 	public function hasValue(): bool
 	{
-		return $this->value !== NULL && strlen( trim( $this->value ) ) > 0;
+		return $this->value !== NULL && 0 !== strlen( trim( $this->value ) );
 	}
 
 	public function is( bool $hasValue = FALSE ): bool
 	{
 		if( $hasValue )
 			return 0 !== strlen( trim( $this->value ) );
-		return $this->value !== NULL;
+		return NULL !== $this->value;
 	}
 
 	/**

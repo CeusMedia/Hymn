@@ -8,4 +8,5 @@ class Hymn_Structure_Config_Database
 	public string $password			= '';
 	public string $name				= '';
 	public string $prefix			= '';
+	public string $modules			= '';
 }

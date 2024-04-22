@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo				code documentation
  */
@@ -41,7 +41,7 @@ class Hymn_Tool_CLI_Question
 	protected string $message;
 	protected string $type			= 'string';
 	protected ?string $default		= NULL;
-	protected array $options		= [];
+	protected ?array $options		= NULL;
 	protected bool $break		= TRUE;
 
 	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
@@ -50,7 +50,7 @@ class Hymn_Tool_CLI_Question
 		$this->message	= $message;
 		$this->setType( $type );
 		$this->setDefault( $default );
-		$this->setOptions( $options ?? [] );
+		$this->setOptions( $options );
 		$this->setBreak( $break );
 	}
 
@@ -68,7 +68,7 @@ class Hymn_Tool_CLI_Question
 			if( in_array( strtolower( $this->default ), ['y', 'yes', '1'] ) )
 				$default	= 'yes';
 		}
-		if( /*!$typeIsBoolean && */strlen( trim( $default ) ) )
+		if( /*!$typeIsBoolean && */strlen( trim( $default ?? '' ) ) )
 			$message	.= " [".$default."]";
 		if( is_array( $options ) && count( $options ) )
 			$message	.= " (".implode( "|", $options ).")";
@@ -81,7 +81,7 @@ class Hymn_Tool_CLI_Question
 			if( !strlen( $input ) && $default )
 				$input	= $default;
 		}
-		while( $options && is_null( $default ) && !in_array( $input, $options ) );
+		while( is_array( $options ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
 			$input	= in_array( strtolower( $input ), ['y', 'yes', '1'] );
 		if( $typeIsInteger )
@@ -105,7 +105,7 @@ class Hymn_Tool_CLI_Question
 
 	public function setOptions( ?array $options = [] ): self
 	{
-		$this->options	= $options ?? [];
+		$this->options	= $options;
 		return $this;
 	}
 

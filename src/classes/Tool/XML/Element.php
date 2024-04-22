@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,7 +30,7 @@
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			namespace handling: implement detection "Prefix or URI?", see http://www.w3.org/TR/REC-xml/#NT-Name
  */
@@ -80,9 +80,9 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
 	#[ReturnTypeWillChange]
-	public function addChild($qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?SimpleXMLElement
+	public function addChild( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?SimpleXMLElement
 	{
-		if( '' !== $namespace ?? '' ){
+		if( '' !== ( $namespace ?? '' ) ){
 			$namespaces	= $this->getDocNamespaces();
 			$key		= $namespace.':'.$qualifiedName;
 			if( array_key_exists( $namespace, $namespaces ) )

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -57,8 +57,39 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	/*  --  PROTECTED  --  */
 	protected function getCurrentValue( Hymn_Structure_Config $config, string $key ): string|bool|int|float|NULL
 	{
-		print_r($config);die;
-		$parts	= explode( ".", $key );
+		$parts		= explode( '.', trim( $key, '.' ), 4 );
+		$lastKey	= array_pop( $parts );
+		$here	= $config;
+		while( $parts ){
+			$part	= array_shift( $parts );
+			$this->outVeryVerbose('Part: '.$part );
+			if( is_object( $here ) && isset( $here->$part ) ){
+				$here	= $here->$part;
+				continue;
+			}
+			else if( is_array( $here ) && isset( $here[$part] ) ){
+				$here	= $here[$part];
+				continue;
+			}
+			$this->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
+		}
+
+		if( is_object( $here ) && isset( $here->$lastKey ) )
+			return $here->$lastKey;
+		else if( is_array( $here ) && isset( $here[$lastKey] ) )
+			return $here[$lastKey];
+
+		$this->outError( 'Invalid path given: key "'.$lastKey.'" not found', Hymn_Client::EXIT_ON_INPUT );
+		return NULL;
+	}
+
+	/**
+	 * @deprecated
+	 */
+	protected function getCurrentValueTheOldWay( Hymn_Structure_Config $config, string $key ): string|bool|int|float|NULL
+	{
+		$parts	= explode( '.', trim( $key, '.' ) );
+
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
 				$config->{$parts[0]}	= (object) [];

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,19 +31,19 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
 class Hymn_Module_Library
 {
-	protected $listModulesAvailable	= NULL;
-	protected $listModulesInstalled	= NULL;
-	protected bool $useCache				= FALSE;
+	protected array|NULL $listModulesAvailable	= NULL;
+	protected array|NULL $listModulesInstalled	= NULL;
+	protected bool $useCache					= FALSE;
 
 	protected Hymn_Client $client;
 
-	protected array $modules		= [];
+	protected array $modules					= [];
 
 	/**
 	 * @var		Hymn_Module_Library_Available		$available
@@ -160,7 +160,7 @@ class Hymn_Module_Library
 		return $list;
 	}
 
-	public function readInstalledModule( string $moduleId )
+	public function readInstalledModule( string $moduleId ): object
 	{
 		return $this->installed->get( $moduleId );
 	}

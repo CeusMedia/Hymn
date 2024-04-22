@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -77,35 +77,26 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		if( $this->ask( "Configure database?", 'boolean', 'yes', NULL, FALSE ) )
 			$this->configureDatabase();
 
-		$data	= [
-			'application'	=> (object) [
-				'title'			=> $this->answers['app.title'],
-				'url'			=> $this->answers['app.url'],
-				'uri'			=> $this->answers['app.uri'],
-				'installType'	=> $this->answers['app.install.type'],
-				'installMode'	=> $this->answers['app.install.mode'],
-			],
-			'sources'		=> (object) [],
-			'modules'		=> (object) [],
-			'database'		=> (object) [],
-			'system'		=> (object) [
-				'user'			=> $this->answers['system.user'],
-				'group'			=> $this->answers['system.group'],
-			],
-		];
-		if( isset( $this->answers['database.driver'] ) ){
-			$data['database']	= (object) [
-				'driver'	=> $this->answers['database.driver'],
-				'host'		=> $this->answers['database.host'],
-				'port'		=> $this->answers['database.port'],
-				'username'	=> $this->answers['database.username'],
-				'password'	=> $this->answers['database.password'],
-				'name'		=> $this->answers['database.name'],
-				'prefix'	=> $this->answers['database.prefix'],
-			];
+		$data	= new Hymn_Structure_Config();
+		$data->application->title		= $this->answers['app.title'];
+		$data->application->url			= $this->answers['app.url'];
+		$data->application->uri			= $this->answers['app.uri'];
+		$data->application->installType	= $this->answers['app.install.type'];
+		$data->application->installMode	= $this->answers['app.install.mode'];
+		$data->system->user		= $this->answers['system.user'];
+		$data->system->group	= $this->answers['system.group'];
 
+
+		if( isset( $this->answers['database.driver'] ) ){
+			$data->database->driver		= $this->answers['database.driver'];
+			$data->database->host		= $this->answers['database.host'];
+			$data->database->port		= $this->answers['database.port'];
+			$data->database->username	= $this->answers['database.username'];
+			$data->database->password	= $this->answers['database.password'];
+			$data->database->name		= $this->answers['database.name'];
+			$data->database->prefix		= $this->answers['database.prefix'];
 		}
-		file_put_contents( Hymn_Client::$fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
+		Hymn_Tool_ConfigFile::save( $data, Hymn_Client::$fileName );
 		$this->out( "Hymn configuration file ".Hymn_Client::$fileName." has been created." );
 		$this->out( "" );
 
@@ -149,13 +140,13 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->out( '' );																	//  print empty line as optical separator
 	}
 
-	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
+	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE ): void
 	{
 		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options ?? [], $break );
 		$this->answers[$key]	= $question->ask();
 	}
 
-	protected function configureDatabase()
+	protected function configureDatabase(): void
 	{
 		$this->out( "Please enter database information:" );
 		$this->answer( 'database.driver', "- PDO Driver", 'string', "mysql", PDO::getAvailableDrivers(), FALSE );
@@ -167,7 +158,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->answer( 'database.prefix', "- Table Prefix", 'string', "", NULL, FALSE );
 	}
 
-	protected function createComposerFile()
+	protected function createComposerFile(): void
 	{
 		$this->out( "Please enter more Application information:" );
 		$this->answer( 'app.author.name', "- Author Name", 'string', "John Doe", NULL, FALSE );
@@ -182,7 +173,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->out( "Composer file has been created." );
 	}
 
-	protected function createConfigFile()
+	protected function createConfigFile(): void
 	{
 		$this->out( "Please enter more Application information:" );
 		$this->answer( 'app.version', "- Version", 'string', "0.1", NULL, FALSE );
@@ -202,13 +193,13 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->out( "Config file has been created." );
 	}
 
-	protected function createGitIgnoreFile()
+	protected function createGitIgnoreFile(): void
 	{
 		copy( $this->pathPhar."templates/gitignore", '.gitignore' );
 		$this->out( "Git ignore file has been created." );
 	}
 
-	protected function createMakeFile()
+	protected function createMakeFile(): void
 	{
 		copy( $this->pathPhar."templates/Makefile", 'Makefile' );
 		$content	= file_get_contents( 'Makefile' );
@@ -218,7 +209,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->out( "Make file has been created." );
 	}
 
-	protected function createUnitFile()
+	protected function createUnitFile(): void
 	{
 		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
 		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );

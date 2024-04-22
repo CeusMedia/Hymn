@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -43,7 +43,7 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run( ?Hymn_Tool_CLI_Arguments $arguments = NULL )
+	public function run( ?Hymn_Tool_CLI_Arguments $arguments = NULL ): void
 	{
 		if( !( $arguments instanceof Hymn_Tool_CLI_Arguments ) )
 			$arguments	= $this->client->arguments;
@@ -61,10 +61,10 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 				$this->out( 'Source "'.$shelf->id.'" would have been removed.' );
 			return;
 		}
-		unset( $config->sources->{$shelf->id} );
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources	= $config->sources;
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+//		unset( $config->sources[$shelf->id] );
+		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
+		unset( $json->sources[$shelf->id] );
+		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
 			$this->out( 'Source "'.$shelf->id.'" has been removed.' );
 	}

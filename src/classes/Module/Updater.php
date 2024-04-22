@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
@@ -98,7 +98,7 @@ class Hymn_Module_Updater
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, bool $changedOnly = FALSE )
+	public function reconfigure( $module, bool $changedOnly = FALSE ): void
 	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
@@ -111,8 +111,8 @@ class Hymn_Module_Updater
 		}
 
 		$hymnModuleConfig	= [];
-		if( isset( $this->config->modules->{$module->id}->config ) )
-			$hymnModuleConfig	= $this->config->modules->{$module->id}->config;
+		if( isset( $this->config->modules[$module->id]->config ) )
+			$hymnModuleConfig	= $this->config->modules[$module->id]->config;
 
 		$inputValues		= [];																//  prepare list of values to change
 		foreach( $moduleSource->config as $configKey => $configData ){

@@ -2,7 +2,7 @@
 	"application": {
 		"title": "My Example Project",
 		"url": "http://example.org/myProjectPath/",
-		"uri": "/var/www/myProjectPath/",
+		"uri": "",
 		"installMode": "dev",
 		"installType": "link"
 	},

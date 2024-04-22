@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -122,11 +122,11 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function addProperty( string $key, string|bool $value, string $comment = '', bool $state = TRUE ): bool
 	{
-		$key = ( $state ? "" : $this->signDisabled ).$key;
+		$key	= ( $state ? "" : $this->signDisabled ).$key;
 		$this->added[] = [
-			"key"		=> $key,
-			"value"		=> $value,
-			"comment"	=> $comment,
+			'key'		=> $key,
+			'value'		=> $value,
+			'comment'	=> $comment,
 		];
 		return is_int( $this->write() );
 	}
@@ -136,10 +136,10 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@access		private
 	 *	@param		string			$key			Key of  Property
 	 *	@param		string|bool		$value			Value of Property
-	 *	@param		string			$comment		Comment of Property
+	 *	@param		string|NULL		$comment		Comment of Property
 	 *	@return		string
 	 */
-	private function buildLine( string $key, string|bool $value, string $comment ): string
+	private function buildLine( string $key, string|bool $value, ?string $comment = NULL ): string
 	{
 		$content	= '"'.addslashes( $value ).'"';
 		if( $this->reservedWords && is_bool( $value ) )
@@ -151,7 +151,7 @@ class Hymn_Tool_BaseConfigEditor
 		if( $breaksValue < 1 )
 			$breaksValue = 1;
 		$line	= $key.str_repeat( "\t", $breaksKey ).'= '.$content;
-		if( $comment )
+		if( '' !== ( $comment ?? '' ) )
 			$line	.= str_repeat( "\t", $breaksValue ).'; '.$comment;
 		return $line;
 	}
@@ -197,13 +197,12 @@ class Hymn_Tool_BaseConfigEditor
 		foreach( $this->properties as $key => $value ){
 			if( $activeOnly && !$this->isActiveProperty( $key ) )
 				continue;
-			$property = array(
-				"key"		=>	$key,
-				"value"		=>	$value,
-				"comment"	=>	$this->getComment( $key ),
-				"active"	=> 	$this->isActiveProperty( $key )
-				);
-			$list[] = $property;
+			$list[]	= [
+				'key'		=>	$key,
+				'value'		=>	$value,
+				'comment'	=>	$this->getComment( $key ),
+				'active'	=> 	$this->isActiveProperty( $key )
+			];
 		}
 		return $list;
 	}
@@ -310,7 +309,7 @@ class Hymn_Tool_BaseConfigEditor
 		if( $this->hasProperty( $key ) )
 			$this->properties[$key] = $value;
 		else
-			$this->addProperty( $key, $value, FALSE );
+			$this->addProperty( $key, $value );
 		return is_int( $this->write() );
 	}
 
@@ -356,12 +355,12 @@ class Hymn_Tool_BaseConfigEditor
 				continue;
 
 			if( preg_match( $this->patternProperty, $line ) ){
-				$pos	= strpos( $line, "=" );
+				$pos	= strpos( $line, '=' );
 				$key	= trim( substr( $line, 0, $pos ) );
 				$value	= trim( substr( $line, ++$pos ) );
 
 				if( preg_match( $this->patternDisabled, $key ) ){
-					$key = preg_replace( $this->patternDisabled, "", $key );
+					$key = preg_replace( $this->patternDisabled, '', $key );
 					$this->disabled[] = $key;
 				}
 
@@ -375,11 +374,11 @@ class Hymn_Tool_BaseConfigEditor
 
 				//  --  CONVERT PROTECTED VALUES  --  //
 				if( $this->reservedWords ){
-					if( in_array( strtolower( $value ), ['yes', 'true'] ) )
+					if( in_array( strtoupper( $value ), ['YES', 'TRUE'] ) )
 						$value	= TRUE;
-					else if( in_array( strtolower( $value ), ['no', 'false'] ) )
+					else if( in_array( strtoupper( $value ), ['NO', 'FALSE'] ) )
 						$value	= FALSE;
-					else if( strtolower( $value ) === "null" )
+					else if( 'NULL' === strtoupper( $value ) )
 						$value	= NULL;
 				}
 				if( preg_match( '@^".*"$@', $value ) )
@@ -411,7 +410,7 @@ class Hymn_Tool_BaseConfigEditor
 					$newKey	= $key	= $this->renamed[$pureKey];
 					if( !$this->isActiveProperty( $newKey ) )
 						$key = $this->signDisabled.$key;
-					$comment	= $this->comments[$newKey] ?? "";
+					$comment	= $this->comments[$newKey] ?? NULL;
 					$line = $this->buildLine( $key, $this->properties[$newKey], $comment );
 				}
 				else{
@@ -419,7 +418,7 @@ class Hymn_Tool_BaseConfigEditor
 						$key = substr( $key, 1 );
 					else if( !$this->isActiveProperty( $pureKey ) && !preg_match( $this->patternDisabled, $key ) )
 						$key = $this->signDisabled.$key;
-					$comment	= $this->comments[$pureKey] ?? "";
+					$comment	= $this->comments[$pureKey] ?? NULL;
 					$line = $this->buildLine( $key, $this->properties[$pureKey], $comment );
 				}
 			}

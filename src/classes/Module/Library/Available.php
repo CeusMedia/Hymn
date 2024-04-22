@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -175,7 +175,7 @@ class Hymn_Module_Library_Available
 		$this->loadModulesInShelves();
 		$list	= [];
 		foreach( $this->modules as $shelfId => $modules ){
-			if( array_key_exists($moduleId, $modules ) )
+			if( array_key_exists( $moduleId, $modules ) )
 				$list[$shelfId]	= $modules[$moduleId];
 		}
 		return $list;
@@ -210,8 +210,7 @@ class Hymn_Module_Library_Available
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
 			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
-		$reader		= new Hymn_Module_Reader();
-		$module		= $reader->load( $filename, $moduleId );										//  otherwise load module configuration from source XML file
+		$module		= Hymn_Module_Reader::load( $filename, $moduleId );								//  otherwise load module configuration from source XML file
 		$this->decorateModuleWithPaths( $module, $path );
 		return $module;																				//  return module
 	}

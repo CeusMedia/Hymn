@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -66,11 +66,11 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 				$this->out( 'Source "'.$shelf->id.'" would have been disabled.' );
 			return;
 		}
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources->{$shelf->id}->active	= FALSE;
-		if( isset( $json->sources->{$shelf->id}->default ) )
-			unset( $json->sources->{$shelf->id}->default );
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
+		$json->sources[$shelf->id]->active	= FALSE;
+		if( isset( $json->sources[$shelf->id]->default ) )
+			unset( $json->sources[$shelf->id]->default );
+		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
 			$this->out( 'Source "'.$shelf->id.'" has been disabled.' );
 	}

@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Config,Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -45,14 +45,14 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$config		= $this->client->getConfig();
 		$key		= $this->client->arguments->getArgument();
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
-		$parts	= explode( ".", $key );
+		$parts	= explode( '.', trim( $key, '.' ) );
 		$module	= array_shift( $parts );
 		if( !$parts )
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name.(section.)key"' );
@@ -60,19 +60,19 @@ class Hymn_Command_Config_Module_Get extends Hymn_Command_Abstract implements Hy
 
 		$availableModules	= $this->getAvailableModulesMap();
 
-		if( !isset( $config->modules->{$module} ) && !isset( $availableModules[$module] ) )
+		if( !isset( $config->modules[$module] ) && !isset( $availableModules[$module] ) )
 			throw new InvalidArgumentException( 'Module "'.$module.'" not installed and not configured' );
 
 		//  ATTENTION: In this view the ACTUAL value is taken from Hymn CONFIG file and seconded by module installation, only.
-		$settings	= (object) array(																//  identified values of config key
+		$settings	= (object) [																	//  identified values of config key
 			'configured'	=> NULL,																//  value from Hymn config file
 			'installed'		=> NULL,																//  value from installed module config
 			'actual'		=> NULL,																//  actual value, configuration over installation
-		);
+		];
 		if( isset( $availableModules[$module]->config[$configKey] ) )								//  config key is set in installed module
 			$settings->installed	= $availableModules[$module]->config[$configKey]->value;		//  note installed value
-		if( isset( $config->modules->{$module}->config->{$configKey} ) )							//  config key is set in Hymn config file
-			$settings->configured	= $config->modules->{$module}->config->{$configKey};			//  note valued configured in Hymn file
+		if( isset( $config->modules[$module]->config[$configKey] ) )							//  config key is set in Hymn config file
+			$settings->configured	= $config->modules[$module]->config[$configKey];			//  note valued configured in Hymn file
 		if( is_null( $settings->configured ) && is_null( $settings->installed ) ){					//  module key value is not set
 			$msg	= 'No configuration value for key "%2$s" in module "%1$s" set';					//  exception message
 			throw new InvalidArgumentException( sprintf( $msg, $module, $configKey ) );				//  throw exception

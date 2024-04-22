@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -47,38 +47,71 @@ class Hymn_Command_Config_Set extends Hymn_Command_Config_Get implements Hymn_Co
 	 */
 	public function run(): void
 	{
-		$key		= $this->client->arguments->getArgument();
-		$value		= $this->client->arguments->getArgument( 1 );
-		if( !strlen( trim( $key ) ) ) {
+		$key		= trim( $this->client->arguments->getArgument() ?? '' );
+		$value		= trim( $this->client->arguments->getArgument( 1 ) ?? '' );
+		if( '' === $key ) {
 			$this->client->outError(
-				'Missing first argument "key" is missing',
+				'Missing first argument "path" is missing',
 				Hymn_Client::EXIT_ON_INPUT
 			);
-			return;
 		}
 
-		$config		= $this->clie;
+//		$config		= $this->client->getConfig();
+		$config		= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
 		$current	= $this->getCurrentValue( $config, $key );
 
-		if( !strlen( trim( $value ) ) )
+		if( '' === $value )
 			$value	= trim( $this->ask( 'Value for "'.$key.'"', 'string', $current ) );
+
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 		if( in_array( $key, ['application.uri'], TRUE ) )											//  force trailing slash
 			$value	= rtrim( $value, '/' ).'/';
+
 		if( $current === $value ){
 			$this->client->outVerbose( 'No change made' );
 			return;
 		}
 
-		$parts	= explode( '.', $key );
-		if( count( $parts ) === 3 )
-			$config->{$parts[0]}->{$parts[1]}->{$parts[2]}	= $value;
-		else if( count( $parts ) === 2 )
-			$config->{$parts[0]}->{$parts[1]}	= $value;
+		$this->setValue( $config, $key, $value );
 
-		$filePath	= Hymn_Client::$fileName;
-		file_put_contents( $filePath, json_encode( $config, JSON_PRETTY_PRINT ) );
+		Hymn_Tool_ConfigFile::save( $config, Hymn_Client::$fileName );
 		clearstatcache();
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Config	$config
+	 *	@param		string					$key
+	 *	@param		string					$value
+	 *	@return		void
+	 */
+	protected function setValue( Hymn_Structure_Config $config, string $key, string $value ): void
+	{
+		$parts		= explode( '.', trim( $key, '.' ), 4 );
+		$lastKey	= array_pop( $parts );
+		$here		= $config;
+		while( $parts ){
+			$part	= array_shift( $parts );
+			$this->outVeryVerbose('Part: '.$part );
+			if( is_object( $here ) && isset( $here->$part ) ){
+				$here	= & $here->$part;
+				continue;
+			}
+			else if( is_array( $here ) && isset( $here[$part] ) ){
+				$here	= & $here[$part];
+				continue;
+			}
+			$this->outError( 'Invalid path given', Hymn_Client::EXIT_ON_INPUT );
+		}
+		if( is_object( $here ) && isset( $here->$lastKey ) ){
+			$here->$lastKey	= $value;
+			$this->outVeryVerbose( 'Set '.$lastKey.' on object '.( $part ?? '' ) );
+		}
+		else if( is_array( $here ) && isset( $here[$lastKey] ) ){
+			$here[$lastKey]	= $value;
+			$this->outVeryVerbose( 'Set '.$lastKey.' on array '.( $part ?? '' ) );
+		}
+		else
+			$this->outError( 'Invalid path given: key "'.$lastKey.'" not found', Hymn_Client::EXIT_ON_INPUT );
 	}
 }

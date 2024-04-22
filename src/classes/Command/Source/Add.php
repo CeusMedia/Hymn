@@ -21,7 +21,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -31,7 +31,7 @@
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2024 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo    		code documentation
  */
@@ -73,12 +73,12 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$config	= $this->client->getConfig();
 
 		if( !isset( $config->sources ) )
-			$config->sources	= (object) [];
+			$config->sources	= [];
 
 		$shelf			= [];
 		$connectable	= FALSE;
@@ -91,12 +91,12 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 					$question['label'],
 					$question['type'],
 					$shelf[$question['key']],														//  preset default or custom value
-					isset( $question['options'] ) ? $question['options'] : [],					//  realize options
+					$question['options'] ?? [],												//  realize options
 					FALSE																			//  no break = inline question
 				);
 				$shelf[$question['key']]	= $input->ask();										//  assign given value
 			}
-			if( isset( $config->sources->{$shelf['key']} ) )
+			if( isset( $config->sources[$shelf['key']] ) )
 				$this->client->outError( 'Source with ID "'.$shelf['key'].'" is already registered.' );
 			else if( $shelf['type'] === "folder" && !file_exists( $shelf['path'] ) )
 				$this->client->outError( 'Path to module library source is not existing.' );
@@ -116,14 +116,14 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 				$this->out( 'Source "'.$shelfId.'" would have been added.' );
 			return;
 		}
-		$json	= json_decode( file_get_contents( Hymn_Client::$fileName ) );
-		$json->sources->{$shelfId} = (object) [
+		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
+		$json->sources[$shelfId] = Hymn_Structure_Config_Source::fromArray( [
 			'active'	=> TRUE,
 			'title'		=> $shelf['title'],
 			'type'		=> $shelf['type'],
 			'path'		=> $shelf['path'],
-		];
-		file_put_contents( Hymn_Client::$fileName, json_encode( $json, JSON_PRETTY_PRINT ) );
+		] );
+		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
 			$this->out( 'Source "'.$shelfId.'" has been added.' );
 	}
