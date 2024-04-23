@@ -48,24 +48,24 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 		if( !( $arguments instanceof Hymn_Tool_CLI_Arguments ) )
 			$arguments	= $this->client->arguments;
 		$config		= $this->client->getConfig();
-		if( !( $shelf = $this->getShelfByArgument( 0, $arguments ) ) )
+		if( !( $source = $this->getSourceByArgument( 0, $arguments ) ) )
 			return;
 
-		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Source "'.$shelf->id.'" is active and needs to be disabled, first.' );
+		if( !$source->active && !$this->flags->force ){
+			$this->client->outVerbose( 'Source "'.$source->id.'" is active and needs to be disabled, first.' );
 			return;
 		}
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$shelf->id.'" would have been removed.' );
+				$this->out( 'Source "'.$source->id.'" would have been removed.' );
 			return;
 		}
-//		unset( $config->sources[$shelf->id] );
+//		unset( $config->sources[$source->id] );
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
-		unset( $json->sources[$shelf->id] );
+		unset( $json->sources[$source->id] );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$shelf->id.'" has been removed.' );
+			$this->out( 'Source "'.$source->id.'" has been removed.' );
 	}
 }

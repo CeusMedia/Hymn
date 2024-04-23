@@ -50,14 +50,14 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 //		$key	= $this->client->arguments->getArgument();
 		$library	= $this->getLibrary();
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$shelfId	= $this->client->arguments->getArgument();
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument();
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$datetime	= date( 'Y-m-d_H:i:s' );
 
-		if( $shelfId ){
-			$modules	= $library->listInstalledModules( $shelfId );
-			$fileName	= $pathDump.'stamp_'.$shelfId.'_'.$datetime.'.json';
-			$this->out( count( $modules )." modules of source ".$shelfId." installed:" );
+		if( $sourceId ){
+			$modules	= $library->listInstalledModules( $sourceId );
+			$fileName	= $pathDump.'stamp_'.$sourceId.'_'.$datetime.'.json';
+			$this->out( count( $modules )." modules of source ".$sourceId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();

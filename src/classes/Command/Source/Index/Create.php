@@ -45,32 +45,32 @@ class Hymn_Command_Source_Index_Create extends Hymn_Command_Source_Abstract impl
 	 */
 	public function run()
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
 		$library	= $this->getLibrary();
-		$modules	= $library->getAvailableModules( $shelf->id );
+		$modules	= $library->getAvailableModules( $source->id );
 		if( !count( $modules ) )
 			$this->outError( 'No available modules found.', Hymn_Client::EXIT_ON_RUN );
 
 		$this->out( vsprintf( 'Found %2$d available modules in source %1$s', [
-			$shelf->id, count( $modules ),
+			$source->id, count( $modules ),
 		] ) );
 
-		$this->out( sprintf( 'Path: %1$s', $shelf->path ) );
+		$this->out( sprintf( 'Path: %1$s', $source->path ) );
 
-		$settings		= new Hymn_Tool_SourceIndex_IniReader( $shelf->path );
-		$moduleFilter	= new Hymn_Tool_SourceIndex_ModuleFilter( $shelf->path );
+		$settings		= new Hymn_Tool_SourceIndex_IniReader( $source->path );
+		$moduleFilter	= new Hymn_Tool_SourceIndex_ModuleFilter( $source->path );
 		$modules		= $moduleFilter->filter( $modules );
 
 		$this->out( 'Creating index JSON file...' );
 		$jsonRenderer	= new Hymn_Tool_SourceIndex_JsonRenderer();
 		$jsonRenderer->setSettings( $settings )->setModules( $modules );
-		file_put_contents( $shelf->path.'index.json', $jsonRenderer->render() );
+		file_put_contents( $source->path.'index.json', $jsonRenderer->render() );
 
 		$this->out( 'Creating index serial file...' );
 		$serialRenderer	= new Hymn_Tool_SourceIndex_SerialRenderer();
 		$serialRenderer->setSettings( $settings )->setModules( $modules );
-		file_put_contents( $shelf->path.'index.serial', $serialRenderer->render() );
+		file_put_contents( $source->path.'index.serial', $serialRenderer->render() );
 	}
 }

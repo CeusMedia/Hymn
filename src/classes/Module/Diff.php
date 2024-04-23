@@ -142,11 +142,11 @@ class Hymn_Module_Diff
 		return $scripts;
 	}
 
-	protected function readModules( ?string $shelfId = NULL ): void
+	protected function readModules( ?string $sourceId = NULL ): void
 	{
 		if( !$this->modulesAvailable ){
-			$this->modulesInstalled	= $this->library->listInstalledModules( $shelfId );
-			$this->modulesAvailable	= $this->library->getAvailableModules( $shelfId );
+			$this->modulesInstalled	= $this->library->listInstalledModules( $sourceId );
+			$this->modulesAvailable	= $this->library->getAvailableModules( $sourceId );
 		}
 	}
 }

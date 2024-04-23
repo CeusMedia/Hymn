@@ -45,25 +45,25 @@ class Hymn_Command_Source_Index_Clear extends Hymn_Command_Source_Abstract imple
 	 */
 	public function run()
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
 		$library	= $this->getLibrary();
-		$modules	= $library->getAvailableModules( $shelf->id );
+		$modules	= $library->getAvailableModules( $source->id );
 		if( !count( $modules ) )
 			$this->outError( 'No available modules found.', Hymn_Client::EXIT_ON_RUN );
 
 		$this->out( vsprintf( 'Found %2$d available modules in source %1$s', [
-			$shelf->id, count( $modules ),
+			$source->id, count( $modules ),
 		] ) );
 
-		if( file_exists( $shelf->path.'index.serial' ) ){
+		if( file_exists( $source->path.'index.serial' ) ){
 			$this->out( 'Found index serial file. Removing ...' );
-			@unlink( $shelf->path.'index.serial' );
+			@unlink( $source->path.'index.serial' );
 		}
-		if( file_exists( $shelf->path.'index.json' ) ){
+		if( file_exists( $source->path.'index.json' ) ){
 			$this->out( 'Found index JSON file. Removing ...' );
-			@unlink( $shelf->path.'index.json' );
+			@unlink( $source->path.'index.json' );
 		}
 	}
 }

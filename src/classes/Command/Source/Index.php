@@ -45,28 +45,28 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 	 */
 	public function run()
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
 		$library	= $this->getLibrary();
-		$modules	= $library->getAvailableModules( $shelf->id );
+		$modules	= $library->getAvailableModules( $source->id );
 		if( !count( $modules ) )
 			$this->outError( 'No available modules found.', Hymn_Client::EXIT_ON_RUN );
 
 		$this->out( vsprintf( 'Found %2$d available modules in source %1$s', [
-			$shelf->id, count( $modules ),
+			$source->id, count( $modules ),
 		] ) );
 
-		$this->out( sprintf( 'Path: %1$s', $shelf->path ) );
+		$this->out( sprintf( 'Path: %1$s', $source->path ) );
 
-		$jsonFile	= $shelf->path.'index.json';
+		$jsonFile	= $source->path.'index.json';
 		if( file_exists( $jsonFile ) ){
 			$this->out( 'Found index JSON file.' );
 			if( $this->flags->verbose )
 				$this->printSettings( json_decode( file_get_contents( $jsonFile ) ) );
 		}
 
-		$serialFile	= $shelf->path.'index.serial';
+		$serialFile	= $source->path.'index.serial';
 		if( file_exists( $serialFile ) ){
 			$this->out( 'Found index serial file.' );
 			if( $this->flags->verbose )
@@ -74,7 +74,7 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 		}
 
 //		if( !$this->flags->quiet )
-//			$this->client->out( 'Source "'.$shelf->id.'" has been enabled.' );
+//			$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
 	}
 
 	protected function printSettings( $settings )

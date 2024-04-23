@@ -53,7 +53,7 @@ class Hymn_Module_Library_Installed
 		return Hymn_Module_Reader::load( $filename, $moduleId );
 	}
 
-	public function getAll( string $shelfId = NULL ): array
+	public function getAll( string $sourceId = NULL ): array
 	{
 //		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
 //			return self::$listModulesInstalled;									//  @todo realize shelves in cache
@@ -67,7 +67,7 @@ class Hymn_Module_Library_Installed
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 				$module	= $this->get( $key );
-				if( !$shelfId || $module->installSource === $shelfId )
+				if( !$sourceId || $module->installSource === $sourceId )
 					$list[$key]	= $module;
 			}
 		}
@@ -76,9 +76,9 @@ class Hymn_Module_Library_Installed
 		return $list;
 	}
 
-	public function has( string $moduleId, string $shelfId = NULL ): bool
+	public function has( string $moduleId, string $sourceId = NULL ): bool
 	{
-		$list	= $this->getAll( $shelfId );
+		$list	= $this->getAll( $sourceId );
 		return array_key_exists( $moduleId, $list );
 	}
 }

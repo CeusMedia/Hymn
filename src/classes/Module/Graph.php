@@ -105,7 +105,7 @@ class Hymn_Module_Graph
 			if( $relation->type !== 'module' )
 			 	continue;
 			if( $relation->source ){
-				if( !$this->library->isAvailableModuleInShelf( $neededModuleId, $relation->source ) ){
+				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
 					$message	= 'Module %s needs module %s from source %s, which is missing.';
 					$this->client->outError( vsprintf( $message, [
 						$module->id,

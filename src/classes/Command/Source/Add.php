@@ -80,51 +80,51 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !isset( $config->sources ) )
 			$config->sources	= [];
 
-		$shelf			= [];
+		$source			= [];
 		$connectable	= FALSE;
 		do{
 			foreach( $this->questions as $question ){												//  iterate questions
-				if( !isset( $shelf[$question['key']] ) )
-					$shelf[$question['key']]	= $question['default'];
+				if( !isset( $source[$question['key']] ) )
+					$source[$question['key']]	= $question['default'];
 				$input	= new Hymn_Tool_CLI_Question(												//  ask for value
 					$this->client,
 					$question['label'],
 					$question['type'],
-					$shelf[$question['key']],														//  preset default or custom value
+					$source[$question['key']],														//  preset default or custom value
 					$question['options'] ?? [],												//  realize options
 					FALSE																			//  no break = inline question
 				);
-				$shelf[$question['key']]	= $input->ask();										//  assign given value
+				$source[$question['key']]	= $input->ask();										//  assign given value
 			}
-			if( isset( $config->sources[$shelf['key']] ) )
-				$this->client->outError( 'Source with ID "'.$shelf['key'].'" is already registered.' );
-			else if( $shelf['type'] === "folder" && !file_exists( $shelf['path'] ) )
+			if( isset( $config->sources[$source['key']] ) )
+				$this->client->outError( 'Source with ID "'.$source['key'].'" is already registered.' );
+			else if( $source['type'] === "folder" && !file_exists( $source['path'] ) )
 				$this->client->outError( 'Path to module library source is not existing.' );
 			else
 				$connectable	= TRUE;																//  note connectability for loop break
-			if( $shelf['type'] === "folder" ){
-				$shelf['path']	= realpath( $shelf['path'] );
-				$shelf['path']	= rtrim( $shelf['path'], '/' ).'/';
+			if( $source['type'] === "folder" ){
+				$source['path']	= realpath( $source['path'] );
+				$source['path']	= rtrim( $source['path'], '/' ).'/';
 			}
 		}
 		while( !$connectable );																		//  repeat until connectable
-		$shelfId		= $shelf['key'];
-		$shelf['title']	= $shelf['title'] ? $shelf['title'] : $shelf['key'];
+		$sourceId		= $source['key'];
+		$source['title']	= $source['title'] ? $source['title'] : $source['key'];
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$shelfId.'" would have been added.' );
+				$this->out( 'Source "'.$sourceId.'" would have been added.' );
 			return;
 		}
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
-		$json->sources[$shelfId] = Hymn_Structure_Config_Source::fromArray( [
+		$json->sources[$sourceId] = Hymn_Structure_Config_Source::fromArray( [
 			'active'	=> TRUE,
-			'title'		=> $shelf['title'],
-			'type'		=> $shelf['type'],
-			'path'		=> $shelf['path'],
+			'title'		=> $source['title'],
+			'type'		=> $source['type'],
+			'path'		=> $source['path'],
 		] );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$shelfId.'" has been added.' );
+			$this->out( 'Source "'.$sourceId.'" has been added.' );
 	}
 }

@@ -37,23 +37,23 @@
  */
 abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
 {
-	protected function getShelfByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL )
+	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL )
 	{
 		$arguments  = $arguments ? $arguments : $this->client->arguments;
-		$shelfId	= $arguments->getArgument( $position );
+		$sourceId	= $arguments->getArgument( $position );
 
-		if( !strlen( trim( $shelfId ) ) ){
+		if( !strlen( trim( $sourceId ) ) ){
 			if( $this->flags->force )
 				return;
 			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
 		}
 
 		$shelves	= $this->getLibrary()->getShelves();
-		if( !array_key_exists( $shelfId, $shelves ) ){
+		if( !array_key_exists( $sourceId, $shelves ) ){
 			if( $this->flags->force )
 				return;
 			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
 		}
-		return $shelves[$shelfId];
+		return $shelves[$sourceId];
 	}
 }
