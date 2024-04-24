@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -43,9 +43,9 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		$config		= $this->client->getConfig();
+//		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$term		= $this->client->arguments->getArgument();
 		$sourceId	= $this->client->arguments->getArgument( 1 );
@@ -60,23 +60,18 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 			$msgEntry	= '- %s v%s (%s)';
 			$modulesAvailable	= $this->getAvailableModulesMap( $sourceId );
 			$modulesInstalled	= $library->listInstalledModules( $sourceId );
-			foreach( $modulesAvailable as $moduleId => $module ){
-				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
-					$modulesFound[$moduleId]	= $module;
-				}
-			}
 		}
 		else{
 			$modulesAvailable	= $this->getAvailableModulesMap();
 			$modulesInstalled	= $library->listInstalledModules();
-			foreach( $modulesAvailable as $moduleId => $module ){
-				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
-					$modulesFound[$moduleId]	= $module;
-				}
+		}
+		foreach( $modulesAvailable as $moduleId => $module ){
+			if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
+				$modulesFound[$moduleId]	= $module;
 			}
 		}
 		$this->out( sprintf( $msgTotal, count( $modulesFound ), $sourceId ) );
-		foreach( $modulesFound as $moduleId => $module ){
+		foreach( $modulesFound as $module ){
 			if( $this->flags->verbose ){
 				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
 				$this->out( $msg );

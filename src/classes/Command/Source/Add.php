@@ -33,37 +33,37 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $questions	= array(
-		array(
+	protected array $questions	= [
+		[
 			'key'		=> 'key',
 			'label'		=> "- Source ID",
 			'type'		=> 'string',
 			'default'	=> 'Local_Modules',
-		),
-		array(
+		],
+		[
 			'key'		=> 'type',
 			'label'		=> "- Source type",
 			'type'		=> 'string',
 			'default'	=> 'folder',
 			'options'	=> ["folder"],
-		),
-		array(
+		],
+		[
 			'key'		=> 'path',
 			'label'		=> "- Source path",
 			'type'		=> 'string',
 			'default'	=> NULL,
-		),
-		array(
+		],
+		[
 			'key'		=> 'title',
 			'label'		=> "- Source description",
 			'type'		=> 'string',
 			'default'	=> NULL,
-		),
-	);
+		],
+	];
 
 	/**
 	 *	Execute this command.
@@ -109,7 +109,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 		while( !$connectable );																		//  repeat until connectable
 		$sourceId		= $source['key'];
-		$source['title']	= $source['title'] ? $source['title'] : $source['key'];
+		$source['title']	= $source['title'] ?: $source['key'];
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )

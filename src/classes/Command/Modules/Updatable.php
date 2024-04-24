@@ -46,7 +46,7 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 //		$config		= $this->client->getConfig();
 //		$relation	= new Hymn_Module_Graph( $this->client, $this->getLibrary() );					//  @todo use to find new required modules

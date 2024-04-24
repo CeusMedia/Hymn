@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Library_Available
 {
@@ -50,9 +50,11 @@ class Hymn_Module_Library_Available
 	];
 
 	protected Hymn_Client $client;
-	protected int $mode			= self::MODE_AUTO;
-	protected array $modules		= [];
-	protected array $shelves		= [];
+	protected int $mode					= self::MODE_AUTO;
+	protected array $modules			= [];
+
+	/** @var	array<string,object>	$sources  */
+	protected array $sources			= [];
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -94,7 +96,7 @@ class Hymn_Module_Library_Available
 				if( !$candidate->isDeprecated )
 					return $candidate;
 		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId );
+			throw new Exception( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
@@ -142,8 +144,13 @@ class Hymn_Module_Library_Available
 
 	public function getFromSource( string $moduleId, string $sourceId, bool $strict = TRUE )
 	{
-		$this->loadModulesInShelves();
-		if( !in_array( $sourceId, array_keys( $this->getActiveShelves() ) ) ){
+		if( '' === trim( $moduleId ) ){
+			if( $strict )
+				throw new InvalidArgumentException( __METHOD__.' > Module ID cannot be empty' );
+			return NULL;
+		}
+		$this->loadModulesInSources();
+		if( !in_array( $sourceId, array_keys( $this->getActiveSources() ) ) ){
 			if( $strict )
 				throw new DomainException( 'Source "'.$sourceId.'" is not active' );
 			return NULL;
@@ -152,7 +159,7 @@ class Hymn_Module_Library_Available
 			if( $module->id === $moduleId )
 				return $module;
 		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId );
+			throw new Exception( 'Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
@@ -235,7 +242,11 @@ class Hymn_Module_Library_Available
 			$module->frameworks['Hydrogen']	= '<0.9';
 	}
 
-	protected function listModulesInSource( $source ): array
+	/**
+	 *	@param		object		$source
+	 *	@return		array<string,object>
+	 */
+	protected function listModulesInSource( object $source ): array
 	{
 		$path	= $source->path;
 		$this->client->outVeryVerbose( '- Path: '.$path );
@@ -293,7 +304,7 @@ class Hymn_Module_Library_Available
 				}
 				break;
 		}
-		$sourceTypesHavingMetaData = [self::MODE_SERIAL, self::MODE_JSON];				//  list of source types supporting source meta data
+		$sourceTypesHavingMetaData = [self::MODE_SERIAL, self::MODE_JSON];				//  list of source types supporting source metadata
 		if( isset( $index ) && in_array( $mode, $sourceTypesHavingMetaData, TRUE ) ){	//  found source has meta data
 			$source	= $this->sources[$source->id];
 			if( isset( $index->date ) && strlen( trim( $index->date ) ) )				//  source index has date
@@ -315,7 +326,7 @@ class Hymn_Module_Library_Available
 		/** @var object{id: string, path: string, type: string, active: bool, default: bool, title: string, date: ?string} $source */
 		foreach($this->sources as $source ){														//  iterate sources
 			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $source->id ) );
-			if( !$source->active )																	//  if source if deactivated
+			if( !$source->active )																	//  if source is deactivated
 				continue;																			//  skip this source
 			$this->modules[$source->id]	= [];													//  prepare empty module list for source
 			foreach( $this->listModulesInSource( $source ) as $module ){								//  iterate modules in source path

@@ -79,6 +79,11 @@ class Hymn_Module_Library
 
 	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE )
 	{
+		if( '' === trim( $moduleId ) ){
+			if( $strict )
+				throw new InvalidArgumentException( __METHOD__.' > Module ID cannot be empty' );
+			return NULL;
+		}
 		return $this->available->getFromSource( $moduleId, $sourceId, $strict );
 	}
 
@@ -133,6 +138,8 @@ class Hymn_Module_Library
 
 	public function isAvailableModuleInSource( string $moduleId, string $sourceId ): bool
 	{
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot be empty' );
 		return (bool) $this->available->getFromSource( $moduleId, $sourceId, FALSE );
 	}
 

@@ -129,7 +129,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVerbose( array|string|NULL $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVerbose( $lines, $newLine );
 	}
@@ -141,7 +141,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVeryVerbose( array|string|NULL $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVeryVerbose( $lines, $newLine );
 	}
@@ -150,7 +150,7 @@ abstract class Hymn_Command_Abstract
 	 *	This method is automatically called by client dispatcher.
 	 *	Commands need to implement this method.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int|void
 	 */
 	abstract public function run();
 
@@ -171,13 +171,13 @@ abstract class Hymn_Command_Abstract
 		return $question->ask();
 	}
 
-	protected function denyOnProductionMode()
+	protected function denyOnProductionMode(): void
 	{
 		if( Hymn_Client::$mode === 'prod' )
 			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
-	protected function deprecate( $messageLines )
+	protected function deprecate( $messageLines ): void
 	{
 		$this->client->outDeprecation( $messageLines );
 	}
@@ -188,7 +188,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		string|NULL		$sourceId		ID of source or all [all,*] (default)
 	 *	@param		boolean			$strict			Flag: throw exception if source ID is not existing
 	 *	@return		string|FALSE|NULL
-	 *	@throws		\RangeException				if source ID is given and not existing
+	 *	@throws		RangeException					if source ID is given and not existing
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
 	 */
@@ -201,7 +201,7 @@ abstract class Hymn_Command_Abstract
 		if( $library->isSource( $sourceId ) )
 			return $sourceId;
 		if( $strict )
-			throw new \RangeException( 'Source ID '.$sourceId.' is invalid' );
+			throw new RangeException( 'Source ID '.$sourceId.' is invalid' );
 		return FALSE;
 	}
 
@@ -269,6 +269,7 @@ abstract class Hymn_Command_Abstract
 			}
 		}
 	}
+
 	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds ): array
 	{
 		$list	= [];

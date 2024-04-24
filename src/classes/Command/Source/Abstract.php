@@ -33,25 +33,25 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
 {
-	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL )
+	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL ): ?object
 	{
-		$arguments  = $arguments ? $arguments : $this->client->arguments;
+		$arguments  = $arguments ?: $this->client->arguments;
 		$sourceId	= $arguments->getArgument( $position );
 
 		if( !strlen( trim( $sourceId ) ) ){
 			if( $this->flags->force )
-				return;
+				return NULL;
 			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
 		}
 
 		$sources	= $this->getLibrary()->getSources();
 		if( !array_key_exists( $sourceId, $sources ) ){
 			if( $this->flags->force )
-				return;
+				return NULL;
 			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
 		}
 		return $sources[$sourceId];

@@ -33,11 +33,11 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $defaultPath;
+	protected string $defaultPath;
 
 	/**
 	 *	Execute this command.
@@ -47,7 +47,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -88,7 +88,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 					'File size:    '.$fileSize,														//  show import file size
 					'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),		//  show server host and port from config
 					'Database:     '.$dbc->getConfig( 'name' ),										//  show database name from config
-					'Table prefix: '.( $prefix ? $prefix : '(none)' ),								//  show table prefix from config
+					'Table prefix: '.( $prefix ?: '(none)' ),										//  show table prefix from config
 					'Access as:    '.$dbc->getConfig( 'username' ),									//  show username from config
 				] );
 				$this->out( 'Loading import file ...' );
@@ -105,7 +105,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 		$this->defaultPath		= $this->client->getConfigPath().'sql/';
 	}

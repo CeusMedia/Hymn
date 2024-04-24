@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Tool_CLI_Config
 {
@@ -98,7 +98,7 @@ class Hymn_Tool_CLI_Config
 
 		if( [] === $modules ){																		//  no map of resource modules with config option key prefix given on function call
 			$modules	= [];																		//  set empty map
-			if( !isset( $this->config->database->modules ) )										//  no database resource modules defined in hymn file (default)
+			if( '' === ( $this->config->database->modules ?? '' ) )									//  no database resource modules defined in hymn file (default)
 				$this->config->database->modules	= 'Resource_Database:access.';					//  set at least pseudo-default resource module from CeusMedia:HydrogenModules
 			$parts	= preg_split( '/\s*,\s*/', $this->config->database->modules );					//  split comma separated list if resource modules in registration format
 			foreach( $parts as $moduleRegistration ){												//  iterate these module registrations

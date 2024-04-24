@@ -45,7 +45,7 @@ class Hymn_Command_Version extends Hymn_Command_Abstract implements Hymn_Command
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 //		$this->client->out( Hymn_Client::$version.' ('.Hymn_Client::$language.')' );
 

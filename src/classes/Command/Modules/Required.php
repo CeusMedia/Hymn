@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -46,16 +46,15 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 	 *	@return		void
 	 *	@todo		replace by recursive library solution or remove
 	 */
-	public function run()
+	public function run(): void
 	{
-		$modules	= (array) $this->client->getConfig()->modules;
 		$library	= $this->getLibrary();
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
-		foreach( $modules as $moduleId => $moduleConfig ){
+		foreach( $this->client->getConfig()->modules as $moduleId => $moduleConfig ){
 			$module		= $library->getAvailableModule( $moduleId, NULL, FALSE );
 			if( !$module ){
-				$this->client->out( "! ".$moduleId.' MISSING' );
+				$this->client->out( '! '.$moduleId.' MISSING' );
 				continue;
 			}
 			$relation->addModule( $module );
@@ -63,7 +62,7 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 		$listInstalled	= [];
 		$listRequired	= [];
 		$modules	= $relation->getOrder();
-//		$this->client->out( count( $modules )." modules required:" );
+//		$this->client->out( count( $modules ).' modules required:' );
 		foreach( $modules as $module ){
 			if( $library->isInstalledModule( $module->id ) )
 				$listInstalled[]	= $module;
@@ -78,13 +77,13 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 		if( count( $listInstalled ) ){
 			$this->client->outVerbose( count( $listInstalled ).' required module(s) installed:' );
 			foreach( $listInstalled as $module ){
-				$this->client->outVerbose( "- ".$module->id.'' );
+				$this->client->outVerbose( '- '.$module->id );
 			}
 		}
 		if( count( $listRequired ) ){
 			$this->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
 			foreach( $listRequired as $module ){
-				$this->out( "- ".$module->id.'' );
+				$this->out( '- '.$module->id );
 			}
 		}
 	}

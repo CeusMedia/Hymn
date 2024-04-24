@@ -18,9 +18,10 @@ $options['mode']	= in_array( $options['mode'], $modes ) ? $options['mode'] : $mo
 
 print('Mode: '.$options['mode'].PHP_EOL);
 print('PHP:  '.$options['php'].PHP_EOL);
+//print('Term: '.getEnv( 'TERM' ).PHP_EOL);
 
 /*  --  SETUP  --  */
-$cols			= ( $cols = intval( `tput cols` ) ) ? $cols : 80;
+$cols			= ( $cols = intval( `tput cols -T xterm-256color` ) ) ? $cols : 80;
 $rootPath		= dirname( __DIR__ );
 $pharFileName	= 'hymn.phar';
 $pharFilePath	= $rootPath.'/'.$pharFileName;

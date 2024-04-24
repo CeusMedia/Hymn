@@ -33,8 +33,8 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
- *	@todo    		implement option includes and excludes (using inference and recursion)
+ *	@todo			code documentation
+ *	@todo			implement option includes and excludes (using inference and recursion)
  */
 class Hymn_Tool_CLI_Arguments
 {

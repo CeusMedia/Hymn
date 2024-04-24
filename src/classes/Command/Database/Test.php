@@ -45,7 +45,7 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;

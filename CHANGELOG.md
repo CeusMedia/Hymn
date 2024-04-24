@@ -6,6 +6,7 @@
 	- Strictly typed parameters and return values
 	- Refactored to use new language features
 	- Support configurable PHP binary path in build process
+	- Improved code strictness (typed parameters and return values)
 	- Reach PHPStan level 2, 3, 4 & 5 for PHP 8.1
 - Handle hymn file data as object:
 	- Add Hymn_Tool_ConfigFile as file parser (reader) and serializer (writer)
@@ -18,10 +19,12 @@
 - Core, commands and build:
 	- Refactor module reader to prepare merge with framework data structure
 	- Allow force on app-base-config-set
+	- Use new exception trace view on error in verbose mode.
 	- Cleanup
 - Minor updates:
 	- Add badges
 	- Update copyright.
+	- Renamed internally used 'shelf/shelves' to 'source/sources'.
 	- Fixed typos
 	- Improved code documentation
 

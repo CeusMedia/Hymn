@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,7 +45,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$library	= $this->getLibrary();
 		$sourceId	= $this->client->arguments->getArgument();

@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
 {
@@ -43,7 +43,7 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( !( $source = $this->getSourceByArgument() ) )
 			return;
@@ -77,7 +77,7 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 //			$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
 	}
 
-	protected function printSettings( $settings )
+	protected function printSettings( $settings ): void
 	{
 		unset( $settings->modules );
 		$data	= (array) $settings;

@@ -41,7 +41,7 @@ interface Hymn_Command_Interface
 	/**
 	 *	Execute this command.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int|void
 	 */
 	public function run();
 }

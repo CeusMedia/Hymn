@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -47,7 +47,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( $this->flags->dry && !$this->flags->quiet )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
@@ -74,9 +74,9 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 		else{
-			$this->out( 'Mode: Install ALL ('.count((array)$config->modules).')' );
+			$this->out( 'Mode: Install ALL ('.count( $config->modules ).')' );
 			foreach( $config->modules as $moduleId => $moduleConfig ){
-				if( preg_match( "/^@/", $moduleId ) )
+				if( '' === $moduleId || str_starts_with( $moduleId, '@' ) )
 					continue;
 				$sourceId	= $this->detectModuleSource( $moduleId );
 				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
@@ -139,8 +139,11 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		}*/
 	}
 
-	protected function detectModuleSource( string $moduleId )
+	protected function detectModuleSource( string $moduleId ): ?string
 	{
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot by empty' );
+
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$defaultId	= $library->getDefaultSource();

@@ -45,7 +45,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 //		$key	= $this->client->arguments->getArgument();
 		$library	= $this->getLibrary();

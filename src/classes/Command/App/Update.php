@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  *	@todo 			handle relations (new relations after update)
  */
 class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
@@ -74,7 +74,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
 			$source				= $installedModule->installSource;									//  get installed module
 			$availableModule	= $library->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
-			if( $availableModule ){																	//  installed module is available atleast
+			if( $availableModule ){																	//  installed module is available at least
 				$versionInstalled	= $installedModule->version;									//  shortcut installed module version
 				$versionAvailable	= $availableModule->version;									//  shortcut available module version
 				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){					//  installed module is outdated

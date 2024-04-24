@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,7 +45,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -53,22 +53,22 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 			return;
 
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			$this->outError("Database can NOT be connected.", Hymn_Client::EXIT_ON_SETUP );
+			$this->outError('Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
 
 		$dbc	= $this->client->getDatabase();
 		$prefix	= $dbc->getConfig( 'prefix' );
 		$tables	= $dbc->getTables( $prefix );
 		if( !$tables ){
 			if( !$this->flags->quiet )
-				$this->out( "Database is empty" );
+				$this->out( 'Database is empty' );
 			return;
 		}
 		if( !( $this->flags->force ) ){
 			if( $this->flags->quiet )
-				$this->outError( "Quiet mode needs force mode (-f|--force)", Hymn_Client::EXIT_ON_INPUT );
-			$this->out( "Database tables:" );
+				$this->outError( 'Quiet mode needs force mode (-f|--force)', Hymn_Client::EXIT_ON_INPUT );
+			$this->out( 'Database tables:' );
 			foreach( $tables as $table )
-				$this->out( "- ".$table );
+				$this->out( '- '.$table );
 			$question	= new Hymn_Tool_CLI_Question(
 				$this->client,
 				'Do you really want to drop these tables?',
@@ -84,11 +84,12 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		foreach( $tables as $table ){
 			$this->client->outVerbose( "- Drop table '".$table."'" );
 			if( !$this->flags->dry )
+				/** @noinspection SqlNoDataSourceInspection */
 				$dbc->query( "DROP TABLE ".$table );
 		}
 		if( !$this->flags->dry )
 			$dbc->exec( 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' );
 		if( !$this->flags->quiet )
-			$this->out( "Database cleared" );
+			$this->out( 'Database cleared' );
 	}
 }

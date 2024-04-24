@@ -146,7 +146,7 @@ class KeepRuleDate extends DateTime
 	 * @param		string					$datetime
 	 * @param		DateTimeZone|NULL		$timezone
 	 */
-	public function __construct( $datetime = 'now', DateTimeZone $timezone = null )
+	public function __construct( string $datetime = 'now', DateTimeZone|NULL $timezone = null )
 	{
 		try{
 			parent::__construct( $datetime, $timezone );

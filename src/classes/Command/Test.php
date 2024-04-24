@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,7 +45,7 @@ class Hymn_Command_Test extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$command	= new Hymn_Command_Test_Syntax( $this->client );
 		$command->run();

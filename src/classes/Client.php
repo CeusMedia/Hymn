@@ -378,7 +378,7 @@ class Hymn_Client
 			$args[]	= $argument;
 
 		foreach( $this->arguments->getOptions() as $key => $value ){
-			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
 				continue;
 			if( in_array( $key, $ignoreOptions ) )
 				continue;
@@ -390,7 +390,7 @@ class Hymn_Client
 		foreach( $addOptions as $key => $value ){
 			if( array_key_exists( $key, $args ) )
 				continue;
-			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
 				continue;
 			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
 				$args[]	= '--'.$key;

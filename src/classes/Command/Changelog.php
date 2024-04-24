@@ -46,7 +46,7 @@ class Hymn_Command_Changelog extends Hymn_Command_Abstract implements Hymn_Comma
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( file_exists( $this->filePath ) ){
 			$this->out( file_get_contents( $this->filePath ) );

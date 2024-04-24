@@ -40,7 +40,7 @@ class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hym
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -67,7 +67,7 @@ class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hym
 		if( 0 === count( $data ) ) {
 			$this->out( 'Empty result.' );
 		} else {
-			$keys	= array_keys( reset( $data ) );
+//			$keys	= array_keys( reset( $data ) );
 			$table	= new Hymn_Tool_CLI_Table( $this->client );
 			$table->detectWidth();
 			print( $table->render( $data ).PHP_EOL );

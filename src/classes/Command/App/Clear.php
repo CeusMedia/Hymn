@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -58,7 +58,7 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !file_exists( Hymn_Client::$fileName ) )
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
-		$config		= $this->client->getConfig();
+//		$config		= $this->client->getConfig();
 		$actions	= $this->client->arguments->getArguments();
 		if( !count( $actions ) )
 			$actions	= ['all'];

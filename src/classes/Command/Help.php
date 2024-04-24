@@ -44,7 +44,7 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$command	= $this->client->arguments->getArgument();				//  get first argument as command
 		$locale		= $this->client->getLocale();								//  shortcut client locale handler

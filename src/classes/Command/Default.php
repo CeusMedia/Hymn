@@ -33,7 +33,7 @@
  *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,7 +45,7 @@ class Hymn_Command_Index extends Hymn_Command_Abstract implements Hymn_Command_I
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$language	= Hymn_Client::$language;
 		$fileName	= 'hymn.phar/locales/'.$language.'/index.txt';									//  get file name of help text
