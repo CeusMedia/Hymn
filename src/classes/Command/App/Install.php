@@ -59,7 +59,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 
 		$moduleIds			= $this->client->arguments->getArguments();
 		$defaultSourceId		= $library->getDefaultSource();
-		$activeSourceList	= $library->getActiveShelves();
+		$activeSourceList	= $library->getActiveSources();
 		$activeSourceIds		= array_keys( $activeSourceList );
 		$listInstalled		= $library->listInstalledModules();
 
@@ -155,7 +155,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			if( $library->isAvailableModuleInSource( $moduleId, $defaultId ) )
 				return $defaultId;
 		}
-		$moduleSourceIds	= array_keys( $library->getAvailableModuleShelves( $moduleId ) );
+		$moduleSourceIds	= array_keys( $library->getAvailableModuleSources( $moduleId ) );
 		if( $moduleSourceIds )
 			return $moduleSourceIds[0];
 		return NULL;

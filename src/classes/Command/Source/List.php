@@ -48,9 +48,9 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	public function run()
 	{
 		$library	= $this->getLibrary();
-		$shelves	= $library->getActiveShelves();
-		$this->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
-		foreach( $shelves as $sourceId => $source ){
+		$sources	= $library->getActiveSources();
+		$this->out( sprintf( 'Found %d source(s):', count( $sources ) ) );
+		foreach( $sources as $sourceId => $source ){
 			$modules	= $library->getAvailableModules( $sourceId );
 			$this->out( [
 				'* '.$sourceId.':',

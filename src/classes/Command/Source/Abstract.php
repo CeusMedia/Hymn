@@ -48,12 +48,12 @@ abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
 			$this->client->outError( 'No source ID given.', Hymn_Client::EXIT_ON_INPUT );
 		}
 
-		$shelves	= $this->getLibrary()->getShelves();
-		if( !array_key_exists( $sourceId, $shelves ) ){
+		$sources	= $this->getLibrary()->getSources();
+		if( !array_key_exists( $sourceId, $sources ) ){
 			if( $this->flags->force )
 				return;
 			$this->client->outError( 'Given source ID is invalid.', Hymn_Client::EXIT_ON_INPUT );
 		}
-		return $shelves[$sourceId];
+		return $sources[$sourceId];
 	}
 }

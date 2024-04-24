@@ -61,11 +61,11 @@ class Hymn_Module_Library_Available
 
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
   {
-		if( in_array( $sourceId, array_keys( $this->shelves ) ) )
+		if( in_array( $sourceId, array_keys( $this->sources ) ) )
 			throw new Exception( 'Source already set by ID: '.$sourceId );
-		$activeShelves	= $this->getShelves( ['default' => TRUE] );
-		$isDefault		= $active && !count( $activeShelves );
-		$this->shelves[$sourceId]	= (object) [
+		$activeSources	= $this->getSources( ['default' => TRUE] );
+		$isDefault		= $active && !count( $activeSources );
+		$this->sources[$sourceId]	= (object) [
 			'id'		=> $sourceId,
 			'path'		=> $path,
 			'type'		=> $type,
@@ -74,12 +74,12 @@ class Hymn_Module_Library_Available
 			'title'		=> $title,
 			'date'		=> NULL,
 		];
-//		ksort( $this->shelves );
+//		ksort( $this->sources );
 	}
 
 	public function get( string $moduleId, string $sourceId = NULL, bool $strict = TRUE ): ?object
 	{
-		$this->loadModulesInShelves();
+		$this->loadModulesInSources();
 		if( $sourceId )
 			return $this->getFromSource( $moduleId, $sourceId, $strict );
 		$candidates	= [];
@@ -98,14 +98,14 @@ class Hymn_Module_Library_Available
 		return NULL;
 	}
 
-	public function getActiveShelves( bool $withModules = FALSE ): array
+	public function getActiveSources( bool $withModules = FALSE ): array
 	{
-		return $this->getShelves( ['active' => TRUE], $withModules );
+		return $this->getSources( ['active' => TRUE], $withModules );
 	}
 
 	public function getAll( string $sourceId = NULL ): array
 	{
-		$this->loadModulesInShelves();
+		$this->loadModulesInSources();
 		$list	= [];
 		if( $sourceId ){
 			if( !isset( $this->modules[$sourceId] ) )
@@ -134,7 +134,7 @@ class Hymn_Module_Library_Available
 
 	public function getDefaultSource(): string
 	{
-		foreach( $this->shelves as $sourceId => $source )
+		foreach($this->sources as $sourceId => $source )
 			if( $source->active && $source->default )
 				return $sourceId;
 		throw new RuntimeException( 'No default source available' );
@@ -170,9 +170,9 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 
-	public function getModuleShelves( string $moduleId ): array
+	public function getModuleSources( string $moduleId ): array
 	{
-		$this->loadModulesInShelves();
+		$this->loadModulesInSources();
 		$list	= [];
 		foreach( $this->modules as $sourceId => $modules ){
 			if( array_key_exists( $moduleId, $modules ) )
@@ -183,25 +183,25 @@ class Hymn_Module_Library_Available
 
 	public function getSource( string $sourceId, bool $withModules = FALSE )
 	{
-		if( !array_key_exists( $sourceId, $this->shelves ) )
+		if( !array_key_exists( $sourceId, $this->sources ) )
 			throw new DomainException( 'Invalid source ID: '.$sourceId );
-		$source	= $this->shelves[$sourceId];
+		$source	= $this->sources[$sourceId];
 		if( !$withModules )
 			unset( $source->modules );
 		return $source;
 	}
 
-	public function getShelves( array $filters = [], bool $withModules = FALSE ): array
+	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
 		$list	= [];																			//  prepare empty source list
-		foreach( $this->shelves as $sourceId => $source ){											//  iterate known shelves
+		foreach($this->sources as $sourceId => $source ){											//  iterate known sources
 			foreach( $filters as $filterKey => $filterValue )										//  iterate given filters
 				if( property_exists( $source, $filterKey ) )											//  filter key is source property
 					if( $source->{$filterKey} !== $filterValue )										//  source property value mismatches filter value
 						continue 2;																	//  skip this source
 			$list[$sourceId]	= $this->getSource( $sourceId, $withModules );							//  enlist source
 		}
-		return $list;																				//  return list of found shelves
+		return $list;																				//  return list of found sources
 	}
 
 	public function readModule( string $path, string $moduleId ): stdClass
@@ -280,8 +280,8 @@ class Hymn_Module_Library_Available
 				break;
 			case self::MODE_FOLDER:
 				$this->client->outVeryVerbose( '- Strategy: folder' );
-	//			if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize shelves in cache
-	//				return $this->listModulesAvailable;									//  @todo realize shelves in cache
+	//			if( $this->useCache && $this->listModulesAvailable !== NULL )			//  @todo realize sources in cache
+	//				return $this->listModulesAvailable;									//  @todo realize sources in cache
 				$iterator	= new RecursiveDirectoryIterator( $path );
 				$index		= new RecursiveIteratorIterator( $iterator, RecursiveIteratorIterator::SELF_FIRST );
 				foreach( $index as $entry ){
@@ -295,7 +295,7 @@ class Hymn_Module_Library_Available
 		}
 		$sourceTypesHavingMetaData = [self::MODE_SERIAL, self::MODE_JSON];				//  list of source types supporting source meta data
 		if( isset( $index ) && in_array( $mode, $sourceTypesHavingMetaData, TRUE ) ){	//  found source has meta data
-			$source	= $this->shelves[$source->id];
+			$source	= $this->sources[$source->id];
 			if( isset( $index->date ) && strlen( trim( $index->date ) ) )				//  source index has date
 				$source->date	= $index->date;											//  define date of source
 			if( isset( $index->url ) && strlen( trim( $index->url ) ) )					//  source index a hyperlink
@@ -303,16 +303,17 @@ class Hymn_Module_Library_Available
 			if( isset( $index->description ) && strlen( trim( $index->description ) ) )	//  source index has a description
 				$source->title	= strip_tags( $index->description );
 		}
-//		$this->listModulesAvailable	= $list;									//  @todo realize shelves in cache
+//		$this->listModulesAvailable	= $list;									//  @todo realize sources in cache
 		return $list;
 	}
 
-	protected function loadModulesInShelves( bool $force = FALSE ): void
-  {
+	protected function loadModulesInSources( bool $force = FALSE ): void
+	{
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
 		$this->modules	= [];																	//  reset module list
-		foreach( $this->shelves as $source ){														//  iterate sources
+		/** @var object{id: string, path: string, type: string, active: bool, default: bool, title: string, date: ?string} $source */
+		foreach($this->sources as $source ){														//  iterate sources
 			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $source->id ) );
 			if( !$source->active )																	//  if source if deactivated
 				continue;																			//  skip this source

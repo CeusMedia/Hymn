@@ -55,8 +55,8 @@ class Hymn_Module_Library_Installed
 
 	public function getAll( string $sourceId = NULL ): array
 	{
-//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
-//			return self::$listModulesInstalled;									//  @todo realize shelves in cache
+//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize sources in cache
+//			return self::$listModulesInstalled;									//  @todo realize sources in cache
 		$list			= [];
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		if( file_exists( $pathModules ) ){
@@ -72,7 +72,7 @@ class Hymn_Module_Library_Installed
 			}
 		}
 		ksort( $list );
-//		self::$listModulesInstalled	= $list;									//  @todo realize shelves in cache
+//		self::$listModulesInstalled	= $list;									//  @todo realize sources in cache
 		return $list;
 	}
 

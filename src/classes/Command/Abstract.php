@@ -225,7 +225,7 @@ abstract class Hymn_Command_Abstract
 
 	/**
 	 *	Returns library of available modules in found sources.
-	 *	Note: Several sources are stored as shelves, so same module IDs are allowed.
+	 *	Note: Several sources are stored as sources, so same module IDs are allowed.
 	 *	Loads library sources on first call, returns already loaded library on second call.
 	 *	Reloading library is possible with flag 'forceReload'.
 	 *	@access		protected

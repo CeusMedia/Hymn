@@ -61,7 +61,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 			$message	= 'No available modules found.';
 			if( $sourceId )
 				$message	= 'No available modules found in source '.$sourceId.'.';
-			if( !$library->getShelves() )
+			if( !$library->getSources() )
 				$message	= 'No available modules found. No modules sources configured.';
 		}
 		$this->out( $message );

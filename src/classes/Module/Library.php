@@ -67,9 +67,9 @@ class Hymn_Module_Library
 		$this->available->addSource( $sourceId, $path, $type, $active, $title );
 	}
 
-	public function getActiveShelves( bool $withModules = FALSE ): array
+	public function getActiveSources( bool $withModules = FALSE ): array
 	{
-		return $this->available->getActiveShelves( $withModules );
+		return $this->available->getActiveSources( $withModules );
 	}
 
 	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE )
@@ -92,9 +92,9 @@ class Hymn_Module_Library
 		return $this->available->getAll( $sourceId );
 	}
 
-	public function getAvailableModuleShelves( string $moduleId ): array
+	public function getAvailableModuleSources( string $moduleId ): array
 	{
-		return $this->available->getModuleShelves( $moduleId );
+		return $this->available->getModuleSources( $moduleId );
 	}
 
 	public function getDefaultSource(): string
@@ -107,9 +107,9 @@ class Hymn_Module_Library
 		return $this->available->getSource( $sourceId, $withModules );
 	}
 
-	public function getShelves( array $filters = [], bool $withModules = FALSE ): array
+	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
-		return $this->available->getShelves( $filters, $withModules );
+		return $this->available->getSources( $filters, $withModules );
 	}
 
 	/**
@@ -143,20 +143,20 @@ class Hymn_Module_Library
 
 	public function isActiveSource( string $sourceId ): bool
 	{
-		return array_key_exists( $sourceId, $this->getActiveShelves() );
+		return array_key_exists( $sourceId, $this->getActiveSources() );
 	}
 
 	public function isSource( string $sourceId ): bool
 	{
-		return array_key_exists( $sourceId, $this->getShelves() );
+		return array_key_exists( $sourceId, $this->getSources() );
 	}
 
 	public function listInstalledModules( ?string $sourceId = NULL ): array
 	{
-//		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize shelves in cache
-//			return $this->listModulesInstalled;									//  @todo realize shelves in cache
+//		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize sources in cache
+//			return $this->listModulesInstalled;									//  @todo realize sources in cache
 		$list	= $this->installed->getAll( $sourceId );
-//		$this->listModulesInstalled	= $list;									//  @todo realize shelves in cache
+//		$this->listModulesInstalled	= $list;									//  @todo realize sources in cache
 		return $list;
 	}
 
