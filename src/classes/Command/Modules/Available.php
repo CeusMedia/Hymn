@@ -48,20 +48,20 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 	public function run()
 	{
 		$library	= $this->getLibrary();
-		$shelfId	= $this->client->arguments->getArgument();
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument();
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 
-		$modules	= $library->getAvailableModules( $shelfId );
+		$modules	= $library->getAvailableModules( $sourceId );
 		if( count( $modules ) ){
 			$message	= 'Found '.count( $modules ).' available modules:';
-			if( $shelfId )
-				$message	= 'Found '.count( $modules ).' available modules in source '.$shelfId.':';
+			if( $sourceId )
+				$message	= 'Found '.count( $modules ).' available modules in source '.$sourceId.':';
 		}
 		else{
 			$message	= 'No available modules found.';
-			if( $shelfId )
-				$message	= 'No available modules found in source '.$shelfId.'.';
-			if( !$library->getShelves() )
+			if( $sourceId )
+				$message	= 'No available modules found in source '.$sourceId.'.';
+			if( !$library->getSources() )
 				$message	= 'No available modules found. No modules sources configured.';
 		}
 		$this->out( $message );

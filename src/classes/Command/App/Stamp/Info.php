@@ -49,11 +49,11 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	{
 		$pathName	= $this->client->arguments->getArgument();
 		$types		= $this->client->arguments->getArgument( 1 );
-		$shelfId	= $this->client->arguments->getArgument( 2 );
+		$sourceId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
-//		$shelfId	= $this->evaluateShelfId( $shelfId );
-//		$modules	= $this->getInstalledModules( $shelfId );									//  load installed modules
-		$stamp		= $this->getStamp( $pathName, $shelfId );
+//		$sourceId	= $this->evaluateSourceId( $sourceId );
+//		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
+		$stamp		= $this->getStamp( $pathName, $sourceId );
 
 
 		$types		= !$types || $types === '*' ? 'all' : $types;
@@ -73,7 +73,7 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 		foreach( $stamp->modules as $module ){
 			if( $moduleId && $moduleId !== $module->id )
 				continue;
-			if( $shelfId && $shelfId !== 'all' && $shelfId !== $module->installSource )
+			if( $sourceId && $sourceId !== 'all' && $sourceId !== $module->installSource )
 				continue;
 			$this->out( 'Module: '.$module->title );
 			$this->out( str_repeat( '-', 48 ) );
@@ -106,7 +106,7 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 		}
 	}
 
-	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL ): ?string
+	protected function getLatestStamp( ?string $path = NULL, ?string $sourceId = NULL ): ?string
 	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
 		$path		= preg_replace( '@\.+/@', '', $path );
@@ -114,8 +114,8 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
 		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
-		if( $shelfId )
-			$pattern	= '/^stamp_'.preg_quote( $shelfId, '/' ).'_[0-9:_-]+\.json$/';
+		if( $sourceId )
+			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.json$/';
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
@@ -127,22 +127,22 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 *	...
 	 *	@access		protected
 	 *	@param		$pathName		...
-	 *	@param		$shelfId		...
+	 *	@param		$sourceId		...
 	 *	@return		object
 	 */
-	protected function getStamp( string $pathName, string $shelfId ): object
+	protected function getStamp( string $pathName, string $sourceId ): object
 	{
 		if( $pathName ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )
-				$fileName	= $this->getLatestStamp( NULL, $shelfId );
+				$fileName	= $this->getLatestStamp( NULL, $sourceId );
 			else if( file_exists( $pathName ) && is_dir( $pathName ) )
-				$fileName	= $this->getLatestStamp( $pathName, $shelfId );
+				$fileName	= $this->getLatestStamp( $pathName, $sourceId );
 			else if( file_exists( $pathName ) )
 				$fileName	= $pathName;
 		}
 		else
-			$fileName		= $this->getLatestStamp( NULL, $shelfId );
+			$fileName		= $this->getLatestStamp( NULL, $sourceId );
 		if( !( $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );

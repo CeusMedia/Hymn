@@ -185,23 +185,23 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		string|NULL		$shelfId		ID of shelf or all [all,*] (default)
-	 *	@param		boolean			$strict			Flag: throw exception if shelf ID is not existing
+	 *	@param		string|NULL		$sourceId		ID of source or all [all,*] (default)
+	 *	@param		boolean			$strict			Flag: throw exception if source ID is not existing
 	 *	@return		string|FALSE|NULL
-	 *	@throws		\RangeException				if shelf ID is given and not existing
+	 *	@throws		\RangeException				if source ID is given and not existing
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
 	 */
-	protected function evaluateShelfId( ?string $shelfId = NULL, bool $strict = TRUE )
+	protected function evaluateSourceId( ?string $sourceId = NULL, bool $strict = TRUE )
 	{
 		$all	= ['all', '*'];
-		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
+		if( is_null( $sourceId ) || in_array( $sourceId, $all ) )
 			return NULL;
 		$library	= $this->getLibrary();
-		if( $library->isShelf( $shelfId ) )
-			return $shelfId;
+		if( $library->isSource( $sourceId ) )
+			return $sourceId;
 		if( $strict )
-			throw new \RangeException( 'Source ID '.$shelfId.' is invalid' );
+			throw new \RangeException( 'Source ID '.$sourceId.' is invalid' );
 		return FALSE;
 	}
 
@@ -210,22 +210,22 @@ abstract class Hymn_Command_Abstract
 	 *	Reduce all available modules in library (from all source) to map by module ID.
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
-	 *	@param		string|NULL			$shelfId	...
+	 *	@param		string|NULL			$sourceId	...
 	 *	@return		array				Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
-	protected function getAvailableModulesMap( ?string $shelfId = NULL ): array
+	protected function getAvailableModulesMap( ?string $sourceId = NULL ): array
 	{
 		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= [];																		//  prepare empty list of available modules
-		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
+		foreach( $library->getAvailableModules( $sourceId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
 		return $moduleMap;																			//  return map of modules by ID
 	}
 
 	/**
 	 *	Returns library of available modules in found sources.
-	 *	Note: Several sources are stored as shelves, so same module IDs are allowed.
+	 *	Note: Several sources are stored as sources, so same module IDs are allowed.
 	 *	Loads library sources on first call, returns already loaded library on second call.
 	 *	Reloading library is possible with flag 'forceReload'.
 	 *	@access		protected
@@ -265,7 +265,7 @@ abstract class Hymn_Command_Abstract
 				$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
 				$type	= $source->type ?? 'folder';											//  set default source type if not defined
 				$title	= $source->title ?? '';													//  set source title
-				$this->library->addShelf( $sourceId, $source->path, $type, $active, $title );	//  add source as shelf in library
+				$this->library->addSource( $sourceId, $source->path, $type, $active, $title );	//  add source as source in library
 			}
 		}
 	}

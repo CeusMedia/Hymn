@@ -51,37 +51,37 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 	public function run(): int
 	{
 		$type		= $this->client->arguments->getArgument();
-		$shelfId	= $this->client->arguments->getArgument( 1 );
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument( 1 );
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 
-		$listInstalled	= $this->getLibrary()->listInstalledModules( $shelfId );					//  get list of installed modules
+		$listInstalled	= $this->getLibrary()->listInstalledModules( $sourceId );					//  get list of installed modules
 		if( !$listInstalled ){																		//  application has no installed modules
 			$message	= 'No installed modules found.';
-			if( $shelfId )
-				$message	= 'No modules installed from source "'.$shelfId.'".';
+			if( $sourceId )
+				$message	= 'No modules installed from source "'.$sourceId.'".';
 			$this->out( $message );															//  quit with message
 			return static::CODE_NONE;
 		}
 		else{
 			$message	= 'Found '.count( $listInstalled ).' installed modules.';
-			if( $shelfId )
-				$message	= 'Found '.count( $listInstalled ).' installed modules in source "'.$shelfId.'".';
+			if( $sourceId )
+				$message	= 'Found '.count( $listInstalled ).' installed modules in source "'.$sourceId.'".';
 			$this->client->outVerbose( $message );
 		}
 
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
-		$outdatedModules	= $moduleUpdater->getUpdatableModules( $shelfId );						//  get list of outdated modules
+		$outdatedModules	= $moduleUpdater->getUpdatableModules( $sourceId );						//  get list of outdated modules
 		if( !$outdatedModules ){																	//  application has no installed modules
 			$message	= 'No installed modules are outdated.';
-			if( $shelfId )
-				$message	= 'No installed modules from source "'.$shelfId.'" are outdated.';
+			if( $sourceId )
+				$message	= 'No installed modules from source "'.$sourceId.'" are outdated.';
 			$this->out( $message );								//  quit with message
 			return static::CODE_NONE;
 		}
 		else{
 			$message	= 'Found '.count( $outdatedModules ).' outdated modules.';
-			if( $shelfId )
-				$message	= 'Found '.count( $outdatedModules ).' outdated modules from source "'.$shelfId.'".';
+			if( $sourceId )
+				$message	= 'Found '.count( $outdatedModules ).' outdated modules from source "'.$sourceId.'".';
 			$this->client->outVerbose( $message );
 		}
 

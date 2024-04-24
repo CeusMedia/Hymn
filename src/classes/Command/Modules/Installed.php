@@ -49,13 +49,13 @@ class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hy
 	{
 //		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$shelfId	= $this->client->arguments->getArgument();
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument();
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 
-		if( $shelfId ){
-			$modules	= $library->listInstalledModules( $shelfId );
+		if( $sourceId ){
+			$modules	= $library->listInstalledModules( $sourceId );
 			ksort( $modules );
-			$this->out( count( $modules )." modules of source ".$shelfId." installed:" );
+			$this->out( count( $modules )." modules of source ".$sourceId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();

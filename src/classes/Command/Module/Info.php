@@ -68,10 +68,10 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		}
 
 		if( !$sourceId ){
-			$shelvesWithModule	= $library->getAvailableModuleShelves( $moduleId );
-			if( count( $shelvesWithModule ) > 1 ){
+			$sourcesWithModule	= $library->getAvailableModuleSources( $moduleId );
+			if( count( $sourcesWithModule ) > 1 ){
 				$message	= 'Module exists in several sources: %s. Please specify!';
-				$message	= sprintf( $message, join( ', ', array_keys( $shelvesWithModule ) ) );
+				$message	= sprintf( $message, join( ', ', array_keys( $sourcesWithModule ) ) );
 				$this->client->outError( $message, Hymn_Client::EXIT_ON_INPUT );
 			}
 		}

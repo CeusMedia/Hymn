@@ -45,15 +45,15 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 	 */
 	public function run()
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
-		if( !$shelf->active && !$this->flags->force ){
-			$this->client->outVerbose( 'Source "'.$shelf->id.'" already disabled.' );
+		if( !$source->active && !$this->flags->force ){
+			$this->client->outVerbose( 'Source "'.$source->id.'" already disabled.' );
 			return;
 		}
 
-		$installedModules	= $this->getLibrary()->listInstalledModules( $shelf->id );
+		$installedModules	= $this->getLibrary()->listInstalledModules( $source->id );
 		if( count( $installedModules ) && !$this->flags->force ){
 			$this->client->outError( sprintf(
 				'Source cannot be disabled since %d installed modules are related.',
@@ -63,15 +63,15 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 
 		if( $this->flags->dry ){
 			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$shelf->id.'" would have been disabled.' );
+				$this->out( 'Source "'.$source->id.'" would have been disabled.' );
 			return;
 		}
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
-		$json->sources[$shelf->id]->active	= FALSE;
-		if( isset( $json->sources[$shelf->id]->default ) )
-			unset( $json->sources[$shelf->id]->default );
+		$json->sources[$source->id]->active	= FALSE;
+		if( isset( $json->sources[$source->id]->default ) )
+			unset( $json->sources[$source->id]->default );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
 		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$shelf->id.'" has been disabled.' );
+			$this->out( 'Source "'.$source->id.'" has been disabled.' );
 	}
 }

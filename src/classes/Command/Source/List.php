@@ -48,23 +48,23 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	public function run()
 	{
 		$library	= $this->getLibrary();
-		$shelves	= $library->getActiveShelves();
-		$this->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
-		foreach( $shelves as $shelfId => $shelf ){
-			$modules	= $library->getAvailableModules( $shelfId );
+		$sources	= $library->getActiveSources();
+		$this->out( sprintf( 'Found %d source(s):', count( $sources ) ) );
+		foreach( $sources as $sourceId => $source ){
+			$modules	= $library->getAvailableModules( $sourceId );
 			$this->out( [
-				'* '.$shelfId.':',
-				'  - Title:    '.$shelf->title,
-				'  - Type:     '.ucfirst( $shelf->type ),
-				'  - Path:     '.$shelf->path,
-				'  - Active:   '.( $shelf->active ? 'yes' : 'no' ),
-				'  - Default:  '.( $shelf->default ? 'yes' : 'no' ),
+				'* '.$sourceId.':',
+				'  - Title:    '.$source->title,
+				'  - Type:     '.ucfirst( $source->type ),
+				'  - Path:     '.$source->path,
+				'  - Active:   '.( $source->active ? 'yes' : 'no' ),
+				'  - Default:  '.( $source->default ? 'yes' : 'no' ),
 				'  - Modules:  '.count( $modules ),
 			] );
-			if( !empty( $shelf->date ) )
-				$this->out( '  - Date:     '.$shelf->date );
-			if( !empty( $shelf->url ) )
-				$this->out( '  - Link:     '.$shelf->url );
+			if( !empty( $source->date ) )
+				$this->out( '  - Date:     '.$source->date );
+			if( !empty( $source->url ) )
+				$this->out( '  - Link:     '.$source->url );
 
 			if( $this->flags->verbose ){
 				foreach( $modules as $moduleId => $module )

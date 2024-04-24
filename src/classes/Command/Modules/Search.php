@@ -48,18 +48,18 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$term		= $this->client->arguments->getArgument();
-		$shelfId	= $this->client->arguments->getArgument( 1 );
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument( 1 );
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 
 		$msgTotal		= '%d module(s) found in all module sources:';
 		$msgEntry		= '%s (%s)';
 		$modulesFound	= [];
 
-		if( $shelfId ){
+		if( $sourceId ){
 			$msgTotal	= '%d module(s) found in module source "%s":';
 			$msgEntry	= '- %s v%s (%s)';
-			$modulesAvailable	= $this->getAvailableModulesMap( $shelfId );
-			$modulesInstalled	= $library->listInstalledModules( $shelfId );
+			$modulesAvailable	= $this->getAvailableModulesMap( $sourceId );
+			$modulesInstalled	= $library->listInstalledModules( $sourceId );
 			foreach( $modulesAvailable as $moduleId => $module ){
 				if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
 					$modulesFound[$moduleId]	= $module;
@@ -75,7 +75,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 		}
-		$this->out( sprintf( $msgTotal, count( $modulesFound ), $shelfId ) );
+		$this->out( sprintf( $msgTotal, count( $modulesFound ), $sourceId ) );
 		foreach( $modulesFound as $moduleId => $module ){
 			if( $this->flags->verbose ){
 				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
