@@ -209,7 +209,9 @@ class Hymn_Client
 			$this->dispatch();
 		}
 		catch( Exception $e ){
-			$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( $e->getMessage().'.' );
+			$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
+			exit( Hymn_Client::EXIT_ON_SETUP );
 		}
 		finally{
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at the end' ) );
@@ -435,7 +437,9 @@ class Hymn_Client
 				$reflectedMethod->invokeArgs( $commandObject, $this->arguments->getArguments() );	//  call reflected object method
 			}
 			catch( Exception $e ){
-				$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_RUN );
+				$this->outError( $e->getMessage().'.' );
+				$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
+				exit( Hymn_Client::EXIT_ON_RUN );
 			}
 		}
 		else																						//  no command string given
