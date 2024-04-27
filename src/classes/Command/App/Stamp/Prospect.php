@@ -104,7 +104,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 							$version,
 							$script->version
 						] ) );
-						$this->out( trim( $script->query ) );
+						$this->out( trim( $script->sql ) );
 						$version	= $script->version;
 					}
 					$this->client->outVerbose( '' );

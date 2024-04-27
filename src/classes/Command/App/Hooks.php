@@ -58,7 +58,7 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 				foreach( $events as $event => $functions ){
 					foreach( $functions as $function ){
 						if( !preg_match( '/\n/', $function ) ){
-							$id	= $resource.'_'.$event.'_'.$moduleId.'_'.$function;
+							$id	= $resource.'_'.$event.'_'.$moduleId.'_'.$function->callback;
 							$list[$id]	= (object) [
 								'moduleId'		=> $moduleId,
 								'resource'		=> $resource,

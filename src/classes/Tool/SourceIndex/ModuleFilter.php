@@ -38,7 +38,7 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 
 	/**
 	 *	@access		public
-	 *	@param		array			$modules		...
+	 *	@param		array<Hymn_Structure_Module>	$modules		...
 	 *	@param		integer|NULL	$mode			Index mode to set, see constants MODES
 	 *	@return		array
 	 */
@@ -52,8 +52,8 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 //			$module->path = preg_replace( $regExp, '', $entry->getPath() );
 
 			unset( $module->isInstalled );
-			unset( $module->versionInstalled );
-			unset( $module->versionAvailable );
+			unset( $module->version->installed );
+			unset( $module->version->available );
 			unset( $module->file );
 			unset( $module->uri );
 			switch( $mode ){

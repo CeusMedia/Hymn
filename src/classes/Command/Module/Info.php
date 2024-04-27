@@ -90,11 +90,11 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$this->out( $availableModule->description );
 		$this->out( ' - Category:     '.$availableModule->category );
 		$this->out( ' - Source:       '.$availableModule->sourceId );
-		$this->out( ' - Version:      '.$availableModule->version );
+		$this->out( ' - Version:      '.$availableModule->version->current );
 		$this->out( ' - Frameworks:   '.$frameworks );
 
-		if( $availableModule->isDeprecated ){
-			$deprecation	= (object) $availableModule->deprecation;
+		if( NULL !== $availableModule->deprecation ){
+			$deprecation	= $availableModule->deprecation;
 			$this->out( ' - Deprecated:   with version '.$deprecation->version );
 			if( strlen( trim( $deprecation->message ) ) > 0 )
 				$this->out( '   - Message:    '.$deprecation->message );
@@ -105,12 +105,12 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		if( array_key_exists( $moduleId, $modulesInstalled ) ){
 			$installedModule	= $modulesInstalled[$moduleId];
 			$this->out( ' - Installed:' );
-			$this->out( '    - Version: '.$installedModule->version );
-			$this->out( '    - Source:  '.$installedModule->installSource );
-			$this->out( '    - Type:    '.$installTypes[$installedModule->installType] );
-			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->installDate ) );
+			$this->out( '    - Version: '.$installedModule->version->current );
+			$this->out( '    - Source:  '.$installedModule->install->source );
+			$this->out( '    - Type:    '.$installTypes[$installedModule->install->type] );
+			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->install->date ) );
 			$message	= ' - Updatable: no';
-			if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
+			if( version_compare( $availableModule->version->current, $installedModule->version->current, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';
 				$message	= sprintf( $message, $installedModule->version, $availableModule->version );
 			}

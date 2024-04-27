@@ -80,14 +80,14 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				if( isset( $modulesAvailable[$module->id] ) ){
 					$moduleResource	= $modulesAvailable[$module->id];
 					$this->out( ' - Available:' );
-					$this->out( '   - Version:   '.$moduleResource->version );
+					$this->out( '   - Version:   '.$moduleResource->version->current );
 					$this->out( '   - Source:    '.$moduleResource->sourceId );
 				}
 				if( isset( $modulesInstalled[$module->id] ) ){
 					$moduleResource	= $modulesInstalled[$module->id];
 					$this->out( ' - Installed:' );
-					$this->out( '   - Version:   '.$moduleResource->version );
-					$this->out( '   - Source:    '.$moduleResource->installSource );
+					$this->out( '   - Version:   '.$moduleResource->version->current );
+					$this->out( '   - Source:    '.$moduleResource->install->source );
 				}
 				if( $moduleResource ){
 					if( $this->flags->veryVerbose ){

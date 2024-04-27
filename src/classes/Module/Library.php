@@ -92,6 +92,10 @@ class Hymn_Module_Library
 		return $this->available->getModuleLogChanges( $moduleId, $sourceId, $versionInstalled, $versionAvailable );
 	}
 
+	/**
+	 *	@param		string|NULL		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function getAvailableModules( ?string $sourceId = NULL ): array
 	{
 		return $this->available->getAll( $sourceId );
@@ -129,6 +133,7 @@ class Hymn_Module_Library
 	public function getUncachedAvailableModuleFromSource( string $moduleId, string $sourceId ): object
 	{
 		$source		= $this->getSource( $sourceId );								//  get source
+		/** @var Hymn_Structure_Module $module */
 		$module		= $this->available->readModule( $source->path, $moduleId );	//  try to read module from source folder
 		$module->sourceId	= $source->id;										//  extend found module by source ID
 		$module->sourcePath	= $source->path;										//  extend found module by source path
@@ -158,6 +163,10 @@ class Hymn_Module_Library
 		return array_key_exists( $sourceId, $this->getSources() );
 	}
 
+	/**
+	 *	@param		string|null		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function listInstalledModules( ?string $sourceId = NULL ): array
 	{
 //		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize sources in cache
@@ -167,7 +176,12 @@ class Hymn_Module_Library
 		return $list;
 	}
 
-	public function readInstalledModule( string $moduleId ): object
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		Hymn_Structure_Module
+	 *	@throws		RangeException		if module is not installed
+	 */
+	public function readInstalledModule( string $moduleId ): Hymn_Structure_Module
 	{
 		return $this->installed->get( $moduleId );
 	}

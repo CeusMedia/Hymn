@@ -68,7 +68,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 
 			if( $this->flags->verbose ){
 				foreach( $modules as $moduleId => $module )
-					$this->out( '    - '.$moduleId.' ('.$module->version.')' );
+					$this->out( '    - '.$moduleId.' ('.$module->version->current.')' );
 			}
 		}
 	}

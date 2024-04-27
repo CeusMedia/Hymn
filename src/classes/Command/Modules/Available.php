@@ -66,7 +66,7 @@ class Hymn_Command_Modules_Available extends Hymn_Command_Abstract implements Hy
 		}
 		$this->out( $message );
 		foreach( $modules as $module ){
-			$line	= $module->id.' ('.$module->version.')';
+			$line	= $module->id.' ('.$module->version->current.')';
 			if( isset( $module->isDeprecated ) && $module->isDeprecated )
 				$line	.= ' [deprecated]';
 			$this->out( '- '.$line );

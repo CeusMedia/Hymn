@@ -211,7 +211,7 @@ abstract class Hymn_Command_Abstract
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
 	 *	@param		string|NULL			$sourceId	...
-	 *	@return		array				Map of modules by ID
+	 *	@return		array<string,Hymn_Structure_Module>		Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
 	protected function getAvailableModulesMap( ?string $sourceId = NULL ): array

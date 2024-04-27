@@ -66,7 +66,7 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$module			= $availableModules[$moduleId];
 		$moduleObject	= (object) [];
 		$msg			= 'Adding module "%s" (%s) from source "%s"';
-		$this->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
+		$this->out( sprintf( $msg, $module->id, $module->version->current, $module->sourceId ) );
 		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;

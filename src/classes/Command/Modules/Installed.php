@@ -63,7 +63,7 @@ class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hy
 			$this->out( count( $modules )." modules installed:" );
 		}
 		foreach( $modules as $module ){
-			$this->out( "- ".$module->id.' ('.$module->version.')' );
+			$this->out( "- ".$module->id.' ('.$module->version->current.')' );
 		}
 	}
 }

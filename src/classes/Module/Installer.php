@@ -81,10 +81,10 @@ class Hymn_Module_Installer
 	 *	3. get value for these missing pairs from console if also not set in hymn file
 	 *	4. combine values from hymn file and console input and apply to module file
 	 *	@access		public
-	 *	@param		object		$module			Data object of module to install
+	 *	@param		Hymn_Structure_Module		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( object $module ): void
+	public function configure( Hymn_Structure_Module $module ): void
   {
 		$source		= $module->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
@@ -183,7 +183,7 @@ class Hymn_Module_Installer
 		}
 	}
 
-	public function install( $module, string $installType = 'link' ): bool
+	public function install( Hymn_Structure_Module $module, string $installType = 'link' ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );

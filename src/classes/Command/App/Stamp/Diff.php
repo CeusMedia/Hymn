@@ -55,7 +55,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 		if( $moduleId )
-			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId ) );
+			$modules	= [$moduleId => $this->getLibrary()->readInstalledModule( $moduleId )];
 
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
@@ -80,7 +80,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$this->showRemovedModule( $type, $moduleChange->module );
 	}
 
-	protected function detectModuleChanges( object $stamp, array $modules ): array
+	/**
+	 *	@param		Hymn_Structure_Config				$stamp
+	 *	@param		array<string,Hymn_Structure_Module>	$modules
+	 *	@return		array<string,object{type: string, module?: Hymn_Structure_Module, source?: Hymn_Structure_Module, target?: Hymn_Structure_Module}>
+	 */
+	protected function detectModuleChanges( Hymn_Structure_Config $stamp, array $modules ): array
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
@@ -104,6 +109,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		return $moduleChanges;
 	}
 
+	/**
+	 *	@param		string|NULL		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	protected function getInstalledModules( ?string $sourceId = NULL ): array
 	{
 		$modules	= $this->getLibrary()->listInstalledModules( $sourceId );
@@ -136,9 +145,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		protected
 	 *	@param		$pathName		...
 	 *	@param		$sourceId		...
-	 *	@return		object
+	 *	@return		Hymn_Structure_Config
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): object
+	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Config
 	{
 		if( '' !== trim( $pathName ) ){
 			$fileName	= NULL;
@@ -161,10 +170,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	Calculates difference of added module and print out results.
 	 *	@access		protected
 	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$module		Module that has been added (maybe from library)
+	 *	@param		Hymn_Structure_Module	$module		Module that has been added (maybe from library)
 	 *	@return		void
 	 */
-	protected function showAddedModule( string $type, object $module ): void
+	protected function showAddedModule( string $type, Hymn_Structure_Module $module ): void
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
 		if( !$this->flags->quiet )
@@ -193,12 +202,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	/**
 	 *	Calculates difference of module change and print out results.
 	 *	@access		protected
-	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$moduleOld	Old version of module (maybe from stamp)
-	 *	@param		object		$moduleNew	New version of module (maybe from library)
+	 *	@param		string					$type		Diff type, one of [all, sql, config(, files)]
+	 *	@param		Hymn_Structure_Module	$moduleOld	Old version of module (maybe from stamp)
+	 *	@param		Hymn_Structure_Module	$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( string $type, object $moduleOld, object $moduleNew ): void
+	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
@@ -216,7 +225,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 						$version,
 						$script->version
 					) ) );
-					$this->out( trim( $script->query ) );
+					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}
 			}
@@ -254,10 +263,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	Calculates difference of removed module and print out results.
 	 *	@access		protected
 	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$module		Module that has been removed (maybe from stamp)
+	 *	@param		Hymn_Structure_Module		$module		Module that has been removed (maybe from stamp)
 	 *	@return		void
 	 */
-	protected function showRemovedModule( string $type, object $module ): void
+	protected function showRemovedModule( string $type, Hymn_Structure_Module $module ): void
 	{
 		$this->client->outError( 'showRemovedModule: Not implemented, yet.' );
 	}

@@ -111,7 +111,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			}
 			$sourceId	= $this->detectModuleSource( $module->id );
 			$sourceId	= $this->client->getModuleInstallSource( $module->id, $activeSourceIds, $sourceId );
-			/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
+			/** @var Hymn_Structure_Module $module */
 			$module		= $library->getUncachedAvailableModuleFromSource( $module->id, $sourceId );
 
 			if( empty( $module->sourceId ) ){
@@ -124,7 +124,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$this->flags->dry ? 'Dry: ' : '',
 					$module->id,
 					$module->sourceId,
-					$module->version,
+					$module->version->current,
 					$installType
 				] ) );
 			$installer->install( $module, $installType );

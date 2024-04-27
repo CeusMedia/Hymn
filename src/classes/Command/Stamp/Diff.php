@@ -73,11 +73,17 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !$this->flags->quiet )
 			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
+		/** @var object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module} $moduleChange */
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'changed' )
 				$this->showChangedModule( $type, $moduleChange->source, $moduleChange->target );
 	}
 
+	/**
+	 * @param $stamp
+	 * @param $modules
+	 * @return array<string,object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module}>
+	 */
 	protected function detectModuleChanges( $stamp, $modules ): array
 	{
 		$moduleChanges	= [];
@@ -153,11 +159,11 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	Calculates difference of module change and print out results.
 	 *	@access		protected
 	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$moduleOld	Old version of module (maybe from stamp)
-	 *	@param		object		$moduleNew	New version of module (maybe from library)
+	 *	@param		Hymn_Structure_Module	$moduleOld	Old version of module (maybe from stamp)
+	 *	@param		Hymn_Structure_Module	$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( string $type, $moduleOld, $moduleNew ): void
+	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
@@ -175,7 +181,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 						$version,
 						$script->version
 					) ) );
-					$this->out( trim( $script->query ) );
+					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}
 			}
