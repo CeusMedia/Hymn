@@ -48,25 +48,23 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 	public function run(): void
 	{
 		$pathConfig	= $this->client->getConfigPath();
-		$fileName	= Hymn_Client::$fileName;
 		if( !file_exists( $pathConfig."modules" ) )
 			$this->outError( "No modules installed", Hymn_Client::EXIT_ON_SETUP );
 
-//		$hymnFile		= json_decode( file_get_contents( $fileName ) );
-		$hymnFile		= Hymn_Tool_ConfigFile::read( $fileName );
+		$hymnFile		= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
 		/** @var string[] $knownModules */
 		$knownModules	= array_keys( $hymnFile->modules );
 
 		$index	= new DirectoryIterator( $pathConfig."modules" );
 		$list	= [];
 		foreach( $index as $entry ){
-			if( $entry->isDir() || $entry->isDot() )
+			if( $entry->isDir()
+				|| $entry->isDot()
+				|| !str_ends_with( $entry->getFilename(), '.xml' ) )								//  read XML files, only
 				continue;
-			if( !preg_match( "/\.xml$/", $entry->getFilename() ) )
-				continue;
-			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
+			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );					//  extract module name from file name
 			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
-			if( $module->config || in_array( $id, $knownModules ) ){
+			if( $module->config || in_array( $id, $knownModules, TRUE ) ){
 				$list[$id]	= new Hymn_Structure_Config_Module();
 				foreach( $module->config as $pair )
 					$list[$id]->config[$pair->key]	= $pair->value;
@@ -74,7 +72,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 		}
 		ksort( $list );
 		$hymnFile->modules	= $list;
-		Hymn_Tool_ConfigFile::save( $hymnFile, $fileName );
-		$this->out( "Configuration dumped to ".$fileName );
+		Hymn_Tool_ConfigFile::save( $hymnFile, Hymn_Client::$fileName );
+		$this->out( "Configuration dumped to ".Hymn_Client::$fileName );
 	}
 }
