@@ -179,7 +179,7 @@ class Hymn_Tool_Database_PDO
 
 	/*  --  PROTECTED  --  */
 
-	protected function ask( string $message, string $type = 'string', $default = NULL, array $options = [], bool $break = TRUE ): string
+	protected function ask( string $message, string $type = 'string', float|bool|int|string|NULL $default = NULL, array $options = [], bool $break = TRUE ): string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,

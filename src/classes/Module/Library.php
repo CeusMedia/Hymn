@@ -72,12 +72,12 @@ class Hymn_Module_Library
 		return $this->available->getActiveSources( $withModules );
 	}
 
-	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE )
+	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		return $this->available->get( $moduleId, $sourceId, $strict );
 	}
 
-	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE )
+	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		if( '' === trim( $moduleId ) ){
 			if( $strict )
@@ -111,7 +111,7 @@ class Hymn_Module_Library
 		return $this->available->getDefaultSource();
 	}
 
-	public function getSource( string $sourceId, bool $withModules = FALSE )
+	public function getSource( string $sourceId, bool $withModules = FALSE ): Hymn_Structure_Source
 	{
 		return $this->available->getSource( $sourceId, $withModules );
 	}
@@ -133,7 +133,6 @@ class Hymn_Module_Library
 	public function getUncachedAvailableModuleFromSource( string $moduleId, string $sourceId ): object
 	{
 		$source		= $this->getSource( $sourceId );								//  get source
-		/** @var Hymn_Structure_Module $module */
 		$module		= $this->available->readModule( $source->path, $moduleId );	//  try to read module from source folder
 		$module->sourceId	= $source->id;										//  extend found module by source ID
 		$module->sourcePath	= $source->path;										//  extend found module by source path

@@ -45,17 +45,17 @@ class Hymn_Loader
 	}
 
 	//  method for recursive class loading
-	protected function loadClassesFromFolder( string $folder, $verbose = FALSE ): void
+	protected function loadClassesFromFolder( string $folder, bool $verbose = FALSE ): void
 	{
 		foreach( new DirectoryIterator( $this->path.$folder ) as $entry ){		//  iterate folder in path
-			$nodeName	= $entry->getFilename();								//  shortcut filename
-			if( !$entry->isDot() && $entry->isDir() ){							//  found a folder node
+			$nodeName	= $entry->getFilename();										//  shortcut filename
+			if( !$entry->isDot() && $entry->isDir() ){									//  found a folder node
 				if( preg_match( "/^[a-z]+$/i", $nodeName ) ){					//  is a valid nested folder
 					$this->loadClassesFromFolder( $folder.$nodeName.'/' );		//  load classes in this folder
 				}
 			}
-			else if( $entry->isFile() ){										//  found a file node
-				if( preg_match( "/^[A-Z]+.+\.php$/", $nodeName ) ){						//  is a PHP file
+			else if( $entry->isFile() ){												//  found a file node
+				if( preg_match( "/^[A-Z]+.+\.php$/", $nodeName ) ){				//  is a PHP file
 					if( $verbose )
 						print 'Loading '.$folder.$nodeName.PHP_EOL;
 					require_once $folder.$nodeName;								//  load classes in file

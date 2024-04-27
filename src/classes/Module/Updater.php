@@ -98,7 +98,7 @@ class Hymn_Module_Updater
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, bool $changedOnly = FALSE ): void
+	public function reconfigure( Hymn_Structure_Module $module, bool $changedOnly = FALSE ): void
 	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->install->source, FALSE );
@@ -216,7 +216,7 @@ class Hymn_Module_Updater
 			$configurator->set( $module->id, $configKey, $inputConfigValue );
 	}
 
-	public function update( $module, string $installType ): bool
+	public function update( Hymn_Structure_Module $module, string $installType ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );

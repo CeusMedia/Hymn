@@ -52,7 +52,7 @@ class Hymn_Module_Config
 		];
 	}
 
-	public function get( string $moduleId, string $configKey )
+	public function get( string $moduleId, string $configKey ): Hymn_Structure_Module_Config
 	{
 		$module		= $this->library->readInstalledModule( $moduleId );
 		if( array_key_exists( $configKey, $module->config ) )
@@ -61,13 +61,17 @@ class Hymn_Module_Config
 		throw new InvalidArgumentException( sprintf( $msg, $moduleId, $configKey ) );			//  throw exception
 	}
 
-	public function getAll( string $moduleId )
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		array<Hymn_Structure_Module_Config>
+	 */
+	public function getAll( string $moduleId ): array
 	{
 		$module		= $this->library->readInstalledModule( $moduleId );
 		return $module->config;
 	}
 
-	public function set( string $moduleId, string $configKey, $configValue ): void
+	public function set( string $moduleId, string $configKey, mixed $configValue ): void
 	{
 		$this->get( $moduleId, $configKey );
 		$target		= $this->client->getConfigPath().'modules/'.$moduleId.'.xml';

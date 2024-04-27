@@ -284,7 +284,13 @@ class Hymn_Client
 		return $type;
 	}
 
-	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL )
+	/**
+	 *	@param		string			$moduleId
+	 *	@param		array<string>	$availableSourceIds
+	 *	@param		string|NULL		$defaultInstallSourceId
+	 *	@return		string
+	 */
+	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL ): string
 	{
 		if( !count( $availableSourceIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );

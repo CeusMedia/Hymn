@@ -86,12 +86,12 @@ class Hymn_Module_Graph
 				$this->nodes[$module->id]->level	= $level;										//  store deeper level
 			return;																					//  exit without adding relations again
 		}
-		$this->nodes[$module->id]	= (object) array(												//  add module to node list by module ID
+		$this->nodes[$module->id]	= (object) [													//  add module to node list by module ID
 			'module'	=> $module,																	//  … store module data object
 			'level'		=> $level,																	//  … store load level
-			'in'		=> [],																	//  … store ingoing module links
-			'out'		=> [],																	//  … store outgoing module links
-		);
+			'in'		=> [],																		//  … store ingoing module links
+			'out'		=> [],																		//  … store outgoing module links
+		];
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
 			//	 @todo remove this block after framework v0.8.8.2 is established
@@ -247,7 +247,7 @@ class Hymn_Module_Graph
 		return NULL;																				//  no loop found
 	}
 
-	protected function countModuleEdgesToRoot( $node, int $level = 0 ): int
+	protected function countModuleEdgesToRoot( object $node, int $level = 0 ): int
 	{
 		$count	= $level;
 		if( count( $node->in ) ){

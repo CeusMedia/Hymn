@@ -200,7 +200,11 @@ class Hymn_Module_Installer
 		}
 	}
 
-	public function uninstall( $module ): bool
+	/**
+	 * @param Hymn_Structure_Module $module
+	 * @return bool
+	 */
+	public function uninstall( Hymn_Structure_Module $module ): bool
 	{
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );

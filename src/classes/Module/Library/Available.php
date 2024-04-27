@@ -55,7 +55,7 @@ class Hymn_Module_Library_Available
 	/** @var array<string,array<string,Hymn_Structure_Module>> $modules  */
 	protected array $modules			= [];
 
-	/** @var	array<string,object>	$sources  */
+	/** @var	array<string,Hymn_Structure_Source>	$sources  */
 	protected array $sources			= [];
 
 	public function __construct( Hymn_Client $client )
@@ -64,12 +64,12 @@ class Hymn_Module_Library_Available
 	}
 
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
-  {
+	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
 			throw new Exception( 'Source already set by ID: '.$sourceId );
 		$activeSources	= $this->getSources( ['default' => TRUE] );
 		$isDefault		= $active && !count( $activeSources );
-		$this->sources[$sourceId]	= (object) [
+		$this->sources[$sourceId]	= Hymn_Structure_Source::fromArray( [
 			'id'		=> $sourceId,
 			'path'		=> $path,
 			'type'		=> $type,
@@ -77,7 +77,7 @@ class Hymn_Module_Library_Available
 			'default'	=> $isDefault,
 			'title'		=> $title,
 			'date'		=> NULL,
-		];
+		] );
 //		ksort( $this->sources );
 	}
 
@@ -87,7 +87,7 @@ class Hymn_Module_Library_Available
 		if( $sourceId )
 			return $this->getFromSource( $moduleId, $sourceId, $strict );
 		$candidates	= [];
-		foreach( $this->modules as $sourceId => $sourceModules )
+		foreach( $this->modules as $sourceModules )
 			foreach( $sourceModules as $sourceModuleId => $sourceModule )
 				if( $sourceModuleId === $moduleId )
 					$candidates[]	= $sourceModule;
@@ -95,7 +95,7 @@ class Hymn_Module_Library_Available
 			return $candidates[0];
 		if( count( $candidates ) > 1 )
 			foreach( $candidates as $candidate )
-				if( !$candidate->isDeprecated )
+				if( NULL === $candidate->deprecation )
 					return $candidate;
 		if( $strict )
 			throw new Exception( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
@@ -119,7 +119,6 @@ class Hymn_Module_Library_Available
 			if( !isset( $this->modules[$sourceId] ) )
 				throw new DomainException( 'Invalid source ID: '.$sourceId );
 
-			/** @var Hymn_Structure_Module $module */
 			foreach( $this->modules[$sourceId] as $module ){
 				$module->sourceId	= $sourceId;
 				$list[$module->id]	= $module;
@@ -144,7 +143,7 @@ class Hymn_Module_Library_Available
 	public function getDefaultSource(): string
 	{
 		foreach($this->sources as $sourceId => $source )
-			if( $source->active && $source->default )
+			if( $source->active && $source->isDefault )
 				return $sourceId;
 		throw new RuntimeException( 'No default source available' );
 	}
@@ -195,7 +194,7 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 
-	public function getSource( string $sourceId, bool $withModules = FALSE )
+	public function getSource( string $sourceId, bool $withModules = FALSE ): Hymn_Structure_Source
 	{
 		if( !array_key_exists( $sourceId, $this->sources ) )
 			throw new DomainException( 'Invalid source ID: '.$sourceId );
@@ -245,14 +244,14 @@ class Hymn_Module_Library_Available
 
 	//  --  PROTECTED  --  //
 
-	protected function decorateModuleWithPaths( $module, $sourcePath ): void
+	protected function decorateModuleWithPaths( Hymn_Structure_Module $module, string $sourcePath ): void
   {
-		$pathname	= str_replace( "_", "/", $module->id ).'/';										//  assume source module path from module ID
-		$module->absolutePath	= realpath( $sourcePath.$pathname )."/";								//  extend found module by real source path
-		$module->pathname		= $pathname;														//  extend found module by relative path
-		$module->path			= $sourcePath.$pathname;												//  extend found module by pseudo real path
+		$pathname	= str_replace( "_", "/", $module->id ).'/';						//  assume source module path from module ID
+		$module->absolutePath	= realpath( $sourcePath.$pathname )."/";						//  extend found module by real source path
+//		$module->pathname		= $pathname;														//  extend found module by relative path
+		$module->path			= $sourcePath.$pathname;											//  extend found module by pseudo real path
 		if( empty( $module->frameworks ) || !isset( $module->frameworks['Hydrogen'] ) )
-			$module->frameworks['Hydrogen']	= '<0.9';
+			$module->frameworks['Hydrogen']	= '<1.0';
 	}
 
 	/**
@@ -268,7 +267,7 @@ class Hymn_Module_Library_Available
 //			- breaks with JSON serialization (classes objects vs stdclass)
 //			- breaks: Hymn_Structure_Module vs CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition
 		return $this->loadModulesFromSourceFolder( $path, [] );
-
+/*
 		$fileJson	= $path.'/index.json';
 		$fileSerial	= $path.'/index.serial';
 
@@ -304,7 +303,7 @@ class Hymn_Module_Library_Available
 				$source->title	= strip_tags( $index->description );
 		}
 //		$this->listModulesAvailable	= $list;									//  @todo realize sources in cache
-		return $list;
+		return $list;*/
 	}
 
 	protected function loadModulesInSources( bool $force = FALSE ): void
@@ -335,16 +334,16 @@ class Hymn_Module_Library_Available
 
 	/**
 	 * @param string $fileSerial
-	 * @param $path
+	 * @param string $path
 	 * @return array<mixed,array<string,Hymn_Structure_Module>>
 	 */
-	protected function loadModulesFromSerialFile( string $fileSerial, $path ): array
+	protected function loadModulesFromSerialFile( string $fileSerial, string $path ): array
 	{
 		$this->client->outVeryVerbose( '- Strategy: serial file' );
 		$index	= unserialize( file_get_contents( $fileSerial ) );
 		foreach( $index->modules as $module ){
 			$module->frameworks		= (array) $module->frameworks;
-			$module->isDeprecated	= isset( $module->deprecation );
+//			$module->isDeprecated	= isset( $module->deprecation );
 			$this->decorateModuleWithPaths( $module, $path );
 		}
 		$list	= $index->modules;
@@ -353,32 +352,47 @@ class Hymn_Module_Library_Available
 
 	/**
 	 *	@param		string		$fileJson
-	 *	@param		array		$list
-	 *	@param		$path
-	 *	@return		array<string,object>
+	 *	@param		array<string,Hymn_Structure_Module>	$list
+	 *	@param		string		$path
+	 *	@return		array
 	 */
-	protected function loadModulesFromJsonFile( string $fileJson, array $list, $path ): array
+	protected function loadModulesFromJsonFile( string $fileJson, array $list, string $path ): array
 	{
 		$this->client->outVeryVerbose( '- Strategy: JSON file' );
+		/** @var object{modules: array<object>} $index */
 		$index	= json_decode( file_get_contents( $fileJson ) );
 		foreach( $index->modules as $module ){
-			$list[$module->id]	= $module;
-			$module->config					= (array) $module->config;
-			$module->hooks					= (array) $module->hooks;
-			foreach( $module->hooks as $resource => $events )
-				$module->hooks[$resource]	= (array) $module->hooks[$resource];
-			foreach( $module->files as $category => $files )
-				$module->files->{$category}	=  (array) $files;
-			$module->relations->needs		= (array) $module->relations->needs;
-			$module->relations->supports	= (array) $module->relations->supports;
-			$module->isDeprecated			= isset( $module->deprecation );
-			if( isset( $module->frameworks ) )
-				$module->frameworks			= (array) $module->frameworks;
+			$module	= $this->convertModuleDataObjectToStructureObject( $module, $fileJson );
 			$this->decorateModuleWithPaths( $module, $path );
+			$list[$module->id]	= $module;
 		}
 		return [$index, $list];
 	}
 
+	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
+	{
+		//  work in progress
+		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
+		foreach( $module->config ?? [] as $config )
+			$obj->config[]	= new Hymn_Structure_Module_Config( $config->key, $config->value, $config->type, $config->title );
+		foreach( $config->hooks ?? [] as $hook )
+			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
+
+		$list[$module->id]	= $module;
+		$module->config					= (array) $module->config;
+		$module->hooks					= (array) $module->hooks;
+		foreach( $module->hooks as $resource => $events )
+			$module->hooks[$resource]	= (array) $module->hooks[$resource];
+		foreach( $module->files as $category => $files )
+			$module->files->{$category}	=  (array) $files;
+		$module->relations->needs		= (array) $module->relations->needs;
+		$module->relations->supports	= (array) $module->relations->supports;
+//			$module->isDeprecated			= isset( $module->deprecation );
+		if( isset( $module->frameworks ) )
+			$module->frameworks			= (array) $module->frameworks;
+		return $obj;
+
+	}
 	/**
 	 *	@param		string		$path
 	 *	@param		array		$list
@@ -401,7 +415,7 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 }
-
+/*
 class CMF_Hydrogen_Environment_Resource_Module_Component_File
 {
 	public $file;
@@ -419,3 +433,4 @@ class CMF_Hydrogen_Environment_Resource_Module_Component_Config
 	public $protected;
 	public $title;
 }
+*/

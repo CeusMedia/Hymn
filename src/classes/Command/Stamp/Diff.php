@@ -53,6 +53,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$modules	= $this->getAvailableModules( $sourceId );									//  load available modules
+
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
 		$stampModules	= (array) $stamp->modules;
@@ -60,7 +61,6 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( $moduleId ){
 			if( !isset( $stamp->modules[$moduleId] ) )
 				$this->client->outError( 'Module "'.$moduleId.'" is not in stamp.', Hymn_Client::EXIT_ON_RUN );
-			$stamp->modules	= (object) [$moduleId => $stamp->modules[$moduleId]];
 		}
 
 		/*  --  FIND MODULE CHANGES  --  */
@@ -80,18 +80,18 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	}
 
 	/**
-	 * @param $stamp
-	 * @param $modules
-	 * @return array<string,object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module}>
+	 *	@param		object{modules: array<Hymn_Structure_Module>}	$stamp
+	 *	@param		array<Hymn_Structure_Module>					$modules
+	 *	@return		array<string,object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module}>
 	 */
-	protected function detectModuleChanges( $stamp, $modules ): array
+	protected function detectModuleChanges( object $stamp, array $modules ): array
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules[$module->id] ) )
 				continue;
 			$oldModule	= $stamp->modules[$module->id];
-			if( !version_compare( $oldModule->version, $module->version, '<' ) )
+			if( !version_compare( $oldModule->version->current, $module->version->current, '<' ) )
 				continue;
 			$moduleChanges[$module->id]	= (object) [
 				'type'		=> 'changed',
@@ -134,9 +134,9 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		protected
 	 *	@param		string		$pathName		...
 	 *	@param		string		$sourceId		...
-	 *	@return		object
+	 *	@return		Hymn_Structure_Stamp
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): object
+	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Stamp
 	{
 		if( '' !== $pathName ){
 			$fileName	= NULL;
@@ -152,7 +152,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !( NULL !== $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return json_decode( trim( file_get_contents( $fileName ) ) );
+		return unserialize( trim( file_get_contents( $fileName ) ) );
 	}
 
 	/**

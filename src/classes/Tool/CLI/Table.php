@@ -162,12 +162,12 @@ class Hymn_Tool_CLI_Table
 		return mb_substr( $text.str_repeat( ' ', $repeat ), 0, $toLength, $this->encoding );
 	}
 
-	protected function fit( $text, int $toLength ): string
+	protected function fit( string $text, int $toLength ): string
 	{
 		return $this->extend( $this->trimCentric( trim( $text ), $toLength ), $toLength );
 	}
 
-	protected function line( $sign = '-', int $lineLength = 76 ): string
+	protected function line( string $sign = '-', int $lineLength = 76 ): string
 	{
 		$steps	= (int) floor( $lineLength / $this->strlen( $sign ) );
 		return str_repeat( $sign, $steps );

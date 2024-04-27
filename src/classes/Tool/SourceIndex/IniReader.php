@@ -35,7 +35,7 @@ class Hymn_Tool_SourceIndex_IniReader
 			$this->data	= array_merge( $this->data, parse_ini_file( $pathSource.$this->fileName ) );
 	}
 
-	public function get( $key )
+	public function get( string $key ): int|float|bool|string|NULL
 	{
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];

@@ -106,8 +106,8 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 						$installedModule	= $listInstalled[$moduleId];
 						$modulesToUpdate[$moduleId]	= (object) [
 							'id'		=> $installedModule->id,
-							'installed'	=> $installedModule->version,
-							'available'	=> $installedModule->version,
+							'installed'	=> $installedModule->version->current,
+							'available'	=> $installedModule->version->current,
 							'source'	=> $installedModule->install->source,
 						];
 					}

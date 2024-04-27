@@ -92,7 +92,7 @@ class Hymn_Module_Diff
 			}
 			else if( $item != $configSource[$item->key] ){
 				$changes	= [];
-				foreach( $item as $property => $value ){
+				foreach( get_object_vars( $item ) as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
 						continue;
 					if( !$targetModule->isInstalled && !$value )

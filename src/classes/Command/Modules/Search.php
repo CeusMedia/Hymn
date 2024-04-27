@@ -73,7 +73,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 		$this->out( sprintf( $msgTotal, count( $modulesFound ), $sourceId ) );
 		foreach( $modulesFound as $module ){
 			if( $this->flags->verbose ){
-				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
+				$msg	= sprintf( $msgEntry, $module->id, $module->version->current, $module->sourceId );
 				$this->out( $msg );
 				$this->out( ' - Title:       '.$module->title );
 				$moduleResource	= NULL;
@@ -103,7 +103,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 			else{
-				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version, $module->sourceId );
+				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version->current, $module->sourceId );
 				$this->out( $msg );
 			}
 		}

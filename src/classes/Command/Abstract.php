@@ -154,7 +154,7 @@ abstract class Hymn_Command_Abstract
 	 */
 	abstract public function run();
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 	}
 
@@ -177,7 +177,7 @@ abstract class Hymn_Command_Abstract
 			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
-	protected function deprecate( $messageLines ): void
+	protected function deprecate( array|string $messageLines ): void
 	{
 		$this->client->outDeprecation( $messageLines );
 	}
@@ -240,7 +240,7 @@ abstract class Hymn_Command_Abstract
 		return $this->library;																		//  return loaded library
 	}
 
-	protected function readLibrary( object $config )
+	protected function readLibrary( object $config ): void
 	{
 		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 		if( $this->flags->force )																//  on force mode
@@ -248,7 +248,7 @@ abstract class Hymn_Command_Abstract
 
 		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
 			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
-			return $this->library;																//  return empty library
+			return;																//  return empty library
 		}
 		foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
 			if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled

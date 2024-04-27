@@ -112,6 +112,11 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		array<Hymn_Structure_Module>	$listInstalled
+	 *	@return		void
+	 */
 	private function uninstallModuleById( string $moduleId, array $listInstalled ): void
 	{
 		$neededBy	= [];

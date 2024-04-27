@@ -54,7 +54,6 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 //		$sourceId	= $this->evaluateSourceId( $sourceId );
 //		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
 
-		/** @var object{modules: array<string,Hymn_Structure_Module>} $stamp */
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
 
@@ -130,9 +129,9 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		protected
 	 *	@param		$pathName		...
 	 *	@param		$sourceId		...
-	 *	@return		object{modules: array<string,Hymn_Structure_Module>}
+	 *	@return		Hymn_Structure_Stamp
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): object
+	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Stamp
 	{
 		if( $pathName ){
 			$fileName	= NULL;

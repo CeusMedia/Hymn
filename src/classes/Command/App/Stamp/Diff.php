@@ -81,11 +81,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	}
 
 	/**
-	 *	@param		Hymn_Structure_Config				$stamp
+	 *	@param		object{modules: array<Hymn_Structure_Module>}		$stamp
 	 *	@param		array<string,Hymn_Structure_Module>	$modules
-	 *	@return		array<string,object{type: string, module?: Hymn_Structure_Module, source?: Hymn_Structure_Module, target?: Hymn_Structure_Module}>
+	 *	@return		array<string,object{type: string, module: ?Hymn_Structure_Module, source: ?Hymn_Structure_Module, target: ?Hymn_Structure_Module}>
 	 */
-	protected function detectModuleChanges( Hymn_Structure_Config $stamp, array $modules ): array
+	protected function detectModuleChanges( object $stamp, array $modules ): array
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
@@ -93,16 +93,19 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'added',
 					'module'	=> $module,
+					'source'	=> NULL,
+					'target'	=> NULL,
 				];
 			}
 			else{
 				$oldModule	= $stamp->modules[$module->id];
-				if( !version_compare( $oldModule->version, $module->version, '<' ) )
+				if( !version_compare( $oldModule->version->current, $module->version->current, '<' ) )
 					continue;
 				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'changed',
 					'source'	=> $oldModule,
 					'target'	=> $module,
+					'module'	=> NULL,
 				];
 			}
 		}
@@ -145,9 +148,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		protected
 	 *	@param		$pathName		...
 	 *	@param		$sourceId		...
-	 *	@return		Hymn_Structure_Config
+	 *	@return		object{modules: array<Hymn_Structure_Module>}
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Config
+	protected function getStamp( string $pathName, string $sourceId ): object
 	{
 		if( '' !== trim( $pathName ) ){
 			$fileName	= NULL;
@@ -163,7 +166,8 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		if( !( $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return Hymn_Tool_ConfigFile::read( $fileName );
+		return unserialize( file_get_contents( $fileName ) );
+//		return Hymn_Tool_ConfigFile::read( $fileName );
 	}
 
 	/**

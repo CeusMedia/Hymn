@@ -81,7 +81,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/*  --  PROTECTED  --  */
 
-	protected function printModuleUpdateChangelog( $update, string $indent = '' ): void
+	protected function printModuleUpdateChangelog( object $update, string $indent = '' ): void
 	{
 		$changes	= $this->getLibrary()->getAvailableModuleLogChanges(
 			$update->id,

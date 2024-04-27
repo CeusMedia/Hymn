@@ -68,8 +68,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
 
 		ksort( $modules );
-		$data	= (object) ['modules' => []];
-		/** @var Hymn_Structure_Module $module */
+		$data	= new Hymn_Structure_Stamp();
 		foreach( $modules as $module ){
 			unset( $module->version->available );
 			unset( $module->version->installed );

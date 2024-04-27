@@ -112,7 +112,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$message	= ' - Updatable: no';
 			if( version_compare( $availableModule->version->current, $installedModule->version->current, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';
-				$message	= sprintf( $message, $installedModule->version, $availableModule->version );
+				$message	= sprintf( $message, $installedModule->version->current, $availableModule->version->current );
 			}
 			$this->out( $message );
 			$availableModule = $installedModule;

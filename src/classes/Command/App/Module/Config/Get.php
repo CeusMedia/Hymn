@@ -67,7 +67,7 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 					$this->out( ' - Key:       '.$item->key );
 					$this->out( ' - Value:     '.$this->renderValue( $item ) );
 					if( $item->values )
-						$this->out( ' - Values:     '.join( ', ', preg_split( '/\s*,\s*/', $item->values ) ) );
+						$this->out( ' - Values:     '.join( ', ', $item->values ) );
 					if( $item->title )
 						$this->out( ' - Title:      '.$item->title );
 					$this->out( ' - Type:      '.$type );
@@ -85,7 +85,7 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 		}
 	}
 
-	protected function renderValue( $item ): int|float|string
+	protected function renderValue( Hymn_Structure_Module_Config $item ): int|float|string
 	{
 		if( in_array( $item->type, ['bool', 'boolean'] ) )
 			return $item->value ? 'yes' : 'no';

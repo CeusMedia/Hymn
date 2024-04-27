@@ -46,6 +46,8 @@ class Hymn_Structure_Module
 	public string $file;
 	public ?string $uri					= NULL;
 	public ?string $path				= NULL;
+//	public ?string $pathName			= NULL;
+	public ?string $absolutePath		= NULL;
 	public string $title;
 	public string $category;
 	public string $description;

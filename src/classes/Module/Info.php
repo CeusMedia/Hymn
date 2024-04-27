@@ -62,11 +62,11 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleFiles( $module ): void
+	public function showModuleFiles( Hymn_Structure_Module $module ): void
   {
 		$list	= [];
 		if( isset( $module->files ) ){
-			foreach( $module->files as $sectionKey => $sectionFiles ){
+			foreach( $module->files->toArray() as $sectionKey => $sectionFiles ){
 				if( !count( $sectionFiles ) )
 				continue;
 				$list[]	= '    - '.ucfirst( $sectionKey );
@@ -100,7 +100,7 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleHook( $module ): void
+	public function showModuleHook( Hymn_Structure_Module $module ): void
   {
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
@@ -108,8 +108,8 @@ class Hymn_Module_Info
 		foreach( $module->hooks as $resource => $events ){
 			foreach( $events as $event => $hooks ){
 				foreach( $hooks as $hook ){
-					if( !preg_match( '/\n/', $hook->hook ) )
-						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->hook );
+					if( !preg_match( '/\n/', $hook->callback ) )
+						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->callback );
 					else
 						$this->client->out( '    - '.$resource.' > '.$event.' >> <func> !DEPRECATED!' );
 				}

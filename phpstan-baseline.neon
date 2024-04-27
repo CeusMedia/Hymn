@@ -1,11 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Access to an undefined property object\\:\\:\\$isInstalled\\.$#"
-			count: 1
-			path: src/classes/Module/Diff.php
-
-		-
 			message: "#^Call to an undefined method SimpleXMLElement\\:\\:addCData\\(\\)\\.$#"
 			count: 1
 			path: src/classes/Tool/XML/Element.php

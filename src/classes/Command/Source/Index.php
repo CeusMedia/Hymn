@@ -77,7 +77,7 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 //			$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
 	}
 
-	protected function printSettings( $settings ): void
+	protected function printSettings( object $settings ): void
 	{
 		unset( $settings->modules );
 		$data	= (array) $settings;
