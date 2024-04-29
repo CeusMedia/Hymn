@@ -420,12 +420,12 @@ class Hymn_Client
 
 	protected function dispatch(): void
 	{
-		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
+		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );				//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
-			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
+			$this->arguments->removeArgument( 0 );												//  remove command from arguments list
 			try{
 				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
-					$this->outVeryVerbose( 'Reading application configuration ...' );				//  note reading of application configuration
+					$this->outVeryVerbose( 'Reading application configuration ...' );			//  note reading of application configuration
 					$this->readConfig();															//  read application configuration from hymn file
 				}
 				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
@@ -436,9 +436,10 @@ class Hymn_Client
 						$this->words->errorCommandClassNotImplementingInterface,
 						$className
 					) );
-				$commandObject		= $reflectedClass->newInstanceArgs( [$this] );			//  create object of reflected class
+				/** @var Hymn_Command_Interface $commandObject */
+				$commandObject		= $reflectedClass->newInstanceArgs( [$this] );					//  create object of reflected class
 				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
-				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
+				$reflectedMethod	= $reflectedObject->getMethod( 'run' );					//  reflect object method "run"
 				$this->applyCommandOptionsToArguments( $commandObject );							//  extend argument options by command specific options
 				$reflectedMethod->invokeArgs( $commandObject, $this->arguments->getArguments() );	//  call reflected object method
 			}
@@ -449,7 +450,7 @@ class Hymn_Client
 			}
 		}
 		else																						//  no command string given
-			$this->out( $this->locale->loadText( 'command/index' ) );								//  print index text
+			$this->out( $this->locale->loadText( 'command/index' ) );							//  print index text
 	}
 
 	/**
@@ -458,6 +459,7 @@ class Hymn_Client
 	 *	@param		string			$command			Called command
 	 *	@return		string								Command class name
 	 *	@throws		InvalidArgumentException			if no command class is available for called command
+	 *	@phpstan-return		class-string
 	 */
 	protected function getCommandClassFromCommand( string $command ): string
 	{
@@ -465,12 +467,12 @@ class Hymn_Client
 			throw new InvalidArgumentException( 'No command given' );
 		$commandWords	= ucwords( preg_replace( '/-+/', ' ', $command ) );
 		$className		= 'Hymn_Command_'.preg_replace( '/ +/', '_', $commandWords );
-		if( !class_exists( $className ) )
-			throw new RangeException( sprintf(
-				$this->words->errorCommandUnknown,
-				$command
-			) );
-		return $className;
+		if( class_exists( $className ) )
+			return $className;
+		throw new RangeException( sprintf(
+			$this->words->errorCommandUnknown,
+			$command
+		) );
 	}
 
 	protected function parseArguments( array $arguments, array $options = [], bool $force = FALSE ): void

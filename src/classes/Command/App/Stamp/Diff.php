@@ -47,14 +47,13 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 */
 	public function run(): void
 	{
-		$pathName	= $this->client->arguments->getArgument();
-		$type		= $this->client->arguments->getArgument( 1 );
-		$sourceId	= $this->client->arguments->getArgument( 2 );
-		$moduleId	= $this->client->arguments->getArgument( 3 );
-		$sourceId	= $this->evaluateSourceId( $sourceId );
+		$pathName	= $this->client->arguments->getArgument() ?? '';
+		$type		= $this->client->arguments->getArgument( 1 ) ?? '';
+		$moduleId	= $this->client->arguments->getArgument( 3 ) ?? '';
+		$sourceId	= $this->evaluateSourceId( $this->client->arguments->getArgument( 2 ) );
 		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $sourceId );
-		if( $moduleId )
+		if( '' !== $moduleId )
 			$modules	= [$moduleId => $this->getLibrary()->readInstalledModule( $moduleId )];
 
 		/*  --  FIND MODULE CHANGES  --  */
@@ -133,13 +132,13 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
-		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
+		$pattern	= '/^stamp_[0-9:_-]+\.serial/';
 		if( $sourceId )
-			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.json$/';
+			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.serial/';
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
-		$finder->setAcceptedFileNames( ['latest.json'] );
+		$finder->setAcceptedFileNames( ['latest.serial'] );
 		return $finder->find( $path );
 	}
 

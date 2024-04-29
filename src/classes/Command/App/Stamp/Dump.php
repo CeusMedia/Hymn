@@ -61,7 +61,7 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 		}
 		else{
 			$modules	= $library->listInstalledModules();
-			$fileName	= $pathDump.'stamp_'.$datetime.'.json';
+			$fileName	= $pathDump.'stamp_'.$datetime.'.serial';
 			$this->out( count( $modules )." modules installed:" );
 		}
 		if( dirname( $fileName) )																//  path is not existing
@@ -73,6 +73,8 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			unset( $module->version->available );
 			unset( $module->version->installed );
 			unset( $module->isInstalled );
+			$module->description	= '';
+			$module->sql			= [];
 			$module->version->log	= [];
 			$data->modules[$module->id]	= $module;
 		}

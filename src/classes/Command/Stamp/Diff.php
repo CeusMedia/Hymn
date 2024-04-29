@@ -119,13 +119,13 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
-		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
+		$pattern	= '/^stamp_[0-9:_-]+\.serial/';
 		if( $sourceId )
-			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.json$/';
+			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.serial/';
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
-		$finder->setAcceptedFileNames( ['latest.json'] );
+		$finder->setAcceptedFileNames( ['latest.serial'] );
 		return $finder->find( $path );
 	}
 
