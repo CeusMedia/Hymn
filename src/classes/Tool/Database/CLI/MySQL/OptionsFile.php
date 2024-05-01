@@ -64,7 +64,7 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 		];
 		$optionList		= [];
 		foreach( $map as $optionsKey => $dbaKey ){
-			$trimmedValue 	= trim( $dbc->getConfig( $dbaKey ) );
+			$trimmedValue 	= trim( $dbc->getConfigValue( $dbaKey ) );
 			if( strlen( $trimmedValue ) )
 				$optionList[$optionsKey]	= $trimmedValue;
 		}

@@ -36,7 +36,7 @@ class Hymn_Tool_Database_PDO
 	 */
 	public function applyTablePrefixToSql( string $sql, ?string $prefix = NULL ): string
 	{
-		$prefix		= $prefix ?: $this->getConfig( 'prefix' );								//  use given or configured table prefix
+		$prefix		= $prefix ?: $this->getConfigValue( 'prefix' );								//  use given or configured table prefix
 		return str_replace( "<%?prefix%>", $prefix, $sql );											//  apply table prefix to SQL and return result
 	}
 
@@ -89,12 +89,15 @@ class Hymn_Tool_Database_PDO
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		$this->dbc->query( 'SET CHARSET utf8' );
 		try{
-			if( !$this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+			$query	= 'SHOW DATABASES LIKE "'.$this->dba->name.'"';
+			$try1	= $this->dbc->query( $query );
+			if( FALSE !== $try1 && !$try1->fetch() ){
 				$this->client->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
 				$this->dbc->query( 'CREATE DATABASE `'.$this->dba->name.'`;' );
 				$this->client->outVerbose( 'OK' );
 			}
-			if( $this->dbc->query( 'SHOW DATABASES LIKE "'.$this->dba->name.'"' )->fetch() ){
+			$try2	= $this->dbc->query( $query );
+			if( FALSE !== $try2 && $try2->fetch() ){
 				$this->client->outVerbose( 'Switching into database "'.$this->dba->name.'" ...', FALSE );
 				$this->dbc->query( 'USE `'.$this->dba->name.'`;' );
 				$this->client->outVerbose( 'OK' );
@@ -122,21 +125,32 @@ class Hymn_Tool_Database_PDO
 	/**
 	 *	Returns database access configuration as object or a single pair by given key.
 	 *	@access		public
-	 *	@param		string|NULL		$key		Key to return single pair for (optional)
-	 *	@return		Hymn_Tool_Database_Source|string
+	 *	@param		string		$key		Key to return single pair for
+	 *	@return		string
 	 *	@throws		DomainException			if key is not set in configuration
 	 */
-	public function getConfig( string $key = NULL ): Hymn_Tool_Database_Source|string
+	public function getConfigValue( string $key ): string
 	{
 		$this->prepareConnection( FALSE );
 		if( !$this->dba )
 			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
-		if( is_null( $key ) )
-			return $this->dba;
 		if( isset( $this->dba->$key ) )
 			return $this->dba->$key;
 		else
 			throw new DomainException( 'Invalid database access property key "'.$key.'"' );
+	}
+
+	/**
+	 *	Returns database access configuration as data object.
+	 *	@access		public
+	 *	@return		Hymn_Tool_Database_Source
+	 */
+	public function getConfig2(): Hymn_Tool_Database_Source
+	{
+		$this->prepareConnection( FALSE );
+		if( !$this->dba )
+			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
+		return $this->dba;
 	}
 
 	/**

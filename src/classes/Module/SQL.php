@@ -257,14 +257,14 @@ class Hymn_Module_SQL
 	 *	Returns PDO driver used or to be used for database connection.
 	 *	@access		protected
 	 *	@return		string							PDO driver used by database connection
-	 *	@throws		\RuntimeException				if no database connection driver is set
+	 *	@throws        RuntimeException                if no database connection driver is set
 	 */
 	protected function checkDriver(): string
 	{
 		$dbc	= $this->client->getDatabase();														//  shortcut database resource of client
-		$driver	= $dbc->getConfig( 'driver' );														//  get configured database driver
+		$driver	= $dbc->getConfigValue( 'driver' );														//  get configured database driver
 		if( !$driver )																				//  no database driver set
-			throw new \RuntimeException( 'No database connection driver set' );						//  quit with exception
+			throw new RuntimeException( 'No database connection driver set' );						//  quit with exception
 		return $driver;																				//  otherwise return configured driver
 	}
 
@@ -275,11 +275,11 @@ class Hymn_Module_SQL
 	 *	@return		void
 	 *	@throws		RuntimeException				if execution fails
 	 */
-	protected function executeSql( string $sql )
+	protected function executeSql( string $sql ): void
 	{
 		$dbc		= $this->client->getDatabase();
 		$dbc->connect( TRUE );
-		$prefix		= $dbc->getConfig( 'prefix' );
+		$prefix		= $dbc->getConfigValue( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
 		$statements = [];
 		$buffer		= [];
