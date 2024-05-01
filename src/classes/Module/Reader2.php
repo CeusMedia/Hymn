@@ -56,7 +56,7 @@ class Hymn_Module_Reader2
 	 *	@access		public
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
-	 *	@return		Hymn_Structure_Module					Module data object
+	 *	@return		Hymn_Structure_Module		Module data object
 	 *	@throws		RuntimeException	if XML file could not been loaded and parsed
 	 */
 	public static function load( string $filePath, string $id ): Hymn_Structure_Module
@@ -340,11 +340,11 @@ class Hymn_Module_Reader2
 			$resource	= self::castNodeAttributesToString( $hook, 'resource' );
 			/** @var string $event */
 			$event		= self::castNodeAttributesToString( $hook, 'event' );
-			$module->hooks[$resource][$event][]	= new HookDefinition(
-				trim( (string) $hook, ' ' ),
-				$resource,
-				$event,
-				(int) self::castNodeAttributesToInt( $hook, 'level', 5 )
+			$content	= trim( (string) $hook, ' ' );
+			if( preg_match( '/\n/', $content ) )
+				throw new RuntimeException( 'Hooks with inline function are not supported anymore' );
+			$module->hooks[$resource][$event][]	= new HookDefinition( $content, $resource, $event,
+				(int) self::castNodeAttributesToInt( $hook, 'level', 5 ),
 			);
 		}
 		return TRUE;

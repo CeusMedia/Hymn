@@ -158,7 +158,7 @@ abstract class Hymn_Command_Abstract
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): float|bool|int|string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,

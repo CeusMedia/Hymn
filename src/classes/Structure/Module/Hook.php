@@ -57,9 +57,33 @@ class Hymn_Structure_Module_Hook
 	 */
 	public function __construct( string $callback, string $resource, string $event, int $level )
 	{
+		if( '' == trim( $callback ) )
+			throw new InvalidArgumentException( 'Parameter "callback" must be a non-empty string.' );
+		if( '' == trim( $resource ) )
+			throw new InvalidArgumentException( 'Parameter "resource" must be a non-empty string.' );
+		if( '' == trim( $event ) )
+			throw new InvalidArgumentException( 'Parameter "event" must be a non-empty string.' );
+
 		$this->callback		= $callback;
 		$this->resource		= $resource;
 		$this->event		= $event;
 		$this->level		= $level;
+	}
+
+	public static function fromArray( array $array ): self
+	{
+		if( !isset( $array['callback'] ) )
+			throw new InvalidArgumentException( 'Parameter "callback" must be a non-empty string.' );
+		if( !isset( $array['resource'] ) )
+			throw new InvalidArgumentException( 'Parameter "resource" must be a non-empty string.' );
+		if( !isset( $array['event'] ) )
+			throw new InvalidArgumentException( 'Parameter "event" must be a non-empty string.' );
+
+		return new self(
+			$array['resource'],
+			$array['event'],
+			$array['level'] ?? 0,
+			$array['callback'],
+		);
 	}
 }
