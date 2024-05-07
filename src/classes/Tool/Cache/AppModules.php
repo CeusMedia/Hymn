@@ -38,15 +38,17 @@
 class Hymn_Tool_Cache_AppModules
 {
 	protected Hymn_Client $client;
+
+	/** @var object{dry: bool, quiet: bool, verbose: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
 		$this->flags	= (object) [
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'quiet'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 	}
 

@@ -92,7 +92,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 		$tablesToSkip	= $this->getTablesToSkip();
 
 		if( $this->flags->verbose ){
-			$dba	= $dbc->getConfig2();
+			$dba	= $dbc->getConfig();
 			$this->out( [
 				'Export file:  '.$fileName,															//  show export file name
 				'DB Server:    '.$dba->host.'@'.$dba->port,											//  show server host and port from config

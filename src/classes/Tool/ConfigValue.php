@@ -55,7 +55,7 @@ class Hymn_Tool_ConfigValue
 		}
 		if( $this->getType() !== $value->getType() )
 			return static::COMPARED_MISMATCH_TYPE;
-		if( strlen( $this->getValue() ) !== strlen( $value->getValue() ) )
+		if( strlen( (string) $this->getValue() ) !== strlen( (string) $value->getValue() ) )
 			return static::COMPARED_MISMATCH_LENGTH;
 		if( $this->getValue() == $value->getValue() )
 			return static::COMPARED_EQUAL;

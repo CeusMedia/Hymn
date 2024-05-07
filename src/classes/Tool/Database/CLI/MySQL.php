@@ -64,28 +64,28 @@ class Hymn_Tool_Database_CLI_MySQL
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
 			$tempFilePath	= $tempFile->create()->getFilePath();
 			$optionsFile->create( $tempFilePath, FALSE );
-			$line	= vsprintf( '%s %s %s', array(											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
-				join( ' ', array(
+			$line	= vsprintf( '%s %s %s', [											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+				join( ' ', [
 					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),						//  configured host as escaped shell arg
 					'--result-file='.escapeshellarg( $fileName ),									//  target file
 					'--skip-extended-insert',														//  each row in one insert line
-				) ),
+				] ),
 				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				$tables
-			) );
+			] );
 		}
 		else {
-			$line	= vsprintf( '%s %s %s', array(											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
-				join( ' ', array(
+			$line	= vsprintf( '%s %s %s', [											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+				join( ' ', [
 					'--host='.escapeshellarg( $dbc->getConfigValue( 'host' ) ),				//  configured host as escaped shell arg
 					'--port='.escapeshellarg( $dbc->getConfigValue( 'port' ) ),				//  configured port as escaped shell arg
 					'--user='.escapeshellarg( $dbc->getConfigValue( 'username' ) ),			//  configured username as escaped shell arg
 					'--password='.escapeshellarg( $dbc->getConfigValue( 'password' ) ),		//  configured password as escaped shell arg
 					'--result-file='.escapeshellarg( $fileName ),
-				) ),
+				] ),
 				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				$tables,																			//  collected found tables
-			) );
+			] );
 		}
 		$result	 = $this->execCommandLine( $line, 'mysqldump' );
 		if( $this->useTempOptionsFile && $optionsFile )
@@ -153,7 +153,7 @@ class Hymn_Tool_Database_CLI_MySQL
 	}
 
 	public function insertPrefixInFile( string $fileName, string $prefix ): void
-  {
+	{
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
 		$callback	= [$this, '_callbackReplacePrefix'];											//  create replace callback
@@ -168,7 +168,7 @@ class Hymn_Tool_Database_CLI_MySQL
 
 		while( !feof( $fpIn ) ){																	//  read input file until end
 			$line	= fgets( $fpIn );																//  read line buffer
-			$line	= preg_replace_callback( $regExp, $callback, $line );							//  perform replace in buffer
+			$line	= preg_replace_callback( $regExp, $callback, $line ?: '' );				//  perform replace in buffer
 //			$buffer	= fread( $fpIn, 4096 );															//  read 4K buffer
 //			$buffer	= preg_replace_callback( $regExp, $callback, $buffer );							//  perform replace in buffer
 			fwrite( $fpOut, $line );																//  write buffer to target file
@@ -220,7 +220,7 @@ class Hymn_Tool_Database_CLI_MySQL
 			throw new RuntimeException( 'Failed to open write stream to '.$tempName );
 		while( !feof( $fpIn ) ){																	//  read input file until end
 			$line	= fgets( $fpIn );																//  read line buffer
-			$line	= str_replace( '<%?prefix%>', $prefix, $line );							//  replace table prefix placeholder
+			$line	= str_replace( '<%?prefix%>', $prefix, $line ?: '' );				//  replace table prefix placeholder
 			fwrite( $fpOut, $line );																//  write buffer to target file
 		}
 		fclose( $fpOut );																			//  close target file

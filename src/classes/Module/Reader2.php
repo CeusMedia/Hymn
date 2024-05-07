@@ -341,8 +341,9 @@ class Hymn_Module_Reader2
 			/** @var string $event */
 			$event		= self::castNodeAttributesToString( $hook, 'event' );
 			$content	= trim( (string) $hook, ' ' );
-			if( preg_match( '/\n/', $content ) )
-				throw new RuntimeException( 'Hooks with inline function are not supported anymore' );
+			if( preg_match( '/\n/', $content ) ){
+				throw new RuntimeException( vsprintf( 'Hooks with inline function are not supported anymore, but found in module %s', [$module->id] ) );
+			}
 			$module->hooks[$resource][$event][]	= new HookDefinition( $content, $resource, $event,
 				(int) self::castNodeAttributesToInt( $hook, 'level', 5 ),
 			);

@@ -5,22 +5,39 @@ class Hymn_Tool_TempFile
 
 	protected ?string $filePath		= NULL;
 
+	public static function getInstance( string $prefix = '' ): self
+	{
+		$object	= new self( $prefix );
+		return $object->create();
+	}
+
 	public function __construct( string $prefix = '' )
 	{
 		$this->prefix	= $prefix;
 	}
 
+	public function __destruct()
+	{
+		$this->destroy();
+	}
+
 	public function create(): self
 	{
-		$this->filePath = tempnam( sys_get_temp_dir(), $this->prefix );
+		$filePath	= tempnam( sys_get_temp_dir(), $this->prefix );
+		if( FALSE === $filePath )
+			throw new RuntimeException( 'Create a temporary file failed' );
+		$this->filePath = $filePath;
 		return $this;
 	}
 
 	public function destroy(): bool
 	{
-		unlink( $this->getFilePath() );
-		$this->filePath	= NULL;
-		return TRUE;
+		if( NULL !== $this->filePath ){
+			unlink( $this->getFilePath() );
+			$this->filePath	= NULL;
+			return TRUE;
+		}
+		return FALSE;
 	}
 
 	public function getFilePath(): string

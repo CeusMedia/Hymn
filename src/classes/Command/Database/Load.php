@@ -83,7 +83,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );						//  get CLI handler for MySQL
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 			if( $this->flags->verbose ){
-				$dba	= $dbc->getConfig2();
+				$dba	= $dbc->getConfig();
 				$this->out( [
 					'Import file:  '.$fileName,														//  show import file name
 					'File size:    '.$fileSize,														//  show import file size

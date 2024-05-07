@@ -128,7 +128,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function getLatestStamp( ?string $path = NULL, ?string $sourceId = NULL ): ?string
 	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$path		= preg_replace( '@\.+/@', '', $path );
+		$path		= preg_replace( '@\.+/@', '', $path ?? '' );
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
@@ -145,11 +145,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		$pathName		...
-	 *	@param		$sourceId		...
+	 *	@param		string			$pathName		...
+	 *	@param		string|NULL		$sourceId		...
 	 *	@return		object{modules: array<Hymn_Structure_Module>}
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): object
+	protected function getStamp( string $pathName, ?string $sourceId = NULL ): object
 	{
 		if( '' !== trim( $pathName ) ){
 			$fileName	= NULL;

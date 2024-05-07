@@ -60,16 +60,16 @@ class Hymn_Tool_Database_PDO
 			$this->client->outError( 'PDO driver "'.$this->dba->driver.'" is not available', Hymn_Client::EXIT_ON_SETUP );
 		}
 		while( empty( $this->dba->name ) ){
-			$this->dba->name		= $this->ask( 'Database Name:' );
+			$this->dba->name		= (string) $this->ask( 'Database Name:' );
 		}
 		while( empty( $this->dba->username ) ){
-			$this->dba->username	= $this->ask( 'Database Username:' );
+			$this->dba->username	= (string) $this->ask( 'Database Username:' );
 		}
 		while( empty( $this->dba->password ) ){
-			$this->dba->password	= $this->ask( 'Database Password:' );
+			$this->dba->password	= (string) $this->ask( 'Database Password:' );
 		}
 		while( is_null( $this->dba->prefix ) ){
-			$this->dba->prefix		= $this->ask( 'Table Prefix:' );
+			$this->dba->prefix		= (string) $this->ask( 'Table Prefix:' );
 		}
 
 		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
@@ -145,7 +145,7 @@ class Hymn_Tool_Database_PDO
 	 *	@access		public
 	 *	@return		Hymn_Tool_Database_Source
 	 */
-	public function getConfig2(): Hymn_Tool_Database_Source
+	public function getConfig(): Hymn_Tool_Database_Source
 	{
 		$this->prepareConnection( FALSE );
 		if( !$this->dba )
@@ -174,7 +174,9 @@ class Hymn_Tool_Database_PDO
 	{
 		$query		= "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" );
 		$result		= $this->query( $query );
-		return $result->fetchAll( PDO::FETCH_COLUMN );
+		if( FALSE !== $result )
+			return $result->fetchAll( PDO::FETCH_COLUMN );
+		return [];
 	}
 
 	/**
@@ -182,10 +184,10 @@ class Hymn_Tool_Database_PDO
 	 *	Connects database if not done before.
 	 *	@access		public
 	 *	@param		string		$query			Query to run
-	 *	@return		PDOStatement
+	 *	@return		PDOStatement|FALSE
 	 *	@see		http://php.net/manual/en/pdo.query.php
 	 */
-	public function query( string $query ): PDOStatement
+	public function query( string $query ): PDOStatement|FALSE
 	{
 		$this->connect();
 		return $this->dbc->query( $query );
@@ -193,7 +195,7 @@ class Hymn_Tool_Database_PDO
 
 	/*  --  PROTECTED  --  */
 
-	protected function ask( string $message, string $type = 'string', float|bool|int|string|NULL $default = NULL, array $options = [], bool $break = TRUE ): string
+	protected function ask( string $message, string $type = 'string', string|NULL $default = NULL, array $options = [], bool $break = TRUE ): float|bool|int|string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
@@ -249,7 +251,7 @@ class Hymn_Tool_Database_PDO
 					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;				//  carry resource module config value to database access information
 		}
 		else if( $usesLinkedModules ){
-			$parts		= preg_split( '/\s*,\s*/', $config->database->modules );					//  split comma separated list if resource modules in registration format
+			$parts		= preg_split( '/\s*,\s*/', $config->database->modules ) ?: [];		//  split comma separated list if resource modules in registration format
 			foreach( $parts as $moduleRegistration ){												//  iterate these module registrations
 				$moduleId		= $moduleRegistration;												//  assume module ID to be the while module registration string ...
 				$configPrefix	= '';																//  ... and no config prefix as fallback (simplest situation)

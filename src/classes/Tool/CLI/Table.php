@@ -91,7 +91,7 @@ class Hymn_Tool_CLI_Table
 		$colWidths	= [];
 		foreach( $keys as $nr => $key )
 			$colWidths[$nr]	= (object) [
-				'head'	=> $this->strlen( $key ),
+				'head'	=> $this->strlen( (string) $key ),
 				'label'	=> $key,
 				'min'	=> pow( 10, 6 ),
 				'max'	=> 0,
