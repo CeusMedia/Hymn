@@ -58,7 +58,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleIds			= $this->client->arguments->getArguments();
-		$defaultSourceId		= $library->getDefaultSource();
+//		$defaultSourceId		= $library->getDefaultSource();
 		$activeSourceList	= $library->getActiveSources();
 		$activeSourceIds	= array_keys( $activeSourceList );
 		$listInstalled		= $library->listInstalledModules();

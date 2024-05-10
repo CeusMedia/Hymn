@@ -7,7 +7,7 @@ class Hymn_Structure_Source
 	public string $path;
 	public string $type;
 	public bool $active;
-	public bool $isDefault;
+	public bool $isDefault		= FALSE;
 	public string $title;
 	public ?string $date		= NULL;
 	public array $modules		= [];

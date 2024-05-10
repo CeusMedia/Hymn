@@ -71,9 +71,8 @@ class Hymn_Tool_CLI_Config
 		$this->config	= $config;
 		$this->applyBaseConfiguredPathsToAppConfig();
 		$this->applyAppConfiguredDatabaseConfigToModules();
-		if( isset( $app->installMode ) && $app->installMode === 'live' )							//  is live installation
-			if( isset( $app->installType ) && $app->installType === 'copy' )						//  is installation copy
-				$this->isLiveCopy = TRUE;															//  this installation is a build for a live copy
+
+		$this->isLiveCopy = 'live' === ( $app->installMode ?? '' ) && 'copy' === ( $app->installType ?? '' );
 		return $this->config;
 	}
 

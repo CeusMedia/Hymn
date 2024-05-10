@@ -78,6 +78,8 @@ class Hymn_Module_Library_Available
 			'title'		=> $title,
 			'date'		=> NULL,
 		] );
+		if( 1 === count( $this->sources ) )
+			$this->sources[$sourceId]->isDefault	= TRUE;
 //		ksort( $this->sources );
 	}
 
