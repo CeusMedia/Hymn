@@ -37,7 +37,12 @@
  */
 abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
 {
-	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL ): ?object
+	/**
+	 *	@param		int							$position
+	 *	@param		?Hymn_Tool_CLI_Arguments	$arguments
+	 *	@return		?Hymn_Structure_Source
+	 */
+	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL ): ?Hymn_Structure_Source
 	{
 		$arguments  = $arguments ?: $this->client->arguments;
 		$sourceId	= $arguments->getArgument( $position );

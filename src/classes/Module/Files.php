@@ -166,13 +166,13 @@ class Hymn_Module_Files
 	{
 		if( !is_object( $module ) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
-		if( !isset( $module->path ) ){
+		if( !isset( $module->install->path ) ){
 			if( $awaitAvailableModule )
 				throw new InvalidArgumentException( 'Given module object is an installed module - object of available module needed' );
-			$module->path	= $this->config->application->uri;
+			$module->install->path	= $this->config->application->uri;
 		}
 
-		$pathSource		= $module->path;
+		$pathSource		= $module->install->path;
 		$pathTarget		= $this->config->application->uri;
 		$layoutTheme	= $this->config->layoutTheme ?? 'common';
 		$layoutPrimer	= $this->config->layoutPrimer ?? 'primer';

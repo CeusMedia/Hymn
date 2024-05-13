@@ -45,7 +45,8 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 	 */
 	public function run(): void
 	{
-		if( !( $source = $this->getSourceByArgument() ) )
+		$source	= $this->getSourceByArgument();
+		if( NULL === $source )
 			return;
 
 		if( !$source->active && !$this->flags->force ){

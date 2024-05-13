@@ -37,14 +37,17 @@
  */
 class Hymn_Structure_Module_Installation
 {
-	/**	@var		string|null		$type */
+	/**	@var		string|NULL		$type */
 	public ?string $type			= NULL;
 
-	/**	@var		string|null		$date */
+	/**	@var		string|NULL		$date */
 	public ?string $date			= NULL;
 
-	/**	@var		string|null		$source */
+	/**	@var		string|NULL		$source */
 	public ?string $source			= NULL;
+
+	/**	@var		string|NULL		$path */
+	public ?string $path			= NULL;
 }
 
 

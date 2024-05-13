@@ -196,6 +196,11 @@ class Hymn_Module_Library_Available
 		return $list;
 	}
 
+	/**
+	 *	@param		string		$sourceId
+	 *	@param		bool		$withModules
+	 *	@return		Hymn_Structure_Source
+	 */
 	public function getSource( string $sourceId, bool $withModules = FALSE ): Hymn_Structure_Source
 	{
 		if( !array_key_exists( $sourceId, $this->sources ) )
@@ -206,6 +211,11 @@ class Hymn_Module_Library_Available
 		return $source;
 	}
 
+	/**
+	 *	@param		array		$filters
+	 *	@param		bool		$withModules
+	 *	@return		array<Hymn_Structure_Source>
+	 */
 	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
 		$list	= [];																			//  prepare empty source list
@@ -251,7 +261,7 @@ class Hymn_Module_Library_Available
 		$pathname	= str_replace( "_", "/", $module->id ).'/';						//  assume source module path from module ID
 		$module->absolutePath	= realpath( $sourcePath.$pathname )."/";						//  extend found module by real source path
 //		$module->pathname		= $pathname;														//  extend found module by relative path
-		$module->path			= $sourcePath.$pathname;											//  extend found module by pseudo real path
+		$module->install->path	= $sourcePath.$pathname;											//  extend found module by pseudo real path
 		if( empty( $module->frameworks ) || !isset( $module->frameworks['Hydrogen'] ) )
 			$module->frameworks['Hydrogen']	= '<1.0';
 	}
@@ -342,7 +352,10 @@ class Hymn_Module_Library_Available
 	protected function loadModulesFromSerialFile( string $fileSerial, string $path ): array
 	{
 		$this->client->outVeryVerbose( '- Strategy: serial file' );
-		$index	= unserialize( file_get_contents( $fileSerial ) );
+		$content	= file_get_contents( $fileSerial );
+		if( FALSE === $content )
+			throw new RuntimeException( 'Reading file "'.$fileSerial.'" failed' );
+		$index		= unserialize( $content );
 		foreach( $index->modules as $module ){
 			$module->frameworks		= (array) $module->frameworks;
 //			$module->isDeprecated	= isset( $module->deprecation );
@@ -361,8 +374,11 @@ class Hymn_Module_Library_Available
 	protected function loadModulesFromJsonFile( string $fileJson, array $list, string $path ): array
 	{
 		$this->client->outVeryVerbose( '- Strategy: JSON file' );
+		$content	= file_get_contents( $fileJson );
+		if( FALSE === $content )
+			throw new RuntimeException( 'Reading file "'.$fileJson.'" failed' );
 		/** @var object{modules: array<object>} $index */
-		$index	= json_decode( file_get_contents( $fileJson ) );
+		$index	= json_decode( $content );
 		foreach( $index->modules as $module ){
 			$module	= $this->convertModuleDataObjectToStructureObject( $module, $fileJson );
 			$this->decorateModuleWithPaths( $module, $path );

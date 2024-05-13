@@ -45,7 +45,8 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 	 */
 	public function run(): void
 	{
-		if( !( $source = $this->getSourceByArgument() ) )
+		$source	= $this->getSourceByArgument();
+		if( NULL === $source )
 			return;
 
 		$library	= $this->getLibrary();

@@ -230,12 +230,12 @@ class Hymn_Module_Graph
 	 */
 	protected function checkForLoop( object $node, int $level = 0, array $steps = [] ): ?object
   {
-		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
+		if( array_key_exists( $node->module->install->path, $steps ) )								//  been in this module in before
 			return (object) array(																	//  return loop data ...
 				'module'	=> $node->module,														//  ... containing looping module
 				'modules'	=> $steps																//  ... and the module chain
 			);
-		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
+		$steps[$node->module->install->path]	= $node->module;									//  note this module in module chain
 		if( count( $node->in ) ){																	//  there are relations
 			foreach( $node->in as $parent ){														//  iterate these relations
 				$parent	= $this->nodes[$parent->id];												//  shortcut parent module

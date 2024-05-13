@@ -49,7 +49,7 @@ class Hymn_Tool_SourceIndex_ModuleFilter
 //		$regExp	= '@^'.preg_quote( $this->pathSource, '@' ).'@';
 		foreach( $modules as $module ){
 //			/** @var string $modulePath */
-//			$module->path = preg_replace( $regExp, '', $entry->getPath() );
+//			$module->install->path = preg_replace( $regExp, '', $entry->getPath() );
 
 			unset( $module->isInstalled );
 			unset( $module->version->installed );

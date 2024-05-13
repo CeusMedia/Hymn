@@ -86,7 +86,7 @@ class Hymn_Module_Installer
 	 */
 	public function configure( Hymn_Structure_Module $module ): void
   {
-		$source		= $module->path.'module.xml';
+		$source		= $module->install->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
 			Hymn_Module_Files::createPath( dirname( $target ) );								//  create folder for module configurations in app

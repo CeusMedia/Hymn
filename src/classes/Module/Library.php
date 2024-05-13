@@ -116,6 +116,11 @@ class Hymn_Module_Library
 		return $this->available->getSource( $sourceId, $withModules );
 	}
 
+	/**
+	 *	@param		array		$filters
+	 *	@param		bool		$withModules
+	 *	@return		array<Hymn_Structure_Source>
+	 */
 	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
 		return $this->available->getSources( $filters, $withModules );
