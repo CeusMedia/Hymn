@@ -1,6 +1,6 @@
 <?php
 /**
- *	...
+ *	Displays the changelog of this hymn version.
  *
  *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Displays the changelog of this hymn version.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
@@ -36,20 +36,17 @@
  */
 class Hymn_Command_Changelog extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected string $filePath		= 'phar://hymn.phar/.changelog';
-
 	/**
-	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose
-	 *	@todo		implement missing flags
+	 *	Displays the changelog of this hymn version.
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(): void
 	{
-		if( file_exists( $this->filePath ) ){
-			$this->out( file_get_contents( $this->filePath ) );
-		}
+		$filePath	= Hymn_Client::$pharPath.'.changelog';
+
+		if( !file_exists( $filePath ) )
+			$this->client->outError( 'No changelog file found.', Hymn_Client::EXIT_ON_LOAD );
+		$this->out( file_get_contents( $filePath ) );
 	}
 }

@@ -1,5 +1,9 @@
 # Change Log
 
+## v1.0.1
+- Move tool config files to own folder.
+
+
 ## v1.0.0
 - Migration to PHP 8
 	- Upgrade code for PHP 8
@@ -45,6 +49,7 @@
 - PHAR compression of on dev mode
 - Going for PHPStan level 2
 - New command: changelog
+- Add badges in readme
 
 ## v0.9.9.6
 - Allow to skip database tables on dump by module config. 

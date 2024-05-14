@@ -37,7 +37,6 @@
  */
 class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected string $pathPhar			= "phar://hymn.phar/";
 	protected array $argumentOptions	= [
 		'backend'		=> [
 			'pattern'	=> '/^-b|--backend/',
@@ -83,7 +82,7 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 				$targetFileName	= $question->setBreak( FALSE )->ask();
 			}
 		}
-		copy( $this->pathPhar."templates/Makefile", $targetFileName );
+		copy( Hymn_Client::$pharPath."templates/Makefile", $targetFileName );
 
 		$lineFilters	= [];
 		if( !$withBackend ){

@@ -40,7 +40,7 @@ class Hymn_Tool_Locale
 	public const TYPE_TEXT		= 1;
 	public const TYPE_WORDS		= 2;
 
-	protected string $baseUri		= 'phar://hymn.phar/locales/';
+	protected string $baseUri;
 	protected string $language;
 	protected string $version;
 
@@ -52,6 +52,7 @@ class Hymn_Tool_Locale
 	 */
 	public function __construct( string $language = NULL )
 	{
+		$this->baseUri		= Hymn_Client::$pharPath.'locales/';
 		$this->version		= Hymn_Client::$version;
 		$this->setLanguage( $language ?? Hymn_Client::$language );
 	}

@@ -37,10 +37,11 @@
  */
 class Hymn_Loader
 {
-	protected string $path			= 'phar://hymn.phar/';
+	protected string $path;
 
 	public function __construct()
 	{
+		$this->path		= Hymn_Client::$pharPath;
 		$this->loadClassesFromFolder( '' );
 	}
 
