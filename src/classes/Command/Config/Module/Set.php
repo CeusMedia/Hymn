@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,10 +45,11 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$filename   = Hymn_Client::$fileName;
-		$config		= $this->client->getConfig();
+//		$config		= $this->client->getConfig();
+		$config		= Hymn_Tool_ConfigFile::read( $filename );
 		$key		= $this->client->arguments->getArgument();
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
@@ -61,14 +62,14 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 		$availableModules	= $this->getAvailableModulesMap();
 
-		if( !isset( $config->modules->{$moduleId} ) )
-			$config->modules->{$moduleId}	= (object) [];
-		if( !isset( $config->modules->{$moduleId}->config ) )
-			$config->modules->{$moduleId}->config	= (object) [];
-		if( !isset( $config->modules->{$moduleId}->config->{$configKey} ) )
-			$config->modules->{$moduleId}->config->{$configKey}	= NULL;
+		if( !isset( $config->modules[$moduleId] ) )
+			$config->modules[$moduleId]	= (object) [];
+		if( !isset( $config->modules[$moduleId]->config ) )
+			$config->modules[$moduleId]->config	= [];
+		if( !isset( $config->modules[$moduleId]->config[$configKey] ) )
+			$config->modules[$moduleId]->config[$configKey]	= NULL;
 
-		$current	= $config->modules->{$moduleId}->config->{$configKey};
+		$current	= $config->modules[$moduleId]->config[$configKey];
 
 		$configType		= 'string';
 		$configDefault	= NULL;
@@ -98,8 +99,10 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 
 		if( $current === $value )
 			throw new RuntimeException( 'No change made' );
-		$config->modules->{$moduleId}->config->{$configKey}	= $value;
-		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
+
+		$config->modules[$moduleId]->config[$configKey]	= $value;
+
+		Hymn_Tool_ConfigFile::save( $config, $filename );
 		clearstatcache();
 	}
 }

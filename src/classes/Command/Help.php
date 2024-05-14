@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,8 +30,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_Interface
@@ -44,7 +44,7 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$command	= $this->client->arguments->getArgument();				//  get first argument as command
 		$locale		= $this->client->getLocale();								//  shortcut client locale handler
@@ -57,6 +57,5 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 			$message	= $locale->loadText( 'command/'.$path );				//  load help text locale
 
 		$this->out( $message );											//	print command help text
-		return TRUE;
 	}
 }

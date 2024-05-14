@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Info
 {
@@ -62,8 +62,8 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleFiles( $module )
-	{
+	public function showModuleFiles( $module ): void
+  {
 		$list	= [];
 		if( isset( $module->files ) ){
 			foreach( $module->files as $sectionKey => $sectionFiles ){
@@ -100,8 +100,8 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleHook( $module )
-	{
+	public function showModuleHook( $module ): void
+  {
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
 		$this->client->out( ' - Hooks: ' );
@@ -117,8 +117,8 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleRelations( Hymn_Module_Library $library, $module )
-	{
+	public function showModuleRelations( Hymn_Module_Library $library, $module ): void
+  {
 		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
@@ -153,8 +153,8 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleVersions( $module )
-	{
+	public function showModuleVersions( $module ): void
+  {
 		if( !count( $module->versionLog ) )
 			return;
 		$this->client->out( ' - Versions: ' );

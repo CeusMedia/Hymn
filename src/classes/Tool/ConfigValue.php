@@ -13,10 +13,10 @@ class Hymn_Tool_ConfigValue
 	public const COMPARED_MISMATCH_TYPE		= 256;
 	public const COMPARED_MISMATCH_LENGTH	= 512;
 
-	protected $value;
+	protected bool|int|float|string|NULL $value		= NULL;
 	protected string $type			= 'string';
 
-	public function __construct( $value = NULL, ?string $type = NULL )
+	public function __construct( string $value = NULL, ?string $type = NULL )
 	{
 		if( NULL !== $value)
 			$this->setType( $type );
@@ -41,7 +41,7 @@ class Hymn_Tool_ConfigValue
 				return static::COMPARED_UNSET_OTHER;
 		}
 		if( !$this->hasValue() || !$value->hasValue() ){
-			if( !$this->hasValue() && !$value->is() )
+			if( !$this->hasValue() && !$value->hasValue() )
 				return static::COMPARED_EMPTY_BOTH;
 			if( !$this->hasValue() )
 				return static::COMPARED_EMPTY_SELF;
@@ -76,10 +76,10 @@ class Hymn_Tool_ConfigValue
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}
 
-	public function getValue( bool $asTrimmedString = FALSE )
-	{
+	public function getValue( bool $asTrimmedString = FALSE ): string
+  {
 		if( $asTrimmedString ){
-			if( in_array( $this->type, ['bool', 'boolean'] ) )
+			if( in_array( $this->type, ['bool', 'boolean'], TRUE ) )
 				return $this->value ? 'yes' : 'no';
 			return trim( $this->value );
 		}
@@ -93,21 +93,21 @@ class Hymn_Tool_ConfigValue
 
 	public function hasValue(): bool
 	{
-		return $this->value !== NULL && strlen( trim( $this->value ) ) > 0;
+		return $this->value !== NULL && 0 !== strlen( trim( $this->value ) );
 	}
 
 	public function is( bool $hasValue = FALSE ): bool
 	{
 		if( $hasValue )
-			return strlen( trim( $this->value ) ) > 0;
-		return $this->value !== NULL;
+			return 0 !== strlen( trim( $this->value ) );
+		return NULL !== $this->value;
 	}
 
 	/**
 	 *	@deprecated		use setValue and setType instead
 	 */
-	public function set( $value, string $type = NULL )
-	{
+	public function set( $value, string $type = NULL ): static
+  {
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );
 		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
@@ -116,8 +116,8 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
-	public function setValue( $value )
-	{
+	public function setValue( $value ): static
+  {
 		$value		= trim( (string) $value );
 		if( $this->type === 'bool' )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
@@ -127,15 +127,15 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
-	public function setType( string $type )
-	{
+	public function setType( ?string $type = NULL ): static
+  {
 		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
 		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
 		$type		= is_null( $type ) ? 'string' : $type;
 		$type		= trim( strtolower( $type ) );
 		$type		= strlen( $type ) > 0 ? $type : 'string';
 		$type		= array_key_exists( $type, $shortmap ) ? $shortmap[$type] : $type;
-		if( !in_array( $type, $types ) )
+		if( !in_array( $type, $types, TRUE ) )
 			throw new DomainException( 'Invalid config value type: '.$type );
 		$this->type	= $type;
 		return $this;

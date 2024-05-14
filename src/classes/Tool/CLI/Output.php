@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,22 +30,24 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo				code documentation
  */
 class Hymn_Tool_CLI_Output
 {
-	public static $outputMethod		= 'print';
+	public static string $outputMethod		= 'print';
 
-	public $flags;
+	/** @var object{force: bool, quiet: bool, verbose: bool, veryVerbose: bool} $flags */
+	public object $flags;
 
 	protected Hymn_Client $client;
 
-	protected $words;
+	/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string}  */
+	protected object $words;
 
-	protected $exit;
+	protected bool $exit;
 
 	/**
 	 *	Constructor.
@@ -58,12 +60,14 @@ class Hymn_Tool_CLI_Output
 		$this->client	= $client;
 		$this->exit		= $exit;
 		$this->flags	= (object) [
-			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
-			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
+			'force'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
+			'quiet'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'veryVerbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE ),
 		];
-		$this->words		= $this->client->getLocale()->loadWords( 'client' );
+		/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string} $words */
+		$words			= $this->client->getLocale()?->loadWords( 'client' );
+		$this->words	= $words;
 
 		if( self::$outputMethod !== 'print' )
 			ob_start();
@@ -72,16 +76,17 @@ class Hymn_Tool_CLI_Output
 	/**
 	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
+	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE )
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
 		if( is_null( $lines ) )
 			$lines	= [];
 		if( !is_array( $lines ) ){																	//  output content is not a list
-			if( is_bool( $lines ) )																	//  output is booleann
+			if( is_bool( $lines ) )																	//  output is boolean
 				$lines	= $lines ? 'yes' : 'no';													//  convert to string
 			if( !is_string( $lines ) && !is_numeric( $lines ) ){									//  output content is neither a string nor numeric
 				throw new InvalidArgumentException( sprintf(										//  quit with exception
@@ -96,17 +101,18 @@ class Hymn_Tool_CLI_Output
 			if( $newLine )																			//  output should be closed by newline character
 				print( PHP_EOL );																	//  print newline character
 		}
+		return $this;
 	}
 
 	/**
 	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
+	 *	@param		string|array		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outDeprecation( $lines = [] )
+	public function outDeprecation( string|array $lines = [] ): self
 	{
 		if( !is_array( $lines ) ){
 			if( !is_string( $lines ) )
@@ -117,8 +123,9 @@ class Hymn_Tool_CLI_Output
 		}
 		$lines[0]	= $this->words->outPrefixDeprecation.$lines[0];
 		array_unshift( $lines, '' );
-		array_push( $lines, '' );
+		$lines[]	= '';
 		$this->out( $lines );
+		return $this;
 	}
 
 	/**
@@ -126,9 +133,9 @@ class Hymn_Tool_CLI_Output
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
 	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outError( string $message, ?int $exitCode = NULL )
+	public function outError( string $message, ?int $exitCode = NULL ): self
 	{
 		$this->out( $this->words->outPrefixError.$message );
 		if( $this->exit && is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
@@ -136,31 +143,33 @@ class Hymn_Tool_CLI_Output
 				print( ob_get_clean() );
 			exit( $exitCode );
 		}
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE )
+	public function outVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): self
 	{
 		if( $this->flags->verbose )																	//  verbose mode is on
 			if( !$this->flags->quiet )																//  quiet mode is off
 				$this->out( $lines, $newLine );
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE )
-	{
+	public function outVeryVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): void
+  {
 		if( $this->flags->veryVerbose )																//  very verbose mode is on
 			$this->outVerbose( $lines, $newLine );
 	}

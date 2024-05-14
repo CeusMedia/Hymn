@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,26 +45,26 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$library	= $this->getLibrary();
-		$shelves	= $library->getActiveShelves();
-		$this->out( sprintf( 'Found %d source(s):', count( $shelves ) ) );
-		foreach( $shelves as $shelfId => $shelf ){
-			$modules	= $library->getAvailableModules( $shelfId );
+		$sources	= $library->getActiveSources();
+		$this->out( sprintf( 'Found %d source(s):', count( $sources ) ) );
+		foreach( $sources as $sourceId => $source ){
+			$modules	= $library->getAvailableModules( $sourceId );
 			$this->out( [
-				'* '.$shelfId.':',
-				'  - Title:    '.$shelf->title,
-				'  - Type:     '.ucfirst( $shelf->type ),
-				'  - Path:     '.$shelf->path,
-				'  - Active:   '.( $shelf->active ? 'yes' : 'no' ),
-				'  - Default:  '.( $shelf->default ? 'yes' : 'no' ),
+				'* '.$sourceId.':',
+				'  - Title:    '.$source->title,
+				'  - Type:     '.ucfirst( $source->type ),
+				'  - Path:     '.$source->path,
+				'  - Active:   '.( $source->active ? 'yes' : 'no' ),
+				'  - Default:  '.( $source->default ? 'yes' : 'no' ),
 				'  - Modules:  '.count( $modules ),
 			] );
-			if( !empty( $shelf->date ) )
-				$this->out( '  - Date:     '.$shelf->date );
-			if( !empty( $shelf->url ) )
-				$this->out( '  - Link:     '.$shelf->url );
+			if( !empty( $source->date ) )
+				$this->out( '  - Date:     '.$source->date );
+			if( !empty( $source->url ) )
+				$this->out( '  - Link:     '.$source->url );
 
 			if( $this->flags->verbose ){
 				foreach( $modules as $moduleId => $module )

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
 {
@@ -43,30 +43,30 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
 		$library	= $this->getLibrary();
-		$modules	= $library->getAvailableModules( $shelf->id );
+		$modules	= $library->getAvailableModules( $source->id );
 		if( !count( $modules ) )
 			$this->outError( 'No available modules found.', Hymn_Client::EXIT_ON_RUN );
 
 		$this->out( vsprintf( 'Found %2$d available modules in source %1$s', [
-			$shelf->id, count( $modules ),
+			$source->id, count( $modules ),
 		] ) );
 
-		$this->out( sprintf( 'Path: %1$s', $shelf->path ) );
+		$this->out( sprintf( 'Path: %1$s', $source->path ) );
 
-		$jsonFile	= $shelf->path.'index.json';
+		$jsonFile	= $source->path.'index.json';
 		if( file_exists( $jsonFile ) ){
 			$this->out( 'Found index JSON file.' );
 			if( $this->flags->verbose )
 				$this->printSettings( json_decode( file_get_contents( $jsonFile ) ) );
 		}
 
-		$serialFile	= $shelf->path.'index.serial';
+		$serialFile	= $source->path.'index.serial';
 		if( file_exists( $serialFile ) ){
 			$this->out( 'Found index serial file.' );
 			if( $this->flags->verbose )
@@ -74,10 +74,10 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 		}
 
 //		if( !$this->flags->quiet )
-//			$this->client->out( 'Source "'.$shelf->id.'" has been enabled.' );
+//			$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
 	}
 
-	protected function printSettings( $settings )
+	protected function printSettings( $settings ): void
 	{
 		unset( $settings->modules );
 		$data	= (array) $settings;

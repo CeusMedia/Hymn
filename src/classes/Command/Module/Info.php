@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,16 +45,16 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		$config		= $this->client->getConfig();
+//		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$moduleId	= $this->client->arguments->getArgument();
 		$sourceId	= $this->client->arguments->getArgument( 1 );
 
-		if( !strlen( trim( $moduleId ) ) )
+		if( !strlen( trim( $moduleId ?? '' ) ) )
 			$this->client->outError( 'No module ID given.', Hymn_Client::EXIT_ON_INPUT );
-		if( !strlen( trim( $sourceId ) ) )
+		if( !strlen( trim( $sourceId ?? '' ) ) )
 			$sourceId	= NULL;
 
 		$modulesAvailable	= $library->getAvailableModules( $sourceId );
@@ -68,10 +68,10 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 		}
 
 		if( !$sourceId ){
-			$shelvesWithModule	= $library->getAvailableModuleShelves( $moduleId );
-			if( count( $shelvesWithModule ) > 1 ){
+			$sourcesWithModule	= $library->getAvailableModuleSources( $moduleId );
+			if( count( $sourcesWithModule ) > 1 ){
 				$message	= 'Module exists in several sources: %s. Please specify!';
-				$message	= sprintf( $message, join( ', ', array_keys( $shelvesWithModule ) ) );
+				$message	= sprintf( $message, join( ', ', array_keys( $sourcesWithModule ) ) );
 				$this->client->outError( $message, Hymn_Client::EXIT_ON_INPUT );
 			}
 		}
@@ -108,7 +108,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$this->out( '    - Version: '.$installedModule->version );
 			$this->out( '    - Source:  '.$installedModule->installSource );
 			$this->out( '    - Type:    '.$installTypes[$installedModule->installType] );
-			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', $installedModule->installDate ) );
+			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->installDate ) );
 			$message	= ' - Updatable: no';
 			if( version_compare( $availableModule->version, $installedModule->version, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';

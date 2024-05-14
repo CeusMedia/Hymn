@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,7 +45,7 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$config		= $this->client->getConfig();
 //		$this->client->getDatabase()->connect();													//  setup connection to database
@@ -53,7 +53,7 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		foreach( $config->modules as $moduleId => $moduleConfig ){
-			if( preg_match( "/^@/", $moduleId ) )
+			if( str_starts_with( $moduleId, '@' ) )
 				continue;
 			$sourceId	= NULL;
 			if( !empty( $moduleConfig->source ) )

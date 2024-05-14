@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -91,12 +91,12 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 		$this->library		= $this->getLibrary();													//  get module library instance
 	}
 
-	private function uninstallAllModules( array $listInstalled )
+	private function uninstallAllModules( array $listInstalled ): void
 	{
 		$relation	= new Hymn_Module_Graph( $this->client, $this->library );
 		foreach( array_keys( $listInstalled ) as $installedModuleId ){
@@ -112,7 +112,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
-	private function uninstallModuleById( string $moduleId, array $listInstalled )
+	private function uninstallModuleById( string $moduleId, array $listInstalled ): void
 	{
 		$neededBy	= [];
 		foreach( $listInstalled as $installedModuleId => $installedModule )

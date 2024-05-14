@@ -9,9 +9,9 @@ hymn - Hydrogen Management
 
 # Hymn
 
-![Branch](https://img.shields.io/badge/Branch-0.9.x-blue?style=flat-square)
-![Release](https://img.shields.io/badge/Release-0.9.11-blue?style=flat-square)
-![PHP version](https://img.shields.io/badge/PHP-%5E7.4|%5E8.1-blue?style=flat-square&color=777BB4)
+![Branch](https://img.shields.io/badge/Branch-1.0.x-blue?style=flat-square)
+![Release](https://img.shields.io/badge/Release----blue?style=flat-square)
+![PHP version](https://img.shields.io/badge/PHP-%5E8.1-blue?style=flat-square&color=777BB4)
 ![PHPStan level](https://img.shields.io/badge/PHPStan_level-1-darkgreen?style=flat-square)
 
 Console tool for installing Hydrogen applications.

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,17 +45,17 @@ class Hymn_Command_Modules_Installed extends Hymn_Command_Abstract implements Hy
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 //		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$shelfId	= $this->client->arguments->getArgument();
-		$shelfId	= $this->evaluateShelfId( $shelfId );
+		$sourceId	= $this->client->arguments->getArgument();
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 
-		if( $shelfId ){
-			$modules	= $library->listInstalledModules( $shelfId );
+		if( $sourceId ){
+			$modules	= $library->listInstalledModules( $sourceId );
 			ksort( $modules );
-			$this->out( count( $modules )." modules of source ".$shelfId." installed:" );
+			$this->out( count( $modules )." modules of source ".$sourceId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();

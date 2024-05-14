@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Library_Installed
 {
@@ -50,14 +50,13 @@ class Hymn_Module_Library_Installed
 		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
 			throw new RangeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		$reader			= new Hymn_Module_Reader();
-		return $reader->load( $filename, $moduleId );
+		return Hymn_Module_Reader::load( $filename, $moduleId );
 	}
 
-	public function getAll( string $shelfId = NULL ): array
+	public function getAll( string $sourceId = NULL ): array
 	{
-//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize shelves in cache
-//			return self::$listModulesInstalled;									//  @todo realize shelves in cache
+//		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize sources in cache
+//			return self::$listModulesInstalled;									//  @todo realize sources in cache
 		$list			= [];
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		if( file_exists( $pathModules ) ){
@@ -68,18 +67,18 @@ class Hymn_Module_Library_Installed
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 				$module	= $this->get( $key );
-				if( !$shelfId || $module->installSource === $shelfId )
+				if( !$sourceId || $module->installSource === $sourceId )
 					$list[$key]	= $module;
 			}
 		}
 		ksort( $list );
-//		self::$listModulesInstalled	= $list;									//  @todo realize shelves in cache
+//		self::$listModulesInstalled	= $list;									//  @todo realize sources in cache
 		return $list;
 	}
 
-	public function has( string $moduleId, string $shelfId = NULL ): bool
+	public function has( string $moduleId, string $sourceId = NULL ): bool
 	{
-		$list	= $this->getAll( $shelfId );
+		$list	= $this->getAll( $sourceId );
 		return array_key_exists( $moduleId, $list );
 	}
 }

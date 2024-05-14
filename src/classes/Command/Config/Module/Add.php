@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -48,14 +48,14 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 	public function run(): void
 	{
 		$filename	= Hymn_Client::$fileName;
-		$config		= json_decode( file_get_contents( $filename ) );
+		$config		= Hymn_Tool_ConfigFile::read( $filename );
 
 		$moduleName	= $this->client->arguments->getArgument();
 		if( !strlen( trim( $moduleName ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
 		$moduleId	= str_replace( ":", "_", $moduleName );
 
-		if( isset( $config->modules->{$moduleId} ) )
+		if( isset( $config->modules[$moduleId] ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is already registered' );
 
 		$availableModules	= $this->getAvailableModulesMap();
@@ -90,8 +90,9 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		}
 		if( count( $moduleConfigValues ) )
 			$moduleObject->config	= $moduleConfigValues;
-		$config->modules->{$module->id}	= $moduleObject;
-		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
+		$config->modules[$module->id]	= $moduleObject;
+
+		Hymn_Tool_ConfigFile::save( $config, $filename );
 		clearstatcache();
 		$this->out( "Saved updated hymn file." );
 	}

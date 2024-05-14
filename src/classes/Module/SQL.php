@@ -2,7 +2,7 @@
 /**
  *	Manager for module SQL scripts.
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_SQL
 {
@@ -55,7 +55,7 @@ class Hymn_Module_SQL
 	 *	Return list of SQL statements to execute on module update.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object		$module				Object of library module to install
+	 *	@param		object{sql: object, version: ?string}		$module				Object of library module to install
 	 *	@return		array		List of SQL statements to execute on module installation
 	 */
 	public function getModuleInstallSql( object $module ): array
@@ -68,6 +68,7 @@ class Hymn_Module_SQL
 		$version	= 0;																			//  init reached version
 		$scripts	= [];																		//  prepare empty list for collected scripts
 
+    /** @var object{sql: string, type: ?string, version: ?string, event: string} $sql */
 		foreach( $module->sql as $sql )																//  first run: install
 			if( $sql->event == "install" && trim( $sql->sql ) )										//  is an install script
 				if( $sql->version == "final" || !$sql->version )									//  is final install script
@@ -108,7 +109,7 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and returns list of uninstall scripts.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object		$installedModule	Object of locally installed module
+	 *	@param		object{sql: object, version: ?string}		$installedModule	Object of locally installed module
 	 *	@return		array		List of SQL statements to execute on module uninstallation
 	 */
 	public function getModuleUninstallSql( object $installedModule ): array
@@ -288,7 +289,7 @@ class Hymn_Module_SQL
 			if( !trim( $line ) )
 				continue;
 			$buffer[]	= $dbc->applyTablePrefixToSql( trim( $line ), $prefix );
-			if( preg_match( '/;$/', trim( $line ) ) ){
+			if( str_ends_with( trim( $line ), ';' ) ){
 				$statements[]	= join( "\n", $buffer );
 				$buffer			= [];
 			}

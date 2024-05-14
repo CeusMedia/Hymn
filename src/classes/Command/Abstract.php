@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,8 +30,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 abstract class Hymn_Command_Abstract
@@ -42,6 +42,7 @@ abstract class Hymn_Command_Abstract
 	/** @var	Hymn_Module_Library|NULL	$library */
 	protected ?Hymn_Module_Library $library	= NULL;
 
+	/** @var object{dry: bool, force: bool, quiet: bool, verbose: bool, veryVerbose: bool} $flags */
 	protected object $flags;
 
 	protected Hymn_Tool_Locale $locale;
@@ -65,14 +66,15 @@ abstract class Hymn_Command_Abstract
 	{
 		$this->client	= $client;
 		$this->flags	= (object) [
-			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'force'			=> $this->client->flags & Hymn_Client::FLAG_FORCE,
-			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
+			'dry'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'force'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
+			'quiet'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'veryVerbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE ),
 		];
 		$this->locale	= $this->client->getLocale();
 
+		/** @var string $localeKey */
 		$localeKey		= preg_replace( '/^Hymn_/', '', get_class( $this ) );
 		$localeKey		= str_replace( '_', '/', strtolower( $localeKey ) );
 		$this->words	= (object) [];
@@ -84,13 +86,15 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
+	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE )
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
 		$this->client->out( $lines, $newLine );
+		return $this;
 	}
 
 	/**
@@ -101,7 +105,7 @@ abstract class Hymn_Command_Abstract
 	 *	@throws		InvalidArgumentException		if given string is empty
 	 *	@return		void
 	 */
-	public function outDeprecation( $lines = [] ): void
+	public function outDeprecation( string|array $lines = [] ): void
 	{
 		$this->client->outDeprecation( $lines );
 	}
@@ -125,7 +129,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVerbose( array|string|NULL $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVerbose( $lines, $newLine );
 	}
@@ -137,7 +141,7 @@ abstract class Hymn_Command_Abstract
 	 *	@param		boolean				$newLine	Flag: add newline at the end
 	 *	@return		void
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVeryVerbose( array|string|NULL $lines, bool $newLine = TRUE ): void
 	{
 		$this->client->outVeryVerbose( $lines, $newLine );
 	}
@@ -146,7 +150,7 @@ abstract class Hymn_Command_Abstract
 	 *	This method is automatically called by client dispatcher.
 	 *	Commands need to implement this method.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int|void
 	 */
 	abstract public function run();
 
@@ -167,13 +171,13 @@ abstract class Hymn_Command_Abstract
 		return $question->ask();
 	}
 
-	protected function denyOnProductionMode()
+	protected function denyOnProductionMode(): void
 	{
 		if( Hymn_Client::$mode === 'prod' )
 			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
-	protected function deprecate( $messageLines )
+	protected function deprecate( $messageLines ): void
 	{
 		$this->client->outDeprecation( $messageLines );
 	}
@@ -181,23 +185,23 @@ abstract class Hymn_Command_Abstract
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		string|NULL		$shelfId		ID of shelf or all [all,*] (default)
-	 *	@param		boolean			$strict			Flag: throw exception if shelf ID is not existing
+	 *	@param		string|NULL		$sourceId		ID of source or all [all,*] (default)
+	 *	@param		boolean			$strict			Flag: throw exception if source ID is not existing
 	 *	@return		string|FALSE|NULL
-	 *	@throws		\RangeException				if shelf ID is given and not existing
+	 *	@throws		RangeException					if source ID is given and not existing
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
 	 */
-	protected function evaluateShelfId( ?string $shelfId = NULL, bool $strict = TRUE )
+	protected function evaluateSourceId( ?string $sourceId = NULL, bool $strict = TRUE )
 	{
 		$all	= ['all', '*'];
-		if( is_null( $shelfId ) || in_array( $shelfId, $all ) )
+		if( is_null( $sourceId ) || in_array( $sourceId, $all ) )
 			return NULL;
 		$library	= $this->getLibrary();
-		if( $library->isShelf( $shelfId ) )
-			return $shelfId;
+		if( $library->isSource( $sourceId ) )
+			return $sourceId;
 		if( $strict )
-			throw new \RangeException( 'Source ID '.$shelfId.' is invalid' );
+			throw new RangeException( 'Source ID '.$sourceId.' is invalid' );
 		return FALSE;
 	}
 
@@ -206,22 +210,22 @@ abstract class Hymn_Command_Abstract
 	 *	Reduce all available modules in library (from all source) to map by module ID.
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
-	 *	@param		string|NULL			$shelfId	...
+	 *	@param		string|NULL			$sourceId	...
 	 *	@return		array				Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
-	protected function getAvailableModulesMap( ?string $shelfId = NULL ): array
+	protected function getAvailableModulesMap( ?string $sourceId = NULL ): array
 	{
 		$library	= $this->getLibrary();															//  try to load sources into a library
 		$moduleMap	= [];																		//  prepare empty list of available modules
-		foreach( $library->getAvailableModules( $shelfId ) as $module )										//  iterate available modules in library
+		foreach( $library->getAvailableModules( $sourceId ) as $module )										//  iterate available modules in library
 			$moduleMap[$module->id]	= $module;														//  note module by ID (=invalid override)
 		return $moduleMap;																			//  return map of modules by ID
 	}
 
 	/**
 	 *	Returns library of available modules in found sources.
-	 *	Note: Several sources are stored as shelves, so same module IDs are allowed.
+	 *	Note: Several sources are stored as sources, so same module IDs are allowed.
 	 *	Loads library sources on first call, returns already loaded library on second call.
 	 *	Reloading library is possible with flag 'forceReload'.
 	 *	@access		protected
@@ -231,35 +235,39 @@ abstract class Hymn_Command_Abstract
 	protected function getLibrary( bool $forceReload = FALSE ): Hymn_Module_Library
 	{
 		$config	= $this->client->getConfig();
-		if( is_null( $this->library ) || $forceReload ){											//  library not loaded yet or reload is forced
-			$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
-			if( $this->flags->force )																//  on force mode
-				$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
-			if( !isset( $config->sources ) || empty( $config->sources ) ){
-				$msg	= 'Warning: No sources defined in Hymn file.';								//  warning message to show
-				$this->client->out( sprintf( $msg ) );												//  output warning
-				return $this->library;																//  return empty library
+		if( is_null( $this->library ) || $forceReload )												//  library not loaded yet or reload is forced
+			$this->readLibrary( $config );
+		return $this->library;																		//  return loaded library
+	}
+
+	protected function readLibrary( object $config )
+	{
+		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
+		if( $this->flags->force )																//  on force mode
+			$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
+
+		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
+			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
+			return $this->library;																//  return empty library
+		}
+		foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
+			if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
+				continue;																		//  skip this source
+			if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
+				$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
+				$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
 			}
-			foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
-				if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
-					continue;																		//  skip this source
-				if( !isset( $source->path ) || !strlen( trim( $source->path ) ) ){					//  source path has NOT been set
-					$msg	= 'Warning: No path defined for source "%s". Source has been ignored.';	//  warning message to show
-					$this->client->out( sprintf( $msg, $sourceId ) );								//  output warning
-				}
-				else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
-					$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
-					$this->client->out( sprintf( $msg, $sourceId ) );									//  output warning
-				}
-				else{
-					$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
-					$type	= isset( $source->type ) ? $source->type : 'folder';					//  set default source type if not defined
-					$title	= isset( $source->title ) ? $source->title : '';						//  set source title
-					$this->library->addShelf( $sourceId, $source->path, $type, $active, $title );	//  add source as shelf in library
-				}
+			else if( !file_exists( $source->path ) ){											//  source path has NOT been detected
+				$msg	= 'Path to source "%s" is not existing. Source has been ignored.';		//  warning message to show
+				$this->client->out( sprintf( $msg, $sourceId ) );									//  output warning
+			}
+			else{
+				$active	= !isset( $source->active ) || $source->active;							//  evaluate source activity
+				$type	= $source->type ?? 'folder';											//  set default source type if not defined
+				$title	= $source->title ?? '';													//  set source title
+				$this->library->addSource( $sourceId, $source->path, $type, $active, $title );	//  add source as source in library
 			}
 		}
-		return $this->library;																		//  return loaded library
 	}
 
 	protected function realizeWildcardedModuleIds( array $givenModuleIds, array $availableModuleIds ): array

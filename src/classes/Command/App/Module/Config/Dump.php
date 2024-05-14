@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,35 +45,34 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$pathConfig	= $this->client->getConfigPath();
-		$fileName	= Hymn_Client::$fileName;
 		if( !file_exists( $pathConfig."modules" ) )
 			$this->outError( "No modules installed", Hymn_Client::EXIT_ON_SETUP );
 
-		$hymnFile		= json_decode( file_get_contents( $fileName ) );
-		$knownModules	= array_keys( (array) $hymnFile->modules );
+		$hymnFile		= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
+		/** @var string[] $knownModules */
+		$knownModules	= array_keys( $hymnFile->modules );
 
 		$index	= new DirectoryIterator( $pathConfig."modules" );
-		$reader	= new Hymn_Module_Reader();
 		$list	= [];
 		foreach( $index as $entry ){
-			if( $entry->isDir() || $entry->isDot() )
+			if( $entry->isDir()
+				|| $entry->isDot()
+				|| !str_ends_with( $entry->getFilename(), '.xml' ) )								//  read XML files, only
 				continue;
-			if( !preg_match( "/\.xml$/", $entry->getFilename() ) )
-				continue;
-			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-			$module	= $reader->load( $entry->getPathname(), $id );
-			if( $module->config || in_array( $id, $knownModules ) ){
-				$list[$id]	= array( 'config' => (object) [] );
+			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );					//  extract module name from file name
+			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
+			if( $module->config || in_array( $id, $knownModules, TRUE ) ){
+				$list[$id]	= new Hymn_Structure_Config_Module();
 				foreach( $module->config as $pair )
-					$list[$id]['config']->{$pair->key}	= $pair->value;
+					$list[$id]->config[$pair->key]	= $pair->value;
 			}
 		}
 		ksort( $list );
 		$hymnFile->modules	= $list;
-		file_put_contents( $fileName, json_encode( $hymnFile, JSON_PRETTY_PRINT ) );
-		$this->out( "Configuration dumped to ".$fileName );
+		Hymn_Tool_ConfigFile::save( $hymnFile, Hymn_Client::$fileName );
+		$this->out( "Configuration dumped to ".Hymn_Client::$fileName );
 	}
 }

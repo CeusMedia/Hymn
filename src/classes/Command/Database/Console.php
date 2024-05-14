@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2023 Christian Würker
+ *	@copyright		2014-2024 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -40,7 +40,7 @@ class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hym
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$this->denyOnProductionMode();
 
@@ -67,7 +67,7 @@ class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hym
 		if( 0 === count( $data ) ) {
 			$this->out( 'Empty result.' );
 		} else {
-			$keys	= array_keys( reset( $data ) );
+//			$keys	= array_keys( reset( $data ) );
 			$table	= new Hymn_Tool_CLI_Table( $this->client );
 			$table->detectWidth();
 			print( $table->render( $data ).PHP_EOL );

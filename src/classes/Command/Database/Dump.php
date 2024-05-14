@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  *	@todo			extract MySQL code to Hymn_Tool_Database_CLI_MySQL
  */
 class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_Command_Interface
@@ -59,7 +59,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
@@ -79,7 +79,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
 			$fileName	= $path;																	//  set path from option or default
-		if( substr( $fileName, -1 ) == '/' )														//  given argument is a path
+		if( str_ends_with( $fileName, '/' ) )														//  given argument is a path
 			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';							//  generate stamped file name
 		if( !dirname( $fileName) )																	//  path is not existing
 			exec( 'mkdir -p '.dirname( $fileName ) );												//  create path
@@ -96,7 +96,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 				'Export file:  '.$fileName,															//  show export file name
 				'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),			//  show server host and port from config
 				'Database:     '.$dbc->getConfig( 'name' ),											//  show database name from config
-				'Table prefix: '.( $prefix ? $prefix : '(none)' ),									//  show table prefix from config
+				'Table prefix: '.( $prefix ?: '(none)' ),											//  show table prefix from config
 				'Access as:    '.$dbc->getConfig( 'username' ),										//  show username from config
 			] );
 			if( $tablesToSkip )

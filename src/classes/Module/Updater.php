@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Updater
 {
@@ -75,13 +75,13 @@ class Hymn_Module_Updater
 	/**
 	 *	Return list of outdated modules within current application.
 	 *	@access		public
-	 *	@param		string		$shelfId		ID of shelf to reduce to
+	 *	@param		string|NULL		$sourceId		ID of source to reduce to
 	 *	@return		array		List of outdated modules
 	 */
-	public function getUpdatableModules( string $shelfId = NULL ): array
+	public function getUpdatableModules( string $sourceId = NULL ): array
 	{
 		$outdated		= [];																	//  prepare list of outdated modules
-		foreach( $this->library->listInstalledModules( $shelfId ) as $installed ){					//  iterate installed modules
+		foreach( $this->library->listInstalledModules( $sourceId ) as $installed ){					//  iterate installed modules
 			$source		= $installed->installSource;												//  get source of installed module
 			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore
@@ -98,7 +98,7 @@ class Hymn_Module_Updater
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, bool $changedOnly = FALSE )
+	public function reconfigure( $module, bool $changedOnly = FALSE ): void
 	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
 		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
@@ -111,8 +111,8 @@ class Hymn_Module_Updater
 		}
 
 		$hymnModuleConfig	= [];
-		if( isset( $this->config->modules->{$module->id}->config ) )
-			$hymnModuleConfig	= $this->config->modules->{$module->id}->config;
+		if( isset( $this->config->modules[$module->id]->config ) )
+			$hymnModuleConfig	= $this->config->modules[$module->id]->config;
 
 		$inputValues		= [];																//  prepare list of values to change
 		foreach( $moduleSource->config as $configKey => $configData ){

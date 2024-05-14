@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,8 +30,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
@@ -60,12 +60,14 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '0.9.11';
+	public static string $version				= '1.0.0';
 
 	public static string $mode					= 'prod';
 
-	/** @var	Hymn_Tool_CLI_Arguments|NULL 	$arguments		Parsed CLI arguments and options */
-	public ?Hymn_Tool_CLI_Arguments $arguments	= NULL;
+	public static string $phpPath				= '/usr/bin/php';
+
+	/** @var	Hymn_Tool_CLI_Arguments 		$arguments		Parsed CLI arguments and options */
+	public Hymn_Tool_CLI_Arguments $arguments;
 
 	public int $flags							= 0;
 
@@ -145,12 +147,13 @@ class Hymn_Client
 		'version',
 	];
 
-	protected ?object $config						= NULL;
+	protected ?Hymn_Structure_Config $config		= NULL;
 
 	protected ?Hymn_Tool_Database_PDO $database		= NULL;
 
 	protected ?Hymn_Tool_Framework $framework		= NULL;
 
+	/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string}  */
 	protected ?object $words;
 
 	protected bool $isLiveCopy						= FALSE;
@@ -179,7 +182,9 @@ class Hymn_Client
 		error_reporting( E_ALL );
 
 		if( file_exists( 'phar://hymn.phar/.mode' ) )
-			self::$mode	= file_get_contents( 'phar://hymn.phar/.mode' );
+			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' ) ?: 'prod';
+		if( file_exists( 'phar://hymn.phar/.php' ) )
+			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' ) ?: '/usr/bin/env php';
 
 		try{
 			$this->parseArguments( $arguments );
@@ -200,11 +205,13 @@ class Hymn_Client
 				$this->parseArguments( $arguments, [], TRUE );
 			}
 
-			self::$fileName		= $this->arguments->getOption( 'file' );
+			self::$fileName		= (string) $this->arguments->getOption( 'file' );
 			$this->dispatch();
 		}
 		catch( Exception $e ){
-			$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( $e->getMessage().'.' );
+			$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
+			exit( Hymn_Client::EXIT_ON_SETUP );
 		}
 		finally{
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at the end' ) );
@@ -220,17 +227,16 @@ class Hymn_Client
 		return $this->framework;
 	}
 
-	public function getConfig(): ?object
+	public function getConfig(): Hymn_Structure_Config
 	{
-		if( !$this->config )
-			$this->readConfig();
+		$this->readConfig();
 		return $this->config;
 	}
 
 	public function getConfigPath(): string
 	{
 		$config	= $this->getConfig();
-		if( substr( $config->paths->config, 0, 1 ) === '/' )
+		if( str_starts_with( $config->paths->config, '/' ) )
 			return $config->paths->config;
 		return $config->application->uri.$config->paths->config;
 	}
@@ -242,13 +248,13 @@ class Hymn_Client
 		return $this->database;
 	}
 
-	public function getLocale(): Hymn_Tool_Locale
+	public function getLocale(): ?Hymn_Tool_Locale
 	{
 		return $this->locale;
 	}
 
-	public function getMemoryUsage( string $position = '' )
-	{
+	public function getMemoryUsage( string $position = '' ): string
+  {
 		$bytes	= memory_get_usage();
 		if( !$this->memoryUsageAtStart )
 			$this->memoryUsageAtStart	= $bytes;
@@ -271,59 +277,57 @@ class Hymn_Client
 
 	public function getModuleInstallType( string $moduleId, string $defaultInstallType = 'copy' ): string
 	{
-		$type	= $defaultInstallType;
-		if( isset( $this->config->application->{'installType'} ) )
-			$type	= $this->config->application->{'installType'};
-		else if( isset( $this->config->modules->{'@installType'} ) )								//  @deprecated: use application->type instead
-			$type	= $this->config->modules->{'@installType'};										//  @todo to be removed in 1.0
-		else if( isset( $this->config->modules->$moduleId ) )
-			if( isset( $this->config->modules->$moduleId->{'installType'} ) )
-				$type	= $this->config->modules->$moduleId->{'installType'};
+		$type	= $this->config->application->installType ?? $defaultInstallType;
+		if( isset( $this->config->modules[$moduleId] ) )
+			if( NULL !== $this->config->modules[$moduleId]->installType )
+				$type	= $this->config->modules[$moduleId]->installType;
 		return $type;
 	}
 
-	public function getModuleInstallShelf( string $moduleId, array $availableShelfIds, ?string $defaultInstallShelfId = NULL )
+	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL )
 	{
-		if( !count( $availableShelfIds ) )
+		if( !count( $availableSourceIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );
 
 		$modules	= $this->config->modules;														//  shortcut configured modules
 		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
-			if( isset( $modules->$moduleId->source ) )												//  module has configured source shelf
-				if( in_array( $modules->$moduleId->source, $availableShelfIds ) )					//  configured shelf source has requested module
-					return $modules->$moduleId->source;												//  return configured source shelf
+			if( isset( $modules->$moduleId->source ) )												//  module has configured source source
+				if( in_array( $modules->$moduleId->source, $availableSourceIds ) )					//  configured source source has requested module
+					return $modules->$moduleId->source;												//  return configured source source
 
-		if( $defaultInstallShelfId !== NULL )														//  default shelf given
-			if( in_array( $defaultInstallShelfId, $availableShelfIds ) )							//  default shelf has requested module
-				return $defaultInstallShelfId;														//  return default shelf
+		if( $defaultInstallSourceId !== NULL )														//  default source given
+			if( in_array( $defaultInstallSourceId, $availableSourceIds ) )							//  default source has requested module
+				return $defaultInstallSourceId;														//  return default source
 
-		return current( $availableShelfIds );														//  return first available shelf
+		return current( $availableSourceIds );														//  return first available source
 	}
 
 	/**
 	 *	Prints out message of one or more lines.
 	 *	@access		public
-	 *	@param		array|string|NULL	$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
-	 *	@throws		InvalidArgumentException		if neither array nor string nor NULL given
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
+	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( $lines = NULL, bool $newLine = TRUE ): void
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
-		$this->output->out( $lines, $newLine );
+		$this->output?->out( $lines, $newLine );
+		return $this;
 	}
 
 	/**
 	 *	Prints out deprecation message of one or more lines.
 	 *	@access		public
-	 *	@param		array		$lines		List of message lines or one string
+	 *	@param		string|array		$lines		List of message lines or one string
 	 *	@throws		InvalidArgumentException		if neither array nor string given
 	 *	@throws		InvalidArgumentException		if given string is empty
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outDeprecation( array $lines = [] ): void
+	public function outDeprecation( string|array $lines = [] ): self
 	{
-		$this->output->outDeprecation( $lines );
+		$this->output?->outDeprecation( $lines );
+		return $this;
 	}
 
 	/**
@@ -331,38 +335,41 @@ class Hymn_Client
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
 	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function outError( string $message, ?int $exitCode = NULL ): void
+	public function outError( string $message, ?int $exitCode = NULL ): self
 	{
-		$this->output->outError( $message, $exitCode );
+		$this->output?->outError( $message, $exitCode );
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
 	 */
-	public function outVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): self
 	{
-		$this->output->outVerbose( $lines, $newLine );
+		$this->output?->outVerbose( $lines, $newLine );
+		return $this;
 	}
 
 	/**
 	 *	Prints out verbose message if very verbose mode is on and quiet mode is off.
 	 *	@access		public
-	 *	@param		array|string		$lines		List of message lines or one string
-	 *	@param		boolean				$newLine	Flag: add newline at the end
-	 *	@return		void
+	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
+	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@return		self
 	 */
-	public function outVeryVerbose( $lines, bool $newLine = TRUE ): void
+	public function outVeryVerbose( string|bool|int|float|array|NULL $lines, bool $newLine = TRUE ): self
 	{
-		$this->output->outVeryVerbose( $lines, $newLine );
+		$this->output?->outVeryVerbose( $lines, $newLine );
+		return $this;
 	}
 
-	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] )
+	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] ): void
 	{
 		if( $this->flags & self::FLAG_VERY_VERBOSE )
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at Client::runCommand' ) );
@@ -371,7 +378,7 @@ class Hymn_Client
 			$args[]	= $argument;
 
 		foreach( $this->arguments->getOptions() as $key => $value ){
-			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
 				continue;
 			if( in_array( $key, $ignoreOptions ) )
 				continue;
@@ -383,7 +390,7 @@ class Hymn_Client
 		foreach( $addOptions as $key => $value ){
 			if( array_key_exists( $key, $args ) )
 				continue;
-			if( !strlen( $value ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
 				continue;
 			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
 				$args[]	= '--'.$key;
@@ -396,7 +403,7 @@ class Hymn_Client
 
 	/*  --  PROTECTED  --  */
 
-	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject )
+	protected function applyCommandOptionsToArguments( Hymn_Command_Interface $commandObject ): void
 	{
 		$commandOptions	= call_user_func( [$commandObject, 'getArgumentOptions'] );			//  get command specific argument options
 		if( $commandOptions ){
@@ -405,7 +412,7 @@ class Hymn_Client
 		}
 	}
 
-	protected function dispatch()
+	protected function dispatch(): void
 	{
 		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
@@ -430,7 +437,9 @@ class Hymn_Client
 				$reflectedMethod->invokeArgs( $commandObject, $this->arguments->getArguments() );	//  call reflected object method
 			}
 			catch( Exception $e ){
-				$this->outError( $e->getMessage().'.', Hymn_Client::EXIT_ON_RUN );
+				$this->outError( $e->getMessage().'.' );
+				$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
+				exit( Hymn_Client::EXIT_ON_RUN );
 			}
 		}
 		else																						//  no command string given
@@ -458,11 +467,9 @@ class Hymn_Client
 		return $className;
 	}
 
-	protected function parseArguments( $arguments, array $options = [], bool $force = FALSE )
+	protected function parseArguments( array $arguments, array $options = [], bool $force = FALSE ): void
 	{
 		$options	= array_merge( $this->baseArgumentOptions, $options );
-		if( $this->arguments && !$force )
-			return;
 		$this->arguments	= new Hymn_Tool_CLI_Arguments( $arguments, $options );
 
 		if( $force )
@@ -487,16 +494,16 @@ class Hymn_Client
 			$this->flags	|= self::FLAG_NO_INTERACTION;
 	}
 
-	protected function readConfig( bool $forceReload = FALSE )
+	protected function readConfig( bool $forceReload = FALSE ): void
 	{
 		if( $this->config && !$forceReload )
 			return;
 
-		$config	= new Hymn_Tool_CLI_Config( $this );
+		$config			= new Hymn_Tool_CLI_Config( $this );
 		$this->config	= $config->readConfig();
 	}
 
-	protected function realizeLanguage()
+	protected function realizeLanguage(): void
 	{
 		if( class_exists( 'Locale' ) ){
 			$language	= Locale::getPrimaryLanguage( Locale::getDefault() );
@@ -504,6 +511,8 @@ class Hymn_Client
 				self::$language	= $language;
 		}
 		$this->locale		= new Hymn_Tool_Locale( self::$language );
-		$this->words		= $this->locale->loadWords( 'client' );
+		/** @var object{outPrefixError: string, outPrefixDeprecation: string, errorCommandUnknown: string, errorCommandClassNotImplementingInterface: string} $words */
+		$words				= $this->locale->loadWords( 'client' );
+		$this->words		= $words;
 	}
 }

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2017-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2017-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,15 +45,15 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$pathName	= $this->client->arguments->getArgument();
 		$type		= $this->client->arguments->getArgument( 1 );
-		$shelfId	= $this->client->arguments->getArgument( 2 );
+		$sourceId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
-		$shelfId	= $this->evaluateShelfId( $shelfId );
-		$modules	= $this->getInstalledModules( $shelfId );									//  load installed modules
-		$stamp		= $this->getStamp( $pathName, $shelfId );
+		$sourceId	= $this->evaluateSourceId( $sourceId );
+		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
+		$stamp		= $this->getStamp( $pathName, $sourceId );
 		if( $moduleId )
 			$modules	= array( $moduleId => $this->getLibrary()->readInstalledModule( $moduleId ) );
 
@@ -84,14 +84,14 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
-			if( !isset( $stamp->modules->{$module->id} ) ){
+			if( !isset( $stamp->modules[$module->id] ) ){
 				$moduleChanges[$module->id]	= (object) [
 					'type'		=> 'added',
 					'module'	=> $module,
 				];
 			}
 			else{
-				$oldModule	= $stamp->modules->{$module->id};
+				$oldModule	= $stamp->modules[$module->id];
 				if( !version_compare( $oldModule->version, $module->version, '<' ) )
 					continue;
 				$moduleChanges[$module->id]	= (object) [
@@ -104,17 +104,17 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		return $moduleChanges;
 	}
 
-	protected function getInstalledModules( ?string $shelfId = NULL ): array
+	protected function getInstalledModules( ?string $sourceId = NULL ): array
 	{
-		$modules	= $this->getLibrary()->listInstalledModules( $shelfId );
+		$modules	= $this->getLibrary()->listInstalledModules( $sourceId );
 		$message	= 'Found '.count( $modules ).' installed modules.';
-		if( $shelfId )
-			$message	= 'Found '.count( $modules ).' installed modules in source '.$shelfId.'.';
+		if( $sourceId )
+			$message	= 'Found '.count( $modules ).' installed modules in source '.$sourceId.'.';
 		$this->client->outVerbose( $message );
 		return $modules;
 	}
 
-	protected function getLatestStamp( ?string $path = NULL, ?string $shelfId = NULL ): ?string
+	protected function getLatestStamp( ?string $path = NULL, ?string $sourceId = NULL ): ?string
 	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
 		$path		= preg_replace( '@\.+/@', '', $path );
@@ -122,8 +122,8 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
 		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
-		if( $shelfId )
-			$pattern	= '/^stamp_'.preg_quote( $shelfId, '/' ).'_[0-9:_-]+\.json$/';
+		if( $sourceId )
+			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.json$/';
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
@@ -135,26 +135,26 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	 *	...
 	 *	@access		protected
 	 *	@param		$pathName		...
-	 *	@param		$shelfId		...
+	 *	@param		$sourceId		...
 	 *	@return		object
 	 */
-	protected function getStamp( string $pathName, string $shelfId ): object
+	protected function getStamp( string $pathName, string $sourceId ): object
 	{
-		if( $pathName ){
+		if( '' !== trim( $pathName ) ){
 			$fileName	= NULL;
 			if( $pathName === 'latest' )
-				$fileName	= $this->getLatestStamp( NULL, $shelfId );
+				$fileName	= $this->getLatestStamp( NULL, $sourceId );
 			else if( file_exists( $pathName ) && is_dir( $pathName ) )
-				$fileName	= $this->getLatestStamp( $pathName, $shelfId );
+				$fileName	= $this->getLatestStamp( $pathName, $sourceId );
 			else if( file_exists( $pathName ) )
 				$fileName	= $pathName;
 		}
 		else
-			$fileName		= $this->getLatestStamp( NULL, $shelfId );
+			$fileName		= $this->getLatestStamp( NULL, $sourceId );
 		if( !( $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return json_decode( trim( file_get_contents( $fileName ) ) );
+		return Hymn_Tool_ConfigFile::read( $fileName );
 	}
 
 	/**

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -47,7 +47,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		if( $this->flags->dry && !$this->flags->quiet )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
@@ -58,27 +58,28 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$relation	= new Hymn_Module_Graph( $this->client, $library );
 
 		$moduleIds			= $this->client->arguments->getArguments();
-		$defaultShelfId		= $library->getDefaultShelf();
-		$activeShelfList	= $library->getActiveShelves();
-		$activeShelfIds		= array_keys( $activeShelfList );
+		$defaultSourceId		= $library->getDefaultSource();
+		$activeSourceList	= $library->getActiveSources();
+		$activeSourceIds		= array_keys( $activeSourceList );
 		$listInstalled		= $library->listInstalledModules();
 
 		if( $moduleIds ){
 			foreach( $moduleIds as $moduleId ){
 				$sourceId	= $this->detectModuleSource( $moduleId );
-				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
+				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
+				/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )
 					$relation->addModule( $module );
 			}
 		}
 		else{
-			$this->out( 'Mode: Install ALL ('.count((array)$config->modules).')' );
+			$this->out( 'Mode: Install ALL ('.count( $config->modules ).')' );
 			foreach( $config->modules as $moduleId => $moduleConfig ){
-				if( preg_match( "/^@/", $moduleId ) )
+				if( '' === $moduleId || str_starts_with( $moduleId, '@' ) )
 					continue;
 				$sourceId	= $this->detectModuleSource( $moduleId );
-				$sourceId	= $this->client->getModuleInstallShelf( $moduleId, $activeShelfIds, $sourceId );
+				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive ){
 					$relation->addModule( $module );
@@ -109,8 +110,9 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				}
 			}
 			$sourceId	= $this->detectModuleSource( $module->id );
-			$sourceId	= $this->client->getModuleInstallShelf( $module->id, $activeShelfIds, $sourceId );
-			$module		= $library->getUncachedAvailableModuleFromShelf( $module->id, $sourceId );
+			$sourceId	= $this->client->getModuleInstallSource( $module->id, $activeSourceIds, $sourceId );
+			/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
+			$module		= $library->getUncachedAvailableModuleFromSource( $module->id, $sourceId );
 
 			if( empty( $module->sourceId ) ){
 				$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );
@@ -137,23 +139,26 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		}*/
 	}
 
-	protected function detectModuleSource( string $moduleId )
+	protected function detectModuleSource( string $moduleId ): ?string
 	{
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot by empty' );
+
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$defaultId	= $library->getDefaultShelf();
-		if( !empty( $config->modules->{$moduleId}->source ) ){
-			$sourceByHymn	= trim( $config->modules->{$moduleId}->source );
-			if( $library->isAvailableModuleInShelf( $moduleId, $sourceByHymn ) )
+		$defaultId	= $library->getDefaultSource();
+		if( !empty( $config->modules[$moduleId]->source ) ){
+			$sourceByHymn	= trim( $config->modules[$moduleId]->source );
+			if( $library->isAvailableModuleInSource( $moduleId, $sourceByHymn ) )
 				return $sourceByHymn;
 		}
 /*		if( $library->isInstalledModule( $moduleId ) ){
 		}*/
 		if( $defaultId ){
-			if( $library->isAvailableModuleInShelf( $moduleId, $defaultId ) )
+			if( $library->isAvailableModuleInSource( $moduleId, $defaultId ) )
 				return $defaultId;
 		}
-		$moduleSourceIds	= array_keys( $library->getAvailableModuleShelves( $moduleId ) );
+		$moduleSourceIds	= array_keys( $library->getAvailableModuleSources( $moduleId ) );
 		if( $moduleSourceIds )
 			return $moduleSourceIds[0];
 		return NULL;

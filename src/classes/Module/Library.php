@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,30 +30,30 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
 class Hymn_Module_Library
 {
-	protected $listModulesAvailable	= NULL;
-	protected $listModulesInstalled	= NULL;
-	protected $useCache				= FALSE;
+	protected array|NULL $listModulesAvailable	= NULL;
+	protected array|NULL $listModulesInstalled	= NULL;
+	protected bool $useCache					= FALSE;
 
 	protected Hymn_Client $client;
 
-	protected $modules		= [];
+	protected array $modules					= [];
 
 	/**
 	 * @var		Hymn_Module_Library_Available		$available
 	 */
-	protected $available;
+	protected Hymn_Module_Library_Available $available;
 
 	/**
 	 * @var		Hymn_Module_Library_Installed		$installed
 	 */
-	protected $installed;
+	protected Hymn_Module_Library_Installed $installed;
 
 	public function __construct( Hymn_Client $client )
 	{
@@ -62,78 +62,85 @@ class Hymn_Module_Library
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
-	public function addShelf( string $shelfId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
 	{
-		$this->available->addShelf( $shelfId, $path, $type, $active, $title );
+		$this->available->addSource( $sourceId, $path, $type, $active, $title );
 	}
 
-	public function getActiveShelves( bool $withModules = FALSE ): array
+	public function getActiveSources( bool $withModules = FALSE ): array
 	{
-		return $this->available->getActiveShelves( $withModules );
+		return $this->available->getActiveSources( $withModules );
 	}
 
-	public function getAvailableModule( string $moduleId, ?string $shelfId = NULL, bool $strict = TRUE )
+	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE )
 	{
-		return $this->available->get( $moduleId, $shelfId, $strict );
+		return $this->available->get( $moduleId, $sourceId, $strict );
 	}
 
-	public function getAvailableModuleFromShelf( string $moduleId, string $shelfId, bool $strict = TRUE )
+	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE )
 	{
-		return $this->available->getFromShelf( $moduleId, $shelfId, $strict );
+		if( '' === trim( $moduleId ) ){
+			if( $strict )
+				throw new InvalidArgumentException( __METHOD__.' > Module ID cannot be empty' );
+			return NULL;
+		}
+		return $this->available->getFromSource( $moduleId, $sourceId, $strict );
 	}
 
-	public function getAvailableModuleLogChanges( string $moduleId, string $shelfId, string $versionInstalled, string $versionAvailable ): array
+	public function getAvailableModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
-		return $this->available->getModuleLogChanges( $moduleId, $shelfId, $versionInstalled, $versionAvailable );
+		return $this->available->getModuleLogChanges( $moduleId, $sourceId, $versionInstalled, $versionAvailable );
 	}
 
-	public function getAvailableModules( ?string $shelfId = NULL ): array
+	public function getAvailableModules( ?string $sourceId = NULL ): array
 	{
-		return $this->available->getAll( $shelfId );
+		return $this->available->getAll( $sourceId );
 	}
 
-	public function getAvailableModuleShelves( string $moduleId ): array
+	public function getAvailableModuleSources( string $moduleId ): array
 	{
-		return $this->available->getModuleShelves( $moduleId );
+		return $this->available->getModuleSources( $moduleId );
 	}
 
-	public function getDefaultShelf(): string
+	public function getDefaultSource(): string
 	{
-		return $this->available->getDefaultShelf();
+		return $this->available->getDefaultSource();
 	}
 
-	public function getShelf( string $shelfId, bool $withModules = FALSE )
+	public function getSource( string $sourceId, bool $withModules = FALSE )
 	{
-		return $this->available->getShelf( $shelfId, $withModules );
+		return $this->available->getSource( $sourceId, $withModules );
 	}
 
-	public function getShelves( array $filters = [], bool $withModules = FALSE ): array
+	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
-		return $this->available->getShelves( $filters, $withModules );
+		return $this->available->getSources( $filters, $withModules );
 	}
 
 	/**
-	 *	Reads an available (within a shelf) module directly from source folder, bypassing any caches.
+	 *	Reads an available (within a source) module directly from source folder, bypassing any caches.
 	 *	This is handy, if full module information is needed, e.G. on installation.
-	 *	The pure module data structure will be extended by shelf information.
+	 *	The pure module data structure will be extended by source information.
 	 *	@access		public
 	 *	@param		string		$moduleId
-	 *	@param		string		$shelfId
+	 *	@param		string		$sourceId
 	 *	@return		object		Uncached module data object
 	 */
-	public function getUncachedAvailableModuleFromShelf( string $moduleId, string $shelfId )
+	public function getUncachedAvailableModuleFromSource( string $moduleId, string $sourceId ): object
 	{
-		$shelf		= $this->getShelf( $shelfId );								//  get shelf
-		$module		= $this->available->readModule( $shelf->path, $moduleId );	//  try to read module from source folder
-		$module->sourceId	= $shelf->id;										//  extend found module by source ID
-		$module->sourcePath	= $shelf->path;										//  extend found module by source path
-		$module->sourceType	= $shelf->type;										//  extend found module by source type
+		$source		= $this->getSource( $sourceId );								//  get source
+		$module		= $this->available->readModule( $source->path, $moduleId );	//  try to read module from source folder
+		$module->sourceId	= $source->id;										//  extend found module by source ID
+		$module->sourcePath	= $source->path;										//  extend found module by source path
+		$module->sourceType	= $source->type;										//  extend found module by source type
 		return $module;
 	}
 
-	public function isAvailableModuleInShelf( string $moduleId, string $shelfId ): bool
+	public function isAvailableModuleInSource( string $moduleId, string $sourceId ): bool
 	{
-		return (bool) $this->available->getFromShelf( $moduleId, $shelfId, FALSE );
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot be empty' );
+		return (bool) $this->available->getFromSource( $moduleId, $sourceId, FALSE );
 	}
 
 	public function isInstalledModule( string $moduleId ): bool
@@ -141,26 +148,26 @@ class Hymn_Module_Library
 		return $this->installed->has( $moduleId );
 	}
 
-	public function isActiveShelf( string $shelfId ): bool
+	public function isActiveSource( string $sourceId ): bool
 	{
-		return array_key_exists( $shelfId, $this->getActiveShelves() );
+		return array_key_exists( $sourceId, $this->getActiveSources() );
 	}
 
-	public function isShelf( string $shelfId ): bool
+	public function isSource( string $sourceId ): bool
 	{
-		return array_key_exists( $shelfId, $this->getShelves() );
+		return array_key_exists( $sourceId, $this->getSources() );
 	}
 
-	public function listInstalledModules( ?string $shelfId = NULL ): array
+	public function listInstalledModules( ?string $sourceId = NULL ): array
 	{
-//		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize shelves in cache
-//			return $this->listModulesInstalled;									//  @todo realize shelves in cache
-		$list	= $this->installed->getAll( $shelfId );
-//		$this->listModulesInstalled	= $list;									//  @todo realize shelves in cache
+//		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize sources in cache
+//			return $this->listModulesInstalled;									//  @todo realize sources in cache
+		$list	= $this->installed->getAll( $sourceId );
+//		$this->listModulesInstalled	= $list;									//  @todo realize sources in cache
 		return $list;
 	}
 
-	public function readInstalledModule( string $moduleId )
+	public function readInstalledModule( string $moduleId ): object
 	{
 		return $this->installed->get( $moduleId );
 	}

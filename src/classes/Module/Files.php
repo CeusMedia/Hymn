@@ -2,7 +2,7 @@
 /**
  *	Manager for module files.
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,15 +30,16 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Files
 {
 	protected Hymn_Client $client;
 	protected ?object $config;
+	/** @var object{dry: bool, force: bool, quiet: bool, verbose: bool, noFiles: bool} $flags */
 	protected object $flags;
 
 	/**
@@ -51,11 +52,11 @@ class Hymn_Module_Files
 		$this->client	= $client;
 		$this->config	= $this->client->getConfig();
 		$this->flags	= (object) [
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'force'		=> $this->client->flags & Hymn_Client::FLAG_FORCE,
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'noFiles'	=> $this->client->flags & Hymn_Client::FLAG_NO_FILES,
+			'dry'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'force'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
+			'quiet'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'noFiles'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_NO_FILES ),
 		];
 	}
 
@@ -66,7 +67,7 @@ class Hymn_Module_Files
 	 *	@param 		object 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
 	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
-	 *	@return		void
+	 *	@return		bool
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
 	public function copyFiles( object $module, string $installType = 'link', bool $tryMode = FALSE ): bool
@@ -79,16 +80,18 @@ class Hymn_Module_Files
 			self::createPath( dirname( $target ) );
 			$pathNameIn	= realpath( $source );
 			$pathOut	= dirname( $target );
-			if( $installType === "link" ){
+
+			if( !$pathNameIn )
+				throw new Exception( 'Source file '.$source.' is not existing' );
+			if( !is_readable( $pathNameIn ) )
+				throw new Exception( 'Source file '.$source.' is not readable' );
+			if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
+				throw new Exception( 'Target path '.$pathOut.' is not creatable' );
+
+			if( 'link' === $installType ){
 //				try{
-					if( !$pathNameIn )
-						throw new Exception( 'Source file '.$source.' is not existing' );
-					if( !is_readable( $pathNameIn ) )
-						throw new Exception( 'Source file '.$source.' is not readable' );
 //					if( !is_executable( $pathNameIn ) )
 //						throw new Exception( 'Source file '.$source.' is not executable' );
-					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
-						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 						if( file_exists( $target ) ){
 							if( is_file( $target ) && !is_link( $target ) && !$this->flags->force )
@@ -110,12 +113,6 @@ class Hymn_Module_Files
 			}
 			else{
 //				try{
-					if( !$pathNameIn )
-						throw new Exception( 'Source file '.$source.' is not existing' );
-					if( !is_readable( $pathNameIn ) )
-						throw new Exception( 'Source file '.$source.' is not readable' );
-					if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
-						throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 					if( !( $this->flags->dry || $tryMode ) ){										//  not a dry or try run
 /*						if( file_exists( $target ) ){
 							if( is_file( $target ) && !$this->flags->force )
@@ -163,7 +160,7 @@ class Hymn_Module_Files
 	 *	@access		protected
 	 *	@param		object		$module		Module object
 	 *	@return		array
-	 *	@todo   	change behaviour of styles without source: install into common instead of theme
+	 *	@todo		change behaviour of styles without source: install into common instead of theme
 	 */
 	protected function prepareModuleFileMap( object $module, bool $awaitAvailableModule = TRUE ): array
 	{
@@ -212,18 +209,11 @@ class Hymn_Module_Files
 							$file->source	= 'theme';
 						if( in_array( $file->source, $skipSources ) )
 							continue 2;
-						switch( $file->source ){
-							case 'common':
-								$theme	= "common";
-								break;
-							case 'primer':
-								$theme	= $layoutPrimer;
-								break;
-							case 'theme':
-							default:
-								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
-								break;
-						}
+						$theme = match( $file->source ){
+							'common'	=> "common",
+							'primer'	=> $layoutPrimer,
+							default		=> !empty( $file->theme ) ? $file->theme : $layoutTheme,
+						};
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
 						if( !file_exists( $path ) && !$this->flags->dry )
 							self::createPath( $path );

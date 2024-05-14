@@ -1,5 +1,33 @@
 # Change Log
 
+## v1.0.0
+- Migration to PHP 8
+	- Upgrade code for PHP 8
+	- Strictly typed parameters and return values
+	- Refactored to use new language features
+	- Support configurable PHP binary path in build process
+	- Improved code strictness (typed parameters and return values)
+	- Reach PHPStan level 2, 3, 4 & 5 for PHP 8.1
+- Handle hymn file data as object:
+	- Add Hymn_Tool_ConfigFile as file parser (reader) and serializer (writer)
+	- Refactored all read/write operations in commands
+	- Add config structure data classes:
+		- Add Hymn_Structure_Config* as data object for parsed file
+		- Rewritten commands to read and write configuration
+		- Rewritten handling of default database configuration 
+		- Extracted default paths to Hymn_Structure_Config_Paths
+- Core, commands and build:
+	- Refactor module reader to prepare merge with framework data structure
+	- Allow force on app-base-config-set
+	- Use new exception trace view on error in verbose mode.
+	- Cleanup
+- Minor updates:
+	- Add badges
+	- Update copyright.
+	- Renamed internally used 'shelf/shelves' to 'source/sources'.
+	- Fixed typos
+	- Improved code documentation
+
 ## v0.9.11
 - New command: app-base-config-list
 - New command: database-console

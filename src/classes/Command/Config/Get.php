@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,20 +45,51 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		$key		= $this->client->arguments->getArgument();
+		$key		= $this->client->arguments->getArgument() ?? '';
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'Missing first argument "key" is missing' );
-		$config		= $this->loadConfig();
-		$current	= $this->getCurrentValue( $config, $key );
+		$current	= $this->getCurrentValue( $this->client->getConfig(), $key );
 		$this->out( $current );
 	}
 
 	/*  --  PROTECTED  --  */
-	protected function getCurrentValue( object $config, string $key )
+	protected function getCurrentValue( Hymn_Structure_Config $config, string $key ): string|bool|int|float|NULL
 	{
-		$parts	= explode( ".", $key );
+		$parts		= explode( '.', trim( $key, '.' ), 4 );
+		$lastKey	= array_pop( $parts );
+		$here	= $config;
+		while( $parts ){
+			$part	= array_shift( $parts );
+			$this->outVeryVerbose('Part: '.$part );
+			if( is_object( $here ) && isset( $here->$part ) ){
+				$here	= $here->$part;
+				continue;
+			}
+			else if( is_array( $here ) && isset( $here[$part] ) ){
+				$here	= $here[$part];
+				continue;
+			}
+			$this->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
+		}
+
+		if( is_object( $here ) && isset( $here->$lastKey ) )
+			return $here->$lastKey;
+		else if( is_array( $here ) && isset( $here[$lastKey] ) )
+			return $here[$lastKey];
+
+		$this->outError( 'Invalid path given: key "'.$lastKey.'" not found', Hymn_Client::EXIT_ON_INPUT );
+		return NULL;
+	}
+
+	/**
+	 * @deprecated
+	 */
+	protected function getCurrentValueTheOldWay( Hymn_Structure_Config $config, string $key ): string|bool|int|float|NULL
+	{
+		$parts	= explode( '.', trim( $key, '.' ) );
+
 		if( count( $parts ) === 3 ){
 			if( !isset( $config->{$parts[0]} ) )
 				$config->{$parts[0]}	= (object) [];
@@ -76,21 +107,6 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 			return $config->{$parts[0]}->{$parts[1]};
 		}
 		$this->client->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
-	}
-
-	protected function loadConfig()
-	{
-		$filePath	= Hymn_Client::$fileName;
-		if( !file_exists( $filePath ) )
-			throw new RuntimeException( 'File "'.$filePath.'" is missing' );
-		$config	= json_decode( file_get_contents( $filePath ) );
-		if( json_last_error() ){
-			$message	= 'Configuration file "%s" is not valid JSON: %s';
-			$this->client->outError(
-				vsprintf( $message, array( $filePath, json_last_error_msg() ) ),
-				Hymn_Client::EXIT_ON_RUN
-			);
-		}
-		return $config;
+		return NULL;
 	}
 }

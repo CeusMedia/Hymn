@@ -3,9 +3,11 @@ includes:
 	- phpstan-baseline.neon
 
 parameters:
-	phpVersion: 70400
-	level: 1
+	phpVersion: 80100
+	level: 5
 	paths:
 		- src
+	editorUrl: 'phpstorm://open?file=%%relFile%%&line=%%line%%'
+	editorUrlTitle: '%%relFile%%:%%line%%'
 	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false

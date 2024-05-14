@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Init
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,15 +30,15 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Init
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected $pathPhar			= "phar://hymn.phar/";
-	protected array $argumentOptions	= array(
+	protected string $pathPhar			= "phar://hymn.phar/";
+	protected array $argumentOptions	= [
 		'backend'		=> [
 			'pattern'	=> '/^-b|--backend/',
 			'resolve'	=> TRUE,
@@ -54,7 +54,7 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
 		],
-	);
+	];
 
 	/**
 	 *	Execute this command.
@@ -64,7 +64,7 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$withBackend = $this->client->arguments->getOption( 'backend' );
 		$withPublic = $this->client->arguments->getOption( 'public' );

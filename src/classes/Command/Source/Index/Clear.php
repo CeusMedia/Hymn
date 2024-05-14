@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Source_Index_Clear extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
 {
@@ -43,27 +43,27 @@ class Hymn_Command_Source_Index_Clear extends Hymn_Command_Source_Abstract imple
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
-		if( !( $shelf = $this->getShelfByArgument() ) )
+		if( !( $source = $this->getSourceByArgument() ) )
 			return;
 
 		$library	= $this->getLibrary();
-		$modules	= $library->getAvailableModules( $shelf->id );
+		$modules	= $library->getAvailableModules( $source->id );
 		if( !count( $modules ) )
 			$this->outError( 'No available modules found.', Hymn_Client::EXIT_ON_RUN );
 
 		$this->out( vsprintf( 'Found %2$d available modules in source %1$s', [
-			$shelf->id, count( $modules ),
+			$source->id, count( $modules ),
 		] ) );
 
-		if( file_exists( $shelf->path.'index.serial' ) ){
+		if( file_exists( $source->path.'index.serial' ) ){
 			$this->out( 'Found index serial file. Removing ...' );
-			@unlink( $shelf->path.'index.serial' );
+			@unlink( $source->path.'index.serial' );
 		}
-		if( file_exists( $shelf->path.'index.json' ) ){
+		if( file_exists( $source->path.'index.json' ) ){
 			$this->out( 'Found index JSON file. Removing ...' );
-			@unlink( $shelf->path.'index.json' );
+			@unlink( $source->path.'index.json' );
 		}
 	}
 }

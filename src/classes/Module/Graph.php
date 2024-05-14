@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Module_Graph
 {
@@ -76,8 +76,8 @@ class Hymn_Module_Graph
 	 *	@param		integer			$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( object $module, int $level = 0 )
-	{
+	public function addModule( object $module, int $level = 0 ): void
+  {
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
 
@@ -98,14 +98,14 @@ class Hymn_Module_Graph
 			if( is_string( $relation ) ){															//  relation came from a reduced module source index
 				$neededModuleId	= $relation;														//  relation only holds module ID
 				$relation		= (object) [														//  simulate relation object
-					'type'		=> preg_match( '@/@', $relation ) ? 'package' : 'module',			//  detect packages and modules
+					'type'		=> str_contains( $relation, '/' ) ? 'package' : 'module',			//  detect packages and modules
 					'source'	=> NULL,
 				];
 			}
 			if( $relation->type !== 'module' )
 			 	continue;
 			if( $relation->source ){
-				if( !$this->library->isAvailableModuleInShelf( $neededModuleId, $relation->source ) ){
+				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
 					$message	= 'Module %s needs module %s from source %s, which is missing.';
 					$this->client->outError( vsprintf( $message, [
 						$module->id,
@@ -129,7 +129,7 @@ class Hymn_Module_Graph
 	public function getOrder(): array
 	{
 		if( $this->status < self::STATUS_CHANGED )
-			throw new Exception( 'No modules loaded' );
+			throw new RuntimeException( 'No modules loaded' );
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 
@@ -142,25 +142,27 @@ class Hymn_Module_Graph
 			$loop	= $this->checkForLoop( $node );
 			if( $loop ){
 				$this->client->outError( 'Module relation Loop found in module '.$loop->module->id.' @ '.$loop->module->sourceId );
-				foreach( array_values( $loop->modules ) as $nr => $item )
-					$this->client->out( ' '.str_pad( $nr + 1, 3, ' ', STR_PAD_LEFT ).'. '.$item->id.' @ '.$item->sourceId );
+				foreach( array_values( $loop->modules ) as $nr => $item ){
+					$bullet	= str_pad( (string) ++$nr, 3, ' ', STR_PAD_LEFT );
+					$this->client->out( ' '.$bullet.'. '.$item->id.' @ '.$item->sourceId );
+				}
 				$this->client->outError( 'Please resolve loop, first!', Hymn_Client::EXIT_ON_RUN );
 			}
 			$edges	= $this->countModuleEdgesToRoot( $node );
-			$rand	= str_pad( rand( 0, $max ), 8, '0', STR_PAD_LEFT );
+			$rand	= str_pad( (string) rand( 0, $max ), 8, '0', STR_PAD_LEFT );
 			$list[(float) $edges.'.'.$rand]	= $id;
 		}
 		krsort( $list );																			//  sort module order list
 
 		/*  collect modules by installation order  */
 		$modules	= [];																		//  prepare empty module list
-		foreach( array_values( $list ) as $id )														//  iterate module order list
+		foreach( $list as $id )														//  iterate module order list
 			$modules[$id]	= $this->nodes[$id]->module;											//  collect module by installation order
 		return $modules;																			//  return list of modules by installation order
 	}
 
-	//  @todo	make indepentent from need/support
-	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ )
+	//  @todo	make independent from need/support
+	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ ): string
 	{
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
@@ -188,7 +190,7 @@ class Hymn_Module_Graph
 		return $graph;
 	}
 
-	public function renderGraphImage( ?string $graph = NULL, ?string $targetFile = NULL )
+	public function renderGraphImage( ?string $graph = NULL, ?string $targetFile = NULL ): ?string
 	{
 		$this->client->out( "Checking graphviz: ", FALSE );
 		$toolTest	= new Hymn_Tool_Test( $this->client );
@@ -216,6 +218,7 @@ class Hymn_Module_Graph
 		catch( Exception $e ){
 			$this->client->out( 'Graph rendering failed: '.$e->getMessage().'.' );
 		}
+		return NULL;
 	}
 
 	/**
@@ -225,8 +228,8 @@ class Hymn_Module_Graph
 	 *	@param		integer		$level		Counter of recursion level, 0 by default.
 	 *	@return		object|NULL				Object if looping node or null if no loop found
 	 */
-	protected function checkForLoop( object $node, int $level = 0, array $steps = [] )
-	{
+	protected function checkForLoop( object $node, int $level = 0, array $steps = [] ): ?object
+  {
 		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
 			return (object) array(																	//  return loop data ...
 				'module'	=> $node->module,														//  ... containing looping module
@@ -256,7 +259,7 @@ class Hymn_Module_Graph
 		return $count;
 	}
 
-	protected function realizeRelations()
+	protected function realizeRelations(): void
 	{
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
@@ -265,7 +268,7 @@ class Hymn_Module_Graph
 				if( is_string( $relation ) ){														//  relation came from a reduced module source index
 					$neededModuleId	= $relation;													//  relation only holds module ID
 					$relation		= (object) [													//  simulate relation object
-						'type'		=> preg_match( '@/@', $relation ) ? 'package' : 'module',		//  detect packages and modules
+						'type'		=> str_contains( $relation, '/' ) ? 'package' : 'module',		//  detect packages and modules
 						'source'	=> NULL,
 					];
 				}

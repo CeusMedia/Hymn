@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
@@ -30,10 +30,10 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2022 Christian Würker
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@copyright		2014-2024 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo    		code documentation
+ *	@todo			code documentation
  */
 class Hymn_Command_Config_Module_Remove extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -45,25 +45,21 @@ class Hymn_Command_Config_Module_Remove extends Hymn_Command_Abstract implements
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
+	public function run(): void
 	{
 		$filename	= Hymn_Client::$fileName;
-		$config	= json_decode( file_get_contents( $filename ) );
+		$config		= Hymn_Tool_ConfigFile::read( $filename );
 
 		$module	= $this->client->arguments->getArgument();
 		$module	= str_replace( ":", "_", $module );
 		if( !strlen( trim( $module ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
 
-		if( !isset( $config->modules->{$module} ) )
+		if( !isset( $config->modules[$module] ) )
 			throw new InvalidArgumentException( 'Module "'.$module.'" is not registered' );
 
-
-		if( isset( $config->modules->{$module} ) )
-			return;
-
-		$config->modules->{$module}	= (object) [];
-		file_put_contents( $filename, json_encode( $config, JSON_PRETTY_PRINT ) );
+		unset( $config->modules[$module] );
+		Hymn_Tool_ConfigFile::save( $config, $filename );
 		clearstatcache();
 	}
 }
