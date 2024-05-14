@@ -23,7 +23,7 @@
         "bin/hymn"
     ],
     "require-dev": {
-        "phpunit/phpunit": "^9.5 | ^10.2",
+        "phpunit/phpunit": "^10",
         "phpstan/phpstan": "^1",
         "phpstan/phpstan-strict-rules": "^1",
         "php-parallel-lint/php-parallel-lint": "^1.3 | dev-master",
@@ -55,25 +55,31 @@
             "test -f /usr/local/bin/hymn && sudo rm -f /usr/local/bin/hymn || true",
             "test -L /usr/local/bin/hymn && sudo rm /usr/local/bin/hymn || true"
         ],
+        "test:all": [
+            "@test:syntax",
+            "@test:stan",
+            "@test:unit",
+            "@phar:create"
+        ],
         "test:stan": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=off vendor/bin/phpstan analyze --memory-limit=1G --verbose"
+            "XDEBUG_MODE=off vendor/bin/phpstan analyze --configuration=tool/phpstan.neon --memory-limit=1G --verbose"
         ],
         "test:stan-clear": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=off vendor/bin/phpstan clear-result-cache --verbose"
+            "XDEBUG_MODE=off vendor/bin/phpstan clear-result-cache --configuration=tool/phpstan.neon --verbose"
         ],
         "test:stan-save": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=off vendor/bin/phpstan analyse --configuration=phpstan.neon --generate-baseline=phpstan-baseline.neon --verbose"
+            "XDEBUG_MODE=off vendor/bin/phpstan analyse --configuration=tool/phpstan.neon --generate-baseline=tool/phpstan-baseline.neon --verbose"
         ],
         "test:rector": [
             "@dev:install-quiet",
-            "vendor/bin/rector --config=util/rector.php --clear-cache --dry-run"
+            "vendor/bin/rector --config=tool/rector.php --clear-cache --dry-run"
         ],
         "test:rector-fix": [
             "@dev:install-quiet",
-            "vendor/bin/rector --config=util/rector.php --clear-cache "
+            "vendor/bin/rector --config=tool/rector.php --clear-cache "
         ],
         "test:syntax": [
             "@dev:install-quiet",
@@ -81,7 +87,7 @@
         ],
         "test:unit": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=on php vendor/bin/phpunit"
+            "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tool/phpunit10.xml"
         ]
     },
     "scripts-descriptions": {
