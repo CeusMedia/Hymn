@@ -1,4 +1,7 @@
 <?php
+if( version_compare( PHP_VERSION, '8.1', '<' ) )
+	die( 'Needs PHP 8.1 or higher' );
+
 require_once 'phar://hymn.phar/Client.php';										//  load main client class
 require_once 'phar://hymn.phar/Loader.php';										//  load class loader
 require_once 'phar://hymn.phar/Command/Interface.php';							//  preload command interface
