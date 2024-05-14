@@ -49,6 +49,7 @@
 - PHAR compression of on dev mode
 - Going for PHPStan level 2
 - New command: changelog
+- Add badges in readme
 
 ## v0.9.9.6
 - Allow to skip database tables on dump by module config. 

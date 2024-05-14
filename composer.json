@@ -57,7 +57,7 @@
         ],
         "test:stan": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=off vendor/bin/phpstan analyze --verbose"
+            "XDEBUG_MODE=off vendor/bin/phpstan analyze --memory-limit=1G --verbose"
         ],
         "test:stan-clear": [
             "@dev:install-quiet",
