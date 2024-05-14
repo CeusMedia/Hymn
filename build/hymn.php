@@ -1,4 +1,5 @@
 <?php
+require_once 'phar://hymn.phar/Client.php';										//  load main client class
 require_once 'phar://hymn.phar/Loader.php';										//  load class loader
 require_once 'phar://hymn.phar/Command/Interface.php';							//  preload command interface
 //require_once 'phar://hymn.phar/Command/Abstract.php';							//  preload abstract command class
