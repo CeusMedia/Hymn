@@ -1,7 +1,7 @@
 # Change Log
 
 ## v1.0.1
-... in progress ...
+- Move tool config files to own folder.
 
 
 ## v1.0.0

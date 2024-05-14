@@ -66,6 +66,10 @@ class Hymn_Client
 
 	public static string $phpPath				= '/usr/bin/php';
 
+	/** @var	string		$pharPathroot		PHAR file resource link  */
+	public static string $pharPath				= 'phar://hymn.phar/';
+
+
 	/** @var	Hymn_Tool_CLI_Arguments 		$arguments		Parsed CLI arguments and options */
 	public Hymn_Tool_CLI_Arguments $arguments;
 
@@ -181,10 +185,11 @@ class Hymn_Client
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		if( file_exists( 'phar://hymn.phar/.mode' ) )
-			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' ) ?: 'prod';
-		if( file_exists( 'phar://hymn.phar/.php' ) )
-			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' ) ?: '/usr/bin/env php';
+		$phar	= Hymn_Client::$pharPath;
+		if( file_exists( $phar.'.mode' ) )
+			self::$mode		= file_get_contents( $phar.'.mode' ) ?: 'prod';
+		if( file_exists( $phar.'.php' ) )
+			self::$phpPath	= file_get_contents( $phar.'.php' ) ?: '/usr/bin/env php';
 
 		try{
 			$this->parseArguments( $arguments );

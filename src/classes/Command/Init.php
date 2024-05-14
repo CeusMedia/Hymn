@@ -38,7 +38,7 @@
 class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
 	protected array $answers	= [];
-	protected string $pathPhar	= "phar://hymn.phar/";
+	protected string $pathPhar;
 
 	/**
 	 *	Execute this command.
@@ -50,12 +50,13 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 	 */
 	public function run(): void
 	{
+		$this->pathPhar		= Hymn_Client::$pharPath;
 		/*  --  CREATE HYMN FILE  --  */
 		$this->out( "Please enter application information:" );
 		$this->answer( 'app.title', "- Application Title", 'string', "My Project", NULL, FALSE );
 		$this->answer( 'app.key', "- Application Key Name", 'string', "MyCompany/MyProject", NULL, FALSE );
 		$this->answer( 'app.uri', "- Installation Path", 'string', getcwd().'/', NULL, FALSE );
-		$this->answer( 'app.url.protocol', "- HTTP Protocol", 'string', "http://", NULL, FALSE );
+		$this->answer( 'app.url.protocol', "- HTTP Protocol", 'string', "https://", NULL, FALSE );
 		$this->answer( 'app.url.host', "- HTTP Host", 'string', "example.com", NULL, FALSE );
 		$this->answer( 'app.url.path', "- HTTP Path", 'string', "/", NULL, FALSE );
 		$this->answer( 'app.install.type', "- Installation Type", 'string', "link", ['copy', 'link'], FALSE );
@@ -74,7 +75,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$this->answer( 'system.user', "- System User", 'string', get_current_user(), NULL, FALSE );
 		$this->answer( 'system.group', "- System Group", 'string', "www-data", NULL, FALSE );
 		$this->out( '' );
-		if( $this->ask( "Configure database?", 'boolean', 'yes', NULL, FALSE ) )
+		if( $this->ask( "Configure database?", 'boolean', 'yes', NULL ) )
 			$this->configureDatabase();
 
 		$data	= new Hymn_Structure_Config();
@@ -102,35 +103,35 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 
 		/*  --  CREATE PHPUNIT FILE  --  */
 		if( !file_exists( 'phpunit.xml' ) )
-			if( $this->ask( "Configure PHPUnit?", 'boolean', 'yes', NULL, FALSE ) ){
+			if( $this->ask( "Configure PHPUnit?", 'boolean', 'yes', NULL ) ){
 				$this->createUnitFile();
 				$this->out( '' );
 			}
 
 		/*  --  CREATE COMPOSER FILE  --  */
 		if( !file_exists( 'composer.json' ) )
-			if( $this->ask( "Configure composer?", 'boolean', 'yes', NULL, FALSE ) ){
+			if( $this->ask( "Configure composer?", 'boolean', 'yes', NULL ) ){
 				$this->createComposerFile();
 				$this->out( '' );															//  print empty line as optical separator
 			}
 
 		/*  --  CREATE APP BASE CONFIG FILE  --  */
 		if( !file_exists( 'config/config.ini' ) )
-			if( $this->ask( "Create base config file?", 'boolean', 'yes', NULL, FALSE ) ){
+			if( $this->ask( "Create base config file?", 'boolean', 'yes', NULL ) ){
 				$this->createConfigFile();
 				$this->out( '' );															//  print empty line as optical separator
 			}
 
 		/*  --  CREATE MAKE FILE  --  */
 		if( !file_exists( 'Makefile' ) )
-			if( $this->ask( "Create make file?", 'boolean', 'yes', NULL, FALSE ) ){
+			if( $this->ask( "Create make file?", 'boolean', 'yes', NULL ) ){
 				$this->createMakeFile();
 				$this->out( '' );															//  print empty line as optical separator
 			}
 
 		/*  --  CREATE GIT IGNORE FILE  --  */
 		if( !file_exists( '.gitignore' ) )
-			if( $this->ask( "Create Git ignore file?", 'boolean', 'yes', NULL, FALSE ) ){
+			if( $this->ask( "Create Git ignore file?", 'boolean', 'yes', NULL ) ){
 				$this->createGitIgnoreFile();
 				$this->out( '' );															//  print empty line as optical separator
 			}
@@ -211,8 +212,8 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 
 	protected function createUnitFile(): void
 	{
-		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL, FALSE );
-		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL, FALSE );
+		$pathSource	= $this->ask( "- Folder with test classes", 'string', "test", NULL );
+		$pathTarget	= $this->ask( "- Path for test results", 'string', "doc/Test", NULL );
 		$pathSource	= rtrim( trim( $pathSource ), '/' );
 		Hymn_Module_Files::createPath( $pathSource );
 		copy( $this->pathPhar."templates/phpunit.xml", 'phpunit.xml' );
@@ -222,7 +223,7 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 		$content	= str_replace( "%pathTarget%", $pathTarget, $content );
 		file_put_contents( 'phpunit.xml', $content );
 		$this->out( "Configuration file for PHPUnit has been created." );
-		if( $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL, FALSE ) ){
+		if( $this->ask( "- Bootstrap file", 'string', "bootstrap.php", NULL ) ){
 			copy( $this->pathPhar."templates/test/bootstrap.php", $pathSource.'/bootstrap.php' );
 			$this->out( "Empty bootstrap file for PHPUnit test classes has been created." );
 		}
