@@ -81,7 +81,7 @@ class Hymn_Tool_CLI_Question
 			if( !strlen( $input ) && $default )
 				$input	= $default;
 		}
-		while( is_array( $options ) && !in_array( $input, $options ) );
+		while( is_array( $options ) && 0 !== count( $options ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
 			$input	= in_array( strtolower( $input ), ['y', 'yes', '1'] );
 		if( $typeIsInteger )
