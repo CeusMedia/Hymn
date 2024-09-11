@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.1b';
+	public static string $version				= '1.0.1b-php8.3';
 
 	public static string $mode					= 'prod';
 
@@ -284,7 +284,7 @@ class Hymn_Client
 	{
 		$type	= $this->config->application->installType ?? $defaultInstallType;
 		if( isset( $this->config->modules[$moduleId] ) )
-			if( NULL !== $this->config->modules[$moduleId]->installType )
+			if( '' !== ( $this->config->modules[$moduleId]->installType ?? '' ) )
 				$type	= $this->config->modules[$moduleId]->installType;
 		return $type;
 	}

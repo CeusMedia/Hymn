@@ -9,6 +9,8 @@ class Hymn_Structure_Config_Paths
 		'scripts'		=> 'scripts/',
 		'templates'		=> 'templates/',
 		'themes'		=> 'themes/',
+		'logs'			=> 'logs/',
+		'cache'			=> 'cache/',
 	];
 
 	public ?string $config		= NULL;
@@ -18,4 +20,6 @@ class Hymn_Structure_Config_Paths
 	public ?string $templates	= NULL;
 	public ?string $scripts		= NULL;
 	public ?string $themes		= NULL;
+	public ?string $logs		= NULL;
+	public ?string $cache		= NULL;
 }
