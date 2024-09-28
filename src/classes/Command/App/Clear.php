@@ -37,13 +37,13 @@
  */
 class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected array $argumentOptions	= array(
-		'age'		=> array(
+	protected array $argumentOptions	= [
+		'age'		=> [
 			'pattern'	=> '/^--age=(\S+)$/',
 			'resolve'	=> '\\1',
 			'default'	=> '-1',
-		),
-	);
+		],
+	];
 
 	/**
 	 *	Execute this command.
@@ -76,6 +76,8 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 
 	protected function clearLocks(): void
 	{
+		if( !is_dir( 'config/locks' ) )
+			return;
 		$age	= (int) $this->client->arguments->getOption( 'age' );
 		$age	= $age > 0 ? $age * 60 : 0;
 		$index	= new DirectoryIterator( 'config/locks' );

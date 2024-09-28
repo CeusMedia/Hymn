@@ -11,6 +11,7 @@ class Hymn_Structure_Config_Paths
 		'themes'		=> 'themes/',
 		'logs'			=> 'logs/',
 		'cache'			=> 'cache/',
+		'contents'		=> 'contents/',
 	];
 
 	public ?string $config		= NULL;
@@ -22,4 +23,5 @@ class Hymn_Structure_Config_Paths
 	public ?string $themes		= NULL;
 	public ?string $logs		= NULL;
 	public ?string $cache		= NULL;
+	public ?string $contents	= NULL;
 }

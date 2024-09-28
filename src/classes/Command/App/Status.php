@@ -73,7 +73,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
-		$moduleId	= trim( $this->client->arguments->getArgument() );								//  get module id as first argument
+		$moduleId	= trim( $this->client->arguments->getArgument() ?? '' );					//  get module id as first argument
 		if( strlen( $moduleId = trim( $moduleId ) ) )												//  a module ID has been given
 			return $this->runForSingleModule( $outdatedModules, $moduleId );						//  run status for single module
 		return $this->runForAllModules( $outdatedModules );											//  run status for all (outdated) modules
