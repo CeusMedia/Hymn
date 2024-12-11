@@ -16,20 +16,34 @@ class Hymn_Tool_ConfigValue
 	protected bool|int|float|string|NULL $value		= NULL;
 	protected string $type			= 'string';
 
-	public function __construct( string $value = NULL, ?string $type = NULL )
+	/**
+	 *	Constructor.
+	 *	@param		bool|int|float|string|NULL	$value
+	 *	@param		string|NULL					$type
+	 */
+	public function __construct( bool|int|float|string|NULL $value = NULL, ?string $type = NULL )
 	{
 		if( NULL !== $value)
 			$this->setType( $type );
 		$this->setValue( $value );
 	}
 
-	public function applyIfSet( Hymn_Tool_ConfigValue $value ): self
+	/**
+	 *	@param		Hymn_Tool_ConfigValue		$value
+	 *	@return		static
+	 */
+	public function applyIfSet( Hymn_Tool_ConfigValue $value ): static
 	{
 		if( $value->is() )
 			$this->setValue( $value->getValue() );
 		return $this;
 	}
 
+	/**
+	 *	@param		Hymn_Tool_ConfigValue	$value
+	 *	@param		bool					$typeSafe			Default: yes
+	 *	@return		int
+	 */
 	public function compareTo( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): int
 	{
 		if( !$this->is() || !$value->is() ){
@@ -62,6 +76,11 @@ class Hymn_Tool_ConfigValue
 		return static::COMPARED_UNEQUAL;
 	}
 
+	/**
+	 *	@param		Hymn_Tool_ConfigValue	$value
+	 *	@param		bool					$typeSafe		Default : yes
+	 *	@return		bool
+	 */
 	public function differsFromIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): bool
 	{
 		if( !$this->is() || !$value->is() )
@@ -71,11 +90,20 @@ class Hymn_Tool_ConfigValue
 		return $this->getValue( TRUE ) !== $value->getValue( TRUE );
 	}
 
+	/**
+	 *	@param		Hymn_Tool_ConfigValue	$value
+	 *	@param		bool					$typeSafe		Default: yes
+	 *	@return		bool
+	 */
 	public function equalsToIfBothSet( Hymn_Tool_ConfigValue $value, bool $typeSafe = TRUE ): bool
 	{
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}
 
+	/**
+	 *	@param		bool		$asTrimmedString		Default: no
+	 *	@return		bool|float|int|string|NULL
+	 */
 	public function getValue( bool $asTrimmedString = FALSE ): bool|float|int|string|NULL
 	{
 		if( $asTrimmedString ){
@@ -86,16 +114,26 @@ class Hymn_Tool_ConfigValue
 		return $this->value;
 	}
 
+	/**
+	 *	@return		string
+	 */
 	public function getType(): string
 	{
 		return $this->type;
 	}
 
+	/**
+	 *	@return		bool
+	 */
 	public function hasValue(): bool
 	{
 		return $this->value !== NULL && 0 !== strlen( trim( strval( $this->value ) ) );
 	}
 
+	/**
+	 *	@param		bool		$hasValue
+	 *	@return		bool
+	 */
 	public function is( bool $hasValue = FALSE ): bool
 	{
 		if( $hasValue )
@@ -116,6 +154,10 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
+	/**
+	 *	@param		int|float|bool|string $value
+	 *	@return		static
+	 */
 	public function setValue( int|float|bool|string $value ): static
 	{
 		$value		= trim( (string) $value );
@@ -127,6 +169,10 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
+	/**
+	 *	@param		string|NULL		$type
+	 *	@return		static
+	 */
 	public function setType( ?string $type = NULL ): static
 	{
 		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];

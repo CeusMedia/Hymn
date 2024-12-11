@@ -38,9 +38,11 @@
 class Hymn_Module_Updater
 {
 	protected Hymn_Client $client;
-	protected ?object $config;
+	protected Hymn_Structure_Config $config;
 	protected Hymn_Module_Library $library;
 	protected bool $isLiveCopy	= FALSE;
+
+	/** @var object{dry: bool, quiet: bool, verbose: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -49,9 +51,9 @@ class Hymn_Module_Updater
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
 		$this->flags	= (object) [
-			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'		=> (bool) ( $client->flags & Hymn_Client::FLAG_DRY ),
+			'quiet'		=> (bool) ( $client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 
 		$app		= $this->config->application;												//  shortcut to application config
@@ -181,7 +183,7 @@ class Hymn_Module_Updater
 						$this->client,
 						"  > Enter new value:",
 						'string',
-						$valueCurrent->getValue(),
+						(string) $valueCurrent->getValue(),
 						[],
 						FALSE
 					)->ask();

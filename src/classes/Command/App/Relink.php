@@ -61,7 +61,7 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !strlen( trim( $sourcePath ) ) )
 			throw new InvalidArgumentException( 'First argument "source" is missing' );
 		$sourceUriRegex	= '/^'.preg_quote( $sourcePath, '/' ).'/';
-		$destPath		= rtrim( getcwd(), '/' ).'/';
+		$destPath		= rtrim( getcwd() ?: '', '/' ).'/';
 
 		$this->out( "Move application" );
 		$this->out( "- from: ".$sourcePath );
@@ -92,6 +92,7 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 			if( $entry->isDir() )
 				$this->fixLinks( $source, $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
 			else if( is_link( $pathName ) ){
+				/** @var string $link */
 				$link = readlink( $pathName );
 				if( preg_match( $sourceUriRegex, $link ) ){
 					$link	= preg_replace( $sourceUriRegex, $dest, $link );
