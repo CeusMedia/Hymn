@@ -40,7 +40,7 @@
         ],
         "phar:create-dev": [
             "@dev:install-quiet",
-            "test -f hymn.phar && rm hymn.phar",
+            "test -f hymn.phar && rm hymn.phar || true",
             "php build/create.php --mode=dev && chmod +x hymn.phar"
         ],
         "phar:install-copy": [
@@ -87,7 +87,7 @@
         ],
         "test:unit": [
             "@dev:install-quiet",
-            "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tool/phpunit10.xml"
+            "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration=tool/phpunit.xml"
         ]
     },
     "scripts-descriptions": {

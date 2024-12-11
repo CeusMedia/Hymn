@@ -136,15 +136,14 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 	 */
 	protected function askQuestion( array $question, bool|int|float|string|NULL $default = NULL ): float|bool|int|string
 	{
-		$input		= new Hymn_Tool_CLI_Question(		//  create input for question answer
+		return Hymn_Tool_CLI_Question::getInstance(		//  create input for question answer
 			$this->client,
 			$question['label'],
 			$question['type'],
 			$default ?? ( $question['default'] ?? NULL ),
 			$question['options'] ?? NULL,
 			FALSE
-		);
-		return $input->ask();												//  ask for value
+		)->ask();												//  ask for value
 	}
 
 	/**

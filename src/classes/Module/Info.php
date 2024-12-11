@@ -51,10 +51,10 @@ class Hymn_Module_Info
 		$this->client->out( ' - Configuration: ' );
 		foreach( $module->config as $item ){
 			$this->client->out( '    - '.$item->key.':' );
-			if( strlen( trim( $item->title ) ) )
+			if( '' !== trim( $item->title ?? '' ) )
 				$this->client->out( '       - Title:     '.trim( $item->title ) );
-			$this->client->out( '       - Type:      '.$item->type );
-			$this->client->out( '       - Value:     '.$item->value );
+			$this->client->out( '       - Type:      '.( $item->type ?? '?' ) );
+			$this->client->out( '       - Value:     '.( $item->value ?? '?' ) );
 			if( $item->values )
 				$this->client->out( '       - Values:    '.join( ', ', $item->values ) );
 			$this->client->out( '       - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );

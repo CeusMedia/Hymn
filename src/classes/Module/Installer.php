@@ -145,18 +145,17 @@ class Hymn_Module_Installer
 						$module->id,
 					] ), Hymn_Client::EXIT_ON_RUN );
 				}
-				$question	= new Hymn_Tool_CLI_Question(											//  get new value from console
+				$configValue	= Hymn_Tool_CLI_Question::getInstance(							//  get new value from console
 					$this->client,
-					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', array(		//  render console input label
+					vsprintf( '    Set (unconfigured mandatory) config value %s:%s', [	//  render console input label
 						$module->id,
 						$moduleConfigKey,
-					) ),
+					] ),
 					$dataType,																	//  provide data type
-					NULL,																		//  no default value
+					NULL,																//  no default value
 					$moduleConfigData->values,													//  get suggested values if set
-					FALSE																		//  no break = inline question
-				);
-				$configValue	= $question->ask();
+					FALSE																	//  no break = inline question
+				)->ask();
 			}
 			if( $moduleConfigData->value !== $configValue )
 				$changeSet[$moduleConfigKey]	= $configValue;

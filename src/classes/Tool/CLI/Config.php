@@ -136,12 +136,14 @@ class Hymn_Tool_CLI_Config
 					$key	= preg_replace( '/^path\./', '', $key );
 					$key	= ucwords( str_replace( '.', ' ', $key ) );
 					$key	= str_replace( ' ', '', lcfirst( $key ) );
+					if( 'scriptsLib' === $key )
+						continue;
 					$this->config->paths->{$key}	= $value;
 					continue;
 				}
-				$key	= ucwords( str_replace( '.', ' ', $key ) );
-				$key	= str_replace( ' ', '', lcfirst( $key ) );
-				$this->config->{$key}	= $value;
+//				$key	= ucwords( str_replace( '.', ' ', $key ) );
+//				$key	= str_replace( ' ', '', lcfirst( $key ) );
+//				$this->config->{$key}	= $value;
 			}
 		}
 	}

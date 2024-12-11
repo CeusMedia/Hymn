@@ -61,17 +61,16 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 
 		$current	= $editor->getProperty( $key, FALSE );
 
-		if( !strlen( trim( $value ) ) ){
-			$question	= new Hymn_Tool_CLI_Question(
+		if( !strlen( trim( $value ) ) )
+			$value	= trim( (string) Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				"Value for '".$key."'",
 				'string',
 				$current,
 				[],
 				FALSE																				//  no break = inline question
-			);
-			$value	= trim( (string) $question->ask() );
-		}
+			)->ask() );
+
 		if( !$this->flags->dry ){
 			$editor->setProperty( $key, $value );
 			clearstatcache();

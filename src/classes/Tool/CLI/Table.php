@@ -49,7 +49,7 @@ class Hymn_Tool_CLI_Table
 	}
 
 	public function detectWidth(): void
-  {
+	{
 		$cols	= intval( `tput cols` );
 		$this->consoleWidth	= ( $cols ?: 80 ) - 3;
 	}

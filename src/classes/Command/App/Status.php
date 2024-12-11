@@ -73,7 +73,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
-		$moduleId	= trim( $this->client->arguments->getArgument() );								//  get module id as first argument
+		$moduleId	= trim( $this->client->arguments->getArgument() ?? '' );					//  get module id as first argument
 		if( strlen( $moduleId = trim( $moduleId ) ) )												//  a module ID has been given
 			return $this->runForSingleModule( $outdatedModules, $moduleId );						//  run status for single module
 		return $this->runForAllModules( $outdatedModules );											//  run status for all (outdated) modules
@@ -81,6 +81,11 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/*  --  PROTECTED  --  */
 
+	/**
+	 *	@param		object		$update
+	 *	@param		string		$indent
+	 *	@return		void
+	 */
 	protected function printModuleUpdateChangelog( object $update, string $indent = '' ): void
 	{
 		$changes	= $this->getLibrary()->getAvailableModuleLogChanges(
@@ -115,12 +120,12 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$message		= '%d installed modules found.';
 		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
 		if( !$outdatedModules ){																	//  there are outdated modules
-			$this->client->outVerbose( 'No updatable modules found.' );								//  print status topic: Modules > Outdated
+			$this->client->outVerbose( 'No updatable modules found.' );						//  print status topic: Modules > Outdated
 			return static::CODE_NONE;
 		}
 		if( !$this->flags->quiet ){
 			$message	= '%d updatable modules found:';
-			$this->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
+			$this->out( sprintf( $message, count( $outdatedModules ) ) );							//  print status topic: Modules > Outdated
 		}
 		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
 			if( !$this->flags->quiet ){

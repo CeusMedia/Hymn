@@ -76,11 +76,11 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@param		mixed		$value		Value of child element
 	 *	@param		mixed		$namespace	Namespace prefix of child element
 	 *	@param		string|NULL	$nsURI		Namespace URI of child element
-	 *	@return		SimpleXMLElement|NULL
+	 *	@return		Hymn_Tool_XML_Element|NULL
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
 	#[ReturnTypeWillChange]
-	public function addChild( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?SimpleXMLElement
+	public function addChild( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?Hymn_Tool_XML_Element
 	{
 		if( '' !== ( $namespace ?? '' ) ){
 			$namespaces	= $this->getDocNamespaces();
@@ -105,13 +105,12 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@param		string			$text			The CDATA value of the child element.
 	 *	@param		string|NULL		$namespace		Namespace prefix of child element
 	 *	@param		string|NULL		$nsURI			Namespace URI of child element
-	 *	@return		SimpleXMLElement
+	 *	@return		Hymn_Tool_XML_Element
 	 *	@reprecated	use addChild instead
 	 */
-	public function addChildCData( string $name, string $text, ?string $namespace = NULL, ?string $nsURI = NULL ): SimpleXMLElement
+	public function addChildCData( string $name, string $text, ?string $namespace = NULL, ?string $nsURI = NULL ): Hymn_Tool_XML_Element
 	{
 		$child	= $this->addChild( $name, NULL, $namespace, $nsURI );
-		/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 		$child->addCData( $text );
 		return $child;
 	}

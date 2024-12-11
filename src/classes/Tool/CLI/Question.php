@@ -42,8 +42,32 @@ class Hymn_Tool_CLI_Question
 	protected string $type			= 'string';
 	protected ?string $default		= NULL;
 	protected ?array $options		= NULL;
-	protected bool $break		= TRUE;
+	protected bool $break			= TRUE;
 
+	/**
+	 *	Static constructor.
+	 *	@param		Hymn_Client		$client
+	 *	@param		string			$message
+	 *	@param		string			$type			Default: string
+	 *	@param		?string			$default
+	 *	@param		?array			$options
+	 *	@param		bool			$break			Default: yes
+	 *	@return		self
+	 */
+	public static function getInstance( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE ): self
+	{
+		return new self( $client, $message, $type, $default, $options, $break );
+	}
+
+	/**
+	 *	Constructor.
+	 *	@param		Hymn_Client		$client
+	 *	@param		string			$message
+	 *	@param		string			$type			Default: string
+	 *	@param		?string			$default
+	 *	@param		?array			$options
+	 *	@param		bool			$break			Default: yes
+	 */
 	public function __construct( Hymn_Client $client, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE )
 	{
 		$this->client	= $client;
@@ -82,7 +106,7 @@ class Hymn_Tool_CLI_Question
 			if( !strlen( $input ) && $default )
 				$input	= $default;
 		}
-		while( is_array( $options ) && !in_array( $input, $options ) );
+		while( is_array( $options ) && 0 !== count( $options ) && !in_array( $input, $options ) );
 		if( $typeIsBoolean )
 			$input	= in_array( strtolower( $input ), ['y', 'yes', '1'] );
 		if( $typeIsInteger )

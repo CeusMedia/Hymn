@@ -290,9 +290,9 @@ class Hymn_Client
 	}
 
 	/**
-	 *	@param		string			$moduleId
-	 *	@param		array<string>	$availableSourceIds
-	 *	@param		string|NULL		$defaultInstallSourceId
+	 *	@param		string		$moduleId
+	 *	@param		array		$availableSourceIds
+	 *	@param		?string		$defaultInstallSourceId
 	 *	@return		string
 	 */
 	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL ): string

@@ -167,26 +167,24 @@ class Hymn_Module_Updater
 			$questionAnswers[]	= 'e';
 			$this->client->out( '  - [e] enter value' );
 
-			$decision	= new Hymn_Tool_CLI_Question(
+			$answer			= Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				"  = Which config value?",
 				'string',
 				$questionDefault,
 				$questionAnswers,
 				FALSE
-			);
-			$answer			= $decision->ask();
+			)->ask();
 			switch( $answer ){
 				case "e":
-					$question	= new Hymn_Tool_CLI_Question(
+					$inputValues[$configKey]	= Hymn_Tool_CLI_Question::getInstance(
 						$this->client,
 						"  > Enter new value:",
 						'string',
 						$valueCurrent->getValue(),
 						[],
 						FALSE
-					);
-					$inputValues[$configKey] = $question->ask();
+					)->ask();
 					break;
 				case "c":
 					$inputValues[$configKey]	= $valueConfig->getValue( TRUE );

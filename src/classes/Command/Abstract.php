@@ -160,15 +160,14 @@ abstract class Hymn_Command_Abstract
 
 	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): float|bool|int|string
 	{
-		$question	= new Hymn_Tool_CLI_Question(
+		return Hymn_Tool_CLI_Question::getInstance(
 			$this->client,
 			$message,
 			$type,
 			$default,
 			$options ?? [],
 			$break
-		);
-		return $question->ask();
+		)->ask();
 	}
 
 	protected function denyOnProductionMode(): void

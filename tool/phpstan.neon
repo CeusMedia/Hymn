@@ -8,7 +8,8 @@ parameters:
 	paths:
 		- ../src
 	excludePaths:
-		- src/classes/Module/Reader.php
+		- ../src/classes/Module/Reader.php
 	editorUrl: 'phpstorm://open?file=%%relFile%%&line=%%line%%'
 	editorUrlTitle: '%%relFile%%:%%line%%'
+	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false

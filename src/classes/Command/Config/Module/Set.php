@@ -83,17 +83,16 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 			}
 		}
 
-		if( !strlen( trim( $value ) ) ){
-			$question	= new Hymn_Tool_CLI_Question(
+		if( !strlen( trim( $value ) ) )
+			$value	= trim( Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				'Value for "'.$moduleId.':'.$configKey.'"',
 				$configType,
 				$configDefault,
 				$configValues,
 				FALSE																				//  no break = inline question
-			);
-			$value	= trim( $question->ask() );
-		}
+			)->ask() );
+
 		if( preg_match( '/^".*"$/', $value ) )
 			$value	= substr( $value, 1, -1 );
 
