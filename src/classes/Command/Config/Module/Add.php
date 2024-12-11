@@ -70,15 +70,14 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
-			$question		= new Hymn_Tool_CLI_Question(
+			$actualValue	= trim( Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				sprintf( 'Value for "%s:%s"', $module->id, $moduleConfig->key ),
 				$moduleConfig->type,
 				$moduleConfig->value,
 				$moduleConfig->values,
 				FALSE																				//  no break = inline question
-			);
-			$actualValue	= trim( $question->ask() );
+			)->ask() );
 			if( in_array( $moduleConfig->type, ['bool', 'boolean'] ) ){
 				$actualValue	= $actualValue ? 'yes' : 'no';
 				$defaultValue	= 'no';

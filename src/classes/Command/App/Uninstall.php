@@ -24,6 +24,10 @@
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Hymn_Client as Client;
+use Hymn_Tool_CLI_Question as CliQuestion;
+
 /**
  *	...
  *
@@ -59,11 +63,11 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 
 		$listInstalled		= $this->library->listInstalledModules();								//  get list of installed modules
 		if( !$listInstalled )																		//  application has no installed modules
-			$this->outError("No installed modules found", Hymn_Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
+			$this->outError("No installed modules found", Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
 
 		/*  fetch arguments  */
 		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
-		if( $moduleIds && '*' !== $moduleIds ){
+		if( $moduleIds && ['*'] !== $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcard modules
 			foreach( $moduleIds as $moduleId ){
@@ -75,16 +79,14 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			}
 		}
 		else{
-			$answer = TRUE;
-			if( !$this->flags->force ){
-				$question	= new Hymn_Tool_CLI_Question(
+			$answer	= TRUE;
+			if( !$this->flags->force )
+				$answer	= CliQuestion::getInstance(
 					$this->client,
 					"Do you really want to uninstall ALL installed modules?",
 					'boolean',
 					'no'
-				);
-				$answer	= $question->ask();
-			}
+				)->ask();
 			if( !$answer )
 				return;
 			$this->uninstallAllModules( $listInstalled );

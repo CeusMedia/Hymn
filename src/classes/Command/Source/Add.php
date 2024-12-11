@@ -86,15 +86,14 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			foreach( $this->questions as $question ){												//  iterate questions
 				if( !isset( $source[$question['key']] ) )
 					$source[$question['key']]	= $question['default'];
-				$input	= new Hymn_Tool_CLI_Question(												//  ask for value
+				$source[$question['key']]	= Hymn_Tool_CLI_Question::getInstance(					//  ask for value
 					$this->client,
 					$question['label'],
 					$question['type'],
 					$source[$question['key']],														//  preset default or custom value
 					$question['options'] ?? [],												//  realize options
-					FALSE																			//  no break = inline question
-				);
-				$source[$question['key']]	= $input->ask();										//  assign given value
+					FALSE																		//  no break = inline question
+				)->ask();																			//  assign given value
 			}
 			if( isset( $config->sources[$source['key']] ) )
 				$this->client->outError( 'Source with ID "'.$source['key'].'" is already registered.' );

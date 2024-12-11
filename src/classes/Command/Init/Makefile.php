@@ -76,11 +76,15 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 		if( !$targetFileName ){
 			if( !file_exists( 'Makefile' ) )
 				$targetFileName	= 'Makefile';
-			else{
-				$question	= new Hymn_Tool_CLI_Question( $this->client, "Name of new make file" );
-				$question->setType( 'string' )->setDefault( "Makefile.generated" );
-				$targetFileName	= $question->setBreak( FALSE )->ask();
-			}
+			else
+				$targetFileName	= Hymn_Tool_CLI_Question::getInstance(
+					$this->client,
+					"Name of new make file",
+					'string',
+					'Makefile.generated',
+					[],
+					FALSE																	//  no break = inline question
+				)->ask();
 		}
 		copy( Hymn_Client::$pharPath."templates/Makefile", $targetFileName );
 

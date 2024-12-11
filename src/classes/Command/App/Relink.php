@@ -75,6 +75,13 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		$this->out( "Done." );
 	}
 
+	/**
+	 *	@param		string		$source
+	 *	@param		string		$sourceUriRegex
+	 *	@param		string		$dest
+	 *	@param		string		$path
+	 *	@return		void
+	 */
 	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' ): void
 	{
 		$index	= new DirectoryIterator( $this->flags->dry ? $source.$path : $dest.$path );
@@ -98,6 +105,12 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 	}
 
+	/**
+	 *	@param		Hymn_Structure_Config	$config
+	 *	@param		string					$sourceUriRegex
+	 *	@param		string					$dest
+	 *	@return		void
+	 */
 	protected function updateHymnFile( Hymn_Structure_Config $config, string $sourceUriRegex, string $dest ): void
 	{
 		$this->client->outVerbose( "  - setting URI in hymn file" );

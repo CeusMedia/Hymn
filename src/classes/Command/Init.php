@@ -143,8 +143,14 @@ class Hymn_Command_Init extends Hymn_Command_Abstract implements Hymn_Command_In
 
 	protected function answer( string $key, string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = TRUE ): void
 	{
-		$question	= new Hymn_Tool_CLI_Question( $this->client, $message, $type, $default, $options ?? [], $break );
-		$this->answers[$key]	= $question->ask();
+		$this->answers[$key]	= Hymn_Tool_CLI_Question::getInstance(
+			$this->client,
+			$message,
+			$type,
+			$default,
+			$options ?? [],
+			$break
+		)->ask();
 	}
 
 	protected function configureDatabase(): void
