@@ -55,20 +55,19 @@ class Hymn_Module_SQL
 	 *	Return list of SQL statements to execute on module update.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object{sql: object, version: ?string}		$module				Object of library module to install
-	 *	@return		array		List of SQL statements to execute on module installation
+	 *	@param		Hymn_Structure_Module		$module				Object of library module to install
+	 *	@return		array<Hymn_Structure_Module_SQL>		List of SQL statements to execute on module installation
 	 */
-	public function getModuleInstallSql( object $module ): array
+	public function getModuleInstallSql( Hymn_Structure_Module $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
-			return [];																			//  quit here and return empty list
+			return [];																				//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
-			return [];																			//  quit here and return empty list
+			return [];																				//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
 		$version	= 0;																			//  init reached version
-		$scripts	= [];																		//  prepare empty list for collected scripts
+		$scripts	= [];																			//  prepare empty list for collected scripts
 
-    /** @var object{sql: string, type: ?string, version: ?string, event: string} $sql */
 		foreach( $module->sql as $sql )																//  first run: install
 			if( $sql->event == "install" && trim( $sql->sql ) )										//  is an install script
 				if( $sql->version == "final" || !$sql->version )									//  is final install script
@@ -77,7 +76,7 @@ class Hymn_Module_SQL
 
 		if( !$scripts ){
 			foreach( $module->sql as $sql ){														//  first run: install
-				if( version_compare( $version, $module->version, "<" ) ){							//  reached version is not final
+				if( version_compare( $version, $module->version->current, "<" ) ){			//  reached version is not final
 					if( $sql->type === $driver || $sql->type == "*" ){								//  database driver is matching or general
 						if( $sql->event == "install" && trim( $sql->sql ) ){						//  is an install script
 							if( isset( $sql->version ) )											//  script version is set
@@ -88,11 +87,11 @@ class Hymn_Module_SQL
 				}
 			}
 			foreach( $module->sql as $sql ){														//  second run: update
-				if( version_compare( $version, $module->version, "<" ) ){							//  reached version is not final
+				if( version_compare( $version, $module->version->current, "<" ) ){			//  reached version is not final
 					if( $sql->type === $driver || $sql->type == "*" ){								//  database driver is matching or general
 						if( $sql->event == "update" && trim( $sql->sql ) ){							//  is an update script
 							if( isset( $sql->version ) ){											//  script version is set
-								if( version_compare( $version, $sql->version, "<" ) ){				//  script version is greater than reached version
+								if( version_compare( $version, $sql->version, "<" ) ){		//  script version is greater than reached version
 									$version	= $sql->version;									//  set reached version to script version
 									$scripts[]	= $sql;												//  append script for execution
 								}
@@ -148,18 +147,18 @@ class Hymn_Module_SQL
 	 *	Return list of SQL statements to execute on module update.
 	 *	Returns empty list if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object		$installedModule	Object of locally installed module
-	 *	@param		object		$module				Object of library module to update to
-	 *	@return		array		List of SQL statements to execute on module update
+	 *	@param		Hymn_Structure_Module		$installedModule	Object of locally installed module
+	 *	@param		Hymn_Structure_Module		$module				Object of library module to update to
+	 *	@return		array<string,Hymn_Structure_Module_SQL>		List of SQL statements to execute on module update
 	 */
-	public function getModuleUpdateSql( object $installedModule, object $module ): array
+	public function getModuleUpdateSql( Hymn_Structure_Module $installedModule, Hymn_Structure_Module $module ): array
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return [];																			//  quit here and return empty list
 		if( !isset( $module->sql ) || !count( $module->sql ) )										//  module has no SQL scripts
 			return [];																			//  quit here and return empty list
 		$driver		= $this->checkDriver();															//  check database connection and get PDO driver
-		$version	= $installedModule->version;													//  start by version of currently installed module
+		$version	= $installedModule->version->current;											//  start by version of currently installed module
 		$scripts	= [];																		//  prepare empty list for collected scripts
 
 		foreach( $module->sql as $sql ){															//  iterate SQL scripts
@@ -179,10 +178,10 @@ class Hymn_Module_SQL
 	 *	Reads module SQL scripts and executes install and update scripts.
 	 *	Does nothing if flag 'db' is set to 'no'.
 	 *	@access		public
-	 *	@param		object		$module			Object of module to install
+	 *	@param		Hymn_Structure_Module		$module			Object of module to install
 	 *	@throws		RuntimeException			if target file is not readable
 	 */
-	public function runModuleInstallSql( object $module )
+	public function runModuleInstallSql( Hymn_Structure_Module $module ): void
 	{
 		if( $this->flags->noDatabase )																//  flag to skip database operations is set
 			return;
@@ -258,14 +257,14 @@ class Hymn_Module_SQL
 	 *	Returns PDO driver used or to be used for database connection.
 	 *	@access		protected
 	 *	@return		string							PDO driver used by database connection
-	 *	@throws		\RuntimeException				if no database connection driver is set
+	 *	@throws        RuntimeException                if no database connection driver is set
 	 */
 	protected function checkDriver(): string
 	{
 		$dbc	= $this->client->getDatabase();														//  shortcut database resource of client
-		$driver	= $dbc->getConfig( 'driver' );														//  get configured database driver
+		$driver	= $dbc->getConfigValue( 'driver' );														//  get configured database driver
 		if( !$driver )																				//  no database driver set
-			throw new \RuntimeException( 'No database connection driver set' );						//  quit with exception
+			throw new RuntimeException( 'No database connection driver set' );						//  quit with exception
 		return $driver;																				//  otherwise return configured driver
 	}
 
@@ -276,11 +275,11 @@ class Hymn_Module_SQL
 	 *	@return		void
 	 *	@throws		RuntimeException				if execution fails
 	 */
-	protected function executeSql( string $sql )
+	protected function executeSql( string $sql ): void
 	{
 		$dbc		= $this->client->getDatabase();
 		$dbc->connect( TRUE );
-		$prefix		= $dbc->getConfig( 'prefix' );
+		$prefix		= $dbc->getConfigValue( 'prefix' );
 		$lines		= explode( "\n", trim( $sql ) );
 		$statements = [];
 		$buffer		= [];

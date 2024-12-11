@@ -44,15 +44,25 @@ class Hymn_Module_Library_Installed
 		$this->client		= $client;
 	}
 
-	public function get( string $moduleId )
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		Hymn_Structure_Module
+	 *	@throws		RangeException		if module is not installed
+	 */
+	public function get( string $moduleId ): Hymn_Structure_Module
 	{
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
 			throw new RangeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		return Hymn_Module_Reader::load( $filename, $moduleId );
+//		return Hymn_Module_Reader::load( $filename, $moduleId );
+		return Hymn_Module_Reader2::load( $filename, $moduleId );
 	}
 
+	/**
+	 *	@param		string|NULL		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function getAll( string $sourceId = NULL ): array
 	{
 //		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize sources in cache
@@ -67,7 +77,7 @@ class Hymn_Module_Library_Installed
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 				$module	= $this->get( $key );
-				if( !$sourceId || $module->installSource === $sourceId )
+				if( !$sourceId || $module->install->source === $sourceId )
 					$list[$key]	= $module;
 			}
 		}

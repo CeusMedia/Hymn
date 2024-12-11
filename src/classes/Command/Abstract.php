@@ -154,11 +154,11 @@ abstract class Hymn_Command_Abstract
 	 */
 	abstract public function run();
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): float|bool|int|string
 	{
 		$question	= new Hymn_Tool_CLI_Question(
 			$this->client,
@@ -177,7 +177,7 @@ abstract class Hymn_Command_Abstract
 			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
-	protected function deprecate( $messageLines ): void
+	protected function deprecate( array|string $messageLines ): void
 	{
 		$this->client->outDeprecation( $messageLines );
 	}
@@ -211,7 +211,7 @@ abstract class Hymn_Command_Abstract
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
 	 *	@param		string|NULL			$sourceId	...
-	 *	@return		array				Map of modules by ID
+	 *	@return		array<string,Hymn_Structure_Module>		Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
 	protected function getAvailableModulesMap( ?string $sourceId = NULL ): array
@@ -240,7 +240,7 @@ abstract class Hymn_Command_Abstract
 		return $this->library;																		//  return loaded library
 	}
 
-	protected function readLibrary( object $config )
+	protected function readLibrary( object $config ): void
 	{
 		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 		if( $this->flags->force )																//  on force mode
@@ -248,7 +248,7 @@ abstract class Hymn_Command_Abstract
 
 		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
 			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
-			return $this->library;																//  return empty library
+			return;																//  return empty library
 		}
 		foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
 			if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled

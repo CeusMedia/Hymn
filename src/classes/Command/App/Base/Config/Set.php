@@ -70,7 +70,7 @@ class Hymn_Command_App_Base_Config_Set extends Hymn_Command_Abstract implements 
 				[],
 				FALSE																				//  no break = inline question
 			);
-			$value	= trim( $question->ask() );
+			$value	= trim( (string) $question->ask() );
 		}
 		if( !$this->flags->dry ){
 			$editor->setProperty( $key, $value );

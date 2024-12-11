@@ -42,7 +42,9 @@ class Hymn_Module_Diff
 	protected Hymn_Module_Library $library;
 	protected object $flags;
 
+	/** @var array<string,Hymn_Structure_Module> $modulesAvailable */
 	protected array $modulesAvailable			= [];
+	/** @var array<string,Hymn_Structure_Module> $modulesInstalled */
 	protected array $modulesInstalled			= [];
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -57,7 +59,7 @@ class Hymn_Module_Diff
 		];
 	}
 
-	public function compareConfigByModules( object $sourceModule, object $targetModule ): array
+	public function compareConfigByModules( Hymn_Structure_Module $sourceModule, Hymn_Structure_Module $targetModule ): array
 	{
 		if( !isset( $sourceModule->config ) )
 			throw new InvalidArgumentException( 'Given source module object is invalid' );
@@ -66,8 +68,8 @@ class Hymn_Module_Diff
 		$skipProperties		= ['title', 'values', 'original', 'default'];
 
 		$list			= [];
-		$configSource	= (array) $sourceModule->config;
-		$configTarget	= (array) $targetModule->config;
+		$configSource	= $sourceModule->config;
+		$configTarget	= $targetModule->config;
 
 		foreach( $configSource as $item ){
 			if( !isset( $configTarget[$item->key] ) ){
@@ -90,7 +92,7 @@ class Hymn_Module_Diff
 			}
 			else if( $item != $configSource[$item->key] ){
 				$changes	= [];
-				foreach( $item as $property => $value ){
+				foreach( get_object_vars( $item ) as $property => $value ){
 					if( in_array( $property, $skipProperties ) )
 						continue;
 					if( !$targetModule->isInstalled && !$value )
@@ -132,14 +134,20 @@ class Hymn_Module_Diff
 		return $this->compareSqlByModules( $sourceModule, $targetModule );
 	}
 
-	public function compareSqlByModules( object $sourceModule, object $targetModule ): array
+	/**
+	 * @param Hymn_Structure_Module $sourceModule
+	 * @param Hymn_Structure_Module $targetModule
+	 * @return array<string,Hymn_Structure_Module_SQL>
+	 */
+	public function compareSqlByModules( Hymn_Structure_Module $sourceModule, Hymn_Structure_Module $targetModule ): array
 	{
 		$helperSql	= new Hymn_Module_SQL( $this->client );
-		$scripts	= $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
+		return $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
+/*		$scripts	= $helperSql->getModuleUpdateSql( $sourceModule, $targetModule );
 		foreach( $scripts as $script )
 //			$script->query	= $this->client->getDatabase()->applyTablePrefixToSql( $script->sql );
 			$script->query	= $script->sql;
-		return $scripts;
+		return $scripts;*/
 	}
 
 	protected function readModules( ?string $sourceId = NULL ): void

@@ -56,7 +56,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 			$this->outError('Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
 
 		$dbc	= $this->client->getDatabase();
-		$prefix	= $dbc->getConfig( 'prefix' );
+		$prefix	= $dbc->getConfigValue( 'prefix' );
 		$tables	= $dbc->getTables( $prefix );
 		if( !$tables ){
 			if( !$this->flags->quiet )

@@ -60,7 +60,7 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 			$this->outError( "Module '".$moduleId."' is not installed", Hymn_Client::EXIT_ON_SETUP );
 		else{
 			$moduleLocal	= $library->readInstalledModule( $moduleId );
-			$moduleSource	= $library->getAvailableModule( $moduleId, $moduleLocal->installSource );
+			$moduleSource	= $library->getAvailableModule( $moduleId, $moduleLocal->install->source );
 			$updater		= new Hymn_Module_Updater( $this->client, $library );
 			$updater->reconfigure( $moduleSource );
 		}

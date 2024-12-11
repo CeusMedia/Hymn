@@ -31,11 +31,14 @@ class Hymn_Tool_SourceIndex_IniReader
 	public function __construct( string $pathSource )
 	{
 		$this->data	= $this->empty;
-		if( file_exists( $pathSource.$this->fileName ) )
-			$this->data	= array_merge( $this->data, parse_ini_file( $pathSource.$this->fileName ) );
+		if( file_exists( $pathSource.$this->fileName ) ){
+			$data	= parse_ini_file( $pathSource.$this->fileName );
+			if( FALSE !== $data )
+				$this->data	= array_merge( $this->data, $data );
+		}
 	}
 
-	public function get( $key )
+	public function get( string $key ): int|float|bool|string|NULL
 	{
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];

@@ -72,12 +72,12 @@ class Hymn_Module_Library
 		return $this->available->getActiveSources( $withModules );
 	}
 
-	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE )
+	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		return $this->available->get( $moduleId, $sourceId, $strict );
 	}
 
-	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE )
+	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		if( '' === trim( $moduleId ) ){
 			if( $strict )
@@ -92,6 +92,10 @@ class Hymn_Module_Library
 		return $this->available->getModuleLogChanges( $moduleId, $sourceId, $versionInstalled, $versionAvailable );
 	}
 
+	/**
+	 *	@param		string|NULL		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function getAvailableModules( ?string $sourceId = NULL ): array
 	{
 		return $this->available->getAll( $sourceId );
@@ -107,11 +111,16 @@ class Hymn_Module_Library
 		return $this->available->getDefaultSource();
 	}
 
-	public function getSource( string $sourceId, bool $withModules = FALSE )
+	public function getSource( string $sourceId, bool $withModules = FALSE ): Hymn_Structure_Source
 	{
 		return $this->available->getSource( $sourceId, $withModules );
 	}
 
+	/**
+	 *	@param		array		$filters
+	 *	@param		bool		$withModules
+	 *	@return		array<Hymn_Structure_Source>
+	 */
 	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
 		return $this->available->getSources( $filters, $withModules );
@@ -158,6 +167,10 @@ class Hymn_Module_Library
 		return array_key_exists( $sourceId, $this->getSources() );
 	}
 
+	/**
+	 *	@param		string|null		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function listInstalledModules( ?string $sourceId = NULL ): array
 	{
 //		if( $this->useCache && $this->listModulesInstalled !== NULL )			//  @todo realize sources in cache
@@ -167,7 +180,12 @@ class Hymn_Module_Library
 		return $list;
 	}
 
-	public function readInstalledModule( string $moduleId ): object
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		Hymn_Structure_Module
+	 *	@throws		RangeException		if module is not installed
+	 */
+	public function readInstalledModule( string $moduleId ): Hymn_Structure_Module
 	{
 		return $this->installed->get( $moduleId );
 	}

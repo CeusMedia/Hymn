@@ -64,13 +64,13 @@ class Hymn_Module_Files
 	 *	Tries to link or copy all module files into application.
 	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
-	 *	@param 		object 		$module			Module object
+	 *	@param 		Hymn_Structure_Module 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
 	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		bool
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( object $module, string $installType = 'link', bool $tryMode = FALSE ): bool
+	public function copyFiles( Hymn_Structure_Module $module, string $installType = 'link', bool $tryMode = FALSE ): bool
 	{
 		if( $this->flags->noFiles )
 			return TRUE;
@@ -158,27 +158,27 @@ class Hymn_Module_Files
 	 *	If not awaiting an available module, an installed module can be given.
 	 *	Mapped source and target paths are identical in this case.
 	 *	@access		protected
-	 *	@param		object		$module		Module object
+	 *	@param		Hymn_Structure_Module		$module		Module object
 	 *	@return		array
 	 *	@todo		change behaviour of styles without source: install into common instead of theme
 	 */
-	protected function prepareModuleFileMap( object $module, bool $awaitAvailableModule = TRUE ): array
+	protected function prepareModuleFileMap( Hymn_Structure_Module $module, bool $awaitAvailableModule = TRUE ): array
 	{
 		if( !is_object( $module ) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
-		if( !isset( $module->path ) ){
+		if( !isset( $module->install->path ) ){
 			if( $awaitAvailableModule )
 				throw new InvalidArgumentException( 'Given module object is an installed module - object of available module needed' );
-			$module->path	= $this->config->application->uri;
+			$module->install->path	= $this->config->application->uri;
 		}
 
-		$pathSource		= $module->path;
+		$pathSource		= $module->install->path;
 		$pathTarget		= $this->config->application->uri;
 		$layoutTheme	= $this->config->layoutTheme ?? 'common';
 		$layoutPrimer	= $this->config->layoutPrimer ?? 'primer';
 		$map			= [];
 		$skipSources	= ['lib', 'styles-lib', 'scripts-lib', 'url'];
-		foreach( $module->files as $fileType => $files ){
+		foreach( $module->files->toArray() as $fileType => $files ){
 			foreach( $files as $file ){
 				switch( $fileType ){
 					case 'files':

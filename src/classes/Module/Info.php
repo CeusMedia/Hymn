@@ -62,11 +62,11 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleFiles( $module ): void
+	public function showModuleFiles( Hymn_Structure_Module $module ): void
   {
 		$list	= [];
 		if( isset( $module->files ) ){
-			foreach( $module->files as $sectionKey => $sectionFiles ){
+			foreach( $module->files->toArray() as $sectionKey => $sectionFiles ){
 				if( !count( $sectionFiles ) )
 				continue;
 				$list[]	= '    - '.ucfirst( $sectionKey );
@@ -100,7 +100,7 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleHook( $module ): void
+	public function showModuleHook( Hymn_Structure_Module $module ): void
   {
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
@@ -108,8 +108,8 @@ class Hymn_Module_Info
 		foreach( $module->hooks as $resource => $events ){
 			foreach( $events as $event => $hooks ){
 				foreach( $hooks as $hook ){
-					if( !preg_match( '/\n/', $hook->hook ) )
-						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->hook );
+					if( !preg_match( '/\n/', $hook->callback ) )
+						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->callback );
 					else
 						$this->client->out( '    - '.$resource.' > '.$event.' >> <func> !DEPRECATED!' );
 				}
@@ -117,8 +117,8 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleRelations( Hymn_Module_Library $library, $module ): void
-  {
+	public function showModuleRelations( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
+	{
 		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
@@ -131,34 +131,35 @@ class Hymn_Module_Info
 				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
-		if( count( (array) $module->relations->needs ) ){
+		if( count( $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
 			foreach( $module->relations->needs as $moduleId => $relation )
 				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
-		if( count( (array) $module->relations->supports ) ){
+		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
 			foreach( $module->relations->supports as $moduleId => $relation )
 				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
 			$this->client->out( ' - Modules needing: ' );
-			foreach( $module->relations->neededBy as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+			foreach( $module->relations->neededBy as $moduleId => $module )
+				$this->client->out( '    - '.$moduleId );
 		}
 		if( count( $module->relations->requiredBy ) ){
 			$this->client->out( ' - Modules requiring: ' );
-			foreach( $module->relations->requiredBy as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+			foreach( $module->relations->requiredBy as $moduleId => $module )
+				$this->client->out( '    - '.$moduleId );
 		}
 	}
 
-	public function showModuleVersions( $module ): void
+	public function showModuleVersions( Hymn_Structure_Module $module ): void
   {
-		if( !count( $module->versionLog ) )
+		if( !count( $module->version->log ) )
 			return;
 		$this->client->out( ' - Versions: ' );
-		foreach( $module->versionLog as $item )
+		/** @var object{note: string, version: string} $item */
+	  foreach( $module->version->log as $item )
 			$this->client->out( '    - '.str_pad( $item->version, 10 ).' '.$item->note );
 	}
 }

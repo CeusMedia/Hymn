@@ -81,12 +81,12 @@ class Hymn_Module_Installer
 	 *	3. get value for these missing pairs from console if also not set in hymn file
 	 *	4. combine values from hymn file and console input and apply to module file
 	 *	@access		public
-	 *	@param		object		$module			Data object of module to install
+	 *	@param		Hymn_Structure_Module		$module			Data object of module to install
 	 *	@return		void
 	 */
-	public function configure( object $module ): void
+	public function configure( Hymn_Structure_Module $module ): void
   {
-		$source		= $module->path.'module.xml';
+		$source		= $module->install->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
 			Hymn_Module_Files::createPath( dirname( $target ) );								//  create folder for module configurations in app
@@ -183,7 +183,7 @@ class Hymn_Module_Installer
 		}
 	}
 
-	public function install( $module, string $installType = 'link' ): bool
+	public function install( Hymn_Structure_Module $module, string $installType = 'link' ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );
@@ -200,7 +200,11 @@ class Hymn_Module_Installer
 		}
 	}
 
-	public function uninstall( $module ): bool
+	/**
+	 * @param Hymn_Structure_Module $module
+	 * @return bool
+	 */
+	public function uninstall( Hymn_Structure_Module $module ): bool
 	{
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );

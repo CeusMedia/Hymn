@@ -91,7 +91,7 @@ class Hymn_Tool_CLI_Table
 		$colWidths	= [];
 		foreach( $keys as $nr => $key )
 			$colWidths[$nr]	= (object) [
-				'head'	=> $this->strlen( $key ),
+				'head'	=> $this->strlen( (string) $key ),
 				'label'	=> $key,
 				'min'	=> pow( 10, 6 ),
 				'max'	=> 0,
@@ -162,12 +162,12 @@ class Hymn_Tool_CLI_Table
 		return mb_substr( $text.str_repeat( ' ', $repeat ), 0, $toLength, $this->encoding );
 	}
 
-	protected function fit( $text, int $toLength ): string
+	protected function fit( string $text, int $toLength ): string
 	{
 		return $this->extend( $this->trimCentric( trim( $text ), $toLength ), $toLength );
 	}
 
-	protected function line( $sign = '-', int $lineLength = 76 ): string
+	protected function line( string $sign = '-', int $lineLength = 76 ): string
 	{
 		$steps	= (int) floor( $lineLength / $this->strlen( $sign ) );
 		return str_repeat( $sign, $steps );

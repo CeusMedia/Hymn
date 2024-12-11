@@ -50,63 +50,51 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !file_exists( Hymn_Client::$fileName ) )
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
-		$list			= [];
-		$library		= $this->getLibrary();
-		$nrInlineFunctions	= 0;
+		$list		= [];
+		$tree		= [];
+		$library	= $this->getLibrary();
 		foreach( $library->listInstalledModules() as $moduleId => $module ){
 			foreach( $module->hooks as $resource => $events ){
-				foreach( $events as $event => $functions ){
-					foreach( $functions as $function ){
-						if( !preg_match( '/\n/', $function ) ){
-							$id	= $resource.'_'.$event.'_'.$moduleId.'_'.$function;
-							$list[$id]	= (object) [
-								'moduleId'		=> $moduleId,
-								'resource'		=> $resource,
-								'event'			=> $event,
-								'type'			=> 'staticPublicFunctionCall',
-								'function'		=> $function,
-							];
-						}
-						else{
-							$nrInlineFunctions++;
-							$id	= vsprintf( '%s_%s_%s_func-%s', [
-								$resource,
-								$event,
-								$moduleId,
-								str_pad( (string) $nrInlineFunctions, 4, '0', STR_PAD_LEFT ),
-							] );
-							$list[$id]	= (object) [
-								'moduleId'		=> $moduleId,
-								'resource'		=> $resource,
-								'event'			=> $event,
-								'type'			=> 'inlineFunction',
-								'function'		=> '<inline_function>',
-							];
-						}
+				foreach( $events as $event => $hooks ){
+					foreach( $hooks as $hook ){
+						$id		= $resource.'_'.$event.'_'.$moduleId.'_'.$hook->callback;
+						$dto	= (object) [
+							'moduleId'		=> $moduleId,
+							'resource'		=> $resource,
+							'event'			=> $event,
+							'callback'		=> $hook->callback,
+							'level'			=> $hook->level,
+						];
+						$list[$id]	= $dto;
+						$tree[$resource][$event][]	= $dto;
 					}
 				}
 			}
 		}
 		ksort( $list );
 
-		foreach( $list as $hook ) {
-			switch( $hook->type ){
-				case 'staticPublicFunctionCall':
-					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
-						$hook->resource,
-						$hook->event,
-						$hook->moduleId,
-						$hook->function,
-					] ) );
-					break;
-				case 'inlineFunction':
-					$this->out( vsprintf( '- %s > %s >> [%s] %s', [
-						$hook->resource,
-						$hook->event,
-						$hook->moduleId,
-						'<inline_function> !DEPRECATED!',
-					] ) );
-					break;
+		if( $this->flags->verbose ){
+			foreach( $tree as $resource => $events ){
+				$this->out( '- Resource: '.$resource );
+				foreach( $events as $event => $hooks ){
+					$this->out( '  - Event: '.$event );
+					foreach( $hooks as $hook ){
+						$this->out( '    - Module: '.$hook->moduleId );
+						$this->out( '      Callback: '.$hook->callback );
+						if( 5 !== $hook->level )
+							$this->out( '      Level: '.$hook->level );
+					}
+				}
+			}
+		}
+		else{
+			foreach( $list as $hook ) {
+				$this->out( vsprintf( '- %s > %s >> [%s] %s', [
+					$hook->resource,
+					$hook->event,
+					$hook->moduleId,
+					$hook->callback,
+				] ) );
 			}
 		}
 	}

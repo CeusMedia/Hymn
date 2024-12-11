@@ -8,4 +8,4 @@ parameters:
 		-
 			message: "#^Call to an undefined method SimpleXMLElement\\:\\:addCData\\(\\)\\.$#"
 			count: 1
-			path: ../src/classes/Tool/XML/Element.php
+			path: src/classes/Tool/XML/Element.php

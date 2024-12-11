@@ -59,8 +59,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$url	= trim( $this->client->arguments->getArgument( 1 ) ?? '' );
 		$url	= $url ? rtrim( $url, '/' ).'/' : '';
 
-		if( !strlen( trim( $dest ) ) )
-			throw new InvalidArgumentException( 'First argument "destination" is missing' );
+		if( '' === $dest )
+			$this->outError( 'First argument "destination" is missing', Hymn_Client::EXIT_ON_INPUT );
 		if( !preg_match( '/^\//', $dest ) )
 			throw new InvalidArgumentException( 'Destination must be absolute' );
 		$dest	= rtrim( $dest, '/' ).'/';

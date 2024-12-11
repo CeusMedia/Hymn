@@ -5,6 +5,7 @@ class Hymn_Structure_Config_Source
 	public string $title	= '';
 	public string $type		= 'folder';
 	public string $path		= '';
+	public bool $isDefault		= FALSE;
 
 	public function __construct()
 	{

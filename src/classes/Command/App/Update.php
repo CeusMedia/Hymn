@@ -70,20 +70,20 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$outdatedModules	= [];																//  prepare empty list of updatable modules
+		$outdatedModules	= [];																	//  prepare empty list of updatable modules
 		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
-			$source				= $installedModule->installSource;									//  get installed module
+			$source				= $installedModule->install->source;								//  get installed module
 			$availableModule	= $library->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
 			if( $availableModule ){																	//  installed module is available at least
-				$versionInstalled	= $installedModule->version;									//  shortcut installed module version
-				$versionAvailable	= $availableModule->version;									//  shortcut available module version
-				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){					//  installed module is outdated
-					$outdatedModules[$installedModule->id]	= (object) array(						//  note updatable module
+				$versionInstalled	= $installedModule->version->current;							//  shortcut installed module version
+				$versionAvailable	= $availableModule->version->current;							//  shortcut available module version
+				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){			//  installed module is outdated
+					$outdatedModules[$installedModule->id]	= (object) [							//  note updatable module
 						'id'		=> $installedModule->id,
-						'installed'	=> $installedModule->version,
-						'available'	=> $availableModule->version,
-						'source'	=> $installedModule->installSource,
-					);
+						'installed'	=> $versionInstalled,
+						'available'	=> $versionAvailable,
+						'source'	=> $installedModule->install->source,
+					];
 				}
 			}
 		}
@@ -106,9 +106,9 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 						$installedModule	= $listInstalled[$moduleId];
 						$modulesToUpdate[$moduleId]	= (object) [
 							'id'		=> $installedModule->id,
-							'installed'	=> $installedModule->version,
-							'available'	=> $installedModule->version,
-							'source'	=> $installedModule->installSource,
+							'installed'	=> $installedModule->version->current,
+							'available'	=> $installedModule->version->current,
+							'source'	=> $installedModule->install->source,
 						];
 					}
 					else{

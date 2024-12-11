@@ -80,32 +80,32 @@ class Hymn_Module_Updater
 	 */
 	public function getUpdatableModules( string $sourceId = NULL ): array
 	{
-		$outdated		= [];																	//  prepare list of outdated modules
+		$outdated		= [];																		//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $sourceId ) as $installed ){					//  iterate installed modules
-			$source		= $installed->installSource;												//  get source of installed module
+			$source		= $installed->install->source;												//  get source of installed module
 			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore
 				continue;																			//  skip this module @todo remove gone modules ?!?
-			if( version_compare( $installed->version, $available->version, '>=' ) )					//  installed module is up-to-date
+			if( version_compare( $installed->version->current, $available->version->current, '>=' ) )					//  installed module is up-to-date
 				continue;																			//  skip this module
-			$outdated[$installed->id]	= (object) array(											//	note outdated module and note:
+			$outdated[$installed->id]	= (object) [												//	note outdated module and note:
 				'id'		=> $installed->id,														//  - module ID
-				'source'	=> $installed->installSource,											//  - source of current module installation
+				'source'	=> $installed->install->source,											//  - source of current module installation
 				'installed'	=> $installed->version,													//  - currently installed module version
 				'available'	=> $available->version,													//  - available module version
-			);
+			];
 		}
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, bool $changedOnly = FALSE ): void
+	public function reconfigure( Hymn_Structure_Module $module, bool $changedOnly = FALSE ): void
 	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
-		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
+		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->install->source, FALSE );
 		if( !$moduleSource ){
 			$message	= vsprintf( 'Module "%" is not available in source "%"', [
 				$module->id,
-				$moduleInstalled->installSource
+				$moduleInstalled->install->source
 			] );
 			throw new RuntimeException( $message );
 		}
@@ -216,7 +216,7 @@ class Hymn_Module_Updater
 			$configurator->set( $module->id, $configKey, $inputConfigValue );
 	}
 
-	public function update( $module, string $installType ): bool
+	public function update( Hymn_Structure_Module $module, string $installType ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );

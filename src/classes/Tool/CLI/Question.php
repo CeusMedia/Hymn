@@ -65,7 +65,7 @@ class Hymn_Tool_CLI_Question
 		if( $typeIsBoolean ){
 			$options	= ['y', 'n'];
 			$default	= 'no';
-			if( in_array( strtolower( $this->default ), ['y', 'yes', '1'] ) )
+			if( in_array( strtolower( $this->default ?? '' ), ['y', 'yes', '1'] ) )
 				$default	= 'yes';
 		}
 		if( /*!$typeIsBoolean && */strlen( trim( $default ?? '' ) ) )
@@ -76,8 +76,9 @@ class Hymn_Tool_CLI_Question
 			$message	.= ": ";
 		do{
 			$this->client->out( $message, $this->break );
+			/** @var resource $handle */
 			$handle	= fopen( "php://stdin","r" );
-			$input	= trim( fgets( $handle ) );
+			$input	= trim( (string) fgets( $handle ) );
 			if( !strlen( $input ) && $default )
 				$input	= $default;
 		}

@@ -55,7 +55,7 @@ class Hymn_Tool_ConfigValue
 		}
 		if( $this->getType() !== $value->getType() )
 			return static::COMPARED_MISMATCH_TYPE;
-		if( strlen( $this->getValue() ) !== strlen( $value->getValue() ) )
+		if( strlen( (string) $this->getValue() ) !== strlen( (string) $value->getValue() ) )
 			return static::COMPARED_MISMATCH_LENGTH;
 		if( $this->getValue() == $value->getValue() )
 			return static::COMPARED_EQUAL;
@@ -76,12 +76,12 @@ class Hymn_Tool_ConfigValue
 		return !$this->differsFromIfBothSet( $value, $typeSafe );
 	}
 
-	public function getValue( bool $asTrimmedString = FALSE ): string
-  {
+	public function getValue( bool $asTrimmedString = FALSE ): bool|float|int|string|NULL
+	{
 		if( $asTrimmedString ){
 			if( in_array( $this->type, ['bool', 'boolean'], TRUE ) )
 				return $this->value ? 'yes' : 'no';
-			return trim( $this->value );
+			return trim( strval( $this->value ) );
 		}
 		return $this->value;
 	}
@@ -93,21 +93,21 @@ class Hymn_Tool_ConfigValue
 
 	public function hasValue(): bool
 	{
-		return $this->value !== NULL && 0 !== strlen( trim( $this->value ) );
+		return $this->value !== NULL && 0 !== strlen( trim( strval( $this->value ) ) );
 	}
 
 	public function is( bool $hasValue = FALSE ): bool
 	{
 		if( $hasValue )
-			return 0 !== strlen( trim( $this->value ) );
+			return 0 !== strlen( trim( strval( $this->value ) ) );
 		return NULL !== $this->value;
 	}
 
 	/**
 	 *	@deprecated		use setValue and setType instead
 	 */
-	public function set( $value, string $type = NULL ): static
-  {
+	public function set( int|float|bool|string $value, string $type = NULL ): static
+	{
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );
 		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
@@ -116,8 +116,8 @@ class Hymn_Tool_ConfigValue
 		return $this;
 	}
 
-	public function setValue( $value ): static
-  {
+	public function setValue( int|float|bool|string $value ): static
+	{
 		$value		= trim( (string) $value );
 		if( $this->type === 'bool' )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
@@ -128,7 +128,7 @@ class Hymn_Tool_ConfigValue
 	}
 
 	public function setType( ?string $type = NULL ): static
-  {
+	{
 		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
 		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
 		$type		= is_null( $type ) ? 'string' : $type;

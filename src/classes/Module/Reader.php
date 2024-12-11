@@ -95,7 +95,7 @@ class Hymn_Module_Reader
 		self::decorateObjectWithDeprecation( $obj, $xml );
 		if( isset( $obj->config['active'] ) )
 			$obj->isActive	= $obj->config['active']->value;
-		$obj->isDeprecated	= count( $obj->deprecation ) > 0;
+//		$obj->isDeprecated	= count( $obj->deprecation ) > 0;
 		return $obj;
 	}
 

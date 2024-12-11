@@ -48,7 +48,8 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 		if( !( $arguments instanceof Hymn_Tool_CLI_Arguments ) )
 			$arguments	= $this->client->arguments;
 		$config		= $this->client->getConfig();
-		if( !( $source = $this->getSourceByArgument( 0, $arguments ) ) )
+		$source		= $this->getSourceByArgument( 0, $arguments );
+		if( NULL === $source )
 			return;
 
 		if( !$source->active && !$this->flags->force ){
