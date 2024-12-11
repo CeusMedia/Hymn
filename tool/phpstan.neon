@@ -11,5 +11,6 @@ parameters:
 		- ../src/classes/Module/Reader.php
 	editorUrl: 'phpstorm://open?file=%%relFile%%&line=%%line%%'
 	editorUrlTitle: '%%relFile%%:%%line%%'
-	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		- identifier: missingType.iterableValue

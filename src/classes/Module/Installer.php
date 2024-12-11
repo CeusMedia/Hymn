@@ -42,6 +42,8 @@ class Hymn_Module_Installer
 	protected Hymn_Structure_Config_Application $app;
 	protected ?object $config;
 	protected bool $isLiveCopy				= FALSE;
+
+	/** @var object{dry: bool, quiet: bool, verbose: bool, veryVerbose: bool, force: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -51,10 +53,11 @@ class Hymn_Module_Installer
 		$this->library	= $library;
 		$this->app		= $this->config->application;											//  shortcut to application config
 		$this->flags	= (object) [
-			'dry'			=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'			=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'		=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
-			'veryVerbose'	=> $this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE,
+			'dry'			=> (bool) ($this->client->flags & Hymn_Client::FLAG_DRY ),
+			'quiet'			=> (bool) ($this->client->flags & Hymn_Client::FLAG_QUIET  ),
+			'force'			=> (bool) ($this->client->flags & Hymn_Client::FLAG_FORCE  ),
+			'verbose'		=> (bool) ($this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'veryVerbose'	=> (bool) ($this->client->flags & Hymn_Client::FLAG_VERY_VERBOSE ),
 		];
 
 /*		if( isset( $this->app->installMode ) )
@@ -62,8 +65,8 @@ class Hymn_Module_Installer
 		if( isset( $this->app->installType ) )
 			$this->client->out( "Install Type: ".$this->app->installType );*/
 
-		if( isset( $this->app->installType ) && $this->app->installType === "copy" )			//  installation is a copy
-			if( isset( $this->app->installMode ) && $this->app->installMode === "live" )		//  installation has been for live environment
+		if( isset( $this->app->installType ) && 'copy' === $this->app->installType )			//  installation is a copy
+			if( isset( $this->app->installMode ) && 'live' === $this->app->installMode )		//  installation has been for live environment
 				$this->isLiveCopy	= TRUE;
 		if( $this->isLiveCopy )
 			$this->client->out( [
@@ -83,6 +86,7 @@ class Hymn_Module_Installer
 	 *	@access		public
 	 *	@param		Hymn_Structure_Module		$module			Data object of module to install
 	 *	@return		void
+	 *	@throws		Exception					if the XML data could not be parsed.
 	 */
 	public function configure( Hymn_Structure_Module $module ): void
   {
@@ -96,6 +100,7 @@ class Hymn_Module_Installer
 			$target	= $source;
 		}
 
+		/** @var string $xml */
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XML_Element( $xml );
 		$type	= $this->app->type ?? 1;
@@ -115,8 +120,7 @@ class Hymn_Module_Installer
 		foreach( $module->config as $moduleConfigKey => $moduleConfigData ){					//  iterate config pairs of module
 			$dataType		= strtolower( trim( $moduleConfigData->type ) );					//  sanitize module config value type
 			$isBoolean		= in_array( $dataType, ['boolean', 'bool'] );						//  note whether module config value is boolean
-			$isMandatory	= $moduleConfigData->mandatory === 'yes';							//  note whether module config value is mandatory
-			$isInConfig		= isset( $configModule[$moduleConfigKey] );						//  note whether config value is set in hymn file
+			$isInConfig		= isset( $configModule[$moduleConfigKey] );							//  note whether config value is set in hymn file
 			$value			= $moduleConfigData->value;											//  note original module config value
 			$configValue	= $isInConfig ? $configModule[$moduleConfigKey] : $value;			//  note configured nodule config value as string
 			if( $isBoolean && $isInConfig ){													//  override boolean module config value by hymn file
@@ -128,9 +132,9 @@ class Hymn_Module_Installer
 					$configValue	= TRUE;
 			}
 			$hasValue	= $isBoolean ? NULL !== $configValue : '' !== trim( $configValue );
-			if( $isMandatory && !$hasValue ){
+			if( $moduleConfigData->mandatory && !$hasValue ){
 				if( $this->flags->quiet ){														//  in quiet mode no input is allowed
-					if( $this->flags->force )													//  dont quit (with exception) in force mode
+					if( $this->flags->force )													//  don't quit (with exception) in force mode
 						continue;
 					$message	= 'Missing module config value %s:%s';							//  build exception message
 					throw new RuntimeException( vsprintf( $message, array(						//  throw exception
@@ -208,7 +212,6 @@ class Hymn_Module_Installer
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
-			$appUri				= $this->app->uri;
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$pathConfig			= $this->client->getConfigPath();
 			$files->removeFiles( $localModule );												//  remove module files

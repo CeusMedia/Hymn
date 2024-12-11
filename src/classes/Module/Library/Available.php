@@ -267,10 +267,10 @@ class Hymn_Module_Library_Available
 	}
 
 	/**
-	 *	@param		object		$source
+	 *	@param		Hymn_Structure_Source		$source
 	 *	@return		array<string,Hymn_Structure_Module>
 	 */
-	protected function listModulesInSource( object $source ): array
+	protected function listModulesInSource( Hymn_Structure_Source $source ): array
 	{
 		$path	= $source->path;
 		$this->client->outVeryVerbose( '- Path: '.$path );
@@ -323,7 +323,6 @@ class Hymn_Module_Library_Available
 		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
 			return;																					//  skip this rerun
 		$this->modules	= [];																	//  reset module list
-		/** @var object{id: string, path: string, type: string, active: bool, default: bool, title: string, date: ?string} $source */
 		foreach($this->sources as $source ){														//  iterate sources
 			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $source->id ) );
 			if( !$source->active )																	//  if source is deactivated
@@ -387,12 +386,18 @@ class Hymn_Module_Library_Available
 		return [$index, $list];
 	}
 
+	/**
+	 *	@param		object	$module
+	 *	@param		string											$filePath
+	 *	@return		Hymn_Structure_Module
+	 */
 	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
 	{
 		//  work in progress
 		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
 		foreach( $module->config ?? [] as $config )
 			$obj->config[]	= new Hymn_Structure_Module_Config( $config->key, $config->value, $config->type, $config->title );
+		/** @var object{callback: string, resource: string, event: string, level: int} $hook */
 		foreach( $config->hooks ?? [] as $hook )
 			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
 

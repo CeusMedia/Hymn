@@ -56,17 +56,17 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
-
-		$types		= !$types || $types === '*' ? 'all' : $types;
-		$types		= preg_split( '/\s*,\s*/', $types );
+		$types		= ( !$types || '*' === $types ) ? 'all' : $types;
+		/** @var array $typeList */
+		$typeList	= preg_split( '/\s*,\s*/', $types );
 
 		$allowedTypes	= ['all', 'config', 'files', 'hooks', 'relations'];
 
-		foreach( $types as $type ){
+		foreach( $typeList as $type ){
 			if( !in_array( $type, $allowedTypes ) )
 				$this->client->outError( 'Invalid type: '.$type, Hymn_Client::EXIT_ON_RUN );
-			if( $type === 'all' ){
-				$types	= $allowedTypes;
+			if( 'all' === $type ){
+				$typeList	= $allowedTypes;
 				break;
 			}
 		}
@@ -93,13 +93,13 @@ class Hymn_Command_App_Stamp_Info extends Hymn_Command_Abstract implements Hymn_
 			$this->out( ' - Frameworks:   '.$frameworks );
 
 			$moduleInfo	= new Hymn_Module_Info( $this->client );
-			if( in_array( 'files', $types ) )
+			if( in_array( 'files', $typeList ) )
 				$moduleInfo->showModuleFiles( $module );
-			if( in_array( 'config', $types ) )
+			if( in_array( 'config', $typeList ) )
 				$moduleInfo->showModuleConfig( $module );
-			if( in_array( 'relations', $types ) )
+			if( in_array( 'relations', $typeList ) )
 				$moduleInfo->showModuleRelations( $this->getLibrary(), $module );
-			if( in_array( 'hooks', $types ) )
+			if( in_array( 'hooks', $typeList ) )
 				$moduleInfo->showModuleHook( $module );
 			$this->out( '' );
 

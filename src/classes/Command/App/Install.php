@@ -67,7 +67,6 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			foreach( $moduleIds as $moduleId ){
 				$sourceId	= $this->detectModuleSource( $moduleId );
 				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
-				/** @var object{id: string, sourceId: string, isActive: bool, version: string} $module */
 				$module		= $library->getAvailableModule( $moduleId, $sourceId );
 				if( $module->isActive )
 					$relation->addModule( $module );

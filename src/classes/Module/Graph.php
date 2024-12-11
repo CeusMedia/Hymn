@@ -52,7 +52,7 @@ class Hymn_Module_Graph
 	/** @var		array					$nodes */
 	public array $nodes						= [];
 
-	/** @var		object					$flags */
+	/** @var		object{quiet: bool, verbose: bool}	$flags */
 	protected object $flags;
 
 	/** @var		integer					$status */
@@ -63,8 +63,8 @@ class Hymn_Module_Graph
 		$this->client	= $client;
 		$this->library	= $library;
 		$this->flags	= (object) [
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'quiet'		=> (bool) ($this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ($this->client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 	}
 
@@ -72,11 +72,11 @@ class Hymn_Module_Graph
 	 *	Adds a module to graph as well as all modules linked as 'needed'.
 	 *	Sets status to 'changed'.
 	 *	@access		public
-	 *	@param		object			$module		Module data object
-	 *	@param		integer			$level		Load level of module, default: 0
+	 *	@param		Hymn_Structure_Module	$module		Module data object
+	 *	@param		integer					$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( object $module, int $level = 0 ): void
+	public function addModule( Hymn_Structure_Module $module, int $level = 0 ): void
   {
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
@@ -198,7 +198,7 @@ class Hymn_Module_Graph
 		$this->client->out( "OK" );
 		try{
 			if( !$graph )
-				$graph		= $this->renderGraphFile( NULL );
+				$graph		= $this->renderGraphFile();
 			$sourceFile	= tempnam( sys_get_temp_dir(), 'Hymn' );
 			file_put_contents( $sourceFile, $graph );												//  save temporary
 
