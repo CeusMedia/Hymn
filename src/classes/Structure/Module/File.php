@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
  *	Module definition: File.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -41,13 +41,16 @@ class Hymn_Structure_Module_File
 	public string $file;
 
 	/** @var	bool|string|NULL	$load */
-	public $load;
+	public string|bool|NULL $load	= NULL;
 
 	/** @var	int|string|NULL		$level */
-	public $level;
+	public string|int|NULL $level	= NULL;
 
-	/** @var	string|null			$source */
+	/** @var	string|NULL			$source */
 	public ?string $source			= NULL;
+
+	/** @var	string|NULL			$theme */
+	public ?string $theme			= NULL;
 
 	/**
 	 *	@param		string		$file

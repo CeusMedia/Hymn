@@ -63,6 +63,16 @@ class Hymn_Module_Library_Available
 		$this->client	= $client;
 	}
 
+	/**
+	 *	Add source.
+	 *	@param		string		$sourceId
+	 *	@param		string		$path
+	 *	@param		string		$type
+	 *	@param		bool		$active
+	 *	@param		?string		$title
+	 *	@return		void
+	 *	@throws		Exception
+	 */
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
 	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
@@ -74,7 +84,7 @@ class Hymn_Module_Library_Available
 			'path'		=> $path,
 			'type'		=> $type,
 			'active'	=> $active,
-			'default'	=> $isDefault,
+			'isDefault'	=> $isDefault,
 			'title'		=> $title,
 			'date'		=> NULL,
 		] );
@@ -83,6 +93,13 @@ class Hymn_Module_Library_Available
 //		ksort( $this->sources );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		?string		$sourceId
+	 *	@param		bool		$strict			Default: yes
+	 *	@return		?Hymn_Structure_Module
+	 *	@throws		Exception
+	 */
 	public function get( string $moduleId, string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		$this->loadModulesInSources();
@@ -93,7 +110,7 @@ class Hymn_Module_Library_Available
 			foreach( $sourceModules as $sourceModuleId => $sourceModule )
 				if( $sourceModuleId === $moduleId )
 					$candidates[]	= $sourceModule;
-		if( count( $candidates ) === 1 )
+		if( 1 === count( $candidates ) )
 			return $candidates[0];
 		if( count( $candidates ) > 1 )
 			foreach( $candidates as $candidate )
@@ -104,6 +121,10 @@ class Hymn_Module_Library_Available
 		return NULL;
 	}
 
+	/**
+	 *	@param		bool		$withModules		Default: no
+	 *	@return		Hymn_Structure_Source[]
+	 */
 	public function getActiveSources( bool $withModules = FALSE ): array
 	{
 		return $this->getSources( ['active' => TRUE], $withModules );
@@ -142,6 +163,9 @@ class Hymn_Module_Library_Available
 		return $modules;
 	}
 
+	/**
+	 *	@return		string
+	 */
 	public function getDefaultSource(): string
 	{
 		foreach($this->sources as $sourceId => $source )
@@ -150,6 +174,13 @@ class Hymn_Module_Library_Available
 		throw new RuntimeException( 'No default source available' );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		bool		$strict			Default: yes
+	 *	@return		?Hymn_Structure_Module
+	 *	@throws		Exception
+	 */
 	public function getFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		if( '' === trim( $moduleId ) ){
@@ -171,6 +202,14 @@ class Hymn_Module_Library_Available
 		return NULL;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		string		$versionInstalled
+	 *	@param		string		$versionAvailable
+	 *	@return		array
+	 *	@throws		Exception
+	 */
 	public function getModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
 		$module	= $this->get( $moduleId, $sourceId );

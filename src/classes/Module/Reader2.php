@@ -19,7 +19,7 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -42,7 +42,7 @@ use Hymn_Structure_Module_Version as VersionDefinition;
 /**
  *	Reader for local module XML files.
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -57,7 +57,9 @@ class Hymn_Module_Reader2
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
 	 *	@return		Hymn_Structure_Module		Module data object
-	 *	@throws		RuntimeException	if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException			if XML file did not pass validation
+	 *	@throws		Exception            		if XML file could not been loaded and parsed
+	 *	@throws		Exception            		if SQL update script is missing version
 	 */
 	public static function load( string $filePath, string $id ): Hymn_Structure_Module
 	{
@@ -233,13 +235,13 @@ class Hymn_Module_Reader2
 			$info		= self::castNodeAttributesToString( $pair, 'info' );
 			$title		= ( !$title && $info ) ? $info : $title;
 			$value		= (string) $pair;
-			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
-				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
+			if( in_array( $type, ['boolean', 'bool'] ) )											//  value is boolean
+				$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
 
 			$item				= new ConfigDefinition( trim( $key ), $value, $type , $title );		//  container for config entry
 
 			$item->values		= self::castNodeAttributesToArray( $pair, 'values' );
-			$item->mandatory	= (bool) self::castNodeAttributesToBool( $pair, 'mandatory', 'bool' );
+			$item->mandatory	= (bool) self::castNodeAttributesToBool( $pair, 'mandatory', FALSE );
 			/** @var bool|string $protected */
 			$protected			= self::castNodeAttributesToString( $pair, 'protected' );
 			$item->protected	= $protected;
@@ -443,12 +445,11 @@ class Hymn_Module_Reader2
 		if( !$xml->log )																			//  no log nodes existing
 			return FALSE;
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
-			if( $entry->hasAttribute( 'version' ) ){									//  only if log entry is versioned
-				$module->version->addLog(															//  append version log entry
-					(string) $entry,																//  extract entry note
-					$entry->getAttribute( 'version' )									//  extract entry version
+			if( $entry->hasAttribute( 'version' ) )											//  only if log entry is versioned
+				$module->version->log[]	= new Hymn_Structure_Module_Log(							//  append version log entry
+					$entry->getAttribute( 'version' )	,										//  extract entry version
+					(string) $entry																	//  extract entry note
 				);
-			}
 		}
 		return TRUE;
 	}
@@ -490,8 +491,8 @@ class Hymn_Module_Reader2
 	 *	@access		protected
 	 *	@param		Hymn_Structure_Module	$module		Data object of module
 	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
-	 *	@return		boolean							TRUE if data object of module has been decorated
-	 *	@throws		Exception
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 *	@throws		Exception				if update script is missing version
 	 */
 	protected static function decorateObjectWithSql( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
