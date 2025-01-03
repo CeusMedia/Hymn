@@ -84,17 +84,24 @@ class Hymn_Module_Updater
 	{
 		$outdated		= [];																		//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $sourceId ) as $installed ){					//  iterate installed modules
-			$source		= $installed->install->source;												//  get source of installed module
+			$source		= $installed->install?->source ?? 'unknown';								//  get source of installed module
 			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore
 				continue;																			//  skip this module @todo remove gone modules ?!?
 			if( version_compare( $installed->version->current, $available->version->current, '>=' ) )					//  installed module is up-to-date
 				continue;																			//  skip this module
+
+			$logs	= [];
+			foreach( $available->version->log as $log )
+				if( version_compare( $log->version, $installed->version->current, '>' ) )
+					$logs[]	= $log;
+
 			$outdated[$installed->id]	= (object) [												//	note outdated module and note:
 				'id'		=> $installed->id,														//  - module ID
 				'source'	=> $installed->install->source,											//  - source of current module installation
-				'installed'	=> $installed->version,													//  - currently installed module version
-				'available'	=> $available->version,													//  - available module version
+				'installed'	=> $installed->version->current,										//  - currently installed module version
+				'available'	=> $available->version->current,										//  - available module version
+				'log'		=> $logs
 			];
 		}
 		return $outdated;																			//  return list of outdated modules

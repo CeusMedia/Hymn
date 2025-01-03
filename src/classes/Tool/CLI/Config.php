@@ -130,20 +130,17 @@ class Hymn_Tool_CLI_Config
 
 		if( file_exists( $this->config->paths->config.'config.ini' ) ){
 			$data	= parse_ini_file( $this->config->paths->config.'config.ini' ) ?: [];
+			/** @var string $key */
+			/** @var string $value */
 			foreach( $data as $key => $value ){
-				if( preg_match( '/^path\./', $key ) ){
-					/** @var string $key */
-					$key	= preg_replace( '/^path\./', '', $key );
-					$key	= ucwords( str_replace( '.', ' ', $key ) );
-					$key	= str_replace( ' ', '', lcfirst( $key ) );
-					if( 'scriptsLib' === $key )
-						continue;
-					$this->config->paths->{$key}	= $value;
+				if( !preg_match( '/^path\./', $key ) )
 					continue;
-				}
-//				$key	= ucwords( str_replace( '.', ' ', $key ) );
-//				$key	= str_replace( ' ', '', lcfirst( $key ) );
-//				$this->config->{$key}	= $value;
+				$key	= preg_replace( '/^path\./', '', $key );
+				$key	= ucwords( str_replace( '.', ' ', $key ) );
+				$key	= str_replace( ' ', '', lcfirst( $key ) );
+				if( in_array( $key, ['scriptsLib', 'stylesLib'] ) )
+					continue;
+				$this->config->paths->{$key}	= $value;
 			}
 		}
 	}

@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
  *	Module definition: Config.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -60,10 +60,15 @@ class Hymn_Structure_Module_Config
 	public ?string $title;
 
 	/** @var	string|int|float|bool|NULL				$title */
-	public string|int|float|bool|NULL $default;
+	public string|int|float|bool|NULL $default			= NULL;
 
 	/** @var	string|int|float|bool|NULL				$original */
-	public string|int|float|bool|NULL $original;
+	public string|int|float|bool|NULL $original			= NULL;
+
+	public static function getInstance( string $key, string|int|float|bool $value, ?string $type = NULL, ?string $title = NULL ): self
+	{
+		return new self( $key, $value, $type, $title );
+	}
 
 	/**
 	 *	@param		string					$key

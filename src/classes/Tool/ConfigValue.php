@@ -23,9 +23,10 @@ class Hymn_Tool_ConfigValue
 	 */
 	public function __construct( bool|int|float|string|NULL $value = NULL, ?string $type = NULL )
 	{
-		if( NULL !== $value)
+		if( NULL !== $type )
 			$this->setType( $type );
-		$this->setValue( $value );
+		if( NULL !== $value )
+			$this->setValue( $value );
 	}
 
 	/**
@@ -155,13 +156,13 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
-	 *	@param		int|float|bool|string $value
+	 *	@param		int|float|bool|string|NULL	$value
 	 *	@return		static
 	 */
-	public function setValue( int|float|bool|string $value ): static
+	public function setValue( int|float|bool|string|NULL $value ): static
 	{
 		$value		= trim( (string) $value );
-		if( $this->type === 'bool' )															//  value is boolean
+		if( 'bool' === $this->type )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
 		else
 			$value	= settype( $value, $this->type );

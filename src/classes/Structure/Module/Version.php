@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
  *	Module definition: Version.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -46,7 +46,7 @@ class Hymn_Structure_Module_Version
 	/**	@var		string|NULL		$available */
 	public ?string $available		= NULL;
 
-	/**	@var		array<object{note: string, version: string}>			$log */
+	/**	@var		array<Hymn_Structure_Module_Log>			$log */
 	public array $log				= [];
 
 	/**
@@ -59,10 +59,7 @@ class Hymn_Structure_Module_Version
 
 	public function addLog( string $message, string $version ): self
 	{
-		$this->log[]	= (object) [
-			'note'		=> $message,
-			'version'	=> $version,
-		];
+		$this->log[]	= new Hymn_Structure_Module_Log( $version, $message );
 		return $this;
 	}
 }

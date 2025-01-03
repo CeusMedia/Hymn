@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
  *	Module definition: Files.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
+ *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -37,25 +37,25 @@
  */
 class Hymn_Structure_Module_Files
 {
-	/** @var array $classes */
+	/** @var array<Hymn_Structure_Module_File> $classes */
 	public array $classes		= [];
 
-	/** @var array $locales */
+	/** @var array<Hymn_Structure_Module_File> $locales */
 	public array $locales		= [];
 
-	/** @var array $templates */
+	/** @var array<Hymn_Structure_Module_File> $templates */
 	public array $templates		= [];
 
-	/** @var array $styles */
+	/** @var array<Hymn_Structure_Module_File> $styles */
 	public array $styles		= [];
 
-	/** @var array $scripts */
+	/** @var array<Hymn_Structure_Module_File> $scripts */
 	public array $scripts		= [];
 
-	/** @var array $images */
+	/** @var array<Hymn_Structure_Module_File> $images */
 	public array $images		= [];
 
-	/** @var array $files */
+	/** @var array<Hymn_Structure_Module_File> $files */
 	public array $files			= [];
 
 	/**
