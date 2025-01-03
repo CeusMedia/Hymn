@@ -75,8 +75,15 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 			$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
 				$update->id,																	//  - module ID
 				$update->installed,																//  - currently installed version
-				$update->available																//  - available version
+				$update->available,																//  - available version
 			] ) );
+			if( $this->flags->verbose ){
+				/** @var Hymn_Structure_Module_Log $log */
+				foreach( $update->log as $log ){
+					$v	= str_pad( $log->version, 10, ' ', STR_PAD_LEFT );
+					$this->out( $v.': '.$log->note );
+				}
+			}
 		}
 	}
 }

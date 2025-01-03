@@ -1,8 +1,21 @@
 # Change Log
 
+## v1.0.2
+- Fix structure migration bug in module update.
+- Add log output of updatable modules.
+
 ## v1.0.1
 - Move tool config files to own folder.
-
+- Add and use module structure objects.
+- Add structures for source and stamp.
+- Improve hook management.
+- Reach PHPStan level 6.
+- Work towards PHPStan level 7.
+- Root path within PHAR is now a static property of client.
+- Fix for PHP 8.3.
+- Move tool config files to own folder.
+- Update composer script for PHPStan.
+- Cleanup.
 
 ## v1.0.0
 - Migration to PHP 8
