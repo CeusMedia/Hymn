@@ -60,10 +60,10 @@ class Hymn_Structure_Module_Config
 	public ?string $title;
 
 	/** @var	string|int|float|bool|NULL				$title */
-	public string|int|float|bool|NULL $default;
+	public string|int|float|bool|NULL $default			= NULL;
 
 	/** @var	string|int|float|bool|NULL				$original */
-	public string|int|float|bool|NULL $original;
+	public string|int|float|bool|NULL $original			= NULL;
 
 	public static function getInstance( string $key, string|int|float|bool $value, ?string $type = NULL, ?string $title = NULL ): self
 	{

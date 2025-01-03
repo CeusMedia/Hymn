@@ -93,8 +93,8 @@ class Hymn_Module_Updater
 			$outdated[$installed->id]	= (object) [												//	note outdated module and note:
 				'id'		=> $installed->id,														//  - module ID
 				'source'	=> $installed->install->source,											//  - source of current module installation
-				'installed'	=> $installed->version,													//  - currently installed module version
-				'available'	=> $available->version,													//  - available module version
+				'installed'	=> $installed->version->current,										//  - currently installed module version
+				'available'	=> $available->version->current,										//  - available module version
 			];
 		}
 		return $outdated;																			//  return list of outdated modules
