@@ -102,7 +102,7 @@ class Hymn_Module_Graph
 					'source'	=> NULL,
 				];
 			}
-			if( $relation->type !== 'module' )
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )
 			 	continue;
 			if( $relation->source ){
 				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
@@ -272,7 +272,7 @@ class Hymn_Module_Graph
 						'source'	=> NULL,
 					];
 				}
-				if( $relation->type === 'module' ){
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type ){
 					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
 					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
 				}

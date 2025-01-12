@@ -245,10 +245,10 @@ class Hymn_Module_Updater
 			$installedModules	= [];
 			$neededModules		= [];
 			foreach( $localModule->relations->needs as $moduleId => $relation )
-				if( $relation->type === 'module' )													//  only if relation is a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
 					$installedModules[$moduleId]	= $relation;
 			foreach( $module->relations->needs as $moduleId => $relation )
-				if( $relation->type === 'module' )													//  only if relation is a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
 					$neededModules[$moduleId]	= $relation;
 			$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
 				array_keys( $installedModules ),													//  ... by intersecting old list ...
@@ -269,7 +269,7 @@ class Hymn_Module_Updater
 
 			//  --  MODULES TO INSTALL
 			foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
-				if( $relation->type !== 'module' )													//  relation is not a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )				//  relation is not a module
 					continue;
 				if( array_key_exists( $neededModuleId, $localModules ) )							//  related module is installed
 					continue;

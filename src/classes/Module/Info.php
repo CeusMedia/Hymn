@@ -122,13 +122,13 @@ class Hymn_Module_Info
 		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
-				if( $installedModule->relations->needs[$module->id]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$module->id]->type )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= [];
 		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
 			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
-				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$moduleId]->type )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( $module->relations->needs ) ){
