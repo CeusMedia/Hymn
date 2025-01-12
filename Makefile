@@ -34,7 +34,7 @@ uninstall:
 	@test -f /usr/local/bin/hymn && echo "Removing hymn in /usr/local/bin" && sudo rm -f /usr/local/bin/hymn || true
 
 test-units:
-	@./vendor/bin/phpunit
+	@./vendor/bin/phpunit --configuration=tool/phpunit.xml
 
 test-syntax:
 	@hymn test-syntax && echo "Result: OK" || echo "Result: FAILED"
@@ -43,10 +43,10 @@ test-syntax-verbose:
 	@hymn test-syntax -vv && echo "Result: OK" || echo "Result: FAILED"
 
 test-phpstan:
-	@vendor/bin/phpstan analyse --configuration phpstan.neon --xdebug || true
+	XDEBUG_MODE=off @vendor/bin/phpstan analyse --configuration tool/phpstan.neon --xdebug || true
 
 test-phpstan-save-baseline:
-	@vendor/bin/phpstan analyse --configuration phpstan.neon --generate-baseline phpstan-baseline.neon || true
+	XDEBUG_MODE=off @vendor/bin/phpstan analyse --configuration tool/phpstan.neon --generate-baseline tool/phpstan-baseline.neon || true
 
 update:
 	@echo "Currently installed: \c" && hymn version

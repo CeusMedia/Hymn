@@ -63,7 +63,7 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleFiles( Hymn_Structure_Module $module ): void
-  {
+	{
 		$list	= [];
 		if( isset( $module->files ) ){
 			foreach( $module->files->toArray() as $sectionKey => $sectionFiles ){
@@ -73,13 +73,13 @@ class Hymn_Module_Info
 				foreach( $sectionFiles as $file ){
 					$line	= $file->file;
 					$attr	= [];
-					if( $sectionKey === 'styles' ){
+					if( 'styles' === $sectionKey ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 						if( !empty( $file->load ) )
 						$attr['load']	= $file->load;
 					}
-					else if( $sectionKey === 'images' ){
+					else if( 'images' === $sectionKey ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 					}
@@ -101,7 +101,7 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleHook( Hymn_Structure_Module $module ): void
-  {
+	{
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
 		$this->client->out( ' - Hooks: ' );
@@ -122,24 +122,24 @@ class Hymn_Module_Info
 		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
-				if( $installedModule->relations->needs[$module->id]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$module->id]->type )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= [];
 		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
 			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
-				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$moduleId]->type )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->getRelationTypeLabel( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
 			foreach( $module->relations->supports as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->getRelationTypeLabel( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
 			$this->client->out( ' - Modules needing: ' );
@@ -154,12 +154,21 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleVersions( Hymn_Structure_Module $module ): void
-  {
+	{
 		if( !count( $module->version->log ) )
 			return;
 		$this->client->out( ' - Versions: ' );
 		/** @var object{note: string, version: string} $item */
 	  foreach( $module->version->log as $item )
 			$this->client->out( '    - '.str_pad( $item->version, 10 ).' '.$item->note );
+	}
+
+	protected function getRelationTypeLabel( int $type ): string
+	{
+		return match( $type ){
+			Hymn_Structure_Module_Relation::TYPE_MODULE		=> 'module',
+			Hymn_Structure_Module_Relation::TYPE_PACKAGE	=> 'package',
+			default											=> 'unknown',
+		};
 	}
 }

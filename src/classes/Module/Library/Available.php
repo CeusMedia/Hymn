@@ -63,6 +63,12 @@ class Hymn_Module_Library_Available
 		$this->client	= $client;
 	}
 
+	public function addModuleToSource( Hymn_Structure_Module $module, Hymn_Structure_Source $source ): static
+	{
+		$this->modules[$source->id][$module->id]	= $module;
+		return $this;
+	}
+
 	/**
 	 *	Add source.
 	 *	@param		string		$sourceId
@@ -70,10 +76,10 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$type
 	 *	@param		bool		$active
 	 *	@param		?string		$title
-	 *	@return		void
+	 *	@return		static
 	 *	@throws		Exception
 	 */
-	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
 			throw new Exception( 'Source already set by ID: '.$sourceId );
@@ -85,12 +91,13 @@ class Hymn_Module_Library_Available
 			'type'		=> $type,
 			'active'	=> $active,
 			'isDefault'	=> $isDefault,
-			'title'		=> $title,
+			'title'		=> $title ?? '',
 			'date'		=> NULL,
 		] );
 		if( 1 === count( $this->sources ) )
 			$this->sources[$sourceId]->isDefault	= TRUE;
 //		ksort( $this->sources );
+		return $this;
 	}
 
 	/**
@@ -432,6 +439,7 @@ class Hymn_Module_Library_Available
 	 */
 	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
 	{
+		/** @var Hymn_Structure_Module $module $obj */
 		//  work in progress
 		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
 		foreach( $module->config ?? [] as $config )
@@ -445,7 +453,7 @@ class Hymn_Module_Library_Available
 		$module->hooks					= (array) $module->hooks;
 		foreach( $module->hooks as $resource => $events )
 			$module->hooks[$resource]	= (array) $module->hooks[$resource];
-		foreach( $module->files as $category => $files )
+		foreach( $module->files->toArray() as $category => $files )
 			$module->files->{$category}	=  (array) $files;
 		$module->relations->needs		= (array) $module->relations->needs;
 		$module->relations->supports	= (array) $module->relations->supports;

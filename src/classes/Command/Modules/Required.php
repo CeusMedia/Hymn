@@ -61,29 +61,42 @@ class Hymn_Command_Modules_Required extends Hymn_Command_Abstract implements Hym
 		}
 		$listInstalled	= [];
 		$listRequired	= [];
-		$modules	= $relation->getOrder();
-//		$this->client->out( count( $modules ).' modules required:' );
+		$modules	= $relation->getModulesOrderedByDependency();
+		$this->client->out( count( $modules ).' modules found to be required.' );
 		foreach( $modules as $module ){
 			if( $library->isInstalledModule( $module->id ) )
-				$listInstalled[]	= $module;
+				$listInstalled[$module->id]	= $module;
 			else
-				$listRequired[]	= $module;
+				$listRequired[$module->id]	= $module;
 		}
 
-		if( !count( $listRequired ) ){
-			if( !$this->flags->verbose )
-				$this->out( 'All '.count( $listInstalled ).' required module(s) installed' );
-		}
-		if( count( $listInstalled ) ){
-			$this->client->outVerbose( count( $listInstalled ).' required module(s) installed:' );
-			foreach( $listInstalled as $module ){
-				$this->client->outVerbose( '- '.$module->id );
+		ksort( $listInstalled );
+		ksort( $listRequired );
+
+		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'on evaluating required modules' ) );
+
+		if( $this->flags->verbose || $this->flags->veryVerbose ){
+			if( [] !== $listInstalled ){
+				$this->client->out( count( $listInstalled ).' required module(s) installed:' );
+				foreach( $listInstalled as $module ){
+					$this->client->out( '- '.$module->id );
+				}
+			}
+			if( [] !== $listRequired ){
+				$this->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
+				foreach( $listRequired as $module ){
+					$this->out( '- '.$module->id );
+				}
 			}
 		}
-		if( count( $listRequired ) ){
-			$this->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
-			foreach( $listRequired as $module ){
-				$this->out( '- '.$module->id );
+		else{
+			if( [] === $listRequired )
+				$this->out( 'All '.count( $listInstalled ).' required module(s) installed' );
+			else{
+				$this->out( count( $listRequired ).' required module(s) NOT INSTALLED:' );
+				foreach( $listRequired as $module ){
+					$this->out( '- '.$module->id );
+				}
 			}
 		}
 	}

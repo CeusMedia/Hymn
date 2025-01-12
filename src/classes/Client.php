@@ -37,22 +37,22 @@
  */
 class Hymn_Client
 {
-	public const FLAG_VERY_VERBOSE		= 1;
-	public const FLAG_VERBOSE			= 2;
-	public const FLAG_QUIET				= 4;
-	public const FLAG_DRY				= 8;
-	public const FLAG_FORCE				= 16;
-	public const FLAG_NO_DB				= 32;
-	public const FLAG_NO_FILES			= 64;
-	public const FLAG_NO_INTERACTION	= 128;
+	public const int FLAG_VERY_VERBOSE		= 1;
+	public const int FLAG_VERBOSE			= 2;
+	public const int FLAG_QUIET				= 4;
+	public const int FLAG_DRY				= 8;
+	public const int FLAG_FORCE				= 16;
+	public const int FLAG_NO_DB				= 32;
+	public const int FLAG_NO_FILES			= 64;
+	public const int FLAG_NO_INTERACTION	= 128;
 
-	public const EXIT_ON_END			= 0;
-	public const EXIT_ON_LOAD			= 1;
-	public const EXIT_ON_SETUP			= 2;
-	public const EXIT_ON_RUN			= 4;
-	public const EXIT_ON_INPUT			= 8;
-	public const EXIT_ON_EXEC			= 16;
-	public const EXIT_ON_OUTPUT			= 32;
+	public const int EXIT_ON_END			= 0;
+	public const int EXIT_ON_LOAD			= 1;
+	public const int EXIT_ON_SETUP			= 2;
+	public const int EXIT_ON_RUN			= 4;
+	public const int EXIT_ON_INPUT			= 8;
+	public const int EXIT_ON_EXEC			= 16;
+	public const int EXIT_ON_OUTPUT			= 32;
 
 	public static string $fileName				= '.hymn';
 
@@ -60,7 +60,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.1.0b';
+	public static string $version				= '1.1.0d';
 
 	public static string $mode					= 'prod';
 
@@ -190,11 +190,15 @@ class Hymn_Client
 			self::$mode		= file_get_contents( $phar.'.mode' ) ?: 'prod';
 		if( file_exists( $phar.'.php' ) )
 			self::$phpPath	= file_get_contents( $phar.'.php' ) ?: '/usr/bin/env php';
+	}
 
+	public function run(): void
+	{
 		try{
+			$arguments	= $this->originalArguments;
 			$this->parseArguments( $arguments );
 			$this->realizeLanguage();
-			$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
+			$this->output		= new Hymn_Tool_CLI_Output( $this, $this->exit );
 			$this->outVeryVerbose( 'hymn v'.self::$version );
 			$this->outVeryVerbose( $this->getMemoryUsage( 'at start' ) );
 

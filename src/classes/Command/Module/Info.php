@@ -108,7 +108,10 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$this->out( '    - Version: '.$installedModule->version->current );
 			$this->out( '    - Source:  '.$installedModule->install->source );
 			$this->out( '    - Type:    '.$installTypes[$installedModule->install->type] );
-			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->install->date ) );
+			if( '' !== ( $installedModule->install->date ?? '' ) ){
+				$date	= new DateTime( $installedModule->install->date );
+				$this->out( '    - Date:    '.$date->format( 'Y-m-d H:i:s' ) );
+			}
 			$message	= ' - Updatable: no';
 			if( version_compare( $availableModule->version->current, $installedModule->version->current, '>' ) ){
 				$message	= ' - Updatable: yes, from %s to %s';

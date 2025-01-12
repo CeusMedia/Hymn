@@ -3,11 +3,16 @@ $path			= realpath( __DIR__.'/../src/classes' ).'/';
 $directories	= [
 	'',
 	'Module',
+	'Module/Library',
 	'Structure',
 	'Structure',
+	'Structure/Config',
+	'Structure/Graph',
 	'Structure/Module',
 	'Command/App',
 	'Command',
+	'Tool',
+	'Tool/CLI',
 	'Tool/XML',
 ];
 

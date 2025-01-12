@@ -311,8 +311,8 @@ class Hymn_Module_Reader2
 	protected static function decorateObjectWithFrameworks( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
 		/** @var string $frameworks */
-		$frameworks	= self::castNodeAttributesToString( $xml, 'frameworks', 'Hydrogen:<0.9' );
-		if( !strlen( trim( $frameworks ) ) )
+		$frameworks	= self::castNodeAttributesToString( $xml, 'frameworks', '' );
+		if( '' === trim( $frameworks ) )
 			return FALSE;
 		/** @var array $list */
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
@@ -466,23 +466,35 @@ class Hymn_Module_Reader2
 		if( !$xml->relations )																		//  no relation nodes existing
 			return FALSE;																			//  do nothing
 		if( $xml->relations->needs )																//  if needed modules are defined
-			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
+			foreach( $xml->relations->needs as $moduleName ){										//  iterate list if needed modules
+				$type	= (string) self::castNodeAttributesToString( $moduleName, 'type' );
 				$module->relations->needs[(string) $moduleName]		= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
-					(string) self::castNodeAttributesToString( $moduleName, 'type' ),			//  ... with relation type
-					(string) self::castNodeAttributesToString( $moduleName, 'source' ),			//  ... with module source, if set
-					(string) self::castNodeAttributesToString( $moduleName, 'version' ),		//  ... with version, if set
+					match( $type ){																	//  ... with relation type
+						'module'	=> RelationDefinition::TYPE_MODULE,
+						'package'	=> RelationDefinition::TYPE_PACKAGE,
+						default		=> RelationDefinition::TYPE_UNKNOWN,
+					},
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
 					'needs'																	//  ... as needed
 				);
+			}
 		if( $xml->relations->supports )																//  if supported modules are defined
-			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
+			foreach( $xml->relations->supports as $moduleName ){									//  iterate list if supported modules
+				$type	= (string) self::castNodeAttributesToString( $moduleName, 'type' );
 				$module->relations->supports[(string) $moduleName]	= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
-					(string) self::castNodeAttributesToString( $moduleName, 'type' ),			//  ... with relation type
-					(string) self::castNodeAttributesToString( $moduleName, 'source' ),			//  ... with module source, if set
-					(string) self::castNodeAttributesToString( $moduleName, 'version' ),		//  ... with version, if set
+					match( $type ){																	//  ... with relation type
+						'module'	=> RelationDefinition::TYPE_MODULE,
+						'package'	=> RelationDefinition::TYPE_PACKAGE,
+						default		=> RelationDefinition::TYPE_UNKNOWN,
+					},
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
 					'supports'																//  ... as supported
 				);
+			}
 		return TRUE;
 	}
 

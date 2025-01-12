@@ -63,7 +63,7 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 				continue;
 			$relation->addModule( $module );
 		}
-		$modulesNeeded	= array_keys( $relation->getOrder() );
+		$modulesNeeded	= array_keys( $relation->getModulesOrderedByDependency() );
 
 		$modulesInstalled = [];
 		foreach( $library->listInstalledModules() as $module )
