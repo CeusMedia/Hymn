@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_Database_Source
 {
 	public string $driver;

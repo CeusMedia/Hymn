@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Locale singleton handler.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,15 +32,15 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 class Hymn_Tool_Locale
 {
-	public const TYPE_UNKNOWN	= 0;
-	public const TYPE_TEXT		= 1;
-	public const TYPE_WORDS		= 2;
+	public const int TYPE_UNKNOWN	= 0;
+	public const int TYPE_TEXT		= 1;
+	public const int TYPE_WORDS		= 2;
 
 	protected string $baseUri;
 	protected string $language;
@@ -137,8 +139,7 @@ class Hymn_Tool_Locale
 		/** @var string $text */
 		$text		= file_get_contents( $filePath );								//  read existing text file
 		$text		= str_replace( "%version%", $this->version, $text );		//  insert client version
-		$text		= str_replace( "%language%", $this->language, $text );	//  insert client language
-		return $text;																//  return text as string
+		return str_replace( "%language%", $this->language, $text );	//  insert client language
 	}
 
 	/**

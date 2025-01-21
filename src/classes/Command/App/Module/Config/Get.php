@@ -1,8 +1,10 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +32,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -57,8 +59,8 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name[.(section.)key]"' );
 		$configKey	= join( '.', $keyParts );
 
+		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 		if( !$keyParts || $configKey === '*' ){
-			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			foreach( $configurator->getAll( $moduleId ) as $item ){
 				if( $this->flags->verbose ){
 					$type	= preg_replace( '/^bool$/', 'boolean', $item->type );

@@ -1,8 +1,10 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	...
  *
- *	Copyright (c) 2017-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +32,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -56,8 +58,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
-		$stampModules	= (array) $stamp->modules;
-		$this->client->outVerbose( 'Found '.count( $stampModules ).' modules in stamp.' );
+		$this->client->outVerbose( 'Found '.count( $stamp->modules ).' modules in stamp.' );
 		if( $moduleId ){
 			if( !isset( $stamp->modules[$moduleId] ) )
 				$this->client->outError( 'Module "'.$moduleId.'" is not in stamp.', Hymn_Client::EXIT_ON_RUN );

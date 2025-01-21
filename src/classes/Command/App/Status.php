@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Compares installed against available modules to collect outdated modules.
  *	Shows outdated modules with logged changes, if available and verbose.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +23,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -32,7 +34,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -40,8 +42,8 @@
  */
 class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	public const CODE_NONE					= 0;
-	public const CODE_MODULES_OUTDATED		= 1;
+	public const int CODE_NONE					= 0;
+	public const int CODE_MODULES_OUTDATED		= 1;
 
 	/**
 	 *	Execute this command.

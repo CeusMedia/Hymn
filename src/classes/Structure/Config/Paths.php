@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Structure_Config_Paths
 {
-	public const DEFAULTS	= [
+	public const array DEFAULTS	= [
 		'config'		=> 'config/',
 		'classes'		=> 'classes/',
 		'images'		=> 'images/',
@@ -12,6 +14,7 @@ class Hymn_Structure_Config_Paths
 		'logs'			=> 'logs/',
 		'cache'			=> 'cache/',
 		'contents'		=> 'contents/',
+		'module.config'	=> 'config/modules/',
 	];
 
 	public ?string $config		= NULL;

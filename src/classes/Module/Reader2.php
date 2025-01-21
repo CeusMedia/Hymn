@@ -3,7 +3,7 @@
 /**
  *	Reader for local module XML files.
  *
- *	Copyright (c) 2012-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *	@category		Library
  *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -44,7 +44,7 @@ use Hymn_Structure_Module_Version as VersionDefinition;
  *	@category		Library
  *	@package		Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -68,7 +68,11 @@ class Hymn_Module_Reader2
 
 		$validator	= new Hymn_Tool_XML_Validator();
 		if( !$validator->validateFile( $filePath ) )
-			throw new RuntimeException( 'XML file of module "'.$id.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
+			throw new RuntimeException( vsprintf( 'XML file of module "%s" is invalid: %s in line %s', [
+				$id,
+				$validator->getErrorMessage(),
+				$validator->getErrorLine()
+			] ) );
 
 		$xml	= new Hymn_Tool_XML_Element( file_get_contents( $filePath ) );
 		$module	= new Hymn_Structure_Module( $id, (string) $xml->version, $filePath );

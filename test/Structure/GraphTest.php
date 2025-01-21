@@ -24,7 +24,7 @@ class Hymn_Test_Structure_GraphTest extends PHPUnit_Framework_TestCase
 
 		$module1->relations->needs[] = new Hymn_Structure_Module_Relation(
 			'Module2',
-			'module',
+			Hymn_Structure_Module_Relation::TYPE_MODULE,
 			'Source1',
 			'1.0.0',
 			'needs'
@@ -69,7 +69,7 @@ class Hymn_Test_Structure_GraphTest extends PHPUnit_Framework_TestCase
 
 		$module1->relations->needs[] = new Hymn_Structure_Module_Relation(
 			'Module2',
-			'module',
+			Hymn_Structure_Module_Relation::TYPE_MODULE,
 			'Source1',
 			'1.0.0',
 			'needs'
@@ -77,7 +77,7 @@ class Hymn_Test_Structure_GraphTest extends PHPUnit_Framework_TestCase
 
 		$module2->relations->needs[] = new Hymn_Structure_Module_Relation(
 			'Module1',
-			'module',
+			Hymn_Structure_Module_Relation::TYPE_MODULE,
 			'Source1',
 			'1.0.0',
 			'needs'

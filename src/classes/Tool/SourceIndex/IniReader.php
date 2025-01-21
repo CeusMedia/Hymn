@@ -1,12 +1,14 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2024 Ceus Media
+ *	@copyright	2021-2025 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2024 Ceus Media
+ *	@copyright	2021-2025 Ceus Media
  */
 class Hymn_Tool_SourceIndex_IniReader
 {

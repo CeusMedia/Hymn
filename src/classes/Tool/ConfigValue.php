@@ -1,17 +1,19 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_ConfigValue
 {
-	public const COMPARED_UNDONE			= 0;
-	public const COMPARED_EQUAL				= 1;
-	public const COMPARED_UNEQUAL			= 2;
-	public const COMPARED_UNSET_BOTH		= 4;
-	public const COMPARED_UNSET_SELF		= 8;
-	public const COMPARED_UNSET_OTHER		= 16;
-	public const COMPARED_EMPTY_BOTH		= 32;
-	public const COMPARED_EMPTY_SELF		= 64;
-	public const COMPARED_EMPTY_OTHER		= 128;
-	public const COMPARED_MISMATCH_TYPE		= 256;
-	public const COMPARED_MISMATCH_LENGTH	= 512;
+	public const int COMPARED_UNDONE			= 0;
+	public const int COMPARED_EQUAL				= 1;
+	public const int COMPARED_UNEQUAL			= 2;
+	public const int COMPARED_UNSET_BOTH		= 4;
+	public const int COMPARED_UNSET_SELF		= 8;
+	public const int COMPARED_UNSET_OTHER		= 16;
+	public const int COMPARED_EMPTY_BOTH		= 32;
+	public const int COMPARED_EMPTY_SELF		= 64;
+	public const int COMPARED_EMPTY_OTHER		= 128;
+	public const int COMPARED_MISMATCH_TYPE		= 256;
+	public const int COMPARED_MISMATCH_LENGTH	= 512;
 
 	protected bool|int|float|string|NULL $value		= NULL;
 	protected string $type			= 'string';

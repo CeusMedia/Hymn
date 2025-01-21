@@ -1,8 +1,8 @@
-<?php
+<?php /** @noinspection PhpDeprecationInspection */
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,13 +30,20 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
+ *	@deprecated		use Reader2 instead
  */
 class Hymn_Module_Reader
 {
+	/**
+	 *	@param		string		$filePath
+	 *	@param		string		$moduleId
+	 *	@return		stdClass
+	 *	@throws		Exception
+	 */
 	public static function load( string $filePath, string $moduleId ): object
 	{
 		$validator	= new Hymn_Tool_XML_Validator();
@@ -100,6 +107,14 @@ class Hymn_Module_Reader
 	}
 
 	/*  --  PROTECTED  --  */
+
+	/**
+	 *	@param		SimpleXMLElement	$xmlNode
+	 *	@param		string				$attributeName
+	 *	@param		$default
+	 *	@param		string|NULL			$nsPrefix
+	 *	@return		mixed|NULL
+	 */
 	protected static function getAttribute( SimpleXMLElement $xmlNode, string $attributeName, $default = NULL, ?string $nsPrefix = NULL )
 	{
 		$attributes	= self::getAttributes( $xmlNode, $nsPrefix );
@@ -122,7 +137,7 @@ class Hymn_Module_Reader
 		return isset( $attributes[$attributeName] );
 	}
 
-	protected static function decorateObjectWithAuthors( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithAuthors( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->author as $author ){
 			$email	= self::getAttribute( $author, 'email', '' );
@@ -135,7 +150,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithCompanies( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithCompanies( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->company as $company ){
 			$site	= self::getAttribute( $company, 'site', '' );
@@ -146,7 +161,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithConfig( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithConfig( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->config as $pair ){
 			$key		= self::getAttribute( $pair, 'name' );
@@ -173,7 +188,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithDeprecation( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithDeprecation( object $obj, SimpleXMLElement $xml ): void
 	{
 		if( !isset( $xml->deprecation ) )
 			return;
@@ -184,7 +199,7 @@ class Hymn_Module_Reader
 		];
 	}
 
-	protected static function decorateObjectWithFiles( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithFiles( object $obj, SimpleXMLElement $xml ): void
 	{
 		if( !$xml->files )
 			return;
@@ -210,7 +225,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithFrameworks( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithFrameworks( object $obj, SimpleXMLElement $xml ): void
 	{
 		$frameworks	= self::getAttribute( $xml, 'frameworks', 'Hydrogen:>=0.8' );
 		if( !strlen( trim( $frameworks ) ) )
@@ -224,7 +239,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithHooks( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithHooks( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->hook as $hook ){
 			$resource	= self::getAttribute( $hook, 'resource' );
@@ -236,7 +251,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-  protected static function readInstallation( $obj, SimpleXMLElement $xml ): void
+  protected static function readInstallation( object $obj, SimpleXMLElement $xml ): void
   {
 		$installDate		= self::getAttribute( $xml->version, 'install-date', '' );
 		$obj->installDate	= $installDate ? strtotime( $installDate ) : '';									//  note install date
@@ -244,7 +259,7 @@ class Hymn_Module_Reader
 		$obj->installSource	= self::getAttribute( $xml->version, 'install-source' );				//  note install source
 	}
 
-	protected static function decorateObjectWithLicenses( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithLicenses( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->license as $license ){
 			$source	= self::getAttribute( $license, 'source' );
@@ -255,7 +270,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithLinks( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithLinks( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->link as $link ){
 			$access		= self::getAttribute( $link, 'access' );
@@ -277,7 +292,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithLog( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithLog( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			$obj->versionLog[]	= (object) [													//  append version log entry
@@ -287,7 +302,7 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithRelations( $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithRelations( object $obj, SimpleXMLElement $xml ): void
 	{
 		if( $xml->relations ){
 			foreach( $xml->relations->needs as $moduleName )
@@ -309,7 +324,13 @@ class Hymn_Module_Reader
 		}
 	}
 
-	protected static function decorateObjectWithSql( $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	@param		object				$obj
+	 *	@param		SimpleXMLElement	$xml
+	 *	@return		void
+	 *	@throws		Exception
+	 */
+	protected static function decorateObjectWithSql( object $obj, SimpleXMLElement $xml ): void
 	{
 		foreach( $xml->sql as $sql ){
 			$event		= self::getAttribute( $sql, 'on' );

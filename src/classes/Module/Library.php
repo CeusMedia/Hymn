@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +32,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -73,11 +75,23 @@ class Hymn_Module_Library
 		return $this->available->getActiveSources( $withModules );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		?string		$sourceId
+	 *	@param		bool		$strict
+	 *	@return		Hymn_Structure_Module|NULL
+	 */
 	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		return $this->available->get( $moduleId, $sourceId, $strict );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		bool		$strict
+	 *	@return		Hymn_Structure_Module|NULL
+	 */
 	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		if( '' === trim( $moduleId ) ){
@@ -88,6 +102,13 @@ class Hymn_Module_Library
 		return $this->available->getFromSource( $moduleId, $sourceId, $strict );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		string		$versionInstalled
+	 *	@param		string		$versionAvailable
+	 *	@return		array
+	 */
 	public function getAvailableModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
 		return $this->available->getModuleLogChanges( $moduleId, $sourceId, $versionInstalled, $versionAvailable );

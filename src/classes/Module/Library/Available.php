@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +22,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,19 +32,19 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
 class Hymn_Module_Library_Available
 {
-	const MODE_AUTO			= 0;
-	const MODE_FOLDER		= 1;
-	const MODE_JSON			= 2;
-	const MODE_SERIAL		= 3;
+	const int MODE_AUTO			= 0;
+	const int MODE_FOLDER		= 1;
+	const int MODE_JSON			= 2;
+	const int MODE_SERIAL		= 3;
 
-	const MODES				= [
+	const array MODES				= [
 		self::MODE_AUTO,
 		self::MODE_FOLDER,
 		self::MODE_JSON,
@@ -105,7 +107,9 @@ class Hymn_Module_Library_Available
 	 *	@param		?string		$sourceId
 	 *	@param		bool		$strict			Default: yes
 	 *	@return		?Hymn_Structure_Module
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function get( string $moduleId, string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
@@ -124,7 +128,7 @@ class Hymn_Module_Library_Available
 				if( NULL === $candidate->deprecation )
 					return $candidate;
 		if( $strict )
-			throw new Exception( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
+			throw new DomainException( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
@@ -186,7 +190,9 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$sourceId
 	 *	@param		bool		$strict			Default: yes
 	 *	@return		?Hymn_Structure_Module
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function getFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
@@ -205,7 +211,7 @@ class Hymn_Module_Library_Available
 			if( $module->id === $moduleId )
 				return $module;
 		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
+			throw new DomainException( 'Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
@@ -215,7 +221,9 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$versionInstalled
 	 *	@param		string		$versionAvailable
 	 *	@return		array
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function getModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
@@ -448,7 +456,6 @@ class Hymn_Module_Library_Available
 		foreach( $config->hooks ?? [] as $hook )
 			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
 
-		$list[$module->id]	= $module;
 		$module->config					= (array) $module->config;
 		$module->hooks					= (array) $module->hooks;
 		foreach( $module->hooks as $resource => $events )

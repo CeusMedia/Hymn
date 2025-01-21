@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_Database_PDO
 {
 	protected Hymn_Client $client;
@@ -110,7 +112,7 @@ class Hymn_Tool_Database_PDO
 
 	/**
 	 *	Wraps PDO::exec in a lazy mode.
-	 *	Connects database if not done before..
+	 *	Connects database if not done before.
 	 *	@access		public
 	 *	@param		string		$statement		Statement to execute
 	 *	@return		integer|FALSE

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_ConfigFile
 {
 	public static function read( ?string $filePath = NULL ): Hymn_Structure_Config

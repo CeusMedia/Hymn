@@ -1,20 +1,22 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2024 Ceus Media
+ *	@copyright	2021-2025 Ceus Media
  */
 
 /**
  *	@author		Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright	2021-2024 Ceus Media
+ *	@copyright	2021-2025 Ceus Media
  */
 class Hymn_Tool_SourceIndex_ModuleFilter
 {
-	const MODE_FULL		= 0;
-	const MODE_MINIMAL	= 1;
-	const MODE_REDUCED	= 2;
+	const int MODE_FULL		= 0;
+	const int MODE_MINIMAL	= 1;
+	const int MODE_REDUCED	= 2;
 
-	const MODES			= [
+	const array MODES		= [
 		self::MODE_FULL,
 		self::MODE_MINIMAL,
 		self::MODE_REDUCED,
