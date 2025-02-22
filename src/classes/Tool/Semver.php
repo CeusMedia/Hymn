@@ -42,6 +42,22 @@ class Hymn_Tool_Semver
 	protected ?string $semanticVersion		= NULL;
 	protected string $defaultOperator		= '=';
 
+	public static function staticCheck( string $actualVersion, string $semanticVersion, string $defaultOperator = '==' ): bool
+	{
+		$operator		= $defaultOperator;
+		$version		= $semanticVersion;
+		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';
+		$matches	= [];
+		preg_match( $patternPrefix, $semanticVersion, $matches );
+		if( 0 !== count( $matches ) ){
+			$operator	= $matches[1];
+			$version	= $matches[2];
+		}
+		if( $operator === '^' )
+			$operator	= '>=';
+		return version_compare( $actualVersion, $version, $operator );
+	}
+
 	public function __construct()
 	{
 	}
@@ -78,21 +94,5 @@ class Hymn_Tool_Semver
 	{
 		$this->semanticVersion	= $version;
 		return $this;
-	}
-
-	public static function staticCheck( string $actualVersion, string $semanticVersion, string $defaultOperator = '==' ): bool
-	{
-		$operator		= $defaultOperator;
-		$version		= $semanticVersion;
-		$patternPrefix	= '/^(\^|>|<|>=|<=|<>|!=|==|=)(.+)$/';
-		$matches	= [];
-		preg_match( $patternPrefix, $semanticVersion, $matches );
-		if( 0 !== count( $matches ) ){
-			$operator	= $matches[1];
-			$version	= $matches[2];
-		}
-		if( $operator === '^' )
-			$operator	= '>=';
-		return version_compare( $actualVersion, $version, $operator );
 	}
 }

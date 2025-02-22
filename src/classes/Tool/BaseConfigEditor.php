@@ -134,33 +134,6 @@ class Hymn_Tool_BaseConfigEditor
 	}
 
 	/**
-	 *	Returns a build Property line.
-	 *	@access		private
-	 *	@param		string			$key			Key of  Property
-	 *	@param		string|bool		$value			Value of Property
-	 *	@param		string|NULL		$comment		Comment of Property
-	 *	@return		string
-	 */
-	private function buildLine( string $key, string|bool $value, ?string $comment = NULL ): string
-	{
-		if( $this->reservedWords && is_bool( $value ) )
-			$content	= $value ? 'yes' : 'no';
-		else
-			$content	= '"'.addslashes( (string) $value ).'"';
-
-		$breaksKey		= 4 - (int) floor( strlen( $key ) / 8 );
-		$breaksValue	= 4 - (int) floor( strlen( $content ) / 8 );
-		if( $breaksKey < 1 )
-			$breaksKey = 1;
-		if( $breaksValue < 1 )
-			$breaksValue = 1;
-		$line	= $key.str_repeat( "\t", $breaksKey ).'= '.$content;
-		if( '' !== ( $comment ?? '' ) )
-			$line	.= str_repeat( "\t", $breaksValue ).'; '.$comment;
-		return $line;
-	}
-
-	/**
 	 *	Deactivates a Property.
 	 *	@access		public
 	 *	@param		string		$key			Key of  Property
@@ -279,7 +252,7 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@return		bool
 	 */
 	public function hasProperty( string $key, bool $activeOnly = TRUE ): bool
-  {
+	{
 		if( $activeOnly )
 			return isset( $this->properties[$key] );
 		if( isset( $this->properties[$key] ) )
@@ -318,7 +291,7 @@ class Hymn_Tool_BaseConfigEditor
 	}
 
 	protected function checkFile( string $fileName ): void
-  {
+	{
 		if( !file_exists( $fileName ) )
 			throw new RuntimeException( 'File "'.addslashes( $fileName ).'" is not existing' );
 		if( !is_file( $fileName ) )
@@ -330,7 +303,7 @@ class Hymn_Tool_BaseConfigEditor
 	}
 
 	protected function createFileIfNotExists( string $fileName ): void
-  {
+	{
 		if( !file_exists( $fileName ) )
 			touch( $fileName );
 	}
@@ -341,7 +314,7 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@return		void
 	 */
 	protected function read(): void
-  {
+	{
 		$this->disabled		= [];
 		$this->properties	= [];
 		$this->lines		= [];
@@ -444,5 +417,32 @@ class Hymn_Tool_BaseConfigEditor
 		$this->renamed	= [];
 		$this->read();
 		return $result;
+	}
+
+	/**
+	 *	Returns a build Property line.
+	 *	@access		private
+	 *	@param		string			$key			Key of  Property
+	 *	@param		string|bool		$value			Value of Property
+	 *	@param		string|NULL		$comment		Comment of Property
+	 *	@return		string
+	 */
+	private function buildLine( string $key, string|bool $value, ?string $comment = NULL ): string
+	{
+		if( $this->reservedWords && is_bool( $value ) )
+			$content	= $value ? 'yes' : 'no';
+		else
+			$content	= '"'.addslashes( (string) $value ).'"';
+
+		$breaksKey		= 4 - (int) floor( strlen( $key ) / 8 );
+		$breaksValue	= 4 - (int) floor( strlen( $content ) / 8 );
+		if( $breaksKey < 1 )
+			$breaksKey = 1;
+		if( $breaksValue < 1 )
+			$breaksValue = 1;
+		$line	= $key.str_repeat( "\t", $breaksKey ).'= '.$content;
+		if( '' !== ( $comment ?? '' ) )
+			$line	.= str_repeat( "\t", $breaksValue ).'; '.$comment;
+		return $line;
 	}
 }

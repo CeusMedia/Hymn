@@ -39,6 +39,15 @@ declare(strict_types=1);
  */
 class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
+	public static function test( Hymn_Client $client ): bool
+	{
+		$dbc		= $client->getDatabase();
+		if( !$dbc->isConnected() )
+			$dbc->connect( TRUE );												//  force setup of new connection to database
+		$result	= $dbc->query( "SHOW TABLES" );
+		return is_array( $result->fetchAll() );
+	}
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags: database-no
@@ -54,14 +63,5 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 		if( !self::test( $this->client ) )
 			$this->outError( "Database is NOT connected.", Hymn_Client::EXIT_ON_SETUP );
 		$this->out( "Database can be connected." );
-	}
-
-	public static function test( Hymn_Client $client ): bool
-	{
-		$dbc		= $client->getDatabase();
-		if( !$dbc->isConnected() )
-			$dbc->connect( TRUE );												//  force setup of new connection to database
-		$result	= $dbc->query( "SHOW TABLES" );
-		return is_array( $result->fetchAll() );
 	}
 }

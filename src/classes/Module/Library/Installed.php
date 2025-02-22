@@ -58,7 +58,7 @@ class Hymn_Module_Library_Installed
 		if( !file_exists( $filename ) )
 			throw new RangeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
 //		return Hymn_Module_Reader::load( $filename, $moduleId );
-		return Hymn_Module_Reader2::load( $filename, $moduleId );
+		return Hymn_Module_Reader::load( $filename, $moduleId );
 	}
 
 	/**

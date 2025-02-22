@@ -26,6 +26,7 @@ declare(strict_types=1);
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
 /**
  *	...
  *
@@ -83,7 +84,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$fileName	= $entry->getFilename();
 			if( preg_match( $regex, $fileName ) ){
 				$timestamp	= preg_replace( $regex, '\\2 \\3', $fileName );
-				$date		= new KeepRuleDate( $timestamp );
+				$date		= new Hymn_Structure_KeepRuleDate( $timestamp );
 				$date->isWeekly		= FALSE;
 				$date->isMonthly	= FALSE;
 				$date->isYearly		= FALSE;
@@ -142,20 +143,3 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	}
 }
 
-class KeepRuleDate extends DateTime
-{
-	/**
-	 * @param		string					$datetime
-	 * @param		DateTimeZone|NULL		$timezone
-	 */
-	public function __construct( string $datetime = 'now', DateTimeZone|NULL $timezone = null )
-	{
-		try{
-			parent::__construct( $datetime, $timezone );
-		} catch ( Exception $e ){}
-	}
-
-	public bool $isMonthly		= FALSE;
-	public bool $isWeekly		= FALSE;
-	public bool $isYearly		= FALSE;
-}

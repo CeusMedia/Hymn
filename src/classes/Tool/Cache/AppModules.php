@@ -44,6 +44,20 @@ class Hymn_Tool_Cache_AppModules
 	/** @var object{dry: bool, quiet: bool, verbose: bool} $flags */
 	protected object $flags;
 
+	/**
+	 *	Returns result of cache invalidation.
+	 *	Returns NULL if modules were not cached.
+	 *	@static
+	 *	@access		public
+	 *	@param		Hymn_Client		$hymnClient		Hymn client instance
+	 *	@return		bool|NULL		Result of cache invalidation, NULL if not cached
+	 */
+	public static function staticInvalidate( Hymn_Client $hymnClient, string $outputPrefix = '' ): ?bool
+	{
+		$tool	= new Hymn_Tool_Cache_AppModules( $hymnClient );
+		return $tool->invalidate( $outputPrefix );
+	}
+
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
@@ -69,19 +83,5 @@ class Hymn_Tool_Cache_AppModules
 		if( !$this->flags->quiet )
 			$this->client->outVerbose( $outputPrefix.'Clearing cache of installed modules ...' );
 		return @unlink( $filePath );
-	}
-
-	/**
-	 *	Returns result of cache invalidation.
-	 *	Returns NULL if modules were not cached.
-	 *	@static
-	 *	@access		public
-	 *	@param		Hymn_Client		$hymnClient		Hymn client instance
-	 *	@return		bool|NULL		Result of cache invalidation, NULL if not cached
-	 */
-	public static function staticInvalidate( Hymn_Client $hymnClient, string $outputPrefix = '' ): ?bool
-	{
-		$tool	= new Hymn_Tool_Cache_AppModules( $hymnClient );
-		return $tool->invalidate( $outputPrefix );
 	}
 }

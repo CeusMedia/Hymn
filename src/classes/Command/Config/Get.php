@@ -82,31 +82,4 @@ class Hymn_Command_Config_Get extends Hymn_Command_Abstract implements Hymn_Comm
 		$this->outError( 'Invalid path given: key "'.$lastKey.'" not found', Hymn_Client::EXIT_ON_INPUT );
 		return NULL;
 	}
-
-	/**
-	 * @deprecated
-	 */
-	protected function getCurrentValueTheOldWay( Hymn_Structure_Config $config, string $key ): string|bool|int|float|NULL
-	{
-		$parts	= explode( '.', trim( $key, '.' ) );
-
-		if( count( $parts ) === 3 ){
-			if( !isset( $config->{$parts[0]} ) )
-				$config->{$parts[0]}	= (object) [];
-			if( !isset( $config->{$parts[0]}->{$parts[1]} ) )
-				$config->{$parts[0]}->{$parts[1]}	= (object) [];
-			if( !isset( $config->{$parts[0]}->{$parts[1]}->{$parts[2]} ) )
-				$config->{$parts[0]}->{$parts[1]}->{$parts[2]}	= NULL;
-			return $config->{$parts[0]}->{$parts[1]}->{$parts[2]};
-		}
-		else if( count( $parts ) === 2 ){
-			if( !isset( $config->{$parts[0]} ) )
-				$config->{$parts[0]}	= (object) [];
-			if( !isset( $config->{$parts[0]}->{$parts[1]} ) )
-				$config->{$parts[0]}->{$parts[1]}	= NULL;
-			return $config->{$parts[0]}->{$parts[1]};
-		}
-		$this->client->outError( 'Invalid key - must be of syntax "path.(subpath.)key"', Hymn_Client::EXIT_ON_RUN );
-		return NULL;
-	}
 }

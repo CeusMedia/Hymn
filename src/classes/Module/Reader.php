@@ -1,8 +1,9 @@
-<?php /** @noinspection PhpDeprecationInspection */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
- *	...
+ *	Reader for local module XML files.
  *
- *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -15,194 +16,274 @@
  *	GNU General Public License for more details.
  *
  *	You should have received a copy of the GNU General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2025 Christian Würker
+ *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			https://github.com/CeusMedia/Hymn
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use Hymn_Structure_Module_Author as AuthorDefinition;
+use Hymn_Structure_Module_Company as CompanyDefinition;
+use Hymn_Structure_Module_Config as ConfigDefinition;
+use Hymn_Structure_Module_Deprecation as DeprecationDefinition;
+use Hymn_Structure_Module_File as FileDefinition;
+use Hymn_Structure_Module_Hook as HookDefinition;
+use Hymn_Structure_Module_Job as JobDefinition;
+use Hymn_Structure_Module_License as LicenseDefinition;
+use Hymn_Structure_Module_Link as LinkDefinition;
+use Hymn_Structure_Module_Relation as RelationDefinition;
+use Hymn_Structure_Module_SQL as SqlDefinition;
+use Hymn_Structure_Module_Version as VersionDefinition;
+
 /**
- *	...
- *
+ *	Reader for local module XML files.
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2025 Christian Würker
+ *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			https://github.com/CeusMedia/Hymn
- *	@todo			code documentation
- *	@deprecated		use Reader2 instead
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class Hymn_Module_Reader
 {
 	/**
-	 *	@param		string		$filePath
-	 *	@param		string		$moduleId
-	 *	@return		stdClass
-	 *	@throws		Exception
+	 *	Load module data object from module XML file statically.
+	 *	@static
+	 *	@access		public
+	 *	@param		string		$filePath		File path to module XML file
+	 *	@param		string		$id				Module ID
+	 *	@return		Hymn_Structure_Module		Module data object
+	 *	@throws		RuntimeException			if XML file did not pass validation
+	 *	@throws		Exception            		if XML file could not been loaded and parsed
+	 *	@throws		Exception            		if SQL update script is missing version
 	 */
-	public static function load( string $filePath, string $moduleId ): object
+	public static function load( string $filePath, string $id ): Hymn_Structure_Module
 	{
+		if( !file_exists( $filePath ) )
+			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
+
 		$validator	= new Hymn_Tool_XML_Validator();
 		if( !$validator->validateFile( $filePath ) )
-			throw new RuntimeException( 'XML file of module "'.$moduleId.'" is invalid: '.$validator->getErrorMessage().' in line '.$validator->getErrorLine() );
+			throw new RuntimeException( vsprintf( 'XML file of module "%s" is invalid: %s in line %s', [
+				$id,
+				$validator->getErrorMessage(),
+				$validator->getErrorLine()
+			] ) );
 
-		$xml	= new SimpleXMLElement( file_get_contents( $filePath ) );
-		$obj	= new stdClass();
-		$obj->id					= $moduleId;
-		$obj->title					= (string) $xml->title;
-		$obj->category				= (string) $xml->category;
-		$obj->description			= (string) $xml->description;
-		$obj->deprecation			= [];
-		$obj->frameworks			= [];
-		$obj->version				= (string) $xml->version;
-		$obj->versionAvailable		= NULL;
-		$obj->versionInstalled		= NULL;
-		$obj->versionLog			= [];
-		$obj->isInstalled			= FALSE;
-		$obj->isActive				= TRUE;
-		$obj->companies				= [];
-		$obj->authors				= [];
-		$obj->licenses				= [];
-		$obj->price					= (string) $xml->price;
-		$obj->icon					= NULL;
-		$obj->files					= new stdClass();
-		$obj->files->classes		= [];
-		$obj->files->locales		= [];
-		$obj->files->templates		= [];
-		$obj->files->styles			= [];
-		$obj->files->scripts		= [];
-		$obj->files->images			= [];
-		$obj->files->files			= [];
-		$obj->config				= [];
-		$obj->relations				= new stdClass();
-		$obj->relations->needs		= [];
-		$obj->relations->supports	= [];
-		$obj->sql					= [];
-		$obj->links					= [];
-		$obj->hooks					= [];
-		$obj->installType			= 0;
-		$obj->installDate			= NULL;
-		$obj->installSource			= NULL;
-		self::decorateObjectWithFrameworks( $obj, $xml );
-		self::readInstallation( $obj, $xml );
-		self::decorateObjectWithLog( $obj, $xml );
-		self::decorateObjectWithFiles( $obj, $xml );
-		self::decorateObjectWithLicenses( $obj, $xml );
-		self::decorateObjectWithCompanies( $obj, $xml );
-		self::decorateObjectWithAuthors( $obj, $xml );
-		self::decorateObjectWithConfig( $obj, $xml );
-		self::decorateObjectWithRelations( $obj, $xml );
-		self::decorateObjectWithSql( $obj, $xml );
-		self::decorateObjectWithLinks( $obj, $xml );
-		self::decorateObjectWithHooks( $obj, $xml );
-		self::decorateObjectWithDeprecation( $obj, $xml );
-		if( isset( $obj->config['active'] ) )
-			$obj->isActive	= $obj->config['active']->value;
-//		$obj->isDeprecated	= count( $obj->deprecation ) > 0;
-		return $obj;
+		$xml	= new Hymn_Tool_XML_Element( file_get_contents( $filePath ) );
+		$module	= new Hymn_Structure_Module( $id, (string) $xml->version, $filePath );
+		self::decorateObjectWithBasics( $module, $xml );
+		self::decorateObjectWithFrameworks( $module, $xml );
+		self::decorateObjectWithLog( $module, $xml );
+		self::decorateObjectWithFiles( $module, $xml );
+		self::decorateObjectWithAuthors( $module, $xml );
+		self::decorateObjectWithCompanies( $module, $xml );
+		self::decorateObjectWithLinks( $module, $xml );
+		self::decorateObjectWithHooks( $module, $xml );
+		self::decorateObjectWithJobs( $module, $xml );
+		self::decorateObjectWithDeprecation( $module, $xml );
+		self::decorateObjectWithConfig( $module, $xml );
+		self::decorateObjectWithRelations( $module, $xml );
+		self::decorateObjectWithLicenses( $module, $xml );
+		self::decorateObjectWithSql( $module, $xml );
+		return $module;
 	}
-
-	/*  --  PROTECTED  --  */
 
 	/**
-	 *	@param		SimpleXMLElement	$xmlNode
-	 *	@param		string				$attributeName
-	 *	@param		$default
-	 *	@param		string|NULL			$nsPrefix
-	 *	@return		mixed|NULL
+	 *	Read module XML file and return module data object.
+	 *	@access		public
+	 *	@param		string		$filePath		File path to module XML file
+	 *	@param		string		$id				Module ID
+	 *	@return		object						Module data object
+	 *	@throws		Exception
 	 */
-	protected static function getAttribute( SimpleXMLElement $xmlNode, string $attributeName, $default = NULL, ?string $nsPrefix = NULL )
+	public function read( string $filePath, string $id ): object
 	{
-		$attributes	= self::getAttributes( $xmlNode, $nsPrefix );
-		if( isset( $attributes[$attributeName] ) )
-			return $attributes[$attributeName];
-		return $default;
+		return self::load( $filePath, $id );
 	}
 
-	protected static function getAttributes( SimpleXMLElement $xmlNode, ?string $nsPrefix = NULL ): array
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	@param		Hymn_Tool_XML_Element	$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		array|NULL
+	 */
+	protected static function castNodeAttributesToArray( Hymn_Tool_XML_Element $node, string $attribute, mixed $default = NULL ): array|NULL
 	{
-		$list	= [];
-		foreach( $xmlNode->attributes( $nsPrefix, TRUE ) as $name => $value )
-			$list[$name]	= (string) $value;
-		return $list;
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? [];
+		$value	= $node->getAttribute( $attribute );
+		return preg_split( '/\s*,\s*/', trim( $value ) ) ?: [];
 	}
 
-	protected static function hasAttribute( SimpleXMLElement $xmlNode, string $attributeName, ?string $nsPrefix = NULL ) : bool
+	/**
+	 *	@param		Hymn_Tool_XML_Element	$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		bool|NULL
+	 */
+	protected static function castNodeAttributesToBool( Hymn_Tool_XML_Element $node, string $attribute, mixed $default = NULL ): bool|NULL
 	{
-		$attributes	= self::getAttributes( $xmlNode, $nsPrefix );
-		return isset( $attributes[$attributeName] );
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? FALSE;
+		$value	= $node->getAttribute( $attribute );
+		return in_array( strtolower( $value ), ['true', 'yes', '1', TRUE] );
 	}
 
-	protected static function decorateObjectWithAuthors( object $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	@param		Hymn_Tool_XML_Element		$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		int|NULL
+	 */
+	protected static function castNodeAttributesToInt( Hymn_Tool_XML_Element $node, string $attribute, mixed $default = NULL ): int|NULL
 	{
-		foreach( $xml->author as $author ){
-			$email	= self::getAttribute( $author, 'email', '' );
-			$site	= self::getAttribute( $author, 'site', '' );
-			$obj->authors[]	= (object) [
-				'name'	=> (string) $author,
-				'email'	=> $email,
-				'site'	=> $site
-			];
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? 0;
+		$value	= $node->getAttribute( $attribute );
+		return (int) $value;
+	}
+
+	/**
+	 *	@param		Hymn_Tool_XML_Element		$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		string|NULL
+	 */
+	protected static function castNodeAttributesToString( Hymn_Tool_XML_Element $node, string $attribute, mixed $default = NULL ): string|NULL
+	{
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? '';
+		$value	= $node->getAttribute( $attribute );
+		return trim( $value );
+	}
+
+	/**
+	 *	Decorates module object by author information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithAuthors( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->author )																			//  no author nodes existing
+			return FALSE;
+		foreach( $xml->author as $author ){															//  iterate author nodes
+			$module->authors[]	= new AuthorDefinition(
+				(string) $author,
+				self::castNodeAttributesToString( $author, 'email' ),
+				self::castNodeAttributesToString( $author, 'site' )
+			);
+		}
+		return TRUE;
+	}
+
+	protected static function decorateObjectWithBasics( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): void
+	{
+		$module->version			= new VersionDefinition( (string) $xml->version );
+		$module->title				= (string) $xml->title;
+		$module->category			= (string) $xml->category;
+		$module->description		= (string) $xml->description;
+		$module->price				= (string) $xml->price;
+		if( NULL !== $module->install && isset( $xml->version ) ){
+			$module->install->type		= self::castNodeAttributesToString( $xml->version, 'install-type' );
+			$module->install->date		= self::castNodeAttributesToString( $xml->version, 'install-date' );
+			$module->install->source	= self::castNodeAttributesToString( $xml->version, 'install-source' );
 		}
 	}
 
-	protected static function decorateObjectWithCompanies( object $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	Decorates module object by company information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithCompanies( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
-		foreach( $xml->company as $company ){
-			$site	= self::getAttribute( $company, 'site', '' );
-			$obj->companies[]	= (object) [
-				'name'		=> (string) $company,
-				'site'		=> $site
-			];
+		if( !$xml->company )																		//  no company nodes existing
+			return FALSE;
+		foreach( $xml->company as $company ){														//  iterate company nodes
+			$module->companies[]	= new CompanyDefinition(
+				(string) $company,
+				self::castNodeAttributesToString( $company, 'email' ),
+				self::castNodeAttributesToString( $company, 'site' )
+			);
 		}
+		return TRUE;
 	}
 
-	protected static function decorateObjectWithConfig( object $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	Decorates module object by config information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithConfig( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
-		foreach( $xml->config as $pair ){
-			$key		= self::getAttribute( $pair, 'name' );
-			$type		= self::getAttribute( $pair, 'type', 'string' );
-			$values		= self::getAttribute( $pair, 'values', '' );
-			$values		= strlen( $values ) ? preg_split( "/\s*,\s*/", $values ) : [];			//  split value on comma if set
-			$title		= self::getAttribute( $pair, 'title' );
-			if( !$title && self::hasAttribute( $pair, 'info' ) )
-				$title	= self::getAttribute( $pair, 'info' );
-			$value		= trim( (string) $pair );
-			if( in_array( strtolower( $type ), ['boolean', 'bool'] ) )						//  value is boolean
-				$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );		//  value is not negative
-			$obj->config[$key]	= (object) [
-				'key'			=> trim( $key ),
-				'type'			=> trim( strtolower( $type ) ),
-				'value'			=> $value,
-				'values'		=> $values,
-				'mandatory'		=> self::getAttribute( $pair, 'mandatory', FALSE ),
-				'protected'		=> self::getAttribute( $pair, 'protected', FALSE ),
-				'title'			=> $title,
-				'default'		=> self::getAttribute( $pair, 'default' ),
-				'original'		=> self::getAttribute( $pair, 'original' ),
-			];
+		if( !$xml->config )																			//  no config nodes existing
+			return FALSE;
+		foreach( $xml->config as $pair ){															//  iterate config nodes
+			$title		= self::castNodeAttributesToString( $pair, 'title' );
+			$type		= (string) self::castNodeAttributesToString( $pair, 'type' );
+			$type		= trim( strtolower( $type ) );
+			$key		= (string) self::castNodeAttributesToString( $pair, 'name' );
+			$info		= self::castNodeAttributesToString( $pair, 'info' );
+			$title		= ( !$title && $info ) ? $info : $title;
+			$value		= (string) $pair;
+			if( in_array( $type, ['boolean', 'bool'] ) )											//  value is boolean
+				$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
+
+			$item				= new ConfigDefinition( trim( $key ), $value, $type , $title );		//  container for config entry
+
+			$item->values		= self::castNodeAttributesToArray( $pair, 'values' );
+			$item->mandatory	= (bool) self::castNodeAttributesToBool( $pair, 'mandatory', FALSE );
+			/** @var bool|string $protected */
+			$protected			= self::castNodeAttributesToString( $pair, 'protected' );
+			$item->protected	= $protected;
+			$module->config[$key]	= $item;
 		}
+		return TRUE;
 	}
 
-	protected static function decorateObjectWithDeprecation( object $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	Decorates module object by deprecation information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithDeprecation( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
-		if( !isset( $xml->deprecation ) )
-			return;
-		$obj->deprecation		= [
-			'message'	=> (string) $xml->deprecation,
-			'version'	=> self::getAttribute( $xml->deprecation, 'version', $obj->version ),
-			'url'		=> self::getAttribute( $xml->deprecation, 'url', '' ),
-		];
+		if( !$xml->deprecation )																	//  deprecation node is not existing
+			return FALSE;
+		$module->deprecation	= new DeprecationDefinition(										//  note deprecation object
+			(string) $xml->deprecation,																//  ... with message
+			self::castNodeAttributesToString( $xml->deprecation, 'url' )					//  ... with follow-up URL, if set
+		);
+		return TRUE;
 	}
 
-	protected static function decorateObjectWithFiles( object $obj, SimpleXMLElement $xml ): void
+	/**
+	 *	Decorates module object by file information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 *	@todo		rethink the defined map of paths
+	 */
+	protected static function decorateObjectWithFiles( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
 		if( !$xml->files )
-			return;
+			return FALSE;
 		$map	= [
 			'class'		=> 'classes',
 			'locale'	=> 'locales',
@@ -214,145 +295,249 @@ class Hymn_Module_Reader
 		];
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
-				$object	= (object) [
-					'type'	=> $source,
-					'file'	=> (string) $file,
-				];
-				foreach( self::getAttributes( $file ) as $key => $value )
-					$object->$key	= $value;
-				$obj->files->{$target}[]	= $object;
+				$item	= new FileDefinition( (string) $file );
+//				$item	= (object) array( 'file' => (string) $file );
+				foreach( $file->getAttributes() as $key => $value )
+					$item->$key	= $value;
+				$module->files->{$target}[]	= $item;
 			}
 		}
-	}
-
-	protected static function decorateObjectWithFrameworks( object $obj, SimpleXMLElement $xml ): void
-	{
-		$frameworks	= self::getAttribute( $xml, 'frameworks', 'Hydrogen:>=0.8' );
-		if( !strlen( trim( $frameworks ) ) )
-			return;
-		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
-		foreach( $list as $listItem ){
-			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
-			if( count( $parts ) < 2 )
-				$parts[1]	= '*';
-			$obj->frameworks[(string) $parts[0]]	= (string) $parts[1];
-		}
-	}
-
-	protected static function decorateObjectWithHooks( object $obj, SimpleXMLElement $xml ): void
-	{
-		foreach( $xml->hook as $hook ){
-			$resource	= self::getAttribute( $hook, 'resource' );
-			$event		= self::getAttribute( $hook, 'event' );
-			$obj->hooks[$resource][$event][]	= (object) [
-				'level'	=> self::getAttribute( $hook, 'level', 5 ),
-				'hook'	=> trim( (string) $hook, ' ' ),
-			];
-		}
-	}
-
-  protected static function readInstallation( object $obj, SimpleXMLElement $xml ): void
-  {
-		$installDate		= self::getAttribute( $xml->version, 'install-date', '' );
-		$obj->installDate	= $installDate ? strtotime( $installDate ) : '';									//  note install date
-		$obj->installType	= (int) self::getAttribute( $xml->version, 'install-type' );			//  note install type
-		$obj->installSource	= self::getAttribute( $xml->version, 'install-source' );				//  note install source
-	}
-
-	protected static function decorateObjectWithLicenses( object $obj, SimpleXMLElement $xml ): void
-	{
-		foreach( $xml->license as $license ){
-			$source	= self::getAttribute( $license, 'source' );
-			$obj->licenses[]	= (object) [
-				'label'		=> (string) $license,
-				'source'	=> $source
-			];
-		}
-	}
-
-	protected static function decorateObjectWithLinks( object $obj, SimpleXMLElement $xml ): void
-	{
-		foreach( $xml->link as $link ){
-			$access		= self::getAttribute( $link, 'access' );
-			$language	= self::getAttribute( $link, 'lang', NULL, 'xml' );
-			$label		= (string) $link;
-			$path		= self::getAttribute( $link, 'path', $label );
-			$rank		= self::getAttribute( $link, 'rank', 10 );
-			$parent		= self::getAttribute( $link, 'parent' );
-			$link		= self::getAttribute( $link, 'link' );
-			$obj->links[]	= (object) [
-				'parent'	=> $parent,
-				'access'	=> $access,
-				'language'	=> $language,
-				'path'		=> $path,
-				'link'		=> $link,
-				'rank'		=> $rank,
-				'label'		=> $label,
-			];
-		}
-	}
-
-	protected static function decorateObjectWithLog( object $obj, SimpleXMLElement $xml ): void
-	{
-		foreach( $xml->log as $entry ){																//  iterate version log entries if available
-			$obj->versionLog[]	= (object) [													//  append version log entry
-				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> self::getAttribute( $entry, 'version' ),							//  extract entry version
-			];
-		}
-	}
-
-	protected static function decorateObjectWithRelations( object $obj, SimpleXMLElement $xml ): void
-	{
-		if( $xml->relations ){
-			foreach( $xml->relations->needs as $moduleName )
-				$obj->relations->needs[(string) $moduleName]	= (object) [
-					'relation'	=> 'needs',
-					'type'		=> self::getAttribute( $moduleName, 'type' ),
-					'id'		=> (string) $moduleName,
-					'source'	=> self::getAttribute( $moduleName, 'source' ),
-					'version'	=> self::getAttribute( $moduleName, 'version' ),
-				];
-			foreach( $xml->relations->supports as $moduleName )
-				$obj->relations->supports[(string) $moduleName]	= (object) [
-					'relation'	=> 'supports',
-					'type'		=> self::getAttribute( $moduleName, 'type' ),
-					'id'		=> (string) $moduleName,
-					'source'	=> self::getAttribute( $moduleName, 'source' ),
-					'version'	=> self::getAttribute( $moduleName, 'version' ),
-				];
-		}
+		return TRUE;
 	}
 
 	/**
-	 *	@param		object				$obj
-	 *	@param		SimpleXMLElement	$xml
-	 *	@return		void
-	 *	@throws		Exception
+	 *	Decorates module object by framework support information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithSql( object $obj, SimpleXMLElement $xml ): void
+	protected static function decorateObjectWithFrameworks( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
-		foreach( $xml->sql as $sql ){
-			$event		= self::getAttribute( $sql, 'on' );
-			$to			= self::getAttribute( $sql, 'version-to' );
-			$version	= self::getAttribute( $sql, 'version', $to );
-			$type		= self::getAttribute( $sql, 'type', '*' );
+		/** @var string $frameworks */
+		$frameworks	= self::castNodeAttributesToString( $xml, 'frameworks', '' );
+		if( '' === trim( $frameworks ) )
+			return FALSE;
+		/** @var array $list */
+		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
+		foreach( $list as $listItem ){
+			/** @var array $parts */
+			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
+			if( count( $parts ) < 2 )
+				$parts[1]	= '*';
+			$module->frameworks[(string) $parts[0]]	= (string) $parts[1];
+		}
+		return TRUE;
+	}
 
-			if( $event == "update" )
-				if( !$version )
-					throw new Exception( 'SQL type "update" needs attribute "version"' );
+	/**
+	 *	Decorates module object by hook information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithHooks( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->hook )																			//  hook node is not existing
+			return FALSE;
+		foreach( $xml->hook as $hook ){																//  iterate hook nodes
+			/** @var string $resource */
+			$resource	= self::castNodeAttributesToString( $hook, 'resource' );
+			/** @var string $event */
+			$event		= self::castNodeAttributesToString( $hook, 'event' );
+			$content	= trim( (string) $hook, ' ' );
+			if( preg_match( '/\n/', $content ) ){
+				throw new RuntimeException( vsprintf( 'Hooks with inline function are not supported anymore, but found in module %s', [$module->id] ) );
+			}
+			$module->hooks[$resource][$event][]	= new HookDefinition( $content, $resource, $event,
+				(int) self::castNodeAttributesToInt( $hook, 'level', 5 ),
+			);
+		}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by job information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithJobs( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->job )																			//  hook node is not existing
+			return FALSE;
+		foreach( $xml->job as $job ){																//  iterate job nodes
+			$callable		= explode( '::', (string) $job, 2 );
+			$module->jobs[]	= new JobDefinition(
+				(string) self::castNodeAttributesToString( $job, 'id' ),
+				$callable[0],
+				$callable[1],
+				(string) self::castNodeAttributesToString( $job, 'commands' ),
+				(string) self::castNodeAttributesToString( $job, 'arguments' ),
+				(array) self::castNodeAttributesToArray( $job, 'mode', [] ),
+				(string) self::castNodeAttributesToString( $job, 'interval' ),
+				(bool) self::castNodeAttributesToBool( $job, 'multiple', FALSE ),
+				(string) self::castNodeAttributesToString( $job, 'deprecated' ),
+				(string) self::castNodeAttributesToString( $job, 'disabled' )
+			);
+		}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by license information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithLicenses( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->license )																		//  no license nodes existing
+			return FALSE;
+		foreach( $xml->license as $license ){														//  iterate license nodes
+			$module->licenses[]	= new LicenseDefinition(
+				(string) $license,
+				self::castNodeAttributesToString( $license, 'title' ),
+				self::castNodeAttributesToString( $license, 'source' )
+			);
+		}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by link information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithLinks( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->link )																			//  no link nodes existing
+			return FALSE;
+		foreach( $xml->link as $link ){																//  iterate link nodes
+			$language	= NULL;
+			if( $link->hasAttribute( 'lang', 'xml' ) )
+				$language	= $link->getAttribute( 'lang', 'xml' );
+			$label		= (string) $link;
+			$module->links[]	= new LinkDefinition(
+				self::castNodeAttributesToString( $link, 'parent' ),
+				self::castNodeAttributesToString( $link, 'access' ),
+				$language,
+				self::castNodeAttributesToString( $link, 'path', $label ),
+				self::castNodeAttributesToString( $link, 'link' ),
+				self::castNodeAttributesToInt( $link, 'rank', 10 ),
+				$label,
+				self::castNodeAttributesToString( $link, 'icon' )
+			);
+		}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by log information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithLog( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->log )																			//  no log nodes existing
+			return FALSE;
+		foreach( $xml->log as $entry ){																//  iterate version log entries if available
+			if( $entry->hasAttribute( 'version' ) )											//  only if log entry is versioned
+				$module->version->log[]	= new Hymn_Structure_Module_Log(							//  append version log entry
+					$entry->getAttribute( 'version' )	,										//  extract entry version
+					(string) $entry																	//  extract entry note
+				);
+		}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by relation information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithRelations( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->relations )																		//  no relation nodes existing
+			return FALSE;																			//  do nothing
+		if( $xml->relations->needs )																//  if needed modules are defined
+			foreach( $xml->relations->needs as $moduleName ){										//  iterate list if needed modules
+				$type	= (string) self::castNodeAttributesToString( $moduleName, 'type' );
+				$module->relations->needs[(string) $moduleName]		= new RelationDefinition(		//  note relation
+					(string) $moduleName,															//  ... with module ID
+					match( $type ){																	//  ... with relation type
+						'module'	=> RelationDefinition::TYPE_MODULE,
+						'package'	=> RelationDefinition::TYPE_PACKAGE,
+						default		=> RelationDefinition::TYPE_UNKNOWN,
+					},
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
+					'needs'																	//  ... as needed
+				);
+			}
+		if( $xml->relations->supports )																//  if supported modules are defined
+			foreach( $xml->relations->supports as $moduleName ){									//  iterate list if supported modules
+				$type	= (string) self::castNodeAttributesToString( $moduleName, 'type' );
+				$module->relations->supports[(string) $moduleName]	= new RelationDefinition(		//  note relation
+					(string) $moduleName,															//  ... with module ID
+					match( $type ){																	//  ... with relation type
+						'module'	=> RelationDefinition::TYPE_MODULE,
+						'package'	=> RelationDefinition::TYPE_PACKAGE,
+						default		=> RelationDefinition::TYPE_UNKNOWN,
+					},
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
+					'supports'																//  ... as supported
+				);
+			}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by SQL information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 *	@throws		Exception				if update script is missing version
+	 */
+	protected static function decorateObjectWithSql( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->sql )																			//  no sql nodes existing
+			return FALSE;
+		foreach( $xml->sql as $sql ){																//  iterate sql nodes
+			/** @var string $event */
+			$event		= self::castNodeAttributesToString( $sql, 'on' );
+			/** @var string $to */
+			$to			= self::castNodeAttributesToString( $sql, 'version-to' );
+			/** @var string $version */
+			$version	= self::castNodeAttributesToString( $sql, 'version', $to );	//  @todo: remove fallback
+			/** @var string $type */
+			$type		= self::castNodeAttributesToString( $sql, 'type', '*' );
+			if( $event === 'update' && !$version )
+				throw new Exception( 'SQL type "update" needs attribute "version"' );
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
-				if( in_array( $event, ['install', 'update'] ) )
+				if( $event == "update" )
 					$key	= $event.":".$version.'@'.$type;
-				$obj->sql[$key] = (object) [
-					'event'		=> $event,
-					'version'	=> $version,
-					'type'		=> $type,
-					'sql'		=> (string) $sql
-				];
+				$module->sql[$key] = new SqlDefinition(
+					$event,
+					$version,
+					$type,
+					(string) $sql
+				);
 			}
 		}
+		return TRUE;
 	}
 }

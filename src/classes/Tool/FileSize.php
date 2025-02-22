@@ -56,6 +56,35 @@ class Hymn_Tool_FileSize
 	];
 
 	/**
+	 *	Formats number of bytes by switching to next higher unit if a set edge is reached.
+	 *	Edge is a factor when to switch to next higher unit, eG. 0.5 means 50% of 1024.
+	 *	If you enter 512 (B) it will return 0.5 KB.
+	 *	Caution! With precision at 0 you may have rounding errors.
+	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
+	 *	@access		public
+	 *	@static
+	 *	@param		int			$bytes			Number of bytes
+	 *	@param		int			$precision		Number of floating point digits
+	 *	@param		string		$indent			Space between number and unit
+	 *	@param		float		$edge			Factor of next higher unit when to break
+	 *	@return		string|float
+	 */
+	public static function formatBytes( int $bytes, int $precision = 1, string $indent = " ", float $edge = 0.5 ): float|string
+	{
+		$float		= (float) $bytes;
+		$unitKey	= 0;														//  step to first Unit
+		$edge		= abs( $edge );												//  avoid negative Edges
+		$edge		= min( $edge, 1);									//  avoid senseless Edges
+		$edgeValue	= 1024 * $edge;												//  calculate Edge Value
+		while( $float >= $edgeValue ){											//  Value is larger than Edge
+			$unitKey ++;														//  step to next Unit
+			$float	/= 1024;													//  calculate Value in new Unit
+		}
+		$float	= round( $float, $precision );									//  round Value
+		return $float.$indent.self::$unitBytes[$unitKey];						//  append Unit and return
+	}
+
+	/**
 	 *	Formats file size by switching to next higher unit if a set edge is reached.
 	 *	Edge is a factor when to switch to next higher unit, eG. 0.5 means 50% of 1024.
 	 *	If you enter 512 (B) it will return 0.5 KB.
@@ -76,34 +105,5 @@ class Hymn_Tool_FileSize
 		/** @var int $size */
 		$size	= filesize( $filePath );
 		return self::formatBytes( $size, $precision, $indent, $edge );
-	}
-
-	/**
-	 *	Formats number of bytes by switching to next higher unit if a set edge is reached.
-	 *	Edge is a factor when to switch to next higher unit, eG. 0.5 means 50% of 1024.
-	 *	If you enter 512 (B) it will return 0.5 KB.
-	 *	Caution! With precision at 0 you may have rounding errors.
-	 *	To avoid the units to be appended, enter FALSE or NULL for indent.
-	 *	@access		public
-	 *	@static
-	 *	@param		int			$bytes			Number of bytes
-	 *	@param		int			$precision		Number of floating point digits
-	 *	@param		string		$indent			Space between number and unit
-	 *	@param		float		$edge			Factor of next higher unit when to break
-	 *	@return		string|float
-	 */
-	public static function formatBytes( int $bytes, int $precision = 1, string $indent = " ", float $edge = 0.5 ): float|string
-  {
-		$float		= (float) $bytes;
-		$unitKey	= 0;														//  step to first Unit
-		$edge		= abs( $edge );												//  avoid negative Edges
-		$edge		= min( $edge, 1);									//  avoid senseless Edges
-		$edgeValue	= 1024 * $edge;												//  calculate Edge Value
-		while( $float >= $edgeValue ){											//  Value is larger than Edge
-			$unitKey ++;														//  step to next Unit
-			$float	/= 1024;													//  calculate Value in new Unit
-		}
-		$float	= round( $float, $precision );									//  round Value
-		return $float.$indent.self::$unitBytes[$unitKey];						//  append Unit and return
 	}
 }

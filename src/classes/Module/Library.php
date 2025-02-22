@@ -64,6 +64,12 @@ class Hymn_Module_Library
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
+	public function addModuleToSource( Hymn_Structure_Module $module, Hymn_Structure_Source $source ): static
+	{
+		$this->available->addModuleToSource( $module, $source );
+		return $this;
+	}
+
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		$this->available->addSource( $sourceId, $path, $type, $active, $title );
@@ -138,12 +144,6 @@ class Hymn_Module_Library
 		return $this->available->getSource( $sourceId, $withModules );
 	}
 
-	public function addModuleToSource( Hymn_Structure_Module $module, Hymn_Structure_Source $source ): static
-	{
-		$this->available->addModuleToSource( $module, $source );
-		return $this;
-	}
-
 	/**
 	 *	@param		array		$filters
 	 *	@param		bool		$withModules
@@ -173,6 +173,11 @@ class Hymn_Module_Library
 		return $module;
 	}
 
+	public function isActiveSource( string $sourceId ): bool
+	{
+		return array_key_exists( $sourceId, $this->getActiveSources() );
+	}
+
 	public function isAvailableModuleInSource( string $moduleId, string $sourceId ): bool
 	{
 		if( '' === trim( $moduleId ) )
@@ -183,11 +188,6 @@ class Hymn_Module_Library
 	public function isInstalledModule( string $moduleId ): bool
 	{
 		return $this->installed->has( $moduleId );
-	}
-
-	public function isActiveSource( string $sourceId ): bool
-	{
-		return array_key_exists( $sourceId, $this->getActiveSources() );
 	}
 
 	public function isSource( string $sourceId ): bool
@@ -218,15 +218,15 @@ class Hymn_Module_Library
 		return $this->installed->get( $moduleId );
 	}
 
-	public function useCache( bool $useCache = TRUE ): self
-	{
-		$this->useCache		= $useCache;
-		return $this;
-	}
-
 	public function setReadMode( int $mode ): self
 	{
 		$this->available->setMode( $mode );
+		return $this;
+	}
+
+	public function useCache( bool $useCache = TRUE ): self
+	{
+		$this->useCache		= $useCache;
 		return $this;
 	}
 }

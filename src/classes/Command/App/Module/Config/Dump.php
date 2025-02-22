@@ -66,7 +66,7 @@ class Hymn_Command_App_Module_Config_Dump extends Hymn_Command_Abstract implemen
 				|| !str_ends_with( $entry->getFilename(), '.xml' ) )								//  read XML files, only
 				continue;
 			$id		= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );					//  extract module name from file name
-			$module	= Hymn_Module_Reader2::load( $entry->getPathname(), $id );
+			$module	= Hymn_Module_Reader::load( $entry->getPathname(), $id );
 			if( $module->config || in_array( $id, $knownModules, TRUE ) ){
 				$list[$id]	= new Hymn_Structure_Config_Module();
 				foreach( $module->config as $pair )

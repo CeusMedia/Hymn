@@ -63,6 +63,25 @@ class Hymn_Module_Files
 	}
 
 	/**
+	 *	Creates a path.
+	 *	A nested path will be created recursively.
+	 *	No error messages will be shown but the return value indicates the result.
+	 *	Does nothing if flag 'db' is set to 'only'.
+	 *	@static
+	 *	@access		public
+	 *	@param		string		$path		Path to create
+	 *	@return		bool|NULL
+	 */
+	public static function createPath( string $path ): ?bool
+	{
+		if( file_exists( $path ) )
+			return NULL;
+		if( @mkdir( $path, 0777, TRUE ) )
+			return TRUE;
+		return FALSE;
+	}
+
+	/**
 	 *	Tries to link or copy all module files into application.
 	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
@@ -136,22 +155,33 @@ class Hymn_Module_Files
 	}
 
 	/**
-	 *	Creates a path.
-	 *	A nested path will be created recursively.
-	 *	No error messages will be shown but the return value indicates the result.
+	 *	Removed installed files of module.
 	 *	Does nothing if flag 'db' is set to 'only'.
-	 *	@static
 	 *	@access		public
-	 *	@param		string		$path		Path to create
-	 *	@return		bool|NULL
+	 *	@param		Hymn_Structure_Module	$module			Module object
+	 *	@param		boolean					$tryMode		Flag: force no changes, only try (default: no)
+	 *	@return		void
+	 *	@throws		RuntimeException			if target file is not readable
+	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	static public function createPath( string $path ): ?bool
+	public function removeFiles( Hymn_Structure_Module $module, bool $tryMode = FALSE ): void
 	{
-		if( file_exists( $path ) )
-			return NULL;
-		if( @mkdir( $path, 0777, TRUE ) )
-			return TRUE;
-		return FALSE;
+		if( $this->flags->noFiles )
+			return;
+		$fileMap	= $this->prepareModuleFileMap( $module, FALSE );								//  get list of installed module files
+		foreach( $fileMap as $target ){												//  iterate target file list
+			if( !file_exists( $target ) && !is_link( $target ) )
+				continue;
+			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable
+				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
+			if( !is_link( $target ) && !is_writable( $target ) )									//  if installed file is a copy and not writable
+				throw new RuntimeException( 'Target file '.$target.' is not removable' );			//  throw exception
+			if( !( $this->flags->dry || $tryMode ) ){												//  not a dry or try run
+				@unlink( $target );																	//  remove installed file
+			}
+			if( $this->flags->verbose && !$this->flags->quiet && !$tryMode )						//  be verbose
+				$this->client->out( '  … removed file '.$target );									//  print note about removed file
+		}
 	}
 
 	/**
@@ -253,35 +283,5 @@ class Hymn_Module_Files
 			}
 		}
 		return $map;
-	}
-
-	/**
-	 *	Removed installed files of module.
-	 *	Does nothing if flag 'db' is set to 'only'.
-	 *	@access		public
-	 *	@param		Hymn_Structure_Module	$module			Module object
-	 *	@param		boolean					$tryMode		Flag: force no changes, only try (default: no)
-	 *	@return		void
-	 *	@throws		RuntimeException			if target file is not readable
-	 *	@throws		RuntimeException			if target file is not writable
-	 */
-	public function removeFiles( Hymn_Structure_Module $module, bool $tryMode = FALSE ): void
-	{
-		if( $this->flags->noFiles )
-			return;
-		$fileMap	= $this->prepareModuleFileMap( $module, FALSE );								//  get list of installed module files
-		foreach( $fileMap as $target ){												//  iterate target file list
-			if( !file_exists( $target ) && !is_link( $target ) )
-				continue;
-			if( !is_link( $target ) && !is_readable( $target ) )									//  if installed file is a copy and not readable
-				throw new RuntimeException( 'Target file '.$target.' is not readable' );			//  throw exception
-			if( !is_link( $target ) && !is_writable( $target ) )									//  if installed file is a copy and not writable
-				throw new RuntimeException( 'Target file '.$target.' is not removable' );			//  throw exception
-			if( !( $this->flags->dry || $tryMode ) ){												//  not a dry or try run
-				@unlink( $target );																	//  remove installed file
-			}
-			if( $this->flags->verbose && !$this->flags->quiet && !$tryMode )						//  be verbose
-				$this->client->out( '  … removed file '.$target );									//  print note about removed file
-		}
 	}
 }

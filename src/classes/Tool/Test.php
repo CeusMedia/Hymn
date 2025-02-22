@@ -20,7 +20,7 @@ declare(strict_types=1);
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn
+ *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -30,7 +30,7 @@ declare(strict_types=1);
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn
+ *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -48,28 +48,32 @@ class Hymn_Tool_Test
 		],
 	);
 
-	public function __construct( Hymn_Client $client )
-	{
-		$this->client		= $client;
-	}
-
-	public function checkShellCommand( string $key ): void
-  {
-		if( !array_key_exists( $key, self::$shellCommands ) )
-			throw new InvalidArgumentException( "No shell command test available for '".$key."'" );
-		$command	= self::$shellCommands[$key]['command']." >/dev/null 2>&1";
-		exec( $command, $results, $code );
-		if( $code == 127 )
-			throw new RuntimeException( self::$shellCommands[$key]['error'] );
-	}
-
 	/**
 	 *	@param		string		$filePath
 	 *	@return		object{valid: bool, code: int, message: string, output: array}
 	 */
-	public function checkPhpFileSyntax( string $filePath ): object
+	public static function staticCheckPhpFileSyntax( string $filePath ): object
 	{
-		return static::staticCheckPhpFileSyntax( $filePath );
+		$code		= 0;
+		$output		= [];
+		$command	= Hymn_Client::$phpPath." -l ".$filePath/*." >/dev/null"*/." 2>&1";
+		@exec( $command, $output, $code );
+		$message	= 'Syntax error in file '.$filePath;
+		if( isset( $output[0] ) && 0 !== strlen( trim( $output[0] ) ) )
+			$message	= $output[0];
+		if( isset( $output[2] ) && 0 !== strlen( trim( $output[2] ) ) )
+			$message	= $output[2];
+		return (object) [
+			'valid'		=> $code === 0,
+			'code'		=> $code,
+			'message'	=> $message,
+			'output'	=> $output,
+		];
+	}
+
+	public function __construct( Hymn_Client $client )
+	{
+		$this->client		= $client;
 	}
 
 	public function checkPhpClasses( ?string $path = NULL, ?bool $recursive = FALSE, bool $verbose = FALSE, int $level = 0 ): void
@@ -110,22 +114,22 @@ class Hymn_Tool_Test
 	 *	@param		string		$filePath
 	 *	@return		object{valid: bool, code: int, message: string, output: array}
 	 */
-	public static function staticCheckPhpFileSyntax( string $filePath ): object
+	public function checkPhpFileSyntax( string $filePath ): object
 	{
-		$code		= 0;
-		$output		= [];
-		$command	= Hymn_Client::$phpPath." -l ".$filePath/*." >/dev/null"*/." 2>&1";
-		@exec( $command, $output, $code );
-		$message	= 'Syntax error in file '.$filePath;
-		if( isset( $output[0] ) && 0 !== strlen( trim( $output[0] ) ) )
-			$message	= $output[0];
-		if( isset( $output[2] ) && 0 !== strlen( trim( $output[2] ) ) )
-			$message	= $output[2];
-		return (object) [
-			'valid'		=> $code === 0,
-			'code'		=> $code,
-			'message'	=> $message,
-			'output'	=> $output,
-		];
+		return static::staticCheckPhpFileSyntax( $filePath );
+	}
+
+	/**
+	 *	@param		string		$key
+	 *	@return		void
+	 */
+	public function checkShellCommand( string $key ): void
+	{
+		if( !array_key_exists( $key, self::$shellCommands ) )
+			throw new InvalidArgumentException( "No shell command test available for '".$key."'" );
+		$command	= self::$shellCommands[$key]['command']." >/dev/null 2>&1";
+		exec( $command, $results, $code );
+		if( 127 === $code )
+			throw new RuntimeException( self::$shellCommands[$key]['error'] );
 	}
 }

@@ -1,6 +1,42 @@
 <?php
 declare(strict_types=1);
 
+/**
+ *	...
+ *
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Tool
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2025 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+/**
+ *	...
+ *
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Tool
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2014-2025 Christian Würker
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Hymn
+ */
+
 class Hymn_Tool_ConfigValue
 {
 	public const int COMPARED_UNDONE			= 0;
@@ -104,6 +140,14 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
+	 *	@return		string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
 	 *	@param		bool		$asTrimmedString		Default: no
 	 *	@return		bool|float|int|string|NULL
 	 */
@@ -115,14 +159,6 @@ class Hymn_Tool_ConfigValue
 			return trim( strval( $this->value ) );
 		}
 		return $this->value;
-	}
-
-	/**
-	 *	@return		string
-	 */
-	public function getType(): string
-	{
-		return $this->type;
 	}
 
 	/**
@@ -145,15 +181,20 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
-	 *	@deprecated		use setValue and setType instead
+	 *	@param		string|NULL		$type
+	 *	@return		static
 	 */
-	public function set( int|float|bool|string $value, string $type = NULL ): static
+	public function setType( ?string $type = NULL ): static
 	{
-		$this->setType( $type === NULL ? $this->type : $type );
-		$value		= trim( (string) $value );
-		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
-			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
-		$this->value	= $value;
+		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
+		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
+		$type		= is_null( $type ) ? 'string' : $type;
+		$type		= trim( strtolower( $type ) );
+		$type		= strlen( $type ) > 0 ? $type : 'string';
+		$type		= array_key_exists( $type, $shortmap ) ? $shortmap[$type] : $type;
+		if( !in_array( $type, $types, TRUE ) )
+			throw new DomainException( 'Invalid config value type: '.$type );
+		$this->type	= $type;
 		return $this;
 	}
 
@@ -169,24 +210,6 @@ class Hymn_Tool_ConfigValue
 		else
 			$value	= settype( $value, $this->type );
 		$this->value	= $value;
-		return $this;
-	}
-
-	/**
-	 *	@param		string|NULL		$type
-	 *	@return		static
-	 */
-	public function setType( ?string $type = NULL ): static
-	{
-		$types		= ['bool', 'int', 'double', 'float', 'string', 'null'];
-		$shortmap	= ['boolean' => 'bool', 'integer' => 'int'];
-		$type		= is_null( $type ) ? 'string' : $type;
-		$type		= trim( strtolower( $type ) );
-		$type		= strlen( $type ) > 0 ? $type : 'string';
-		$type		= array_key_exists( $type, $shortmap ) ? $shortmap[$type] : $type;
-		if( !in_array( $type, $types, TRUE ) )
-			throw new DomainException( 'Invalid config value type: '.$type );
-		$this->type	= $type;
 		return $this;
 	}
 }

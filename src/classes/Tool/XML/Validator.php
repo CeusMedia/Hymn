@@ -67,19 +67,6 @@ class Hymn_Tool_XML_Validator
 	}
 
 	/**
-	 *	Validates a local XML file.
-	 *	@access		public
-	 *	@return		bool
-	 */
-	public function validateFile( string $fileName ): bool
-	{
-		if( !file_exists( $fileName ) )
-			throw new InvalidArgumentException( "XML file '".$fileName."' is not existing" );
-		$xml = file_get_contents( $fileName );
-		return $this->validate( $xml );
-	}
-
-	/**
 	 *	Validates a XML string.
 	 *	@access		public
 	 *	@param		string		$xml		XML string to validate
@@ -103,5 +90,18 @@ class Hymn_Tool_XML_Validator
 		}
 		xml_parser_free( $parser );
 		return TRUE;
+	}
+
+	/**
+	 *	Validates a local XML file.
+	 *	@access		public
+	 *	@return		bool
+	 */
+	public function validateFile( string $fileName ): bool
+	{
+		if( !file_exists( $fileName ) )
+			throw new InvalidArgumentException( "XML file '".$fileName."' is not existing" );
+		$xml = file_get_contents( $fileName );
+		return $this->validate( $xml );
 	}
 }

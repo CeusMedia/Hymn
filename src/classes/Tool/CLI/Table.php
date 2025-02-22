@@ -175,18 +175,6 @@ class Hymn_Tool_CLI_Table
 		return str_repeat( $sign, $steps );
 	}
 
-	protected function trimCentric( string $string, int $length = 0 ): string
-	{
-		$string	= trim( $string );
-		if( $length === 0 || $this->strlen( $string ) <= $length )
-			return $string;
-		$range	= ( $length - 1 ) / 2;
-		$length	= $this->strlen( $string ) - (int) floor( $range );
-		$left	= $this->substr( $string, 0, (int) ceil( $range ) );
-		$right	= $this->substr( $string, (int) -floor( $range ), $length );
-		return $left.'…'.$right;
-	}
-
 	protected function strlen( string $string ): int
 	{
 		if( !function_exists( 'mb_strlen' ) )
@@ -199,5 +187,17 @@ class Hymn_Tool_CLI_Table
 		if( !function_exists( 'mb_substr' ) )
 			return mb_convert_encoding( substr( mb_convert_encoding( $string, 'ISO-8859-1', 'UTF-8' ), $start, $length ), 'UTF-8', 'ISO-8859-1' );
 		return mb_substr( $string, $start, $length, $this->encoding );
+	}
+
+	protected function trimCentric( string $string, int $length = 0 ): string
+	{
+		$string	= trim( $string );
+		if( $length === 0 || $this->strlen( $string ) <= $length )
+			return $string;
+		$range	= ( $length - 1 ) / 2;
+		$length	= $this->strlen( $string ) - (int) floor( $range );
+		$left	= $this->substr( $string, 0, (int) ceil( $range ) );
+		$right	= $this->substr( $string, (int) -floor( $range ), $length );
+		return $left.'…'.$right;
 	}
 }
