@@ -61,15 +61,13 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 		}
 
 		if( $this->flags->dry ){
-			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$source->id.'" would have been removed.' );
+			$this->out( 'Source "'.$source->id.'" would have been removed.' );
 			return;
 		}
 //		unset( $config->sources[$source->id] );
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
 		unset( $json->sources[$source->id] );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
-		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$source->id.'" has been removed.' );
+		$this->out( 'Source "'.$source->id.'" has been removed.' );
 	}
 }

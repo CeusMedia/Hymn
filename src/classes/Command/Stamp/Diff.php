@@ -67,12 +67,10 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
-			if( !$this->flags->quiet )
-				$this->out( 'No modules have changed.' );
+			$this->out( 'No modules have changed.' );
 			return;
 		}
-		if( !$this->flags->quiet )
-			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
+		$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		/** @var object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module} $moduleChange */
 		foreach( $moduleChanges as $moduleChange )
@@ -167,12 +165,10 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
-		if( !$this->flags->quiet )
-			$this->out( ' - Module changed: '.$moduleNew->id );
+		$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
-				if( !$this->flags->quiet )
-					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
+				$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){

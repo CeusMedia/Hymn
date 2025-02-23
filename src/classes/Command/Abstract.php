@@ -95,7 +95,8 @@ abstract class Hymn_Command_Abstract
 	 */
 	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
 	{
-		$this->client->out( $lines, $newLine );
+		if( !$this->flags->quiet )
+			$this->client->out( $lines, $newLine );
 		return $this;
 	}
 

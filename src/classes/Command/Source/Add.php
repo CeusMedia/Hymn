@@ -113,8 +113,7 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 		$source['title']	= $source['title'] ?: $source['key'];
 
 		if( $this->flags->dry ){
-			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$sourceId.'" would have been added.' );
+			$this->out( 'Source "'.$sourceId.'" would have been added.' );
 			return;
 		}
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
@@ -125,7 +124,6 @@ class Hymn_Command_Source_Add extends Hymn_Command_Abstract implements Hymn_Comm
 			'path'		=> $source['path'],
 		] );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
-		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$sourceId.'" has been added.' );
+		$this->out( 'Source "'.$sourceId.'" has been added.' );
 	}
 }

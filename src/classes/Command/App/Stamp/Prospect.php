@@ -115,8 +115,7 @@ class Hymn_Command_App_Stamp_Prospect extends Hymn_Command_Abstract implements H
 			else if( in_array( $type, [NULL, 'all', 'config'] ) ){
 				$changes	= $diff->compareConfigByModules( $sourceModule, $targetModule );
 				if( $changes ){
-					if( !$this->flags->quiet )
-						$this->out( ' - Module: '.$targetModule->id );
+					$this->out( ' - Module: '.$targetModule->id );
 					foreach( $changes as $change ){
 						if( $change->status === 'removed' ){
 							$message	= '   [-] %s (was: %s)';

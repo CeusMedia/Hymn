@@ -73,10 +73,8 @@ class Hymn_Command_App_Graph extends Hymn_Command_Abstract implements Hymn_Comma
 		$targetFileGraph	= $this->client->getConfigPath()."modules.graph";
 		$targetFileImage	= $this->client->getConfigPath()."modules.graph.png";
 		$graph				= $relation->renderGraphFile( $targetFileGraph );
-//		if( !$this->flags->quiet )
-//			$this->client->out( "Saved graph file to ".$targetFileGraph."." );
+//		$this->client->out( "Saved graph file to ".$targetFileGraph."." );
 		$relation->renderGraphImage( $graph, $targetFileImage );
-//		if( !$this->flags->quiet )
-//			$this->client->out( "Saved graph image to ".$targetFileImage."." );
+//		$this->client->out( "Saved graph image to ".$targetFileImage."." );
 	}
 }

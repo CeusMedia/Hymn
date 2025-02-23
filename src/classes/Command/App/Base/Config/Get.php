@@ -59,7 +59,7 @@ class Hymn_Command_App_Base_Config_Get extends Hymn_Command_Abstract implements 
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		$current	= $editor->getProperty( $key );
-		$this->out( $current );
+		$this->client->out( $current );
 		clearstatcache();
 	}
 }

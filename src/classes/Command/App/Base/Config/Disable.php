@@ -41,8 +41,8 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 {
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: dry, force, quiet, verbose
+	 *	Implements flags: dry, quiet, verbose
+	 *	Missing flags: force
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void
@@ -59,8 +59,7 @@ class Hymn_Command_App_Base_Config_Disable extends Hymn_Command_Abstract impleme
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		if( !$editor->isActiveProperty( $key ) ){
-			if( !$this->flags->quiet )
-				$this->out( 'Base config key "'.$key.'" already is disabled' );
+			$this->out( 'Base config key "'.$key.'" already is disabled' );
 			return;
 		}
 		if( !$this->flags->dry ){

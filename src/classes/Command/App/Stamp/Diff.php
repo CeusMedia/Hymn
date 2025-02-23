@@ -61,12 +61,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
-			if( !$this->flags->quiet )
-				$this->out( 'No modules have changed.' );
+			$this->out( 'No modules have changed.' );
 			return;
 		}
-		if( !$this->flags->quiet )
-			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
+		$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'added' )
@@ -181,13 +179,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showAddedModule( string $type, Hymn_Structure_Module $module ): void
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
-		if( !$this->flags->quiet )
-			$this->out( ' - Module added: '.$module->id );
+		$this->out( ' - Module added: '.$module->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			$scripts	= $sql->getModuleInstallSql( $module );
 			if( $scripts ){
-				if( !$this->flags->quiet )
-					$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
+				$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
 				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
 				foreach( array_values( $scripts ) as $nr => $script ){
 					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s', array(
@@ -215,12 +211,10 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
-		if( !$this->flags->quiet )
-			$this->out( ' - Module changed: '.$moduleNew->id );
+		$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
-				if( !$this->flags->quiet )
-					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
+				$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){

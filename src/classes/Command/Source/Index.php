@@ -76,8 +76,7 @@ class Hymn_Command_Source_Index extends Hymn_Command_Source_Abstract implements 
 				$this->printSettings( unserialize( file_get_contents( $serialFile )) );
 		}
 
-//		if( !$this->flags->quiet )
-//			$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
+//		$this->client->out( 'Source "'.$source->id.'" has been enabled.' );
 	}
 
 	protected function printSettings( object $settings ): void

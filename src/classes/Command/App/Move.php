@@ -85,12 +85,8 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->updateHymnFile( $config, $sourceUriRegex, $dest, $url );
 		$this->moveProject( $source, $dest );
 
-		if( !$this->flags->dry ){
-			$this->client->outVerbose( "- fixing links" );
-		}
-		else{
-			$this->client->outVerbose( "- would fix links" );
-		}
+		$this->client->outVerbose( $this->flags->dry ? "- would fix links" : "- fixing links" );
+
 		$this->fixLinks( $source, $sourceUriRegex, $dest );
 		$this->out( "DONE!" );
 		$this->out( "Now run: cd ".$dest." && make set-permissions" );

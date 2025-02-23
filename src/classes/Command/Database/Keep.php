@@ -87,8 +87,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		}
 
 		if( $this->flags->dry ){
-			if( !$this->flags->quiet )
-				$this->out( count( $list ).' database dumps would have been removed.' );
+			$this->out( count( $list ).' database dumps would have been removed.' );
 			return;
 		}
 
@@ -96,8 +95,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$this->client->outVerbose( '- Removing: '.$fileName );
 			@unlink( $pathName.$fileName );
 		}
-		if( !$this->flags->quiet )
-			$this->out( count( $list ).' database dumps removed.' );
+		$this->out( count( $list ).' database dumps removed.' );
 	}
 
 	protected function __onInit(): void
