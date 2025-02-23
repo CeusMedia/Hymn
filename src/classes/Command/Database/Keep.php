@@ -67,6 +67,9 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$keepMonthly	= abs( $this->client->arguments->getOption( 'monthly' ) );
 		$keepYearly		= abs( $this->client->arguments->getOption( 'yearly' ) );
 
+		if( !$keepDaily )
+			$this->client->outError( 'No daily rule given. All database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
+
 		/*  --  GET PATHNAME  --  */
 		$pathName	= $this->defaultPath;
 		if( $arg1 && file_exists( $arg1 ) &&  is_dir( $arg1 ) )
@@ -75,6 +78,74 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$this->client->outError( 'No database dump folder found.', Hymn_Client::EXIT_ON_RUN );
 		$pathName	= rtrim( $pathName, '/' ).'/';
 
+		$index	= $this->findFilesInPath( $pathName );
+		$list	= $this->collectFilesToRemove( $index, $keepDaily, $keepWeekly, $keepMonthly, $keepYearly );
+
+		if( [] === $list ){
+			$this->out( 'All database dumps were matching the rules and are kept.' );
+			exit( Hymn_Client::EXIT_ON_RUN );
+		}
+
+		if( $this->flags->dry ){
+			if( !$this->flags->quiet )
+				$this->out( count( $list ).' database dumps would have been removed.' );
+			return;
+		}
+
+		foreach( $list as $fileName ){
+			$this->client->outVerbose( '- Removing: '.$fileName );
+			@unlink( $pathName.$fileName );
+		}
+		if( !$this->flags->quiet )
+			$this->out( count( $list ).' database dumps removed.' );
+	}
+
+	protected function __onInit(): void
+	{
+		$this->defaultPath	= $this->client->getConfigPath().'sql/';
+	}
+
+	/**
+	 *	Collect files to remove, based on index of files with keep rule dates.
+	 *	Returns list of filenames, selected to be removed.
+	 *
+	 *	@param		array<string,Hymn_Structure_KeepRuleDate>	$index
+	 *	@param		int			$keepDaily
+	 *	@param		int			$keepWeekly
+	 *	@param		int			$keepMonthly
+	 *	@param		int			$keepYearly
+	 *	@return		array<string>
+	 */
+	protected function collectFilesToRemove( array $index, int $keepDaily, int $keepWeekly, int $keepMonthly, int $keepYearly ): array
+	{
+		$nrDaily	= 0;
+		$nrWeekly	= 0;
+		$nrMonthly	= 0;
+		$nrYearly	= 0;
+		$list		= [];
+		foreach( $index as $fileName => $file ){
+			$nrDaily	+= 1;
+			$nrWeekly	+= $file->isWeekly ? 1 : 0;
+			$nrMonthly	+= $file->isMonthly ? 1 : 0;
+			$nrYearly	+= $file->isYearly ? 1 : 0;
+			if( $nrDaily <= $keepDaily )
+				continue;
+			$isValidWeekly	= $keepWeekly && $file->isWeekly && $nrWeekly <= $keepWeekly;
+			$isValidMonthly	= $keepMonthly && $file->isMonthly && $nrMonthly <= $keepMonthly;
+			$isValidYearly	= $keepYearly && $file->isYearly && $nrYearly <= $keepYearly;
+			if( !( $isValidWeekly || $isValidMonthly || $isValidYearly ) )
+				$list[]	= $fileName;
+		}
+		return $list;
+	}
+
+	/**
+	 *	Returns map of files with keep rule dates.
+	 *	@param		string		$pathName
+	 *	@return		array<string,Hymn_Structure_KeepRuleDate>
+	 */
+	protected function findFilesInPath( string $pathName ): array
+	{
 		/*  --  LIST ALL FILES  --  */
 		$index	= [];
 		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
@@ -98,48 +169,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			}
 		}
 		krsort( $index );
-
-		if( !$keepDaily )
-			$this->client->outError( 'No daily rule given. All database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
-
-		/*  --  COLLECT FILES TO REMOVE  --  */
-		$nrDaily	= 0;
-		$nrWeekly	= 0;
-		$nrMonthly	= 0;
-		$nrYearly	= 0;
-		$list		= [];
-		foreach( $index as $fileName => $file ){
-			$nrDaily	+= 1;
-			$nrWeekly	+= $file->isWeekly ? 1 : 0;
-			$nrMonthly	+= $file->isMonthly ? 1 : 0;
-			$nrYearly	+= $file->isYearly ? 1 : 0;
-			if( $nrDaily <= $keepDaily )
-				continue;
-			$isValidWeekly	= $keepWeekly && $file->isWeekly && $nrWeekly <= $keepWeekly;
-			$isValidMonthly	= $keepMonthly && $file->isMonthly && $nrMonthly <= $keepMonthly;
-			$isValidYearly	= $keepYearly && $file->isYearly && $nrYearly <= $keepYearly;
-			if( !( $isValidWeekly || $isValidMonthly || $isValidYearly ) )
-				$list[]	= $fileName;
-		}
-		if( !$list ){
-			$this->out( 'All database dumps were matching the rules and are kept.' );
-			exit( Hymn_Client::EXIT_ON_RUN );
-		}
-		foreach( $list as $fileName ){
-			$this->client->outVerbose( '- Removing: '.$fileName );
-			if( !$this->flags->dry )
-				@unlink( $pathName.$fileName );
-		}
-		if( !$this->flags->quiet )
-			if( $this->flags->dry )
-				$this->out( count( $list ).' database dumps would have been removed.' );
-			else
-				$this->out( count( $list ).' database dumps removed.' );
-	}
-
-	protected function __onInit(): void
-	{
-		$this->defaultPath	= $this->client->getConfigPath().'sql/';
+		return $index;
 	}
 }
 
