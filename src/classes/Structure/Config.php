@@ -56,11 +56,14 @@ class Hymn_Structure_Config
 	/** @var Hymn_Structure_Config_Database $application */
 	public Hymn_Structure_Config_Database $database;
 
+	public Hymn_Structure_Config_Layout $layout;
+
 	public function __construct()
 	{
 		$this->application	= new Hymn_Structure_Config_Application();
 		$this->system		= new Hymn_Structure_Config_System();
 		$this->database		= new Hymn_Structure_Config_Database();
 		$this->paths		= new Hymn_Structure_Config_Paths();
+		$this->layout		= new Hymn_Structure_Config_Layout();
 	}
 }
