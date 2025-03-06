@@ -70,6 +70,7 @@ class Hymn_Tool_CLI_Config
 
 		$this->config	= $config;
 		$this->applyBaseConfiguredPathsToAppConfig();
+		$this->applyBaseConfiguredThemesToAppConfig();
 		$this->applyAppConfiguredDatabaseConfigToModules();
 
 		$this->isLiveCopy = 'live' === ( $app->installMode ?? '' ) && 'copy' === ( $app->installType ?? '' );
@@ -142,6 +143,22 @@ class Hymn_Tool_CLI_Config
 					continue;
 				$this->config->paths->{$key}	= $value;
 			}
+		}
+	}
+
+	protected function applyBaseConfiguredThemesToAppConfig(): void
+	{
+		if( !file_exists( $this->config->paths->config.'config.ini' ) )
+			return;
+
+		$data	= parse_ini_file( $this->config->paths->config.'config.ini' ) ?: [];
+		/** @var string $key */
+		/** @var string $value */
+		foreach( $data as $key => $value ){
+			if( !preg_match( '/^layout\./', $key ) )
+				continue;
+			$key	= preg_replace( '/^layout\./', '', $key );
+			$this->config->layout->{$key}	= $value;
 		}
 	}
 }

@@ -175,8 +175,8 @@ class Hymn_Module_Files
 
 		$pathSource		= $module->install->path;
 		$pathTarget		= $this->config->application->uri;
-		$layoutTheme	= $this->config->layoutTheme ?? 'common';
-		$layoutPrimer	= $this->config->layoutPrimer ?? 'primer';
+		$layoutTheme	= $this->config->layout->theme ?? 'common';
+		$layoutPrimer	= $this->config->layout->primer ?? 'primer';
 		$map			= [];
 		$skipSources	= ['lib', 'styles-lib', 'scripts-lib', 'url'];
 		foreach( $module->files->toArray() as $fileType => $files ){

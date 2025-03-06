@@ -24,6 +24,9 @@
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Hymn_Structure_Module_Relation as RelationDefinition;
+
 /**
  *	...
  *
@@ -63,7 +66,7 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleFiles( Hymn_Structure_Module $module ): void
-  {
+	{
 		$list	= [];
 		if( isset( $module->files ) ){
 			foreach( $module->files->toArray() as $sectionKey => $sectionFiles ){
@@ -101,7 +104,7 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleHook( Hymn_Structure_Module $module ): void
-  {
+	{
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
 		$this->client->out( ' - Hooks: ' );
@@ -133,13 +136,21 @@ class Hymn_Module_Info
 
 		if( count( $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
+			/**
+			 * @var string $moduleId
+			 * @var Hymn_Structure_Module_Relation $relation
+			 */
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
+			/**
+			 * @var string $moduleId
+			 * @var Hymn_Structure_Module_Relation $relation
+			 */
 			foreach( $module->relations->supports as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
 			$this->client->out( ' - Modules needing: ' );
@@ -154,12 +165,25 @@ class Hymn_Module_Info
 	}
 
 	public function showModuleVersions( Hymn_Structure_Module $module ): void
-  {
+	{
 		if( !count( $module->version->log ) )
 			return;
 		$this->client->out( ' - Versions: ' );
 		/** @var object{note: string, version: string} $item */
 	  foreach( $module->version->log as $item )
 			$this->client->out( '    - '.str_pad( $item->version, 10 ).' '.$item->note );
+	}
+
+	/**
+	 *	Map relation type from integer to string.
+	 *	@param		int		$type
+	 *	@return		string
+	 */
+	protected function resolveRelationType( int $type ): string
+	{
+		return match( $type ){
+			RelationDefinition::TYPE_MODULE	=> 'module',
+			default							=> 'package'
+		};
 	}
 }
