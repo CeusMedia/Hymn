@@ -1,9 +1,17 @@
 # Change Log
 
+## v1.1.0
+- 1.0.2: Fix structure migration bug in module update.
+- 1.0.2: Add log output of updatable modules.
+- 1.0.2: Module relation type is now integer.
+- 1.0.2: Fix installation to theme source.Add graph structure for module relations.
+- Add graph structure for module relations.
+
 ## v1.0.2
 - Fix structure migration bug in module update.
 - Add log output of updatable modules.
-- Add graph structure for module relations.
+- Module relation type is now integer.
+- Fix installation to theme source.
 
 ## v1.0.1
 - Move tool config files to own folder.

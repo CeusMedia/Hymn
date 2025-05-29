@@ -218,12 +218,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){
-					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s-> %s', array(
+					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s-> %s', [
 						$nr + 1,
 						count( $scripts ),
-						$version,
-						$script->version
-					) ) );
+						is_object( $version ) ? $version->current : $version,
+						is_object( $script->version ) ? $script->version->current : $script->version
+					] ) );
 					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}

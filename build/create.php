@@ -91,6 +91,7 @@ print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
 
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
 $archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
+$archive->addFile( $rootPath.'/src/baseArgumentOptions.json', 'baseArgumentOptions.json' );
 $archive->addFile( $rootPath.'/build/.mode', '.mode' );
 $archive->addFile( $rootPath.'/build/.php', '.php' );
 if( $options['mode'] !== 'dev' )
