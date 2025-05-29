@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -52,17 +52,96 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 	public function run(): void
 	{
 		$config				= $this->client->getConfig();											//  shortcut hymn config
-		$library			= $this->getLibrary();													//  get module library instance
-	//	$this->client->getDatabase()->connect();													//  setup connection to database
-		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
+
+		//  apply default install type and mode if not set in application hymn file
+		if( isset( $config->application->installType ) )
+			$this->installType	= $config->application->installType;
+		if( isset( $config->application->installMode ) )
+			$this->installMode	= $config->application->installMode;
 
 		if( $this->flags->dry )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		if( !$listInstalled )																		//  application has no installed modules
-			$this->outError( "No installed modules found", Hymn_Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
+		$this->updateOutdatedModules();
+		$this->installNewlyNeededModules();
+	}
 
-//		$start		= microtime( TRUE );
+	protected function detectModuleSource( string $moduleId ): ?string
+	{
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot by empty' );
+
+		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
+		$defaultId	= $library->getDefaultSource();
+		if( !empty( $config->modules[$moduleId]->source ) ){
+			$sourceByHymn	= trim( $config->modules[$moduleId]->source );
+			if( $library->isAvailableModuleInSource( $moduleId, $sourceByHymn ) )
+				return $sourceByHymn;
+		}
+		if( $defaultId )
+			if( $library->isAvailableModuleInSource( $moduleId, $defaultId ) )
+				return $defaultId;
+		$moduleSourceIds	= array_keys( $library->getAvailableModuleSources( $moduleId ) );
+		if( $moduleSourceIds )
+			return $moduleSourceIds[0];
+		return NULL;
+	}
+
+	/**
+	 *	Installs modules, which are needed after update of modules list in hymn file.
+	 *	@return		void
+	 */
+	protected function installNewlyNeededModules(): void
+	{
+		$library	= $this->getLibrary();
+		$config		= $this->client->getConfig();
+
+		$activeSourceList	= $library->getActiveSources();
+		$activeSourceIds	= array_keys( $activeSourceList );
+		$listInstalled		= $library->listInstalledModules();
+
+		$relation	= new Hymn_Module_Graph( $this->client, $library );
+		foreach( $config->modules as $moduleId => $moduleConfig ){
+			if( '' === $moduleId || str_starts_with( $moduleId, '@' ) )
+				continue;
+			$sourceId	= $this->detectModuleSource( $moduleId );
+			$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
+			$module		= $library->getAvailableModule( $moduleId, $sourceId );
+			if( !$module->isActive )
+				continue;
+			$relation->addModule( $module );
+		}
+
+		foreach( $relation->getOrder() as $module ){
+			try{
+				if( array_key_exists( $module->id, $listInstalled ) )
+					continue;
+				$this->client->getFramework()->checkModuleSupport( $module );
+				$installType	= $this->client->getModuleInstallType( $module->id );
+				if( !$this->flags->quiet )
+					$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
+						$this->flags->dry ? 'Dry: ' : '',
+						$module->id,
+						$module->sourceId,
+						$module->version->current,
+						$installType
+					] ) );
+				$installer	= new Hymn_Module_Installer( $this->client, $library );
+				$installer->install( $module, $installType );
+			}
+			catch( Exception $e ){
+				$this->out( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
+			}
+		}
+	}
+
+	protected function updateOutdatedModules(): void
+	{
+		$config				= $this->client->getConfig();											//  shortcut hymn config
+		$library			= $this->getLibrary();													//  get module library instance
+		//	$this->client->getDatabase()->connect();													//  setup connection to database
+		$listInstalled		= $library->listInstalledModules();										//  get list of installed modules
 
 		//  apply default install type and mode if not set in application hymn file
 		if( isset( $config->application->installType ) )
@@ -94,7 +173,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$outdatedModuleIds	= array_keys( $outdatedModules );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );		//  replace wildcarded modules
 
-			$modulesToUpdate	= [];															//  start with empty list again
+			$modulesToUpdate	= [];																//  start with empty list again
 			foreach( $moduleIds as $moduleId ){														//  iterate given modules
 				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
 					$this->out( sprintf(

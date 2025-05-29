@@ -3,6 +3,8 @@
 ## v1.0.2
 - Fix structure migration bug in module update.
 - Add log output of updatable modules.
+- Module relation type is now integer.
+- Fix installation to theme source.
 
 ## v1.0.1
 - Move tool config files to own folder.
