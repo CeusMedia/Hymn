@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -46,16 +46,16 @@ class Hymn_Command_Help extends Hymn_Command_Abstract implements Hymn_Command_In
 	 */
 	public function run(): void
 	{
-		$command	= $this->client->arguments->getArgument();				//  get first argument as command
-		$locale		= $this->client->getLocale();								//  shortcut client locale handler
+		$command	= trim( $this->client->arguments->getArgument() ?? '' );					//  get first argument as command
+		$locale		= $this->client->getLocale();													//  shortcut client locale handler
 //		$words		= $locale->loadWords( 'command/help' );
 
-		$command	= strlen( trim( $command ) ) ? $command : 'help';			//  set default command to show help index
-		$path		= str_replace( '-', '/', strtolower( trim( $command ) ) );	//  realize locale file path
-		$message	= $locale->loadText( 'command/help.miss' );					//  load fallback help text locale
-		if( $locale->hasText( 'command/'.$path ) )								//  help text locale exists
-			$message	= $locale->loadText( 'command/'.$path );				//  load help text locale
+		$command	= 0 !== strlen( $command ) ? $command : 'help';									//  set default command to show help index
+		$path		= str_replace( '-', '/', strtolower( $command ) );				//  realize locale file path
+		$message	= $locale->loadText( 'command/help.miss' );								//  load fallback help text locale
+		if( $locale->hasText( 'command/'.$path ) )												//  help text locale exists
+			$message	= $locale->loadText( 'command/'.$path );								//  load help text locale
 
-		$this->out( $message );											//	print command help text
+		$this->out( $message );																		//  print command help text
 	}
 }

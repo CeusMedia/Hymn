@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Base.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -56,28 +56,30 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 
 		if( $sourceId ){
 			$modules	= $library->listInstalledModules( $sourceId );
-			$fileName	= $pathDump.'stamp_'.$sourceId.'_'.$datetime.'.json';
+			$fileName	= $pathDump.'stamp_'.$sourceId.'_'.$datetime.'.serial';
 			$this->out( count( $modules )." modules of source ".$sourceId." installed:" );
 		}
 		else{
 			$modules	= $library->listInstalledModules();
-			$fileName	= $pathDump.'stamp_'.$datetime.'.json';
+			$fileName	= $pathDump.'stamp_'.$datetime.'.serial';
 			$this->out( count( $modules )." modules installed:" );
 		}
 		if( dirname( $fileName) )																//  path is not existing
 			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
 
 		ksort( $modules );
-		$data	= (object) ['modules' => []];
+		$data	= new Hymn_Structure_Stamp();
 		foreach( $modules as $module ){
-			unset( $module->versionAvailable );
-			unset( $module->versionInstalled );
-			unset( $module->versionLog );
+			unset( $module->version->available );
+			unset( $module->version->installed );
 			unset( $module->isInstalled );
-			unset( $module->versionInstalled );
+			$module->description	= '';
+			$module->sql			= [];
+			$module->version->log	= [];
 			$data->modules[$module->id]	= $module;
 		}
-		file_put_contents( $fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
+//		file_put_contents( $fileName, json_encode( $data, JSON_PRETTY_PRINT ) );
+		file_put_contents( $fileName, serialize( $data ) );
 
 		$this->out( 'Saved app stamp to '.$fileName.'.' );
 	}

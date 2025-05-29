@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Cache
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Cache
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -38,15 +38,17 @@
 class Hymn_Tool_Cache_AppModules
 {
 	protected Hymn_Client $client;
+
+	/** @var object{dry: bool, quiet: bool, verbose: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
 		$this->flags	= (object) [
-			'dry'		=> $this->client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'quiet'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 	}
 

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,17 +20,20 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Hymn_Structure_Module_Relation as RelationDefinition;
+
 /**
  *	...
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -51,10 +54,10 @@ class Hymn_Module_Info
 		$this->client->out( ' - Configuration: ' );
 		foreach( $module->config as $item ){
 			$this->client->out( '    - '.$item->key.':' );
-			if( strlen( trim( $item->title ) ) )
+			if( '' !== trim( $item->title ?? '' ) )
 				$this->client->out( '       - Title:     '.trim( $item->title ) );
-			$this->client->out( '       - Type:      '.$item->type );
-			$this->client->out( '       - Value:     '.$item->value );
+			$this->client->out( '       - Type:      '.( $item->type ?? '?' ) );
+			$this->client->out( '       - Value:     '.( $item->value ?? '?' ) );
 			if( $item->values )
 				$this->client->out( '       - Values:    '.join( ', ', $item->values ) );
 			$this->client->out( '       - Mandatory: '.( $item->mandatory ? 'yes' : 'no' ) );
@@ -62,11 +65,11 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleFiles( $module ): void
-  {
+	public function showModuleFiles( Hymn_Structure_Module $module ): void
+	{
 		$list	= [];
 		if( isset( $module->files ) ){
-			foreach( $module->files as $sectionKey => $sectionFiles ){
+			foreach( $module->files->toArray() as $sectionKey => $sectionFiles ){
 				if( !count( $sectionFiles ) )
 				continue;
 				$list[]	= '    - '.ucfirst( $sectionKey );
@@ -100,16 +103,16 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleHook( $module ): void
-  {
+	public function showModuleHook( Hymn_Structure_Module $module ): void
+	{
 		if( !isset( $module->hooks) || !count( $module->hooks ) )
 			return;
 		$this->client->out( ' - Hooks: ' );
 		foreach( $module->hooks as $resource => $events ){
 			foreach( $events as $event => $hooks ){
 				foreach( $hooks as $hook ){
-					if( !preg_match( '/\n/', $hook->hook ) )
-						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->hook );
+					if( !preg_match( '/\n/', $hook->callback ) )
+						$this->client->out( '    - '.$resource.' > '.$event.' >> '.$hook->callback );
 					else
 						$this->client->out( '    - '.$resource.' > '.$event.' >> <func> !DEPRECATED!' );
 				}
@@ -117,48 +120,70 @@ class Hymn_Module_Info
 		}
 	}
 
-	public function showModuleRelations( Hymn_Module_Library $library, $module ): void
-  {
+	public function showModuleRelations( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
+	{
 		$module->relations->requiredBy	= [];
 		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
-				if( $installedModule->relations->needs[$module->id]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$module->id]->type )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= [];
 		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
 			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
-				if( $availableModule->relations->needs[$moduleId]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$moduleId]->type )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
-		if( count( (array) $module->relations->needs ) ){
+		if( count( $module->relations->needs ) ){
 			$this->client->out( ' - Modules needed: ' );
+			/**
+			 * @var string $moduleId
+			 * @var Hymn_Structure_Module_Relation $relation
+			 */
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
-		if( count( (array) $module->relations->supports ) ){
+		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
+			/**
+			 * @var string $moduleId
+			 * @var Hymn_Structure_Module_Relation $relation
+			 */
 			foreach( $module->relations->supports as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->neededBy ) ){
 			$this->client->out( ' - Modules needing: ' );
-			foreach( $module->relations->neededBy as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+			foreach( $module->relations->neededBy as $moduleId => $module )
+				$this->client->out( '    - '.$moduleId );
 		}
 		if( count( $module->relations->requiredBy ) ){
 			$this->client->out( ' - Modules requiring: ' );
-			foreach( $module->relations->requiredBy as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $relation->type ).': '.$moduleId );
+			foreach( $module->relations->requiredBy as $moduleId => $module )
+				$this->client->out( '    - '.$moduleId );
 		}
 	}
 
-	public function showModuleVersions( $module ): void
-  {
-		if( !count( $module->versionLog ) )
+	public function showModuleVersions( Hymn_Structure_Module $module ): void
+	{
+		if( !count( $module->version->log ) )
 			return;
 		$this->client->out( ' - Versions: ' );
-		foreach( $module->versionLog as $item )
+		/** @var object{note: string, version: string} $item */
+	  foreach( $module->version->log as $item )
 			$this->client->out( '    - '.str_pad( $item->version, 10 ).' '.$item->note );
+	}
+
+	/**
+	 *	Map relation type from integer to string.
+	 *	@param		int		$type
+	 *	@return		string
+	 */
+	protected function resolveRelationType( int $type ): string
+	{
+		return match( $type ){
+			RelationDefinition::TYPE_MODULE	=> 'module',
+			default							=> 'package'
+		};
 	}
 }

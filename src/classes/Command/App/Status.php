@@ -3,7 +3,7 @@
  *	Compares installed against available modules to collect outdated modules.
  *	Shows outdated modules with logged changes, if available and verbose.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -32,7 +32,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -73,7 +73,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleUpdater		= new Hymn_Module_Updater( $this->client, $this->getLibrary() );		//  use module updater on current application installation
 		$outdatedModules	= $moduleUpdater->getUpdatableModules();								//  get list of outdated modules
 
-		$moduleId	= trim( $this->client->arguments->getArgument() );								//  get module id as first argument
+		$moduleId	= trim( $this->client->arguments->getArgument() ?? '' );					//  get module id as first argument
 		if( strlen( $moduleId = trim( $moduleId ) ) )												//  a module ID has been given
 			return $this->runForSingleModule( $outdatedModules, $moduleId );						//  run status for single module
 		return $this->runForAllModules( $outdatedModules );											//  run status for all (outdated) modules
@@ -81,7 +81,12 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 
 	/*  --  PROTECTED  --  */
 
-	protected function printModuleUpdateChangelog( $update, string $indent = '' ): void
+	/**
+	 *	@param		object		$update
+	 *	@param		string		$indent
+	 *	@return		void
+	 */
+	protected function printModuleUpdateChangelog( object $update, string $indent = '' ): void
 	{
 		$changes	= $this->getLibrary()->getAvailableModuleLogChanges(
 			$update->id,
@@ -115,12 +120,12 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 		$message		= '%d installed modules found.';
 		$this->client->outVerbose( sprintf( $message, count( $listInstalled ) ) );					//  print status topic: Modules > Installed
 		if( !$outdatedModules ){																	//  there are outdated modules
-			$this->client->outVerbose( 'No updatable modules found.' );								//  print status topic: Modules > Outdated
+			$this->client->outVerbose( 'No updatable modules found.' );						//  print status topic: Modules > Outdated
 			return static::CODE_NONE;
 		}
 		if( !$this->flags->quiet ){
 			$message	= '%d updatable modules found:';
-			$this->out( sprintf( $message, count( $outdatedModules ) ) );					//  print status topic: Modules > Outdated
+			$this->out( sprintf( $message, count( $outdatedModules ) ) );							//  print status topic: Modules > Outdated
 		}
 		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
 			if( !$this->flags->quiet ){

@@ -91,6 +91,10 @@ class Hymn_Tool_ConfigFile
 				$source->active	= $sourceData->active ?? TRUE;
 				$config->sources[$sourceKey]	= $source;
 			}
+			if( 1 === count( $config->sources ) ){
+				$sourceKey	= current( array_keys( $config->sources ) );
+				$config->sources[$sourceKey]->isDefault	= TRUE;
+			}
 		}
 		if( isset( $object->modules ) ){
 			/** @var object{sourceId: ?string, config: ?array} $moduleData */
@@ -156,6 +160,8 @@ class Hymn_Tool_ConfigFile
 			$data	= array_filter( $data, function( $value ) use ( $filterValues ){
 				return !in_array( $value, $filterValues, TRUE );
 			} );
+			if( isset( $data['isDefault'] ) )
+				unset( $data['isDefault'] );
 		}
 		return (object) $data;
 	}

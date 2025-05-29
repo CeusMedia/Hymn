@@ -1,13 +1,16 @@
 includes:
-#	- vendor/phpstan/phpstan-strict-rules/rules.neon
+#	- ../vendor/phpstan/phpstan-strict-rules/rules.neon
 	- phpstan-baseline.neon
 
 parameters:
 	phpVersion: 80100
-	level: 5
+	level: 6
 	paths:
-		- src
+		- ../src
+	excludePaths:
+		- ../src/classes/Module/Reader.php
 	editorUrl: 'phpstorm://open?file=%%relFile%%&line=%%line%%'
 	editorUrlTitle: '%%relFile%%:%%line%%'
-	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		- identifier: missingType.iterableValue

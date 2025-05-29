@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -79,17 +79,18 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			$this->outError( 'Missing read access to SQL script: '.$fileName, Hymn_Client::EXIT_ON_EXEC );
 		try{
 			$dbc		= $this->client->getDatabase();
-			$prefix		= $dbc->getConfig( 'prefix' );											//  get table prefix from config
+			$prefix		= $dbc->getConfigValue( 'prefix' );											//  get table prefix from config
 			$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );						//  get CLI handler for MySQL
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 			if( $this->flags->verbose ){
+				$dba	= $dbc->getConfig();
 				$this->out( [
 					'Import file:  '.$fileName,														//  show import file name
 					'File size:    '.$fileSize,														//  show import file size
-					'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),		//  show server host and port from config
-					'Database:     '.$dbc->getConfig( 'name' ),										//  show database name from config
+					'DB Server:    '.$dba->host.'@'.$dba->port,										//  show server host and port from config
+					'Database:     '.$dba->name,													//  show database name from config
 					'Table prefix: '.( $prefix ?: '(none)' ),										//  show table prefix from config
-					'Access as:    '.$dbc->getConfig( 'username' ),									//  show username from config
+					'Access as:    '.$dba->username,												//  show username from config
 				] );
 				$this->out( 'Loading import file ...' );
 			}

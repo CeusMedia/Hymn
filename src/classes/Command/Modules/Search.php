@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -73,21 +73,21 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 		$this->out( sprintf( $msgTotal, count( $modulesFound ), $sourceId ) );
 		foreach( $modulesFound as $module ){
 			if( $this->flags->verbose ){
-				$msg	= sprintf( $msgEntry, $module->id, $module->version, $module->sourceId );
+				$msg	= sprintf( $msgEntry, $module->id, $module->version->current, $module->sourceId );
 				$this->out( $msg );
 				$this->out( ' - Title:       '.$module->title );
 				$moduleResource	= NULL;
 				if( isset( $modulesAvailable[$module->id] ) ){
 					$moduleResource	= $modulesAvailable[$module->id];
 					$this->out( ' - Available:' );
-					$this->out( '   - Version:   '.$moduleResource->version );
+					$this->out( '   - Version:   '.$moduleResource->version->current );
 					$this->out( '   - Source:    '.$moduleResource->sourceId );
 				}
 				if( isset( $modulesInstalled[$module->id] ) ){
 					$moduleResource	= $modulesInstalled[$module->id];
 					$this->out( ' - Installed:' );
-					$this->out( '   - Version:   '.$moduleResource->version );
-					$this->out( '   - Source:    '.$moduleResource->installSource );
+					$this->out( '   - Version:   '.$moduleResource->version->current );
+					$this->out( '   - Source:    '.$moduleResource->install->source );
 				}
 				if( $moduleResource ){
 					if( $this->flags->veryVerbose ){
@@ -103,7 +103,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 				}
 			}
 			else{
-				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version, $module->sourceId );
+				$msg	= sprintf( ' - '.$msgEntry, $module->id, $module->version->current, $module->sourceId );
 				$this->out( $msg );
 			}
 		}

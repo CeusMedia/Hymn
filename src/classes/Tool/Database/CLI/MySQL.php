@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.Database.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -57,35 +57,35 @@ class Hymn_Tool_Database_CLI_MySQL
 		$useSkip		= count( $tablesToSkip ) !== 0;
 		if( $usePrefix || $useSkip )																//  table prefix has been set or there are tables to skip
 			foreach( $dbc->getTables( $tablePrefix ) as $table )									//  iterate found tables with prefix
-				if( !in_array( $table, $tablesToSkip, TRUE ) )										//  table shall not be skipped
+				if( !in_array( $table, $tablesToSkip, TRUE ) )								//  table shall not be skipped
 					$tables	.= ' '.escapeshellarg( $table );										//  collect table as escaped shell arg
 		if( $this->useTempOptionsFile ){
 			$optionsFile	= new Hymn_Tool_Database_CLI_MySQL_OptionsFile( $this->client );
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
 			$tempFilePath	= $tempFile->create()->getFilePath();
 			$optionsFile->create( $tempFilePath, FALSE );
-			$line	= vsprintf( '%s %s %s', array(													//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
-				join( ' ', array(
+			$line	= vsprintf( '%s %s %s', [											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+				join( ' ', [
 					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),						//  configured host as escaped shell arg
 					'--result-file='.escapeshellarg( $fileName ),									//  target file
 					'--skip-extended-insert',														//  each row in one insert line
-				) ),
-				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
+				] ),
+				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				$tables
-			) );
+			] );
 		}
 		else {
-			$line	= vsprintf( '%s %s %s', array(													//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
-				join( ' ', array(
-					'--host='.escapeshellarg( $dbc->getConfig( 'host' ) ),							//  configured host as escaped shell arg
-					'--port='.escapeshellarg( $dbc->getConfig( 'port' ) ),							//  configured port as escaped shell arg
-					'--user='.escapeshellarg( $dbc->getConfig( 'username' ) ),						//  configured username as escaped shell arg
-					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
+			$line	= vsprintf( '%s %s %s', [											//  @see https://dev.mysql.com/doc/refman/8.0/en/mysqldump.html#option_mysqldump_compact
+				join( ' ', [
+					'--host='.escapeshellarg( $dbc->getConfigValue( 'host' ) ),				//  configured host as escaped shell arg
+					'--port='.escapeshellarg( $dbc->getConfigValue( 'port' ) ),				//  configured port as escaped shell arg
+					'--user='.escapeshellarg( $dbc->getConfigValue( 'username' ) ),			//  configured username as escaped shell arg
+					'--password='.escapeshellarg( $dbc->getConfigValue( 'password' ) ),		//  configured password as escaped shell arg
 					'--result-file='.escapeshellarg( $fileName ),
-				) ),
-				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
+				] ),
+				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				$tables,																			//  collected found tables
-			) );
+			] );
 		}
 		$result	 = $this->execCommandLine( $line, 'mysqldump' );
 		if( $this->useTempOptionsFile && $optionsFile )
@@ -104,37 +104,37 @@ class Hymn_Tool_Database_CLI_MySQL
 	{
 		$optionsFile	= NULL;
 		$dbc		= $this->client->getDatabase();
-		$cores		= (int) shell_exec( 'cat /proc/cpuinfo | grep processor | wc -l' );				//  get number of CPU cores
+		$cores		= (int) shell_exec( 'cat /proc/cpuinfo | grep processor | wc -l' );	//  get number of CPU cores
 		if( $this->useTempOptionsFile ){
 			$optionsFile	= new Hymn_Tool_Database_CLI_MySQL_OptionsFile( $this->client );
 			$tempFile		= new Hymn_Tool_TempFile( $optionsFile->getDefaultFileName() );
 			$tempFilePath	= $tempFile->create()->getFilePath();
 			$optionsFile->create( $tempFilePath, FALSE );
-			$line		= vsprintf( '%s %s < %s', array(
-				join( ' ', array(
-					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),							//  configured host as escaped shell arg
-					'--force',																			//  continue if error eccoured
-	//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
-	//					'--replace',																	//  replace if already existing
-				) ),
-				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
+			$line		= vsprintf( '%s %s < %s', [
+				join( ' ', [
+					'--defaults-extra-file='.escapeshellarg( $tempFilePath ),						//  configured host as escaped shell arg
+					'--force',																		//  continue if error occurred
+//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
+//					'--replace',																	//  replace if already existing
+				] ),
+				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				escapeshellarg( $fileName ),
-			) );
+			] );
 		}
 		else {
-			$line		= vsprintf( '%s %s < %s', array(
-				join( ' ', array(
-					'--host='.escapeshellarg( $dbc->getConfig( 'host' ) ),							//  configured host as escaped shell arg
-					'--port='.escapeshellarg( $dbc->getConfig( 'port' ) ),							//  configured port as escaped shell arg
-					'--user='.escapeshellarg( $dbc->getConfig( 'username' ) ),						//  configured username as escaped shell arg
-					'--password='.escapeshellarg( $dbc->getConfig( 'password' ) ),					//  configured pasword as escaped shell arg
-					'--force',																		//  continue if error eccoured
-	//					'--use-threads='.( max( 1, $cores - 1 ) ),										//  how many threads to use (number of cores - 1)
-	//					'--replace',																	//  replace if already existing
-				) ),
-				escapeshellarg( $dbc->getConfig( 'name' ) ),										//  configured database name as escaped shell arg
+			$line		= vsprintf( '%s %s < %s', [
+				join( ' ', [
+					'--host='.escapeshellarg( $dbc->getConfigValue( 'host' ) ),				//  configured host as escaped shell arg
+					'--port='.escapeshellarg( $dbc->getConfigValue( 'port' ) ),				//  configured port as escaped shell arg
+					'--user='.escapeshellarg( $dbc->getConfigValue( 'username' ) ),			//  configured username as escaped shell arg
+					'--password='.escapeshellarg( $dbc->getConfigValue( 'password' ) ),		//  configured password as escaped shell arg
+					'--force',																		//  continue if error occurred
+	//					'--use-threads='.( max( 1, $cores - 1 ) ),									//  how many threads to use (number of cores - 1)
+	//					'--replace',																//  replace if already existing
+				] ),
+				escapeshellarg( $dbc->getConfigValue( 'name' ) ),								//  configured database name as escaped shell arg
 				escapeshellarg( $fileName ),														//  temp file name as escaped shell arg
-			) );
+			] );
 		}
 		$result	= $this->execCommandLine( $line );
 		if( $this->useTempOptionsFile && $optionsFile )
@@ -145,7 +145,7 @@ class Hymn_Tool_Database_CLI_MySQL
 	public function importFileWithPrefix( string $fileName, ?string $prefix = NULL ): object
 	{
 		$dbc		= $this->client->getDatabase();
-		$prefix		= $prefix ?: $dbc->getConfig( 'prefix' );								//  get table prefix from config as fallback
+		$prefix		= $prefix ?: $dbc->getConfigValue( 'prefix' );								//  get table prefix from config as fallback
 		$importFile	= $this->getTempFileWithAppliedTablePrefix( $fileName, $prefix );				//  get file with applied table prefix
 		$result		= $this->importFile( $importFile );
 		@unlink( $importFile );
@@ -153,14 +153,14 @@ class Hymn_Tool_Database_CLI_MySQL
 	}
 
 	public function insertPrefixInFile( string $fileName, string $prefix ): void
-  {
+	{
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
-		$callback	= [$this, '_callbackReplacePrefix'];										//  create replace callback
+		$callback	= [$this, '_callbackReplacePrefix'];											//  create replace callback
 
-		rename( $fileName, $fileName."_" );															//  move dump file to source file
-		$fpIn		= fopen( $fileName."_", "r" );													//  open source file
-		$fpOut		= fopen( $fileName, "a" );														//  prepare empty target file
+		rename( $fileName, $fileName."_" );														//  move dump file to source file
+		$fpIn		= fopen( $fileName."_", "r" );									//  open source file
+		$fpOut		= fopen( $fileName, "a" );												//  prepare empty target file
 		if( FALSE === $fpIn )
 			throw new RuntimeException( 'Failed to open read stream to '.$fileName.'_' );
 		if( FALSE === $fpOut )
@@ -168,14 +168,14 @@ class Hymn_Tool_Database_CLI_MySQL
 
 		while( !feof( $fpIn ) ){																	//  read input file until end
 			$line	= fgets( $fpIn );																//  read line buffer
-			$line	= preg_replace_callback( $regExp, $callback, $line );							//  perform replace in buffer
+			$line	= preg_replace_callback( $regExp, $callback, $line ?: '' );				//  perform replace in buffer
 //			$buffer	= fread( $fpIn, 4096 );															//  read 4K buffer
 //			$buffer	= preg_replace_callback( $regExp, $callback, $buffer );							//  perform replace in buffer
 			fwrite( $fpOut, $line );																//  write buffer to target file
 		}
 		fclose( $fpOut );																			//  close target file
 		fclose( $fpIn );																			//  close source file
-		unlink( $fileName."_" );																	//  remove source file
+		unlink( $fileName."_" );															//  remove source file
 	}
 
 	public function setPrefixPlaceholder( string $prefixPlaceholder ): self
@@ -213,18 +213,18 @@ class Hymn_Tool_Database_CLI_MySQL
 //		$this->client->outVerbose( 'Applying table prefix ...' );
 		$tempName	= $sourceFile.'.tmp';
 		$fpIn		= fopen( $sourceFile, 'r' );												//  open source file
-		$fpOut		= fopen( $tempName, 'a' );													//  prepare empty target file
+		$fpOut		= fopen( $tempName, 'a' );												//  prepare empty target file
 		if( FALSE === $fpIn )
 			throw new RuntimeException( 'Failed to open read stream to '.$sourceFile );
 		if( FALSE === $fpOut )
 			throw new RuntimeException( 'Failed to open write stream to '.$tempName );
-		while( !feof( $fpIn ) ){																//  read input file until end
-			$line	= fgets( $fpIn );															//  read line buffer
-			$line	= str_replace( '<%?prefix%>', $prefix, $line );								//  replace table prefix placeholder
-			fwrite( $fpOut, $line );															//  write buffer to target file
+		while( !feof( $fpIn ) ){																	//  read input file until end
+			$line	= fgets( $fpIn );																//  read line buffer
+			$line	= str_replace( '<%?prefix%>', $prefix, $line ?: '' );				//  replace table prefix placeholder
+			fwrite( $fpOut, $line );																//  write buffer to target file
 		}
-		fclose( $fpOut );																		//  close target file
-		fclose( $fpIn );																		//  close source file
+		fclose( $fpOut );																			//  close target file
+		fclose( $fpIn );																			//  close source file
 		return $tempName;
 	}
 }

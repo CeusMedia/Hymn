@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,14 +30,19 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
 abstract class Hymn_Command_Source_Abstract extends Hymn_Command_Abstract
 {
-	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL ): ?object
+	/**
+	 *	@param		int							$position
+	 *	@param		?Hymn_Tool_CLI_Arguments	$arguments
+	 *	@return		?Hymn_Structure_Source
+	 */
+	protected function getSourceByArgument( int $position = 0, ?Hymn_Tool_CLI_Arguments $arguments = NULL ): ?Hymn_Structure_Source
 	{
 		$arguments  = $arguments ?: $this->client->arguments;
 		$sourceId	= $arguments->getArgument( $position );

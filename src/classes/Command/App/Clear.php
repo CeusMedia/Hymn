@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,20 +30,20 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
 class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected array $argumentOptions	= array(
-		'age'		=> array(
+	protected array $argumentOptions	= [
+		'age'		=> [
 			'pattern'	=> '/^--age=(\S+)$/',
 			'resolve'	=> '\\1',
 			'default'	=> '-1',
-		),
-	);
+		],
+	];
 
 	/**
 	 *	Execute this command.
@@ -76,6 +76,8 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 
 	protected function clearLocks(): void
 	{
+		if( !is_dir( 'config/locks' ) )
+			return;
 		$age	= (int) $this->client->arguments->getOption( 'age' );
 		$age	= $age > 0 ? $age * 60 : 0;
 		$index	= new DirectoryIterator( 'config/locks' );

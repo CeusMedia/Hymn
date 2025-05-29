@@ -2,7 +2,7 @@
 /**
  *	XML element based on SimpleXMLElement with improved attribute and content handling.
  *
- *	Copyright (c) 2007-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2024 Christian Würker
+ *	@copyright		2007-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -29,7 +29,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2024 Christian Würker
+ *	@copyright		2007-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			namespace handling: implement detection "Prefix or URI?", see http://www.w3.org/TR/REC-xml/#NT-Name
@@ -76,11 +76,11 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@param		mixed		$value		Value of child element
 	 *	@param		mixed		$namespace	Namespace prefix of child element
 	 *	@param		string|NULL	$nsURI		Namespace URI of child element
-	 *	@return		SimpleXMLElement|NULL
+	 *	@return		Hymn_Tool_XML_Element|NULL
 	 *	@throws		RuntimeException		if namespace prefix is neither registered nor given
 	 */
 	#[ReturnTypeWillChange]
-	public function addChild( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?SimpleXMLElement
+	public function addChild( $qualifiedName, $value = NULL, $namespace = NULL, ?string $nsURI = NULL ): ?Hymn_Tool_XML_Element
 	{
 		if( '' !== ( $namespace ?? '' ) ){
 			$namespaces	= $this->getDocNamespaces();
@@ -105,13 +105,12 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@param		string			$text			The CDATA value of the child element.
 	 *	@param		string|NULL		$namespace		Namespace prefix of child element
 	 *	@param		string|NULL		$nsURI			Namespace URI of child element
-	 *	@return		SimpleXMLElement
+	 *	@return		Hymn_Tool_XML_Element
 	 *	@reprecated	use addChild instead
 	 */
-	public function addChildCData( string $name, string $text, ?string $namespace = NULL, ?string $nsURI = NULL ): SimpleXMLElement
+	public function addChildCData( string $name, string $text, ?string $namespace = NULL, ?string $nsURI = NULL ): Hymn_Tool_XML_Element
 	{
 		$child	= $this->addChild( $name, NULL, $namespace, $nsURI );
-		/** @noinspection PhpPossiblePolymorphicInvocationInspection */
 		$child->addCData( $text );
 		return $child;
 	}

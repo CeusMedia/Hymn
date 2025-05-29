@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -49,7 +49,7 @@ class Hymn_Tool_CLI_Table
 	}
 
 	public function detectWidth(): void
-  {
+	{
 		$cols	= intval( `tput cols` );
 		$this->consoleWidth	= ( $cols ?: 80 ) - 3;
 	}
@@ -91,7 +91,7 @@ class Hymn_Tool_CLI_Table
 		$colWidths	= [];
 		foreach( $keys as $nr => $key )
 			$colWidths[$nr]	= (object) [
-				'head'	=> $this->strlen( $key ),
+				'head'	=> $this->strlen( (string) $key ),
 				'label'	=> $key,
 				'min'	=> pow( 10, 6 ),
 				'max'	=> 0,
@@ -162,12 +162,12 @@ class Hymn_Tool_CLI_Table
 		return mb_substr( $text.str_repeat( ' ', $repeat ), 0, $toLength, $this->encoding );
 	}
 
-	protected function fit( $text, int $toLength ): string
+	protected function fit( string $text, int $toLength ): string
 	{
 		return $this->extend( $this->trimCentric( trim( $text ), $toLength ), $toLength );
 	}
 
-	protected function line( $sign = '-', int $lineLength = 76 ): string
+	protected function line( string $sign = '-', int $lineLength = 76 ): string
 	{
 		$steps	= (int) floor( $lineLength / $this->strlen( $sign ) );
 		return str_repeat( $sign, $steps );

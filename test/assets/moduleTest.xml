@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<module>
+    <title>Test</title>
+    <description><![CDATA[For testing.]]></description>
+    <category>Test</category>
+    <version>1.0.0</version>
+    <log version="1.0.0">First release.</log>
+    <files/>
+    <config protected="user" type="string" name="text" title="Test text">1...2...3...</config>
+    <relations/>
+</module>

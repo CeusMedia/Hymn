@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -61,7 +61,7 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !strlen( trim( $sourcePath ) ) )
 			throw new InvalidArgumentException( 'First argument "source" is missing' );
 		$sourceUriRegex	= '/^'.preg_quote( $sourcePath, '/' ).'/';
-		$destPath		= rtrim( getcwd(), '/' ).'/';
+		$destPath		= rtrim( getcwd() ?: '', '/' ).'/';
 
 		$this->out( "Move application" );
 		$this->out( "- from: ".$sourcePath );
@@ -75,6 +75,13 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		$this->out( "Done." );
 	}
 
+	/**
+	 *	@param		string		$source
+	 *	@param		string		$sourceUriRegex
+	 *	@param		string		$dest
+	 *	@param		string		$path
+	 *	@return		void
+	 */
 	protected function fixLinks( string $source, string $sourceUriRegex, string $dest, string $path = '' ): void
 	{
 		$index	= new DirectoryIterator( $this->flags->dry ? $source.$path : $dest.$path );
@@ -85,6 +92,7 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 			if( $entry->isDir() )
 				$this->fixLinks( $source, $sourceUriRegex, $dest, $path.$entry->getFilename().'/' );
 			else if( is_link( $pathName ) ){
+				/** @var string $link */
 				$link = readlink( $pathName );
 				if( preg_match( $sourceUriRegex, $link ) ){
 					$link	= preg_replace( $sourceUriRegex, $dest, $link );
@@ -98,6 +106,12 @@ class Hymn_Command_App_Relink extends Hymn_Command_Abstract implements Hymn_Comm
 		}
 	}
 
+	/**
+	 *	@param		Hymn_Structure_Config	$config
+	 *	@param		string					$sourceUriRegex
+	 *	@param		string					$dest
+	 *	@return		void
+	 */
 	protected function updateHymnFile( Hymn_Structure_Config $config, string $sourceUriRegex, string $dest ): void
 	{
 		$this->client->outVerbose( "  - setting URI in hymn file" );

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2017-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2024 Christian Würker
+ *	@copyright		2017-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -53,6 +53,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$modules	= $this->getAvailableModules( $sourceId );									//  load available modules
+
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
 		$stampModules	= (array) $stamp->modules;
@@ -60,7 +61,6 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( $moduleId ){
 			if( !isset( $stamp->modules[$moduleId] ) )
 				$this->client->outError( 'Module "'.$moduleId.'" is not in stamp.', Hymn_Client::EXIT_ON_RUN );
-			$stamp->modules	= (object) [$moduleId => $stamp->modules[$moduleId]];
 		}
 
 		/*  --  FIND MODULE CHANGES  --  */
@@ -73,19 +73,25 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !$this->flags->quiet )
 			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
+		/** @var object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module} $moduleChange */
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'changed' )
 				$this->showChangedModule( $type, $moduleChange->source, $moduleChange->target );
 	}
 
-	protected function detectModuleChanges( $stamp, $modules ): array
+	/**
+	 *	@param		object{modules: array<Hymn_Structure_Module>}	$stamp
+	 *	@param		array<Hymn_Structure_Module>					$modules
+	 *	@return		array<string,object{type: string, source: Hymn_Structure_Module, target: Hymn_Structure_Module}>
+	 */
+	protected function detectModuleChanges( object $stamp, array $modules ): array
 	{
 		$moduleChanges	= [];
 		foreach( $modules as $module ){
 			if( !isset( $stamp->modules[$module->id] ) )
 				continue;
 			$oldModule	= $stamp->modules[$module->id];
-			if( !version_compare( $oldModule->version, $module->version, '<' ) )
+			if( !version_compare( $oldModule->version->current, $module->version->current, '<' ) )
 				continue;
 			$moduleChanges[$module->id]	= (object) [
 				'type'		=> 'changed',
@@ -113,13 +119,13 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );
-		$pattern	= '/^stamp_[0-9:_-]+\.json$/';
+		$pattern	= '/^stamp_[0-9:_-]+\.serial/';
 		if( $sourceId )
-			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.json$/';
+			$pattern	= '/^stamp_'.preg_quote( $sourceId, '/' ).'_[0-9:_-]+\.serial/';
 
 		$finder		= new Hymn_Tool_LatestFile( $this->client );
 		$finder->setFileNamePattern( $pattern );
-		$finder->setAcceptedFileNames( ['latest.json'] );
+		$finder->setAcceptedFileNames( ['latest.serial'] );
 		return $finder->find( $path );
 	}
 
@@ -128,9 +134,9 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	@access		protected
 	 *	@param		string		$pathName		...
 	 *	@param		string		$sourceId		...
-	 *	@return		object
+	 *	@return		Hymn_Structure_Stamp
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): object
+	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Stamp
 	{
 		if( '' !== $pathName ){
 			$fileName	= NULL;
@@ -146,18 +152,18 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 		if( !( NULL !== $fileName && file_exists( $fileName ) ) )
 			$this->client->outError( 'No comparable stamp file found.', Hymn_Client::EXIT_ON_RUN );
 		$this->client->outVerbose( 'Loading stamp: '.$fileName );
-		return json_decode( trim( file_get_contents( $fileName ) ) );
+		return unserialize( trim( file_get_contents( $fileName ) ) );
 	}
 
 	/**
 	 *	Calculates difference of module change and print out results.
 	 *	@access		protected
 	 *	@param		string		$type		Diff type, one of [all, sql, config(, files)]
-	 *	@param		object		$moduleOld	Old version of module (maybe from stamp)
-	 *	@param		object		$moduleNew	New version of module (maybe from library)
+	 *	@param		Hymn_Structure_Module	$moduleOld	Old version of module (maybe from stamp)
+	 *	@param		Hymn_Structure_Module	$moduleNew	New version of module (maybe from library)
 	 *	@return		void
 	 */
-	protected function showChangedModule( string $type, $moduleOld, $moduleNew ): void
+	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
 		if( !$this->flags->quiet )
@@ -175,7 +181,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 						$version,
 						$script->version
 					) ) );
-					$this->out( trim( $script->query ) );
+					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}
 			}

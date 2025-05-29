@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,17 +20,21 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Hymn_Client as Client;
+use Hymn_Tool_CLI_Question as CliQuestion;
+
 /**
  *	...
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -59,11 +63,11 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 
 		$listInstalled		= $this->library->listInstalledModules();								//  get list of installed modules
 		if( !$listInstalled )																		//  application has no installed modules
-			$this->outError("No installed modules found", Hymn_Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
+			$this->outError("No installed modules found", Client::EXIT_ON_SETUP );	//  not even one module is installed, no update
 
 		/*  fetch arguments  */
 		$moduleIds			= $this->client->arguments->getArguments();								//  get all arguments as one or more module IDs
-		if( $moduleIds && '*' !== $moduleIds ){
+		if( $moduleIds && ['*'] !== $moduleIds ){
 			$installedModuleIds	= array_keys( $listInstalled );
 			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $installedModuleIds );		//  replace wildcard modules
 			foreach( $moduleIds as $moduleId ){
@@ -75,16 +79,14 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			}
 		}
 		else{
-			$answer = TRUE;
-			if( !$this->flags->force ){
-				$question	= new Hymn_Tool_CLI_Question(
+			$answer	= TRUE;
+			if( !$this->flags->force )
+				$answer	= CliQuestion::getInstance(
 					$this->client,
 					"Do you really want to uninstall ALL installed modules?",
 					'boolean',
 					'no'
-				);
-				$answer	= $question->ask();
-			}
+				)->ask();
 			if( !$answer )
 				return;
 			$this->uninstallAllModules( $listInstalled );
@@ -112,12 +114,17 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 		}
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		array<Hymn_Structure_Module>	$listInstalled
+	 *	@return		void
+	 */
 	private function uninstallModuleById( string $moduleId, array $listInstalled ): void
 	{
 		$neededBy	= [];
 		foreach( $listInstalled as $installedModuleId => $installedModule )
 			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
-				if( $installedModule->relations->needs[$moduleId]->type === 'module' )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$moduleId]->type )
 					$neededBy[]	= $installedModuleId;
 
 		$module		= $listInstalled[$moduleId];
@@ -127,7 +134,7 @@ class Hymn_Command_App_Uninstall extends Hymn_Command_Abstract implements Hymn_C
 			$this->out( sprintf( $msg, $module->id, count( $neededBy ), $list ) );
 		}
 		else{
-			$module->path	= 'not_relevant/';
+			$module->install->path	= 'not_relevant/';
 			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
 			if( !$this->flags->quiet ) {
 				$this->out( vsprintf( '%sUninstalling module %s ...', [

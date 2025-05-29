@@ -1,8 +1,8 @@
 <?php
 /**
- *	...
+ *	Displays the changelog of this hymn version.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,36 +20,33 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Displays the changelog of this hymn version.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 class Hymn_Command_Changelog extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected string $filePath		= 'phar://hymn.phar/.changelog';
-
 	/**
-	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose
-	 *	@todo		implement missing flags
+	 *	Displays the changelog of this hymn version.
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(): void
 	{
-		if( file_exists( $this->filePath ) ){
-			$this->out( file_get_contents( $this->filePath ) );
-		}
+		$filePath	= Hymn_Client::$pharPath.'.changelog';
+
+		if( !file_exists( $filePath ) )
+			$this->client->outError( 'No changelog file found.', Hymn_Client::EXIT_ON_LOAD );
+		$this->out( file_get_contents( $filePath ) );
 	}
 }

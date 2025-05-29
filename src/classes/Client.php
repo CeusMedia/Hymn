@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -46,6 +46,17 @@ class Hymn_Client
 	public const FLAG_NO_FILES			= 64;
 	public const FLAG_NO_INTERACTION	= 128;
 
+	public const FLAGS					= [
+		self::FLAG_VERY_VERBOSE,
+		self::FLAG_VERBOSE,
+		self::FLAG_QUIET,
+		self::FLAG_DRY,
+		self::FLAG_FORCE,
+		self::FLAG_NO_DB,
+		self::FLAG_NO_FILES,
+		self::FLAG_NO_INTERACTION,
+	];
+
 	public const EXIT_ON_END			= 0;
 	public const EXIT_ON_LOAD			= 1;
 	public const EXIT_ON_SETUP			= 2;
@@ -54,88 +65,41 @@ class Hymn_Client
 	public const EXIT_ON_EXEC			= 16;
 	public const EXIT_ON_OUTPUT			= 32;
 
+	public const EXITS					= [
+		self::EXIT_ON_END,
+		self::EXIT_ON_LOAD,
+		self::EXIT_ON_SETUP,
+		self::EXIT_ON_RUN,
+		self::EXIT_ON_INPUT,
+		self::EXIT_ON_EXEC,
+		self::EXIT_ON_OUTPUT,
+	];
+
 	public static string $fileName				= '.hymn';
 
 	public static string $outputMethod			= 'print';
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.0';
+	public static string $version				= '1.0.2';
 
 	public static string $mode					= 'prod';
 
 	public static string $phpPath				= '/usr/bin/php';
+
+	/** @var	string		$pharPathroot		PHAR file resource link  */
+	public static string $pharPath				= 'phar://hymn.phar/';
+
 
 	/** @var	Hymn_Tool_CLI_Arguments 		$arguments		Parsed CLI arguments and options */
 	public Hymn_Tool_CLI_Arguments $arguments;
 
 	public int $flags							= 0;
 
+	/** @var	?Hymn_Tool_Locale 				$locale			Language support */
 	public ?Hymn_Tool_Locale $locale			= NULL;
 
 	public int $memoryUsageAtStart				= 0;
-
-	protected array $baseArgumentOptions		= [
-		'db'		=> [
-			'pattern'	=> '/^--db=(\S+)$/',
-			'resolve'	=> '\\1',
-			'values'	=> ['yes', 'no', 'only'],
-			'default'	=> 'yes',
-		],
-		'dry'		=> [
-			'pattern'	=> '/^-d|--dry/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-		],
-		'file'		=> [
-			'pattern'	=> '/^--file=(\S+)$/',
-			'resolve'	=> '\\1',
-			'default'	=> '.hymn',
-		],
-		'force'		=> [
-			'pattern'	=> '/^-f|--force$/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-		],
-		'help'		=> [
-			'pattern'	=> '/^-h|--help/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-		],
-		'quiet'		=> [
-			'pattern'	=> '/^-q|--quiet$/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-			'excludes'	=> 'verbose',
-		],
-		'verbose'	=> [
-			'pattern'	=> '/^-v|--verbose$/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-		],
-		'very-verbose'	=> [
-			'pattern'	=> '/^-vv|--very-verbose$/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-			'includes'	=> 'verbose',
-		],
-		'version'	=> [
-			'pattern'	=> '/^--version/',
-			'resolve'	=> TRUE,
-			'default'	=> NULL,
-		],
-		'interactive'	=> [
-			'pattern'	=> '/^--interactive=(\S+)$/',
-			'resolve'	=> '\\1',
-			'values'	=> ['yes', 'no'],
-			'default'	=> 'yes',
-		],
-		'comment'	=> [
-			'pattern'	=> '/^--comment=(\S+)$/',
-			'resolve'	=> '\\1',
-			'default'	=> NULL,
-		]
-	];
 
 	protected static array $commandWithoutConfig	= [
 		//  APP CREATION
@@ -146,6 +110,8 @@ class Hymn_Client
 		'test-syntax',
 		'version',
 	];
+
+	protected array $baseArgumentOptions		= [];
 
 	protected ?Hymn_Structure_Config $config		= NULL;
 
@@ -178,13 +144,17 @@ class Hymn_Client
 		$this->exit					= $exit;
 		$this->originalArguments	= $arguments;
 
+
 		ini_set( 'display_errors', TRUE );
 		error_reporting( E_ALL );
 
-		if( file_exists( 'phar://hymn.phar/.mode' ) )
-			self::$mode		= file_get_contents( 'phar://hymn.phar/.mode' ) ?: 'prod';
-		if( file_exists( 'phar://hymn.phar/.php' ) )
-			self::$phpPath	= file_get_contents( 'phar://hymn.phar/.php' ) ?: '/usr/bin/env php';
+		$phar	= Hymn_Client::$pharPath;
+		$baseArgumentOptionsJson	= file_get_contents( $phar.'baseArgumentOptions.json' );
+		$this->baseArgumentOptions	= json_decode( $baseArgumentOptionsJson, TRUE );
+		if( file_exists( $phar.'.mode' ) )
+			self::$mode		= file_get_contents( $phar.'.mode' ) ?: 'prod';
+		if( file_exists( $phar.'.php' ) )
+			self::$phpPath	= file_get_contents( $phar.'.php' ) ?: '/usr/bin/env php';
 
 		try{
 			$this->parseArguments( $arguments );
@@ -284,7 +254,13 @@ class Hymn_Client
 		return $type;
 	}
 
-	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL )
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		array		$availableSourceIds
+	 *	@param		?string		$defaultInstallSourceId
+	 *	@return		string
+	 */
+	public function getModuleInstallSource( string $moduleId, array $availableSourceIds, ?string $defaultInstallSourceId = NULL ): string
 	{
 		if( !count( $availableSourceIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );
@@ -414,12 +390,12 @@ class Hymn_Client
 
 	protected function dispatch(): void
 	{
-		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );							//  get called command
+		$calledAction	= trim( $this->arguments->getArgument( 0 ) ?? '' );				//  get called command
 		if( strlen( $calledAction ) ){																//  command string given
-			$this->arguments->removeArgument( 0 );													//  remove command from arguments list
+			$this->arguments->removeArgument( 0 );												//  remove command from arguments list
 			try{
 				if( !in_array( $calledAction, self::$commandWithoutConfig ) ){						//  command needs hymn file
-					$this->outVeryVerbose( 'Reading application configuration ...' );				//  note reading of application configuration
+					$this->outVeryVerbose( 'Reading application configuration ...' );			//  note reading of application configuration
 					$this->readConfig();															//  read application configuration from hymn file
 				}
 				$className			= $this->getCommandClassFromCommand( $calledAction );			//  get command class from called command
@@ -430,9 +406,10 @@ class Hymn_Client
 						$this->words->errorCommandClassNotImplementingInterface,
 						$className
 					) );
-				$commandObject		= $reflectedClass->newInstanceArgs( [$this] );			//  create object of reflected class
+				/** @var Hymn_Command_Interface $commandObject */
+				$commandObject		= $reflectedClass->newInstanceArgs( [$this] );					//  create object of reflected class
 				$reflectedObject	= new ReflectionObject( $commandObject );						//  reflect object for method call
-				$reflectedMethod    = $reflectedObject->getMethod( 'run' );							//  reflect object method "run"
+				$reflectedMethod	= $reflectedObject->getMethod( 'run' );					//  reflect object method "run"
 				$this->applyCommandOptionsToArguments( $commandObject );							//  extend argument options by command specific options
 				$reflectedMethod->invokeArgs( $commandObject, $this->arguments->getArguments() );	//  call reflected object method
 			}
@@ -443,7 +420,7 @@ class Hymn_Client
 			}
 		}
 		else																						//  no command string given
-			$this->out( $this->locale->loadText( 'command/index' ) );								//  print index text
+			$this->out( $this->locale->loadText( 'command/index' ) );							//  print index text
 	}
 
 	/**
@@ -452,6 +429,7 @@ class Hymn_Client
 	 *	@param		string			$command			Called command
 	 *	@return		string								Command class name
 	 *	@throws		InvalidArgumentException			if no command class is available for called command
+	 *	@phpstan-return		class-string
 	 */
 	protected function getCommandClassFromCommand( string $command ): string
 	{
@@ -459,12 +437,12 @@ class Hymn_Client
 			throw new InvalidArgumentException( 'No command given' );
 		$commandWords	= ucwords( preg_replace( '/-+/', ' ', $command ) );
 		$className		= 'Hymn_Command_'.preg_replace( '/ +/', '_', $commandWords );
-		if( !class_exists( $className ) )
-			throw new RangeException( sprintf(
-				$this->words->errorCommandUnknown,
-				$command
-			) );
-		return $className;
+		if( class_exists( $className ) )
+			return $className;
+		throw new RangeException( sprintf(
+			$this->words->errorCommandUnknown,
+			$command
+		) );
 	}
 
 	protected function parseArguments( array $arguments, array $options = [], bool $force = FALSE ): void

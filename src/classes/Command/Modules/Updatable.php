@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Modules
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -75,8 +75,15 @@ class Hymn_Command_Modules_Updatable extends Hymn_Command_Abstract implements Hy
 			$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
 				$update->id,																	//  - module ID
 				$update->installed,																//  - currently installed version
-				$update->available																//  - available version
+				$update->available,																//  - available version
 			] ) );
+			if( $this->flags->verbose ){
+				/** @var Hymn_Structure_Module_Log $log */
+				foreach( $update->log as $log ){
+					$v	= str_pad( $log->version, 10, ' ', STR_PAD_LEFT );
+					$this->out( $v.': '.$log->note );
+				}
+			}
 		}
 	}
 }

@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -141,11 +141,13 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	private function buildLine( string $key, string|bool $value, ?string $comment = NULL ): string
 	{
-		$content	= '"'.addslashes( $value ).'"';
 		if( $this->reservedWords && is_bool( $value ) )
 			$content	= $value ? 'yes' : 'no';
-		$breaksKey		= 4 - floor( strlen( $key ) / 8 );
-		$breaksValue	= 4 - floor( strlen( $content ) / 8 );
+		else
+			$content	= '"'.addslashes( (string) $value ).'"';
+
+		$breaksKey		= 4 - (int) floor( strlen( $key ) / 8 );
+		$breaksValue	= 4 - (int) floor( strlen( $content ) / 8 );
 		if( $breaksKey < 1 )
 			$breaksKey = 1;
 		if( $breaksValue < 1 )
@@ -343,7 +345,8 @@ class Hymn_Tool_BaseConfigEditor
 		$this->lines		= [];
 		$this->comments		= [];
 		$commentOpen		= 0;
-		$lines				= preg_split( '/\r?\n/', file_get_contents( $this->fileName ) );
+		$content			= file_get_contents( $this->fileName );
+		$lines				= preg_split( '/\r?\n/', $content ?: '' ) ?: [];
 		foreach( $lines as $line ){
 			$line			= trim( $line );
 			$this->lines[]	= $line;
@@ -355,7 +358,7 @@ class Hymn_Tool_BaseConfigEditor
 				continue;
 
 			if( preg_match( $this->patternProperty, $line ) ){
-				$pos	= strpos( $line, '=' );
+				$pos	= (int) strpos( $line, '=' );
 				$key	= trim( substr( $line, 0, $pos ) );
 				$value	= trim( substr( $line, ++$pos ) );
 
@@ -366,9 +369,9 @@ class Hymn_Tool_BaseConfigEditor
 
 				//  --  EXTRACT COMMENT  --  //
 				if( preg_match( $this->patternLineComment, $value ) ){
-					$newValue		= preg_split( $this->patternLineComment, $value, 2 );
-					$value			= trim( $newValue[0] );
-					$inlineComment	= trim( $newValue[1] );
+					$newValue		= preg_split( $this->patternLineComment, $value, 2 ) ?: [];
+					$value			= trim( $newValue[0] ?? '' );
+					$inlineComment	= trim( $newValue[1] ?? NULL );
 					$this->comments[$key] = $inlineComment;
 				}
 
@@ -381,8 +384,8 @@ class Hymn_Tool_BaseConfigEditor
 					else if( 'NULL' === strtoupper( $value ) )
 						$value	= NULL;
 				}
-				if( preg_match( '@^".*"$@', $value ) )
-					$value	= substr( stripslashes( $value ), 1, -1 );
+				if( preg_match( '@^".*"$@', (string) $value ) )
+					$value	= substr( stripslashes( (string) $value ), 1, -1 );
 				$this->properties[$key] = $value;
 			}
 		}
@@ -398,7 +401,7 @@ class Hymn_Tool_BaseConfigEditor
 		$newLines	= [];
 		foreach( $this->lines as $line ){
 			if( preg_match( $this->patternProperty, $line ) ){
-				$pos		= strpos( $line, "=" );
+				$pos		= (int) strpos( $line, "=" );
 				$key		= trim( substr( $line, 0, $pos ) );
 				$pureKey	= preg_replace( $this->patternDisabled, "", $key );
 				$parts		= explode(  "//", trim( substr( $line, $pos+1 ) ) );

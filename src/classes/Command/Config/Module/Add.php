@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Config.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -66,19 +66,18 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$module			= $availableModules[$moduleId];
 		$moduleObject	= (object) [];
 		$msg			= 'Adding module "%s" (%s) from source "%s"';
-		$this->out( sprintf( $msg, $module->id, $module->version, $module->sourceId ) );
+		$this->out( sprintf( $msg, $module->id, $module->version->current, $module->sourceId ) );
 		$moduleConfigValues	= [];
 		foreach( $module->config as $moduleConfig ){
 			$defaultValue	= $moduleConfig->value;
-			$question		= new Hymn_Tool_CLI_Question(
+			$actualValue	= trim( Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				sprintf( 'Value for "%s:%s"', $module->id, $moduleConfig->key ),
 				$moduleConfig->type,
 				$moduleConfig->value,
 				$moduleConfig->values,
 				FALSE																				//  no break = inline question
-			);
-			$actualValue	= trim( $question->ask() );
+			)->ask() );
 			if( in_array( $moduleConfig->type, ['bool', 'boolean'] ) ){
 				$actualValue	= $actualValue ? 'yes' : 'no';
 				$defaultValue	= 'no';

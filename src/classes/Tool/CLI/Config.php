@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.CLI
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -70,10 +70,10 @@ class Hymn_Tool_CLI_Config
 
 		$this->config	= $config;
 		$this->applyBaseConfiguredPathsToAppConfig();
+		$this->applyBaseConfiguredThemesToAppConfig();
 		$this->applyAppConfiguredDatabaseConfigToModules();
-		if( isset( $app->installMode ) && $app->installMode === 'live' )							//  is live installation
-			if( isset( $app->installType ) && $app->installType === 'copy' )						//  is installation copy
-				$this->isLiveCopy = TRUE;															//  this installation is a build for a live copy
+
+		$this->isLiveCopy = 'live' === ( $app->installMode ?? '' ) && 'copy' === ( $app->installType ?? '' );
 		return $this->config;
 	}
 
@@ -100,7 +100,7 @@ class Hymn_Tool_CLI_Config
 			$modules	= [];																		//  set empty map
 			if( '' === ( $this->config->database->modules ?? '' ) )									//  no database resource modules defined in hymn file (default)
 				$this->config->database->modules	= 'Resource_Database:access.';					//  set at least pseudo-default resource module from CeusMedia:HydrogenModules
-			$parts	= preg_split( '/\s*,\s*/', $this->config->database->modules );					//  split comma separated list if resource modules in registration format
+			$parts	= preg_split( '/\s*,\s*/', $this->config->database->modules ) ?: [];		//  split comma separated list if resource modules in registration format
 			foreach( $parts as $moduleRegistration ){												//  iterate these module registrations
 				$moduleId		= $moduleRegistration;												//  assume module ID to be the while module registration string ...
 				$configPrefix	= '';																//  ... and no config prefix as fallback (simplest situation)
@@ -112,12 +112,12 @@ class Hymn_Tool_CLI_Config
 		foreach( $modules as $moduleId => $configPrefix ){											//  iterate given or found resource module registrations
 		//	$this->outVeryVerbose( 'Applying database config to module '.$moduleId.' ...' );		//  tell about this in very verbose mode
 			if( !isset( $this->config->modules[$moduleId] ) )										//  registered module is not installed
-				$this->config->modules[$moduleId]	= (object) [];									//  create an empty module definition in loaded module list
+				$this->config->modules[$moduleId]	= new Hymn_Structure_Config_Module();			//  create an empty module definition in loaded module list
 			$module	= $this->config->modules[$moduleId];											//  shortcut module definition
 			if( !isset( $module->config ) )															//  module definition has not configuration
 				$module->config	= [];																//  create an empty configuration in module definition
-			foreach( (array) $this->config->database as $key => $value )									//  iterate database access information from hymn file
-				if( !in_array( $key, ['modules'], TRUE ) )										//  skip the found list of resource modules to apply exactly this method to
+			foreach( (array) $this->config->database as $key => $value )							//  iterate database access information from hymn file
+				if( !in_array( $key, ['modules'], TRUE ) )									//  skip the found list of resource modules to apply exactly this method to
 					$module->config[$configPrefix.$key]	= $value;									//  set database access information in resource module configuration
 		}
 		return TRUE;
@@ -130,20 +130,35 @@ class Hymn_Tool_CLI_Config
 				$this->config->paths->{$pathKey}	= $pathValue;
 
 		if( file_exists( $this->config->paths->config.'config.ini' ) ){
-			$data	= parse_ini_file( $this->config->paths->config.'config.ini' );
+			$data	= parse_ini_file( $this->config->paths->config.'config.ini' ) ?: [];
+			/** @var string $key */
+			/** @var string $value */
 			foreach( $data as $key => $value ){
-				if( preg_match( '/^path\./', $key ) ){
-					/** @var string $key */
-					$key	= preg_replace( '/^path\./', '', $key );
-					$key	= ucwords( str_replace( '.', ' ', $key ) );
-					$key	= str_replace( ' ', '', lcfirst( $key ) );
-					$this->config->paths->{$key}	= $value;
+				if( !preg_match( '/^path\./', $key ) )
 					continue;
-				}
+				$key	= preg_replace( '/^path\./', '', $key );
 				$key	= ucwords( str_replace( '.', ' ', $key ) );
 				$key	= str_replace( ' ', '', lcfirst( $key ) );
-				$this->config->{$key}	= $value;
+				if( in_array( $key, ['scriptsLib', 'stylesLib'] ) )
+					continue;
+				$this->config->paths->{$key}	= $value;
 			}
+		}
+	}
+
+	protected function applyBaseConfiguredThemesToAppConfig(): void
+	{
+		if( !file_exists( $this->config->paths->config.'config.ini' ) )
+			return;
+
+		$data	= parse_ini_file( $this->config->paths->config.'config.ini' ) ?: [];
+		/** @var string $key */
+		/** @var string $value */
+		foreach( $data as $key => $value ){
+			if( !preg_match( '/^layout\./', $key ) )
+				continue;
+			$key	= preg_replace( '/^layout\./', '', $key );
+			$this->config->layout->{$key}	= $value;
 		}
 	}
 }

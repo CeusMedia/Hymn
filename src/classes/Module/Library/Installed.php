@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -44,15 +44,25 @@ class Hymn_Module_Library_Installed
 		$this->client		= $client;
 	}
 
-	public function get( string $moduleId )
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		Hymn_Structure_Module
+	 *	@throws		RangeException		if module is not installed
+	 */
+	public function get( string $moduleId ): Hymn_Structure_Module
 	{
 		$pathModules	= $this->client->getConfigPath().'modules/';
 		$filename		= $pathModules.$moduleId.'.xml';
 		if( !file_exists( $filename ) )
 			throw new RangeException( 'Module "'.$moduleId.'" not installed in '.$pathModules );
-		return Hymn_Module_Reader::load( $filename, $moduleId );
+//		return Hymn_Module_Reader::load( $filename, $moduleId );
+		return Hymn_Module_Reader2::load( $filename, $moduleId );
 	}
 
+	/**
+	 *	@param		string|NULL		$sourceId
+	 *	@return		array<string,Hymn_Structure_Module>
+	 */
 	public function getAll( string $sourceId = NULL ): array
 	{
 //		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize sources in cache
@@ -67,7 +77,7 @@ class Hymn_Module_Library_Installed
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
 				$module	= $this->get( $key );
-				if( !$sourceId || $module->installSource === $sourceId )
+				if( !$sourceId || $module->install->source === $sourceId )
 					$list[$key]	= $module;
 			}
 		}

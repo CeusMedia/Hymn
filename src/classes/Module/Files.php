@@ -2,7 +2,7 @@
 /**
  *	Manager for module files.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -38,7 +38,7 @@
 class Hymn_Module_Files
 {
 	protected Hymn_Client $client;
-	protected ?object $config;
+	protected Hymn_Structure_Config $config;
 	/** @var object{dry: bool, force: bool, quiet: bool, verbose: bool, noFiles: bool} $flags */
 	protected object $flags;
 
@@ -64,13 +64,13 @@ class Hymn_Module_Files
 	 *	Tries to link or copy all module files into application.
 	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
-	 *	@param 		object 		$module			Module object
+	 *	@param 		Hymn_Structure_Module 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
 	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		bool
 	 *	@throws		Exception	if any file manipulation action goes wrong
 	 */
-	public function copyFiles( object $module, string $installType = 'link', bool $tryMode = FALSE ): bool
+	public function copyFiles( Hymn_Structure_Module $module, string $installType = 'link', bool $tryMode = FALSE ): bool
 	{
 		if( $this->flags->noFiles )
 			return TRUE;
@@ -158,27 +158,28 @@ class Hymn_Module_Files
 	 *	If not awaiting an available module, an installed module can be given.
 	 *	Mapped source and target paths are identical in this case.
 	 *	@access		protected
-	 *	@param		object		$module		Module object
+	 *	@param		Hymn_Structure_Module	$module					Module object
+	 *	@param		bool					$awaitAvailableModule	Default: yes
 	 *	@return		array
 	 *	@todo		change behaviour of styles without source: install into common instead of theme
 	 */
-	protected function prepareModuleFileMap( object $module, bool $awaitAvailableModule = TRUE ): array
+	protected function prepareModuleFileMap( Hymn_Structure_Module $module, bool $awaitAvailableModule = TRUE ): array
 	{
 		if( !is_object( $module ) )
 			throw new InvalidArgumentException( 'Given module object is invalid' );
-		if( !isset( $module->path ) ){
+		if( !isset( $module->install->path ) ){
 			if( $awaitAvailableModule )
 				throw new InvalidArgumentException( 'Given module object is an installed module - object of available module needed' );
-			$module->path	= $this->config->application->uri;
+			$module->install->path	= $this->config->application->uri;
 		}
 
-		$pathSource		= $module->path;
+		$pathSource		= $module->install->path;
 		$pathTarget		= $this->config->application->uri;
-		$layoutTheme	= $this->config->layoutTheme ?? 'common';
-		$layoutPrimer	= $this->config->layoutPrimer ?? 'primer';
+		$layoutTheme	= $this->config->layout->theme ?? 'common';
+		$layoutPrimer	= $this->config->layout->primer ?? 'primer';
 		$map			= [];
 		$skipSources	= ['lib', 'styles-lib', 'scripts-lib', 'url'];
-		foreach( $module->files as $fileType => $files ){
+		foreach( $module->files->toArray() as $fileType => $files ){
 			foreach( $files as $file ){
 				switch( $fileType ){
 					case 'files':
@@ -256,13 +257,13 @@ class Hymn_Module_Files
 	 *	Removed installed files of module.
 	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@access		public
-	 *	@param		object		$module			Module object
-	 *	@param		boolean		$tryMode		Flag: force no changes, only try (default: no)
+	 *	@param		Hymn_Structure_Module	$module			Module object
+	 *	@param		boolean					$tryMode		Flag: force no changes, only try (default: no)
 	 *	@return		void
 	 *	@throws		RuntimeException			if target file is not readable
 	 *	@throws		RuntimeException			if target file is not writable
 	 */
-	public function removeFiles( object $module, bool $tryMode = FALSE ): void
+	public function removeFiles( Hymn_Structure_Module $module, bool $tryMode = FALSE ): void
 	{
 		if( $this->flags->noFiles )
 			return;

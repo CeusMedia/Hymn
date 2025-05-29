@@ -2,6 +2,6 @@ doc
 vendor
 composer.lock
 .idea
-.phpunit.result.cache
 .hymn
 build/.mode
+tool/.phpunit.cache

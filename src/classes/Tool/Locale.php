@@ -2,7 +2,7 @@
 /**
  *	Locale singleton handler.
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -40,7 +40,7 @@ class Hymn_Tool_Locale
 	public const TYPE_TEXT		= 1;
 	public const TYPE_WORDS		= 2;
 
-	protected string $baseUri		= 'phar://hymn.phar/locales/';
+	protected string $baseUri;
 	protected string $language;
 	protected string $version;
 
@@ -52,6 +52,7 @@ class Hymn_Tool_Locale
 	 */
 	public function __construct( string $language = NULL )
 	{
+		$this->baseUri		= Hymn_Client::$pharPath.'locales/';
 		$this->version		= Hymn_Client::$version;
 		$this->setLanguage( $language ?? Hymn_Client::$language );
 	}

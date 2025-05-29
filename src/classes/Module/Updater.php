@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -38,9 +38,11 @@
 class Hymn_Module_Updater
 {
 	protected Hymn_Client $client;
-	protected ?object $config;
+	protected Hymn_Structure_Config $config;
 	protected Hymn_Module_Library $library;
 	protected bool $isLiveCopy	= FALSE;
+
+	/** @var object{dry: bool, quiet: bool, verbose: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
@@ -49,9 +51,9 @@ class Hymn_Module_Updater
 		$this->config	= $this->client->getConfig();
 		$this->library	= $library;
 		$this->flags	= (object) [
-			'dry'		=> $client->flags & Hymn_Client::FLAG_DRY,
-			'quiet'		=> $client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $client->flags & Hymn_Client::FLAG_VERBOSE,
+			'dry'		=> (bool) ( $client->flags & Hymn_Client::FLAG_DRY ),
+			'quiet'		=> (bool) ( $client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 
 		$app		= $this->config->application;												//  shortcut to application config
@@ -80,32 +82,39 @@ class Hymn_Module_Updater
 	 */
 	public function getUpdatableModules( string $sourceId = NULL ): array
 	{
-		$outdated		= [];																	//  prepare list of outdated modules
+		$outdated		= [];																		//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $sourceId ) as $installed ){					//  iterate installed modules
-			$source		= $installed->installSource;												//  get source of installed module
+			$source		= $installed->install?->source ?? 'unknown';								//  get source of installed module
 			$available	= $this->library->getAvailableModule( $installed->id, $source, FALSE );		//  get available module within source of installed module
 			if( !$available )																		//  module is not existing in source anymore
 				continue;																			//  skip this module @todo remove gone modules ?!?
-			if( version_compare( $installed->version, $available->version, '>=' ) )					//  installed module is up-to-date
+			if( version_compare( $installed->version->current, $available->version->current, '>=' ) )					//  installed module is up-to-date
 				continue;																			//  skip this module
-			$outdated[$installed->id]	= (object) array(											//	note outdated module and note:
+
+			$logs	= [];
+			foreach( $available->version->log as $log )
+				if( version_compare( $log->version, $installed->version->current, '>' ) )
+					$logs[]	= $log;
+
+			$outdated[$installed->id]	= (object) [												//	note outdated module and note:
 				'id'		=> $installed->id,														//  - module ID
-				'source'	=> $installed->installSource,											//  - source of current module installation
-				'installed'	=> $installed->version,													//  - currently installed module version
-				'available'	=> $available->version,													//  - available module version
-			);
+				'source'	=> $installed->install->source,											//  - source of current module installation
+				'installed'	=> $installed->version->current,										//  - currently installed module version
+				'available'	=> $available->version->current,										//  - available module version
+				'log'		=> $logs
+			];
 		}
 		return $outdated;																			//  return list of outdated modules
 	}
 
-	public function reconfigure( $module, bool $changedOnly = FALSE ): void
+	public function reconfigure( Hymn_Structure_Module $module, bool $changedOnly = FALSE ): void
 	{
 		$moduleInstalled	= $this->library->readInstalledModule( $module->id );
-		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->installSource, FALSE );
+		$moduleSource		= $this->library->getAvailableModule( $module->id, $moduleInstalled->install->source, FALSE );
 		if( !$moduleSource ){
 			$message	= vsprintf( 'Module "%" is not available in source "%"', [
 				$module->id,
-				$moduleInstalled->installSource
+				$moduleInstalled->install->source
 			] );
 			throw new RuntimeException( $message );
 		}
@@ -167,26 +176,24 @@ class Hymn_Module_Updater
 			$questionAnswers[]	= 'e';
 			$this->client->out( '  - [e] enter value' );
 
-			$decision	= new Hymn_Tool_CLI_Question(
+			$answer			= Hymn_Tool_CLI_Question::getInstance(
 				$this->client,
 				"  = Which config value?",
 				'string',
 				$questionDefault,
 				$questionAnswers,
 				FALSE
-			);
-			$answer			= $decision->ask();
+			)->ask();
 			switch( $answer ){
 				case "e":
-					$question	= new Hymn_Tool_CLI_Question(
+					$inputValues[$configKey]	= Hymn_Tool_CLI_Question::getInstance(
 						$this->client,
 						"  > Enter new value:",
 						'string',
-						$valueCurrent->getValue(),
+						(string) $valueCurrent->getValue(),
 						[],
 						FALSE
-					);
-					$inputValues[$configKey] = $question->ask();
+					)->ask();
 					break;
 				case "c":
 					$inputValues[$configKey]	= $valueConfig->getValue( TRUE );
@@ -216,7 +223,7 @@ class Hymn_Module_Updater
 			$configurator->set( $module->id, $configKey, $inputConfigValue );
 	}
 
-	public function update( $module, string $installType ): bool
+	public function update( Hymn_Structure_Module $module, string $installType ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
 		$files	= new Hymn_Module_Files( $this->client );
@@ -238,10 +245,10 @@ class Hymn_Module_Updater
 			$installedModules	= [];
 			$neededModules		= [];
 			foreach( $localModule->relations->needs as $moduleId => $relation )
-				if( $relation->type === 'module' )													//  only if relation is a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
 					$installedModules[$moduleId]	= $relation;
 			foreach( $module->relations->needs as $moduleId => $relation )
-				if( $relation->type === 'module' )													//  only if relation is a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
 					$neededModules[$moduleId]	= $relation;
 			$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
 				array_keys( $installedModules ),													//  ... by intersecting old list ...
@@ -262,7 +269,7 @@ class Hymn_Module_Updater
 
 			//  --  MODULES TO INSTALL
 			foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
-				if( $relation->type !== 'module' )													//  relation is not a module
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )				//  relation is not a module
 					continue;
 				if( array_key_exists( $neededModuleId, $localModules ) )							//  related module is installed
 					continue;

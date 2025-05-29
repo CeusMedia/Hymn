@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -52,7 +52,7 @@ class Hymn_Module_Graph
 	/** @var		array					$nodes */
 	public array $nodes						= [];
 
-	/** @var		object					$flags */
+	/** @var		object{quiet: bool, verbose: bool}	$flags */
 	protected object $flags;
 
 	/** @var		integer					$status */
@@ -63,8 +63,8 @@ class Hymn_Module_Graph
 		$this->client	= $client;
 		$this->library	= $library;
 		$this->flags	= (object) [
-			'quiet'		=> $this->client->flags & Hymn_Client::FLAG_QUIET,
-			'verbose'	=> $this->client->flags & Hymn_Client::FLAG_VERBOSE,
+			'quiet'		=> (bool) ($this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ($this->client->flags & Hymn_Client::FLAG_VERBOSE ),
 		];
 	}
 
@@ -72,11 +72,11 @@ class Hymn_Module_Graph
 	 *	Adds a module to graph as well as all modules linked as 'needed'.
 	 *	Sets status to 'changed'.
 	 *	@access		public
-	 *	@param		object			$module		Module data object
-	 *	@param		integer			$level		Load level of module, default: 0
+	 *	@param		Hymn_Structure_Module	$module		Module data object
+	 *	@param		integer					$level		Load level of module, default: 0
 	 *	@return		void
 	 */
-	public function addModule( object $module, int $level = 0 ): void
+	public function addModule( Hymn_Structure_Module $module, int $level = 0 ): void
   {
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
@@ -86,12 +86,12 @@ class Hymn_Module_Graph
 				$this->nodes[$module->id]->level	= $level;										//  store deeper level
 			return;																					//  exit without adding relations again
 		}
-		$this->nodes[$module->id]	= (object) array(												//  add module to node list by module ID
+		$this->nodes[$module->id]	= (object) [													//  add module to node list by module ID
 			'module'	=> $module,																	//  … store module data object
 			'level'		=> $level,																	//  … store load level
-			'in'		=> [],																	//  … store ingoing module links
-			'out'		=> [],																	//  … store outgoing module links
-		);
+			'in'		=> [],																		//  … store ingoing module links
+			'out'		=> [],																		//  … store outgoing module links
+		];
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
 		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
 			//	 @todo remove this block after framework v0.8.8.2 is established
@@ -102,7 +102,7 @@ class Hymn_Module_Graph
 					'source'	=> NULL,
 				];
 			}
-			if( $relation->type !== 'module' )
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )
 			 	continue;
 			if( $relation->source ){
 				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
@@ -198,7 +198,7 @@ class Hymn_Module_Graph
 		$this->client->out( "OK" );
 		try{
 			if( !$graph )
-				$graph		= $this->renderGraphFile( NULL );
+				$graph		= $this->renderGraphFile();
 			$sourceFile	= tempnam( sys_get_temp_dir(), 'Hymn' );
 			file_put_contents( $sourceFile, $graph );												//  save temporary
 
@@ -230,12 +230,12 @@ class Hymn_Module_Graph
 	 */
 	protected function checkForLoop( object $node, int $level = 0, array $steps = [] ): ?object
   {
-		if( array_key_exists( $node->module->path, $steps ) )										//  been in this module in before
+		if( array_key_exists( $node->module->install->path, $steps ) )								//  been in this module in before
 			return (object) array(																	//  return loop data ...
 				'module'	=> $node->module,														//  ... containing looping module
 				'modules'	=> $steps																//  ... and the module chain
 			);
-		$steps[$node->module->path]	= $node->module;												//  note this module in module chain
+		$steps[$node->module->install->path]	= $node->module;									//  note this module in module chain
 		if( count( $node->in ) ){																	//  there are relations
 			foreach( $node->in as $parent ){														//  iterate these relations
 				$parent	= $this->nodes[$parent->id];												//  shortcut parent module
@@ -247,7 +247,7 @@ class Hymn_Module_Graph
 		return NULL;																				//  no loop found
 	}
 
-	protected function countModuleEdgesToRoot( $node, int $level = 0 ): int
+	protected function countModuleEdgesToRoot( object $node, int $level = 0 ): int
 	{
 		$count	= $level;
 		if( count( $node->in ) ){
@@ -272,7 +272,7 @@ class Hymn_Module_Graph
 						'source'	=> NULL,
 					];
 				}
-				if( $relation->type === 'module' ){
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type ){
 					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
 					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
 				}

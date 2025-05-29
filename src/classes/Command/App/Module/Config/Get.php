@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Module.Config
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -47,7 +47,7 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 	 */
 	public function run(): void
 	{
-		$key		= $this->client->arguments->getArgument();
+		$key		= $this->client->arguments->getArgument() ?? '';
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 
@@ -67,7 +67,7 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 					$this->out( ' - Key:       '.$item->key );
 					$this->out( ' - Value:     '.$this->renderValue( $item ) );
 					if( $item->values )
-						$this->out( ' - Values:     '.join( ', ', preg_split( '/\s*,\s*/', $item->values ) ) );
+						$this->out( ' - Values:     '.join( ', ', $item->values ) );
 					if( $item->title )
 						$this->out( ' - Title:      '.$item->title );
 					$this->out( ' - Type:      '.$type );
@@ -85,7 +85,7 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 		}
 	}
 
-	protected function renderValue( $item ): int|float|string
+	protected function renderValue( Hymn_Structure_Module_Config $item ): int|float|string
 	{
 		if( in_array( $item->type, ['bool', 'boolean'] ) )
 			return $item->value ? 'yes' : 'no';

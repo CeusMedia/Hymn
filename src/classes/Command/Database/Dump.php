@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -72,32 +72,33 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 
 //		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
 		$defaultPath	= $this->client->getConfigPath().'sql/';
-		$path			= $arguments->getOption( 'path' );											//  get path from option
-		$path			= $path ?: $defaultPath;												//  ... or default
+		$path			= $arguments->getOption( 'path' );										//  get path from option
+		$path			= $path ?: $defaultPath;													//  ... or default
 
 		$fileName		= (string) $arguments->getArgument( 0 );
 
-		if( !preg_match( '/[a-z0-9]/i', $fileName ) )												//  arguments has not valid value
+		if( !preg_match( '/[a-z0-9]/i', $fileName ) )										//  arguments has not valid value
 			$fileName	= $path;																	//  set path from option or default
 		if( str_ends_with( $fileName, '/' ) )														//  given argument is a path
-			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';							//  generate stamped file name
+			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';					//  generate stamped file name
 		if( !dirname( $fileName) )																	//  path is not existing
-			exec( 'mkdir -p '.dirname( $fileName ) );												//  create path
+			exec( 'mkdir -p '.dirname( $fileName ) );										//  create path
 
-		$mysql		= new Hymn_Tool_Database_CLI_MySQL( $this->client );							//  get CLI handler for MySQL
-		$prefix		= trim( $arguments->getOption( 'prefix' ) ?? $dbc->getConfig( 'prefix' ) );
-		if( strlen( $prefix ) )
-			$mysql->setPrefixPlaceholder( $prefix );
+		$mysql	= new Hymn_Tool_Database_CLI_MySQL( $this->client );								//  get CLI handler for MySQL
+		$prefix	= $arguments->getOption( 'prefix' ) ?? $dbc->getConfigValue( 'prefix' );
+		if( '' !== trim( $prefix ) )
+			$mysql->setPrefixPlaceholder( trim( $prefix ) );
 
 		$tablesToSkip	= $this->getTablesToSkip();
 
 		if( $this->flags->verbose ){
+			$dba	= $dbc->getConfig();
 			$this->out( [
 				'Export file:  '.$fileName,															//  show export file name
-				'DB Server:    '.$dbc->getConfig( 'host' ).'@'.$dbc->getConfig( 'port' ),			//  show server host and port from config
-				'Database:     '.$dbc->getConfig( 'name' ),											//  show database name from config
+				'DB Server:    '.$dba->host.'@'.$dba->port,											//  show server host and port from config
+				'Database:     '.$dba->name,														//  show database name from config
 				'Table prefix: '.( $prefix ?: '(none)' ),											//  show table prefix from config
-				'Access as:    '.$dbc->getConfig( 'username' ),										//  show username from config
+				'Access as:    '.( $dba->username ?? '-' ),											//  show username from config
 			] );
 			if( $tablesToSkip )
 				$this->out( 'Skip tables:  '.join( ', ', $tablesToSkip ) );

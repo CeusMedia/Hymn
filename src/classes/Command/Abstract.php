@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2014-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2025 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -30,7 +30,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2024 Christian Würker
+ *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -154,21 +154,20 @@ abstract class Hymn_Command_Abstract
 	 */
 	abstract public function run();
 
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 	}
 
-	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): string
+	protected function ask( string $message, string $type = 'string', ?string $default = NULL, ?array $options = [], bool $break = FALSE ): float|bool|int|string
 	{
-		$question	= new Hymn_Tool_CLI_Question(
+		return Hymn_Tool_CLI_Question::getInstance(
 			$this->client,
 			$message,
 			$type,
 			$default,
 			$options ?? [],
 			$break
-		);
-		return $question->ask();
+		)->ask();
 	}
 
 	protected function denyOnProductionMode(): void
@@ -177,7 +176,7 @@ abstract class Hymn_Command_Abstract
 			$this->outError( 'Not allowed in production mode', Hymn_Client::EXIT_ON_SETUP );
 	}
 
-	protected function deprecate( $messageLines ): void
+	protected function deprecate( array|string $messageLines ): void
 	{
 		$this->client->outDeprecation( $messageLines );
 	}
@@ -211,7 +210,7 @@ abstract class Hymn_Command_Abstract
 	 *	ATTENTION: Modules with same ID from different sources will collide. Only latest of these modules is noted.
 	 *	@access		protected
 	 *	@param		string|NULL			$sourceId	...
-	 *	@return		array				Map of modules by ID
+	 *	@return		array<string,Hymn_Structure_Module>		Map of modules by ID
 	 *	@todo		find a better solution!
 	 */
 	protected function getAvailableModulesMap( ?string $sourceId = NULL ): array
@@ -240,7 +239,7 @@ abstract class Hymn_Command_Abstract
 		return $this->library;																		//  return loaded library
 	}
 
-	protected function readLibrary( object $config )
+	protected function readLibrary( object $config ): void
 	{
 		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
 		if( $this->flags->force )																//  on force mode
@@ -248,7 +247,7 @@ abstract class Hymn_Command_Abstract
 
 		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
 			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning
-			return $this->library;																//  return empty library
+			return;																//  return empty library
 		}
 		foreach( $config->sources as $sourceId => $source ){									//  iterate sources defined in Hymn file
 			if( isset( $source->active ) && $source->active === FALSE )							//  source is (explicitly) disabled
