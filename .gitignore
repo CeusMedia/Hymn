@@ -1,6 +1,5 @@
 doc
 vendor
-composer.lock
 .idea
 .hymn
 build/.mode
