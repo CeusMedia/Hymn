@@ -1,6 +1,6 @@
 export PWD	:= $(shell pwd)
 export PHP  :=/usr/bin/env php
-#export PHP  :=/opt/plesk/php/8.1/bin/php
+export PHP  :=/opt/plesk/php/8.1/bin/php
 
 
 help: ## show this help

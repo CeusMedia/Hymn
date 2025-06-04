@@ -226,8 +226,8 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 						$nr + 1,
 						count( $scripts ),
 						is_object( $version ) ? $version->current : $version,
-						is_object( $script->version ) ? $script->version->current : $script->version
-					] ) );
+						is_object( $script->version ) ? $script->version->current : $script->version,
+					) ) );
 					$this->out( trim( $script->sql ) );
 					$version	= $script->version;
 				}
