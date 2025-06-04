@@ -58,8 +58,9 @@ class Hymn_Module_Reader2
 	 *	@param		string		$id				Module ID
 	 *	@return		Hymn_Structure_Module		Module data object
 	 *	@throws		RuntimeException			if XML file did not pass validation
-	 *	@throws		Exception            		if XML file could not been loaded and parsed
-	 *	@throws		Exception            		if SQL update script is missing version
+	 *	@throws		Exception					if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException			if SQL update script is missing version
+	 *	@throws		RuntimeException			if inline function found in hook (which is deprecated)
 	 */
 	public static function load( string $filePath, string $id ): Hymn_Structure_Module
 	{
@@ -331,7 +332,8 @@ class Hymn_Module_Reader2
 	 *	@access		protected
 	 *	@param		Hymn_Structure_Module	$module		Data object of module
 	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
-	 *	@return		boolean							TRUE if data object of module has been decorated
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 *	@throws		RuntimeException		if inline function found in hook (which is deprecated)
 	 */
 	protected static function decorateObjectWithHooks( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
 	{
@@ -520,7 +522,7 @@ class Hymn_Module_Reader2
 			/** @var string $type */
 			$type		= self::castNodeAttributesToString( $sql, 'type', '*' );
 			if( $event === 'update' && !$version )
-				throw new Exception( 'SQL type "update" needs attribute "version"' );
+				throw new RuntimeException( 'SQL type "update" needs attribute "version"' );
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;

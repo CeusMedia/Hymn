@@ -1,0 +1,68 @@
+{
+  "db": {
+    "pattern": "\/^--db=(\\S+)$\/",
+    "resolve": "\\1",
+    "values": [
+      "yes",
+      "no",
+      "only"
+    ],
+    "default": "yes"
+  },
+  "dry": {
+    "pattern": "\/^-d|--dry\/",
+    "resolve": true,
+    "default": null
+  },
+  "file": {
+    "pattern": "\/^--file=(\\S+)$\/",
+    "resolve": "\\1",
+    "default": ".hymn"
+  },
+  "force": {
+    "pattern": "\/^-f|--force$\/",
+    "resolve": true,
+    "default": null
+  },
+  "help": {
+    "pattern": "\/^-h|--help\/",
+    "resolve": true,
+    "default": null
+  },
+  "quiet": {
+    "pattern": "\/^-q|--quiet$\/",
+    "resolve": true,
+    "default": null,
+    "excludes": "verbose"
+  },
+  "verbose": {
+    "pattern": "\/^-v|--verbose$\/",
+    "resolve": true,
+    "default": null
+  },
+  "very-verbose": {
+    "pattern": "\/^-vv|--very-verbose$\/",
+    "resolve": true,
+    "default": null,
+    "includes": "verbose"
+  },
+  "version": {
+    "pattern": "\/^--version\/",
+    "resolve": true,
+    "default": null
+  },
+  "interactive": {
+    "pattern": "\/^--interactive=(\\S+)$\/",
+    "resolve": "\\1",
+    "values": [
+      "yes",
+      "no"
+    ],
+    "default": "yes"
+  },
+  "comment": {
+    "pattern": "\/^--comment=(\\S+)$\/",
+    "resolve": "\\1",
+    "default": null
+  }
+}

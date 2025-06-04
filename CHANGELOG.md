@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.3
+- Improve exception handling on module indexing / reading.
+
 ## v1.0.2
 - Fix structure migration bug in module update.
 - Add log output of updatable modules.

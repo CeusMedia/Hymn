@@ -48,6 +48,10 @@ class Hymn_Module_Library_Installed
 	 *	@param		string		$moduleId
 	 *	@return		Hymn_Structure_Module
 	 *	@throws		RangeException		if module is not installed
+	 *	@throws		RuntimeException	if XML file did not pass validation
+	 *	@throws		Exception			if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException	if SQL update script is missing version
+	 *	@throws		RuntimeException	if inline function found in hook (which is deprecated)
 	 */
 	public function get( string $moduleId ): Hymn_Structure_Module
 	{
@@ -76,9 +80,14 @@ class Hymn_Module_Library_Installed
 				if( !$entry->isFile() || !preg_match( "/\.xml$/", $entry->getFilename() ) )
 					continue;
 				$key	= pathinfo( $entry->getFilename(), PATHINFO_FILENAME );
-				$module	= $this->get( $key );
-				if( !$sourceId || $module->install->source === $sourceId )
-					$list[$key]	= $module;
+				try{
+					$module	= $this->get( $key );
+					if( !$sourceId || $module->install->source === $sourceId )
+						$list[$key]	= $module;
+				}
+				catch( Throwable $e ){
+					$this->client->outError( 'Skipped module '.$key.': '.$e->getMessage() );
+				}
 			}
 		}
 		ksort( $list );

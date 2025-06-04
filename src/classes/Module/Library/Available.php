@@ -272,14 +272,18 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$path
 	 *	@param		string		$moduleId
 	 *	@return		Hymn_Structure_Module
-	 *	@throws		RuntimeException
+	 *	@throws		RangeException		if module.xml not found in module path (resolved from ID)
+	 *	@throws		RuntimeException	if XML file did not pass validation
+	 *	@throws		Exception			if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException	if SQL update script is missing version
+	 *	@throws		RuntimeException	if inline function found in hook (which is deprecated)
 	 */
 	public function readModule( string $path, string $moduleId ): Hymn_Structure_Module
 	{
 		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RuntimeException( 'Module "'.$moduleId.'" not found in '.$pathname );			//  throw exception
+			throw new RangeException( 'Missing module XML file in in '.$pathname );			//  throw exception
 		$module		= Hymn_Module_Reader2::load( $filename, $moduleId );								//  otherwise load module configuration from source XML file
 		$this->decorateModuleWithPaths( $module, $path );
 		return $module;																				//  return module
@@ -471,8 +475,13 @@ class Hymn_Module_Library_Available
 			if( !$entry->isFile() || !preg_match( "/^module\.xml$/", $entry->getFilename() ) )
 				continue;
 			$key	= str_replace( "/", "_", substr( $entry->getPath(), strlen( $path ) ) );
-			$module	= $this->readModule( $path, $key );
-			$list[$key]	= $module;
+			try{
+				$module	= $this->readModule( $path, $key );
+				$list[$key]	= $module;
+			}
+			catch( Throwable $e ){
+				$this->client->outError( 'Skipped module '.$key.': '.$e->getMessage() );
+			}
 		}
 		return $list;
 	}
