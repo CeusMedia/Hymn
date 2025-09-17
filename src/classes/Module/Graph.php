@@ -49,7 +49,7 @@ class Hymn_Module_Graph
 	/** @var		Hymn_Module_Library		$library */
 	public Hymn_Module_Library $library;
 
-	/** @var		array					$nodes */
+	/** @var		array<object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]}>					$nodes */
 	public array $nodes						= [];
 
 	/** @var		object{quiet: bool, verbose: bool}	$flags */
@@ -77,7 +77,7 @@ class Hymn_Module_Graph
 	 *	@return		void
 	 */
 	public function addModule( Hymn_Structure_Module $module, int $level = 0 ): void
-  {
+	{
 //		if( version_compare( $this->client->getFramework()->getVersion(), '0.8.8.2', '<' ) )		//  framework is earlier than 0.8.8.2
 //			$module	= $this->library->getAvailableModule( $module->id );							//  load module using library
 
@@ -93,30 +93,23 @@ class Hymn_Module_Graph
 			'out'		=> [],																		//  … store outgoing module links
 		];
 		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
-		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
-			//	 @todo remove this block after framework v0.8.8.2 is established
-			if( is_string( $relation ) ){															//  relation came from a reduced module source index
-				$neededModuleId	= $relation;														//  relation only holds module ID
-				$relation		= (object) [														//  simulate relation object
-					'type'		=> str_contains( $relation, '/' ) ? 'package' : 'module',			//  detect packages and modules
-					'source'	=> NULL,
-				];
-			}
-			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )
-			 	continue;
-			if( $relation->source ){
-				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
-					$message	= 'Module %s needs module %s from source %s, which is missing.';
-					$this->client->outError( vsprintf( $message, [
-						$module->id,
-						$neededModuleId,
-						$relation->source,
-					] ), Hymn_Client::EXIT_ON_RUN );
-				}
-			}
-			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relation->source );		//  get module data object from module library
-			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
-		}
+		$this->addNeededModules( $module, $level );
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		array
+	 */
+	public function findWaysUpFromModule( Hymn_Structure_Module $module ): array
+	{
+		if( $this->status < self::STATUS_CHANGED )
+			throw new RuntimeException( 'No modules loaded' );
+		if( $this->status < self::STATUS_LINKED )
+			$this->realizeRelations();
+
+		$ways	= [];
+		$this->bubbleUp( $module, $ways );
+		return $ways;
 	}
 
 	/**
@@ -162,18 +155,22 @@ class Hymn_Module_Graph
 	}
 
 	//  @todo	make independent from need/support
-	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ ): string
+	public function renderGraphContent( /*string $type = 'needs'*/ ): string
 	{
 		if( $this->status < self::STATUS_LINKED )
 			$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
 		$nodes	= [];
 		$edges	= [];
-		foreach( $this->nodes as $id => $node ){
+		/**
+		 * @var string $moduleId
+		 * @var object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]} $node
+		 */
+		foreach( $this->nodes as $moduleId => $node ){
 			$label		= 'label="'.$node->module->title.'"';
-			$nodes[]	= $node->module->id.' ['.$label.' '.$nodeStyle.'];';
+			$nodes[]	= $moduleId.' ['.$label.' '.$nodeStyle.'];';
 			foreach( $node->out as $out )
-				$edges[]	= $node->module->id.' -> '.$out->module->id.' []';
+				$edges[]	= $moduleId.' -> '.$out->id.' []';
 		}
 		$options	= "\n\t".'rankdir="LR"';
 		$this->status	= self::STATUS_PRODUCED;
@@ -181,55 +178,105 @@ class Hymn_Module_Graph
 			$this->client->out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
 		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
 		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
-		$graph		= "digraph {".$options.$nodes.$edges."\n}";
-		if( $targetFile ){
-			file_put_contents( $targetFile, $graph );
-			if( !$this->flags->quiet )
-				$this->client->out( "Saved graph file to ".$targetFile."." );
-		}
+		return "digraph {".$options.$nodes.$edges."\n}";
+	}
+
+	//  @todo	make independent from need/support
+	public function renderGraphFile( /*string $type = 'needs'*/ ): string
+	{
+		$graphFile	= $this->client->getConfigPath().'modules.graph';
+		$graph		= $this->renderGraphContent();
+		file_put_contents( $graphFile, $graph );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Saved graph file to '.$graphFile.'.' );
 		return $graph;
 	}
 
-	public function renderGraphImage( ?string $graph = NULL, ?string $targetFile = NULL ): ?string
+	/**
+	 *	@return		void
+	 */
+	public function renderGraphImages(): void
 	{
-		$this->client->out( "Checking graphviz: ", FALSE );
+		$graphFile	= $this->client->getConfigPath().'modules.graph';
+		$this->client->out( 'Checking graphviz: ', FALSE );
 		$toolTest	= new Hymn_Tool_Test( $this->client );
-		$toolTest->checkShellCommand( "graphviz" );
-		$this->client->out( "OK" );
-		try{
-			if( !$graph )
-				$graph		= $this->renderGraphFile();
-			$sourceFile	= tempnam( sys_get_temp_dir(), 'Hymn' );
-			file_put_contents( $sourceFile, $graph );												//  save temporary
+		$toolTest->checkShellCommand( 'graphviz' );
+		$this->client->out( 'OK' );
+		$this->renderGraphPngImage( $graphFile );
+		$this->renderGraphSvgImage( $graphFile );
+	}
 
-			if( $targetFile ){
-				@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
-				if( !$this->flags->quiet )
-					$this->client->out( 'Graph image saved to '.$targetFile.'.' );
+
+	//  --  PROTECTED  --  //
+
+
+	/**
+	 *	Adds modules needed by originally added module.
+	 *	Attention: Recurses to addModule, thus works recursively.
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@param		int		$level
+	 *	@return		void
+	 */
+	protected function addNeededModules( Hymn_Structure_Module $module, int $level ): void
+	{
+		foreach( $module->relations->needs as $neededModuleId => $relation ){						//  iterate all modules linked as "needed"
+			//	 @todo remove this block after framework v0.8.8.2 is established
+			if( is_string( $relation ) ){															//  relation came from a reduced module source index
+				$neededModuleId	= $relation;														//  relation only holds module ID
+				$relation		= (object) [														//  simulate relation object
+					'type'		=> str_contains( $relation, '/' ) ? 'package' : 'module',			//  detect packages and modules
+					'source'	=> NULL,
+				];
 			}
-			else{
-				exec( 'dot -Tpng -O '.$sourceFile );
-				unlink( $sourceFile );
-				$graphImage	= file_get_contents( $sourceFile.'.png' );
-				@unlink( $sourceFile );
-				return $graphImage;
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )
+				continue;
+			if( $relation->source ){
+				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
+					$message	= 'Module %s needs module %s from source %s, which is missing.';
+					$this->client->outError( vsprintf( $message, [
+						$module->id,
+						$neededModuleId,
+						$relation->source,
+					] ), Hymn_Client::EXIT_ON_RUN );
+				}
 			}
+			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relation->source );		//  get module data object from module library
+			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
 		}
-		catch( Exception $e ){
-			$this->client->out( 'Graph rendering failed: '.$e->getMessage().'.' );
+	}
+
+	/**
+	 *	This recursive method is used by findWaysUpFromModule.
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@param		array		$ways		Link to list to collect all traces in.
+	 *	@param		array|NULL	$steps		Current trace
+	 *	@return		void
+	 */
+	protected function bubbleUp( Hymn_Structure_Module $module, array & $ways, ?array $steps = NULL ): void
+	{
+		$steps		??= [];
+		$parents	= $this->nodes[$module->id]->in;
+		if( [] === $parents ){										//  no more parents
+			$steps[]	= $module;									//  add original module
+			$ways[]		= $steps;									//  finally report complete ways
+			return;													//  finish this trace
 		}
-		return NULL;
+		foreach( $parents as $parent ){								//  we are in the middle of a trace
+			$clone		= $steps;									//  copy trace so far
+			$clone[]	= $module;									//  note this module on cloned trace
+			$this->bubbleUp( $parent, $ways, $clone );			//  continue tracing for this module
+		}
 	}
 
 	/**
 	 *	Check for loop in module relations.
 	 *	@access		protected
-	 *	@param		object		$node		Node data object containing module and in and out relations
+	 *	@param		object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]}	$node		Node data object containing module and in and out relations
 	 *	@param		integer		$level		Counter of recursion level, 0 by default.
 	 *	@return		object|NULL				Object if looping node or null if no loop found
 	 */
 	protected function checkForLoop( object $node, int $level = 0, array $steps = [] ): ?object
-  {
+	{
 		if( array_key_exists( $node->module->install->path, $steps ) )								//  been in this module in before
 			return (object) array(																	//  return loop data ...
 				'module'	=> $node->module,														//  ... containing looping module
@@ -247,6 +294,11 @@ class Hymn_Module_Graph
 		return NULL;																				//  no loop found
 	}
 
+	/**
+	 *	@param		object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]}	$node
+	 *	@param		int		$level
+	 *	@return		int
+	 */
 	protected function countModuleEdgesToRoot( object $node, int $level = 0 ): int
 	{
 		$count	= $level;
@@ -273,7 +325,7 @@ class Hymn_Module_Graph
 					];
 				}
 				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type ){
-					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId];		//  note outgoing link on this node
+					$this->nodes[$id]->out[$neededModuleId]	= $this->nodes[$neededModuleId]->module;//  note outgoing link on this node
 					$this->nodes[$neededModuleId]->in[$id]	= $node->module;						//  note ingoing link on the needed node
 				}
 			}
@@ -281,5 +333,21 @@ class Hymn_Module_Graph
 		$this->status	= self::STATUS_LINKED;
 		if( $this->flags->verbose && !$this->flags->quiet )
 			$this->client->outVeryVerbose( "Found ".count( $this->nodes )." modules." );
+	}
+
+	protected function renderGraphPngImage( string $sourceFile ): void
+	{
+		$targetFile	= $sourceFile.'.png';
+		@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Graph PNG image saved to '.$targetFile.'.' );
+	}
+
+	protected function renderGraphSvgImage( string $sourceFile ): void
+	{
+		$targetFile	= $sourceFile.'.svg';
+		@exec( 'dot -Tsvg -o'.$targetFile.' '.$sourceFile );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Graph SVG image saved to '.$targetFile.'.' );
 	}
 }

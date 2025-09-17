@@ -2,6 +2,9 @@
 
 ## v1.0.3
 - Improve exception handling on module indexing / reading.
+- Allow module config value on/off as boolean.
+- Show why a modules is installed in module info.
+- On app-graph, create SVG next to PNG and graph file.
 
 ## v1.0.2
 - Fix structure migration bug in module update.

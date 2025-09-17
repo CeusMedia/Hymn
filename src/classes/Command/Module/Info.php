@@ -58,8 +58,6 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			$sourceId	= NULL;
 
 		$modulesAvailable	= $library->getAvailableModules( $sourceId );
-		$modulesInstalled	= $library->listInstalledModules( $sourceId );							//  get list of installed modules
-
 		if( !array_key_exists( $moduleId, $modulesAvailable ) ){
 			$message	= 'Module '.$moduleId.' not available.';
 			if( $sourceId )
@@ -76,55 +74,90 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 			}
 		}
 
-		$installTypes	= [0 => 'Copy', 1 => 'Link'];
-
 		$availableModule	= $modulesAvailable[$moduleId];
 
-		$frameworks	= [];
-		foreach( $availableModule->frameworks as $frameworkIdentifier => $frameworkVersion )
-			$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
-		$frameworks	= join( ' | ', $frameworks );
+		$this->showBasicDetails( $availableModule );
+		$this->showDeprecation( $availableModule );
 
-		$this->out( $availableModule->title );
-		if( $availableModule->description )
-			$this->out( $availableModule->description );
-		$this->out( ' - Category:     '.$availableModule->category );
-		$this->out( ' - Source:       '.$availableModule->sourceId );
-		$this->out( ' - Version:      '.$availableModule->version->current );
-		$this->out( ' - Frameworks:   '.$frameworks );
-
-		if( NULL !== $availableModule->deprecation ){
-			$deprecation	= $availableModule->deprecation;
-			$this->out( ' - Deprecated:   with version '.$deprecation->version );
-			if( strlen( trim( $deprecation->message ) ) > 0 )
-				$this->out( '   - Message:    '.$deprecation->message );
-			if( strlen( trim( $deprecation->url ) ) > 0 )
-				$this->out( '   - New URL:    '.$deprecation->url );
-		}
-
+		$modulesInstalled	= $library->listInstalledModules( $sourceId );							//  get list of installed modules
 		if( array_key_exists( $moduleId, $modulesInstalled ) ){
 			$installedModule	= $modulesInstalled[$moduleId];
-			$this->out( ' - Installed:' );
-			$this->out( '    - Version: '.$installedModule->version->current );
-			$this->out( '    - Source:  '.$installedModule->install->source );
-			$this->out( '    - Type:    '.$installTypes[$installedModule->install->type] );
-			$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->install->date ) );
-			$message	= ' - Updatable: no';
-			if( version_compare( $availableModule->version->current, $installedModule->version->current, '>' ) ){
-				$message	= ' - Updatable: yes, from %s to %s';
-				$message	= sprintf( $message, $installedModule->version->current, $availableModule->version->current );
-			}
-			$this->out( $message );
+			$this->showInstalledModuleBasicInfo( $installedModule, $availableModule );
 			$availableModule = $installedModule;
 		}
+		$this->showWhy( $availableModule );
+		$moduleInfo	= new Hymn_Module_Info( $this->client );
+		$moduleInfo->showModuleRelations( $library, $availableModule );
 
 		if( $this->flags->verbose ){
 			$moduleInfo	= new Hymn_Module_Info( $this->client );
 			$moduleInfo->showModuleVersions( $availableModule );
 			$moduleInfo->showModuleFiles( $availableModule );
 			$moduleInfo->showModuleConfig( $availableModule );
-			$moduleInfo->showModuleRelations( $library, $availableModule );
 			$moduleInfo->showModuleHook( $availableModule );
 		}
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		void
+	 */
+	protected function showBasicDetails( Hymn_Structure_Module $module ): void
+	{
+		$frameworks	= [];
+		foreach( $module->frameworks as $frameworkIdentifier => $frameworkVersion )
+			$frameworks[]	= $frameworkIdentifier.'@'.$frameworkVersion;
+		$frameworks	= join( ' | ', $frameworks );
+
+		$this->out( $module->title );
+		if( $module->description )
+			$this->out( $module->description );
+		$this->out( ' - Category:     '.$module->category );
+		$this->out( ' - Source:       '.$module->sourceId );
+		$this->out( ' - Version:      '.$module->version->current );
+		$this->out( ' - Frameworks:   '.$frameworks );
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module $module
+	 *	@return		void
+	 */
+	protected function showDeprecation( Hymn_Structure_Module $module ): void
+	{
+		if( NULL !== $module->deprecation ){
+			$deprecation	= $module->deprecation;
+			$this->out( ' - Deprecated:   with version '.$deprecation->version );
+			if( strlen( trim( $deprecation->message ) ) > 0 )
+				$this->out( '   - Message:    '.$deprecation->message );
+			if( strlen( trim( $deprecation->url ) ) > 0 )
+				$this->out( '   - New URL:    '.$deprecation->url );
+		}
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@param		string|NULL				$sourceId
+	 *	@return		void
+	 */
+	protected function showWhy( Hymn_Structure_Module $module, ?string $sourceId = NULL ): void
+	{
+		$moduleInfo	= new Hymn_Module_Info( $this->client );
+		$moduleInfo->showWhy( $this->library, $module );
+	}
+
+	protected function showInstalledModuleBasicInfo( Hymn_Structure_Module $installedModule, Hymn_Structure_Module $availableModule ): void
+	{
+		$installTypes	= [0 => 'Copy', 1 => 'Link'];
+		$this->out( ' - Installed:' );
+		$this->out( '    - Version: '.$installedModule->version->current );
+		$this->out( '    - Source:  '.$installedModule->install->source );
+		$this->out( '    - Type:    '.$installTypes[$installedModule->install->type] );
+		$this->out( '    - Date:    '.date( 'Y-m-d H:i:s', (int) $installedModule->install->date ) );
+		$message	= ' - Updatable: no';
+		if( version_compare( $availableModule->version->current, $installedModule->version->current, '>' ) ){
+			$message	= ' - Updatable: yes, from %s to %s';
+			$message	= sprintf( $message, $installedModule->version->current, $availableModule->version->current );
+		}
+		$this->out( $message );
 	}
 }

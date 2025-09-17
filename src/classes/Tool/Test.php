@@ -52,7 +52,7 @@ class Hymn_Tool_Test
 	}
 
 	public function checkShellCommand( string $key ): void
-  {
+	{
 		if( !array_key_exists( $key, self::$shellCommands ) )
 			throw new InvalidArgumentException( "No shell command test available for '".$key."'" );
 		$command	= self::$shellCommands[$key]['command']." >/dev/null 2>&1";

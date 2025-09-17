@@ -120,18 +120,42 @@ class Hymn_Module_Info
 		}
 	}
 
+	/**
+	 *	@param		Hymn_Module_Library			$library
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		void
+	 */
+	public function showWhy( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
+	{
+		$relation		= new Hymn_Module_Graph( $this->client, $library );
+		foreach( $library->listInstalledModules() as $installedModule )
+			$relation->addModule( $installedModule );
+
+		$ways	= $relation->findWaysUpFromModule( $module );
+		if( [] === $ways )
+			return;
+//			$this->client->out( 'Not needed by any installed module.' );
+		$this->client->out( ' - Needed by modules: ' );
+		foreach( $ways as $steps ){
+			$items	= array_map( function ( $module ) {
+				return $module->title;
+			}, array_slice( $steps, 1 ) );
+			$this->client->out( '   - '.join( ' <- ', $items ) );
+		}
+	}
+
 	public function showModuleRelations( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
 	{
 		$module->relations->requiredBy	= [];
-		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
-			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
+		foreach( $library->listInstalledModules() as $installedModule )
+			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
 				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$module->id]->type )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= [];
-		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
-			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
-				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$moduleId]->type )
+		foreach( $library->getAvailableModules() as $availableModule )
+			if( array_key_exists( $module->id, $availableModule->relations->needs ) )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$module->id]->type )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( $module->relations->needs ) ){
@@ -141,7 +165,7 @@ class Hymn_Module_Info
 			 * @var Hymn_Structure_Module_Relation $relation
 			 */
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
+				$this->client->out( 'c- '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );
