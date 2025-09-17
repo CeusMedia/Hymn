@@ -49,7 +49,7 @@ class Hymn_Module_Graph
 	/** @var		Hymn_Module_Library		$library */
 	public Hymn_Module_Library $library;
 
-	/** @var		array<object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]}>					$nodes */
+	/** @var		array<Hymn_Structure_ModuleRelationNode>					$nodes */
 	public array $nodes						= [];
 
 	/** @var		object{quiet: bool, verbose: bool}	$flags */
@@ -162,10 +162,6 @@ class Hymn_Module_Graph
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
 		$nodes	= [];
 		$edges	= [];
-		/**
-		 * @var string $moduleId
-		 * @var object{module: Hymn_Structure_Module, level: int, in: Hymn_Structure_Module[], out: Hymn_Structure_Module[]} $node
-		 */
 		foreach( $this->nodes as $moduleId => $node ){
 			$label		= 'label="'.$node->module->title.'"';
 			$nodes[]	= $moduleId.' ['.$label.' '.$nodeStyle.'];';
