@@ -21,7 +21,7 @@ print('PHP:  '.$options['php'].PHP_EOL);
 //print('Term: '.getEnv( 'TERM' ).PHP_EOL);
 
 /*  --  SETUP  --  */
-$cols			= ( $cols = intval( `tput cols -T xterm-256color` ) ) ? $cols : 80;
+$cols			= ( $cols = intval( `tput cols -T xterm-256color` ) ) ? min( $cols, 200 ) : 80;
 $rootPath		= dirname( __DIR__ );
 $pharFileName	= 'hymn.phar';
 $pharFilePath	= $rootPath.'/'.$pharFileName;
@@ -77,11 +77,13 @@ foreach( $iterator as $entry ){
 			str_pad( ceil( $count / $nrFiles * 100 ), 3, ' ', STR_PAD_LEFT ),
 		] );
 		print( str_pad( $message, $cols - 2, ' ' ) );
-		$syntax	= Hymn_Tool_Test::staticCheckPhpFileSyntax( $filePath );
-		if( !$syntax->valid ){
-			$message	= str_replace( $rootPath.'/build/', 'src/', $syntax->message );
-			print( "\r".str_pad( 'FAIL: '.$message, $cols - 2, ' ' ).PHP_EOL );
-			exit( 1 );
+		if( str_ends_with( $filePath, '.php' ) ){
+			$syntax	= Hymn_Tool_Test::staticCheckPhpFileSyntax( $filePath );
+			if( !$syntax->valid ){
+				$message	= str_replace( $rootPath.'/build/', 'src/', $syntax->message );
+				print( "\r".str_pad( 'FAIL: '.$message, $cols - 2, ' ' ).PHP_EOL );
+				exit( 1 );
+			}
 		}
 		if( $options['mode'] !== 'dev' )
 			file_put_contents( $filePath, trim( php_strip_whitespace( $filePath ) ) );
@@ -91,6 +93,8 @@ print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
 
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
 $archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
+//$archive->addFile( $rootPath.'/src/classes/Structure/Module.xsd', 'Module.xsd' );
+$archive->addFromString( 'module-1.0.0.xsd', file_get_contents( 'https://schema.ceusmedia.de/hydrogen/module-1.0.0.xsd' ) );
 $archive->addFile( $rootPath.'/src/baseArgumentOptions.json', 'baseArgumentOptions.json' );
 $archive->addFile( $rootPath.'/build/.mode', '.mode' );
 $archive->addFile( $rootPath.'/build/.php', '.php' );
