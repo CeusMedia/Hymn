@@ -41,6 +41,18 @@ class Hymn_Tool_XML_Validator
 	protected array $error	= [];
 
 	/**
+	 *	Returns last error.
+	 *	@access		public
+	 *	@return		?object{error: string, line: int, message: string }
+	 */
+	public function getError(): ?object
+	{
+		if( $this->error )
+			return (object) $this->error['line'];
+		return NULL;
+	}
+
+	/**
 	 *	Returns last error line.
 	 *	@access		public
 	 *	@return		int
@@ -67,7 +79,9 @@ class Hymn_Tool_XML_Validator
 	/**
 	 *	Validates a local XML file.
 	 *	@access		public
+	 *	@param		string		$fileName
 	 *	@return		bool
+	 *	@throws		InvalidArgumentException	if XML file is not existing
 	 */
 	public function validateFile( string $fileName ): bool
 	{
@@ -93,9 +107,9 @@ class Hymn_Tool_XML_Validator
 			$msg	= "%s at line %d";
 			$error	= xml_error_string( xml_get_error_code( $parser ) );
 			$line	= xml_get_current_line_number( $parser );
-			$this->error['message']	= sprintf( $msg, $error, $line );
+			$this->error['error']	= $error;
 			$this->error['line']	= $line;
-			$this->error['xml']		= $xml;
+			$this->error['message']	= sprintf( $msg, $error, $line );
 			xml_parser_free( $parser );
 			return FALSE;
 		}

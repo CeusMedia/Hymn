@@ -57,6 +57,7 @@ class Hymn_Module_Reader
 		$obj->versionLog			= [];
 		$obj->isInstalled			= FALSE;
 		$obj->isActive				= TRUE;
+		$obj->sources				= [];
 		$obj->companies				= [];
 		$obj->authors				= [];
 		$obj->licenses				= [];
@@ -85,6 +86,7 @@ class Hymn_Module_Reader
 		self::decorateObjectWithLog( $obj, $xml );
 		self::decorateObjectWithFiles( $obj, $xml );
 		self::decorateObjectWithLicenses( $obj, $xml );
+		self::decorateObjectWithSources( $obj, $xml );
 		self::decorateObjectWithCompanies( $obj, $xml );
 		self::decorateObjectWithAuthors( $obj, $xml );
 		self::decorateObjectWithConfig( $obj, $xml );
@@ -142,6 +144,17 @@ class Hymn_Module_Reader
 			$obj->companies[]	= (object) [
 				'name'		=> (string) $company,
 				'site'		=> $site
+			];
+		}
+	}
+
+	protected static function decorateObjectWithSources( $obj, SimpleXMLElement $xml ): void
+	{
+		foreach( $xml->source as $source ){
+			$url	= self::getAttribute( $source, 'source', '' );
+			$obj->sources[]	= (object) [
+				'name'		=> (string) $source,
+				'url'		=> $url
 			];
 		}
 	}

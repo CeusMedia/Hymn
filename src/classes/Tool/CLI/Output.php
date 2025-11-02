@@ -75,14 +75,18 @@ class Hymn_Tool_CLI_Output
 
 	/**
 	 *	Prints out message of one or more lines.
+	 *	In quiet mode no output, if not forced.
 	 *	@access		public
-	 *	@param		string|bool|int|float|array|NULL	$lines		List of message lines or one string
-	 *	@param		boolean								$newLine	Flag: add newline at the end
+	 *	@param		string|bool|int|float|array|NULL	$lines			List of message lines or one string
+	 *	@param		boolean								$newLine		Flag: add newline at the end
+	 *	@param		boolean								$ignoreQuiet	Flag: bypass check for quiet flag
 	 *	@return		self
 	 *	@throws		InvalidArgumentException			if neither array nor string nor NULL given
 	 */
-	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE ): self
+	public function out( string|bool|int|float|array|NULL $lines = NULL, bool $newLine = TRUE, bool $ignoreQuiet = FALSE ): self
 	{
+		if( $this->flags->quiet && !$ignoreQuiet )
+			return $this;
 		if( is_null( $lines ) )
 			$lines	= [];
 		if( !is_array( $lines ) ){																	//  output content is not a list
@@ -137,7 +141,7 @@ class Hymn_Tool_CLI_Output
 	 */
 	public function outError( string $message, ?int $exitCode = NULL ): self
 	{
-		$this->out( $this->words->outPrefixError.$message );
+		$this->out( $this->words->outPrefixError.$message, TRUE, TRUE );
 		if( $this->exit && is_int( $exitCode ) && $exitCode > Hymn_Client::EXIT_ON_END ){
 			if( self::$outputMethod !== 'print' && ob_get_level() )
 				print( ob_get_clean() );

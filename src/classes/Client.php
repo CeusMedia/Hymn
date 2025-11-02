@@ -224,7 +224,7 @@ class Hymn_Client
 	}
 
 	public function getMemoryUsage( string $position = '' ): string
-  {
+    {
 		$bytes	= memory_get_usage();
 		if( !$this->memoryUsageAtStart )
 			$this->memoryUsageAtStart	= $bytes;

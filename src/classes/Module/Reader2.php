@@ -36,6 +36,7 @@ use Hymn_Structure_Module_Job as JobDefinition;
 use Hymn_Structure_Module_License as LicenseDefinition;
 use Hymn_Structure_Module_Link as LinkDefinition;
 use Hymn_Structure_Module_Relation as RelationDefinition;
+use Hymn_Structure_Module_Source as SourceDefinition;
 use Hymn_Structure_Module_SQL as SqlDefinition;
 use Hymn_Structure_Module_Version as VersionDefinition;
 
@@ -77,6 +78,7 @@ class Hymn_Module_Reader2
 		self::decorateObjectWithFrameworks( $module, $xml );
 		self::decorateObjectWithLog( $module, $xml );
 		self::decorateObjectWithFiles( $module, $xml );
+		self::decorateObjectWithSources( $module, $xml );
 		self::decorateObjectWithAuthors( $module, $xml );
 		self::decorateObjectWithCompanies( $module, $xml );
 		self::decorateObjectWithLinks( $module, $xml );
@@ -497,6 +499,26 @@ class Hymn_Module_Reader2
 					'supports'																//  ... as supported
 				);
 			}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by source information, if set.
+	 *	@access		protected
+	 *	@param		Hymn_Structure_Module	$module		Data object of module
+	 *	@param		Hymn_Tool_XML_Element	$xml		XML tree object of module created by ::load
+	 *	@return		boolean					TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithSources( Hymn_Structure_Module $module, Hymn_Tool_XML_Element $xml ): bool
+	{
+		if( !$xml->source )																		//  no source nodes existing
+			return FALSE;
+		foreach( $xml->source as $source ){														//  iterate source nodes
+			$module->sources[]	= new SourceDefinition(
+				(string) $source,
+				self::castNodeAttributesToString( $source, 'url' )
+			);
+		}
 		return TRUE;
 	}
 

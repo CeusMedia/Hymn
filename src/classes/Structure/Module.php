@@ -62,13 +62,16 @@ class Hymn_Structure_Module
 	/**	@var ?Hymn_Structure_Module_Deprecation $deprecation */
 	public ?Hymn_Structure_Module_Deprecation $deprecation	= NULL;
 
+	/**	@var array<Hymn_Structure_Module_Source> $sources */
+	public array $sources				= [];
+
 	/**	@var array<Hymn_Structure_Module_Company> $companies */
 	public array $companies				= [];
 
 	/**	@var array<Hymn_Structure_Module_Author> $authors */
 	public array $authors				= [];
 
-	/**	@var array<Hymn_Structure_Module_License> $authors */
+	/**	@var array<Hymn_Structure_Module_License> $licenses */
 	public array $licenses				= [];
 
 	/**	@var Hymn_Structure_Module_Files $files */

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
 /**
  *	...
  *
@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Module.Config
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,49 +28,43 @@
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Command.App.Module.Config
+ *	@package		CeusMedia.Hymn.Command.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2025 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
-class Hymn_Command_App_Module_Config_Validate extends Hymn_Command_Abstract implements Hymn_Command_Interface
+class Hymn_Command_Source_Validate extends Hymn_Command_Source_Abstract implements Hymn_Command_Interface
 {
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose
-	 *	@todo		implement missing flags
+	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(): void
 	{
-		$moduleId		= $this->client->arguments->getArgument() ?? '';
-
-		if( '' !== $moduleId ){
-			$errors	= [];
-			$this->out( 'Checking config of installed module '.$moduleId.': ', FALSE );
-			$result	= $this->validateInstalledModuleConfig( $moduleId, $errors );
-			$this->out( $result ? 'Valid' : 'Invalid' );
-			if( !$result )
-				$this->out( $this->renderErrorList( $errors ) );
+		$source	= $this->getSourceByArgument();
+		if( NULL === $source )
 			return;
-		}
+
+		$this->out( "Source: ".$source->title );
+		$this->out( "Path:   ".$source->path );
+		$modules	= $this->getLibrary()->getAvailableModules( $source->id );
+		$this->out( 'Scanning '.count( $modules ).' module(s)...' );
+
 		$nrErrors	= 0;
 		$nrModules	= 0;
-		$modulesInstalled	= $this->getLibrary()->listInstalledModules();
-		$this->out( 'Checking config of '.count( $modulesInstalled ).' installed modules:' );
-		foreach( $modulesInstalled as $module ){
-			$errors	= [];
-			$this->outVerbose( "- ".$module->id.'... ', FALSE );
-			$result	= $this->validateInstalledModuleConfig( $module->id, $errors );
+		foreach( $modules as $moduleId => $module ){
+			$errors		= [];
+			$this->outVerbose( "- ".$moduleId.'... ', FALSE );
+			$result	= $this->validateAvailableModule( $module, $errors );
 			$this->outVerbose( $result ? 'OK' : 'INVALID' );
 			if( $result )
 				continue;
 			if( !$this->flags->verbose )
-				$this->out( '- '.$module->id.' invalid:' );
+				$this->out( '- '.$moduleId.' invalid:' );
 			$this->out( $this->renderErrorList( $errors ) );
 			$nrModules++;
 			$nrErrors	+= count( $errors );
@@ -82,29 +76,22 @@ class Hymn_Command_App_Module_Config_Validate extends Hymn_Command_Abstract impl
 
 	/**
 	 * @param array<LibXMLError> $errors
+	 * @param int $colLineLength
 	 * @return array
 	 */
-	protected function renderErrorList( array $errors ): array
+	protected function renderErrorList( array $errors, int $colLineLength = 5 ): array
 	{
 		$list	= [];
 		foreach( $errors as $error ){
-			$lineNr	= str_pad( trim( $error->line ), 5, ' ' );
+			$lineNr	= str_pad( trim( (string) $error->line ), $colLineLength, ' ' );
 			$list[]	= '  '.$lineNr.'| '.trim( $error->message );
 		}
 		return $list;
 	}
 
-	/**
-	 *	Validate the XML config file of an installed module.
-	 *	Applies checks for syntax and semantics.
-	 *	@param		string				$moduleId
-	 *	@param		array<LibXMLError>	$errors
-	 *	@return		bool
-	 */
-	protected function validateInstalledModuleConfig( string $moduleId, array & $errors ): bool
+	protected function validateAvailableModule( Hymn_Structure_Module $module, array & $errors ): bool
 	{
-		$pathConfig		= $this->client->getConfigPath();
-		$filePathXml	= $pathConfig.'modules/'.$moduleId.'.xml';
+		$filePathXml	= $module->absolutePath.'module.xml';
 		return $this->validateModuleFileSyntax( $filePathXml, $errors )
 			&& $this->validateModuleFileAgainstSchema( $filePathXml, $errors );
 	}
@@ -160,3 +147,5 @@ class Hymn_Command_App_Module_Config_Validate extends Hymn_Command_Abstract impl
 		return FALSE;
 	}
 }
+
+
