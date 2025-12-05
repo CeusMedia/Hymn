@@ -144,6 +144,7 @@
                 <xs:attribute name="file" type="xs:string" use="optional"/>
                 <xs:attribute name="format" type="xs:string" use="optional"/>
                 <xs:attribute name="url" type="xs:string" use="optional"/>
+                <xs:attribute name="version" type="versionType" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
