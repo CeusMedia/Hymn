@@ -1,8 +1,8 @@
 <?php
 /**
- *	...
+ *	Compare stamp against available modules.
  *
- *	Copyright (c) 2017-2025 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2026 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,17 +20,17 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2025 Christian Würker
+ *	@copyright		2017-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Compare stamp against available modules.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2025 Christian Würker
+ *	@copyright		2017-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -56,7 +56,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 
-		$stampModules	= (array) $stamp->modules;
+		$stampModules	= $stamp->modules;
 		$this->client->outVerbose( 'Found '.count( $stampModules ).' modules in stamp.' );
 		if( $moduleId ){
 			if( !isset( $stamp->modules[$moduleId] ) )
@@ -115,7 +115,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	protected function getLatestStamp( ?string $path = NULL, ?string $sourceId = NULL ): ?string
 	{
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$path		= preg_replace( '@\.+/@', '', $path );
+		$path		= preg_replace( '@\.+/@', '', $path ?? '' );
 		$path		= rtrim( $path, '/' );
 		$path		= trim( $path ) ? $path.'/' : $pathDump;
 		$this->client->outVerbose( "Scanning folder ".$path." ..." );

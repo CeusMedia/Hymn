@@ -1,8 +1,8 @@
 <?php
 /**
- *	...
+ *	Compare stamp against installed modules.
  *
- *	Copyright (c) 2017-2025 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2017-2026 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,17 +20,17 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2025 Christian Würker
+ *	@copyright		2017-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Compare stamp against installed modules.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2017-2025 Christian Würker
+ *	@copyright		2017-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
@@ -49,8 +49,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$pathName	= $this->client->arguments->getArgument() ?? '';
 		$type		= $this->client->arguments->getArgument( 1 ) ?? '';
+		$sourceId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 ) ?? '';
-		$sourceId	= $this->evaluateSourceId( $this->client->arguments->getArgument( 2 ) );
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 		if( '' !== $moduleId )
@@ -59,11 +60,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
-			if( !$this->flags->quiet )
+			if( !$this->flags->quiet && 'sql' !== $type )
 				$this->out( 'No modules have changed.' );
 			return;
 		}
-		if( !$this->flags->quiet )
+		if( !$this->flags->quiet && 'sql' !== $type )
 			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
@@ -179,12 +180,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showAddedModule( string $type, Hymn_Structure_Module $module ): void
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
-		if( !$this->flags->quiet )
+		if( !$this->flags->quiet && 'sql' !== $type )
 			$this->out( ' - Module added: '.$module->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			$scripts	= $sql->getModuleInstallSql( $module );
 			if( $scripts ){
-				if( !$this->flags->quiet )
+				if( !$this->flags->quiet && 'sql' !== $type )
 					$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
 				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
 				foreach( array_values( $scripts ) as $nr => $script ){
@@ -213,11 +214,11 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
-		if( !$this->flags->quiet )
+		if( !$this->flags->quiet && 'sql' !== $type )
 			$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
-				if( !$this->flags->quiet )
+				if( !$this->flags->quiet && 'sql' !== $type )
 					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
