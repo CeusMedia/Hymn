@@ -85,7 +85,7 @@ class Hymn_Command_App_Move extends Hymn_Command_Abstract implements Hymn_Comman
 		$this->updateHymnFile( $config, $sourceUriRegex, $dest, $url );
 		$this->moveProject( $source, $dest );
 
-		$this->client->outVerbose( $this->flags->dry ? "- would fix links" : "- fixing links" );
+		$this->outVerbose( $this->flags->dry ? "- would fix links" : "- fixing links" );
 
 		$this->fixLinks( $source, $sourceUriRegex, $dest );
 		$this->out( "DONE!" );

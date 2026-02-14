@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- *	...
+ *	Compare stamp against available modules.
  *
  *	Copyright (c) 2017-2026 Christian Würker (ceusmedia.de)
  *
@@ -27,7 +27,7 @@ declare(strict_types=1);
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Compare stamp against available modules.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.Stamp

@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- *	...
+ *	Compare stamp against installed modules.
  *
  *	Copyright (c) 2017-2026 Christian Würker (ceusmedia.de)
  *
@@ -27,7 +27,7 @@ declare(strict_types=1);
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Compare stamp against installed modules.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command.App.Stamp
@@ -51,8 +51,9 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	{
 		$pathName	= $this->client->arguments->getArgument() ?? '';
 		$type		= $this->client->arguments->getArgument( 1 ) ?? '';
+		$sourceId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 ) ?? '';
-		$sourceId	= $this->evaluateSourceId( $this->client->arguments->getArgument( 2 ) );
+		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$modules	= $this->getInstalledModules( $sourceId );									//  load installed modules
 		$stamp		= $this->getStamp( $pathName, $sourceId );
 		if( '' !== $moduleId )
@@ -61,10 +62,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 		/*  --  FIND MODULE CHANGES  --  */
 		$moduleChanges	= $this->detectModuleChanges( $stamp, $modules );
 		if( !$moduleChanges ){
-			$this->out( 'No modules have changed.' );
+			if( 'sql' !== $type )
+				$this->out( 'No modules have changed.' );
 			return;
 		}
-		$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
+		if( 'sql' !== $type )
+			$this->out( 'Found '.count( $moduleChanges ).' modules have changed:' );
 
 		foreach( $moduleChanges as $moduleChange )
 			if( $moduleChange->type === 'added' )
@@ -179,11 +182,13 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showAddedModule( string $type, Hymn_Structure_Module $module ): void
 	{
 		$sql	= new Hymn_Module_SQL( $this->client );
-		$this->out( ' - Module added: '.$module->id );
+		if( 'sql' !== $type )
+			$this->out( ' - Module added: '.$module->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			$scripts	= $sql->getModuleInstallSql( $module );
 			if( $scripts ){
-				$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
+				if( 'sql' !== $type )
+					$this->out( '   SQL: '.count( $scripts ).' installation(s):' );
 				$this->client->outVerbose( '--  INSTALL '.strtoupper( $module->id ).'  --' );
 				foreach( array_values( $scripts ) as $nr => $script ){
 					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s', array(
@@ -211,10 +216,12 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 	protected function showChangedModule( string $type, Hymn_Structure_Module $moduleOld, Hymn_Structure_Module $moduleNew ): void
 	{
 		$diff	= new Hymn_Module_Diff( $this->client, $this->library );
-		$this->out( ' - Module changed: '.$moduleNew->id );
+		if( 'sql' !== $type )
+			$this->out( ' - Module changed: '.$moduleNew->id );
 		if( in_array( $type, [NULL, 'all', 'sql'] ) ){
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
-				$this->out( '   SQL: '.count( $scripts ).' update(s):' );
+				if( 'sql' !== $type )
+					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
 				$version	= $moduleOld->version;
 				foreach( array_values( $scripts ) as $nr => $script ){
@@ -222,7 +229,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 						$nr + 1,
 						count( $scripts ),
 						is_object( $version ) ? $version->current : $version,
-						is_object( $script->version ) ? $script->version->current : $script->version
+						is_object( $script->version ) ? $script->version->current : $script->version,
 					] ) );
 					$this->out( trim( $script->sql ) );
 					$version	= $script->version;

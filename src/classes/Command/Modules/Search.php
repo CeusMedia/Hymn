@@ -68,7 +68,7 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 			$modulesInstalled	= $library->listInstalledModules();
 		}
 		foreach( $modulesAvailable as $moduleId => $module ){
-			if( preg_match( '/'.preg_quote( $term ).'/', $moduleId ) ){
+			if( preg_match( '/'.preg_quote( $term ).'/i', $moduleId ) ){
 				$modulesFound[$moduleId]	= $module;
 			}
 		}

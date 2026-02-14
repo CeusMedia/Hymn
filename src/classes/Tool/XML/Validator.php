@@ -95,7 +95,9 @@ class Hymn_Tool_XML_Validator
 	/**
 	 *	Validates a local XML file.
 	 *	@access		public
+	 *	@param		string		$fileName
 	 *	@return		bool
+	 *	@throws		InvalidArgumentException	if XML file is not existing
 	 */
 	public function validateFile( string $fileName ): bool
 	{

@@ -69,7 +69,7 @@ class Hymn_Structure_Module
 	/**	@var array<Hymn_Structure_Module_Author> $authors */
 	public array $authors				= [];
 
-	/**	@var array<Hymn_Structure_Module_License> $authors */
+	/**	@var array<Hymn_Structure_Module_License> $licenses */
 	public array $licenses				= [];
 
 	/**	@var Hymn_Structure_Module_Files $files */

@@ -64,8 +64,10 @@ class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Com
 			$this->downloadFile( $urlHymn, $pathFile );
 			$this->client->outVerbose( 'Saved to: '.$pathFile );
 		}
-		$this->out( 'Version installed: ', FALSE );
-		passthru( 'hymn version' );
+		if( !$this->flags->quiet ){
+			$this->out( 'Version installed: ', FALSE );
+			passthru( 'hymn version' );
+		}
 	}
 
 	protected function downloadFile( string $url, string $file ): void

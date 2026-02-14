@@ -45,24 +45,6 @@ class Hymn_Module_Files
 	protected object $flags;
 
 	/**
-	 *	Constructor.
-	 *	@access		public
-	 *	@param		Hymn_Client		$client		Hymn client instance
-	 */
-	public function __construct( Hymn_Client $client )
-	{
-		$this->client	= $client;
-		$this->config	= $this->client->getConfig();
-		$this->flags	= (object) [
-			'dry'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
-			'force'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
-			'quiet'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
-			'verbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
-			'noFiles'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_NO_FILES ),
-		];
-	}
-
-	/**
 	 *	Creates a path.
 	 *	A nested path will be created recursively.
 	 *	No error messages will be shown but the return value indicates the result.
@@ -79,6 +61,24 @@ class Hymn_Module_Files
 		if( @mkdir( $path, 0777, TRUE ) )
 			return TRUE;
 		return FALSE;
+	}
+
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		Hymn_Client		$client		Hymn client instance
+	 */
+	public function __construct( Hymn_Client $client )
+	{
+		$this->client	= $client;
+		$this->config	= $this->client->getConfig();
+		$this->flags	= (object) [
+			'dry'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'force'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
+			'quiet'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
+			'verbose'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
+			'noFiles'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_NO_FILES ),
+		];
 	}
 
 	/**

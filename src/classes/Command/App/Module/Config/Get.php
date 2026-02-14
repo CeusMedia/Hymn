@@ -81,7 +81,6 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 			}
 		}
 		else{
-			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			$config			= $configurator->get( $moduleId, $configKey );
 			$this->out( $config->value );
 		}
