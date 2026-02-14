@@ -40,6 +40,12 @@ declare(strict_types=1);
 
 class Hymn_Structure_Graph
 {
+	public const int STATUS_EMPTY		= 0;
+	public const int STATUS_CHANGED		= 1;
+	public const int STATUS_LINKED		= 2;
+	public const int STATUS_PRODUCED	= 3;
+	public const int STATUS_DRAWN		= 4;
+
 	/** @var	Hymn_Module_Library				$library */
 	public Hymn_Module_Library $library;
 
@@ -47,6 +53,9 @@ class Hymn_Structure_Graph
 	public array $nodes							= [];
 
 	protected array $errors						= [];
+
+	/** @var		integer					$status */
+	protected int $status					= self::STATUS_EMPTY;
 
 	public function __construct( Hymn_Module_Library $library )
 	{
@@ -72,24 +81,8 @@ class Hymn_Structure_Graph
 			return $this;																			//  exit without adding relations again
 		}
 		$this->nodes[$module->id]	= new Hymn_Structure_Graph_Node( $module, $level );				//  add module to node list by module ID
-//		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
-		foreach( $module->relations->needs as $relatedComponent ){									//  iterate all modules linked as "needed"
-			$neededModuleId	= $relatedComponent->id;
-			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relatedComponent->type )
-				continue;
-			if( $relatedComponent->source ){
-				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relatedComponent->source ) ){
-					$message	= 'Module %s needs module %s from source %s, which is missing.';
-					$this->errors[]	= vsprintf( $message, [
-						$module->id,
-						$neededModuleId,
-						$relatedComponent->source,
-					] );
-				}
-			}
-			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relatedComponent->source );		//  get module data object from module library
-			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
-		}
+		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
+		$this->addNeededModules( $module, $level );
 		return $this;
 	}
 
@@ -126,6 +119,23 @@ class Hymn_Structure_Graph
 	}
 
 	/**
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		array<array<Hymn_Structure_Module>>
+	 *	@throws		RuntimeException			if no modules were loaded
+	 */
+	public function findWaysUpFromModule( Hymn_Structure_Module $module ): array
+	{
+		if( $this->status < self::STATUS_CHANGED )
+			throw new RuntimeException( 'No modules loaded' );
+		if( $this->status < self::STATUS_LINKED )
+			$this->realizeRelations();
+
+		$ways	= [];
+		$this->bubbleUp( $module, $ways );
+		return $ways;
+	}
+
+	/**
 	 *	@return		array<string>
 	 */
 	public function getErrors( bool $flush = FALSE ): array
@@ -153,8 +163,18 @@ class Hymn_Structure_Graph
 		return $this->nodes;
 	}
 
+	/**
+	 *	@return		int
+	 */
+	public function getStatus(): int
+	{
+		return $this->status;
+	}
+
 	public function realizeRelations(): void
 	{
+		if( self::STATUS_LINKED <= $this->status )
+			return;
 		/*  count ingoing and outgoing module links  */
 		foreach( $this->nodes as $id => $node ){													//  iterate all nodes
 			foreach( $node->module->relations->needs as $neededModuleId => $relation ){				//  iterate all needed modules of node
@@ -165,6 +185,71 @@ class Hymn_Structure_Graph
 				}
 			}
 		}
-//		$this->status	= self::STATUS_LINKED;
+		$this->status	= self::STATUS_LINKED;
+	}
+
+	/**
+	 *	@param		int		$status
+	 *	@return		self
+	 */
+	public function setStatus( int $status ): self
+	{
+		$this->status = $status;
+		return $this;
+	}
+
+
+	//  --  PROTECTED  --  //
+
+
+	/**
+	 *	Adds modules needed by originally added module.
+	 *	Attention: Recurses to addModule, thus works recursively.
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@param		int		$level
+	 *	@return		void
+	 */
+	protected function addNeededModules( Hymn_Structure_Module $module, int $level ): void
+	{
+		foreach( $module->relations->needs as $relation ){									//  iterate all modules linked as "needed"
+			$neededModuleId	= $relation->id;
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )
+				continue;
+			if( $relation->source ){
+				if( !$this->library->isAvailableModuleInSource( $neededModuleId, $relation->source ) ){
+					$message	= 'Module %s needs module %s from source %s, which is missing.';
+					$this->errors[]	= vsprintf( $message, [
+						$module->id,
+						$neededModuleId,
+						$relation->source,
+					] );
+				}
+			}
+			$neededModule	= $this->library->getAvailableModule( $neededModuleId, $relation->source );		//  get module data object from module library
+			$this->addModule( $neededModule, $level + 1 );											//  add this needed module with increased load level
+		}
+	}
+
+	/**
+	 *	This recursive method is used by findWaysUpFromModule.
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@param		array		$ways		Link to list to collect all traces in.
+	 *	@param		array|NULL	$steps		Current trace
+	 *	@return		void
+	 */
+	protected function bubbleUp( Hymn_Structure_Module $module, array & $ways, ?array $steps = NULL ): void
+	{
+		$steps		??= [];
+		$parents	= $this->nodes[$module->id]->in;
+		if( [] === $parents ){										//  no more parents
+			$steps[]	= $module;									//  add original module
+			$ways[]		= $steps;									//  finally report complete ways
+			return;													//  finish this trace
+		}
+		foreach( $parents as $parent ){								//  we are in the middle of a trace
+			$clone		= $steps;									//  copy trace so far
+			$clone[]	= $module;									//  note this module on cloned trace
+			$this->bubbleUp( $parent, $ways, $clone );			//  continue tracing for this module
+		}
 	}
 }

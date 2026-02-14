@@ -39,11 +39,6 @@ declare(strict_types=1);
  */
 class Hymn_Module_Graph
 {
-	public const int STATUS_EMPTY		= 0;
-	public const int STATUS_CHANGED		= 1;
-	public const int STATUS_LINKED		= 2;
-	public const int STATUS_PRODUCED	= 3;
-	public const int STATUS_DRAWN		= 4;
 
 	/** @var		Hymn_Client				$client */
 	public Hymn_Client $client;
@@ -51,16 +46,10 @@ class Hymn_Module_Graph
 	/** @var		Hymn_Module_Library		$library */
 	public Hymn_Module_Library $library;
 
-	/** @var		array					$nodes */
-	public array $nodes						= [];
-
 	protected Hymn_Structure_Graph $graph;
 
 	/** @var		object{quiet: bool, verbose: bool}	$flags */
 	protected object $flags;
-
-	/** @var		integer					$status */
-	protected int $status					= self::STATUS_EMPTY;
 
 	public function __construct( Hymn_Client $client, Hymn_Module_Library $library )
 	{
@@ -75,7 +64,6 @@ class Hymn_Module_Graph
 
 	/**
 	 *	Adds a module to graph as well as all modules linked as 'needed'.
-	 *	Sets status to 'changed'.
 	 *	@access		public
 	 *	@param		Hymn_Structure_Module	$module		Module data object
 	 *	@param		integer					$level		Load level of module, default: 0
@@ -87,7 +75,16 @@ class Hymn_Module_Graph
 		$errors		= $this->graph->getErrors( TRUE );
 		if( [] !== $errors )
 			$this->client->outError( current( $errors ), Hymn_Client::EXIT_ON_RUN );
-		$this->status	= self::STATUS_CHANGED;														//  set internal status to "changed"
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		array<array<Hymn_Structure_Module>>
+	 *	@throws		RuntimeException			if no modules were loaded
+	 */
+	public function findWaysUpFromModule( Hymn_Structure_Module $module ): array
+	{
+		return $this->graph->findWaysUpFromModule( $module );
 	}
 
 	/**
@@ -99,10 +96,7 @@ class Hymn_Module_Graph
 	 */
 	public function getModulesOrderedByDependency(): array
 	{
-		if( $this->status < self::STATUS_CHANGED )
-			throw new RuntimeException( 'No modules loaded' );
-		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations();
+		$this->realizeRelations();
 
 		/*  calculate maximum relation depth  */
 		$list	= [];
@@ -135,10 +129,9 @@ class Hymn_Module_Graph
 	}
 
 	//  @todo	make independent from need/support
-	public function renderGraphFile( string $targetFile = NULL/*, string $type = 'needs'*/ ): string
+	public function renderGraphContent( /*string $type = 'needs'*/ ): string
 	{
-		if( $this->status < self::STATUS_LINKED )
-			$this->realizeRelations();
+		$this->realizeRelations();
 		$nodeStyle	= 'fontsize=9 shape=box color=black style=filled color="#00007F" fillcolor="#CFCFFF"';
 		$nodes	= [];
 		$edges	= [];
@@ -149,59 +142,63 @@ class Hymn_Module_Graph
 				$edges[]	= $node->module->id.' -> '.$out->module->id.' []';
 		}
 		$options	= "\n\t".'rankdir="LR"';
-		$this->status	= self::STATUS_PRODUCED;
-		if( $this->flags->verbose && !$this->flags->quiet )
+		$this->graph->setStatus( Hymn_Structure_Graph::STATUS_PRODUCED );
+		if( $this->flags->verbose )
 			$this->client->out( "Produced graph with ".count( $nodes )." nodes and ".count( $edges )." edged." );
 		$nodes		= $nodes ? "\n\t".join( "\n\t", $nodes ) : '';
 		$edges		= $edges ? "\n\t".join( "\n\t", $edges ) : '';
-		$graph		= "digraph {".$options.$nodes.$edges."\n}";
-		if( $targetFile ){
-			file_put_contents( $targetFile, $graph );
-			if( !$this->flags->quiet )
-				$this->client->out( "Saved graph file to ".$targetFile."." );
-		}
+		return "digraph {".$options.$nodes.$edges."\n}";
+	}
+
+	//  @todo	make independent from need/support
+	public function renderGraphFile( /*string $type = 'needs'*/ ): string
+	{
+		$graphFile	= $this->client->getConfigPath().'modules.graph';
+		$graph		= $this->renderGraphContent();
+		file_put_contents( $graphFile, $graph );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Saved graph file to '.$graphFile.'.' );
 		return $graph;
 	}
 
-	public function renderGraphImage( ?string $graph = NULL, ?string $targetFile = NULL ): ?string
+	/**
+	 *	@return		void
+	 */
+	public function renderGraphImages(): void
 	{
-		$this->client->out( "Checking graphviz: ", FALSE );
+		$graphFile	= $this->client->getConfigPath().'modules.graph';
+		$this->client->out( 'Checking graphviz: ', FALSE );
 		$toolTest	= new Hymn_Tool_Test( $this->client );
-		$toolTest->checkShellCommand( "graphviz" );
-		$this->client->out( "OK" );
-		try{
-			if( !$graph )
-				$graph		= $this->renderGraphFile();
-			$sourceFile	= tempnam( sys_get_temp_dir(), 'Hymn' );
-			file_put_contents( $sourceFile, $graph );												//  save temporary
-
-			if( $targetFile ){
-				@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
-				if( !$this->flags->quiet )
-					$this->client->out( 'Graph image saved to '.$targetFile.'.' );
-			}
-			else{
-				exec( 'dot -Tpng -O '.$sourceFile );
-				unlink( $sourceFile );
-				$graphImage	= file_get_contents( $sourceFile.'.png' );
-				@unlink( $sourceFile );
-				return $graphImage;
-			}
-		}
-		catch( Exception $e ){
-			$this->client->out( 'Graph rendering failed: '.$e->getMessage().'.' );
-		}
-		return NULL;
+		$toolTest->checkShellCommand( 'graphviz' );
+		$this->client->out( 'OK' );
+		$this->renderGraphPngImage( $graphFile );
+		$this->renderGraphSvgImage( $graphFile );
 	}
+
+
+	//  --  PROTECTED  --  //
+
 
 	protected function realizeRelations(): void
 	{
-		if( self::STATUS_LINKED <= $this->status )
-			return;
 		$this->graph->realizeRelations();
-		$this->status	= self::STATUS_LINKED;
-		if( $this->flags->verbose && !$this->flags->quiet )
-			$this->client->outVeryVerbose( "Found ".count( $this->nodes )." modules." );
+		$this->client->outVeryVerbose( "Found ".count( $this->graph->getNodes() )." modules." );
 		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after realizing module relations' ) );
+	}
+
+	protected function renderGraphPngImage( string $sourceFile ): void
+	{
+		$targetFile	= $sourceFile.'.png';
+		@exec( 'dot -Tpng -o'.$targetFile.' '.$sourceFile );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Graph PNG image saved to '.$targetFile.'.' );
+	}
+
+	protected function renderGraphSvgImage( string $sourceFile ): void
+	{
+		$targetFile	= $sourceFile.'.svg';
+		@exec( 'dot -Tsvg -o'.$targetFile.' '.$sourceFile );
+		if( !$this->flags->quiet )
+			$this->client->out( 'Graph SVG image saved to '.$targetFile.'.' );
 	}
 }

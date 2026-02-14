@@ -68,7 +68,9 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 		}
 	}
 
+
 	//  --  PROTECTED  --  //
+
 
 	/**
 	 *	Traverses installed modules to collect hook information.
