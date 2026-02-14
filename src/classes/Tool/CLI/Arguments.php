@@ -80,9 +80,11 @@ class Hymn_Tool_CLI_Arguments
 
 	public function getOptions(): array
 	{
-		return array_map( function( $option ){
-			return $option['value'];
-		}, $this->options );
+		$options	= [];
+		foreach( $this->options as $key => $option ){
+			$options[$key]	= $option['value'];
+		}
+		return $options;
 	}
 
 	public function hasOption( string $key, bool $hasValue = FALSE ): bool

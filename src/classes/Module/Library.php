@@ -64,6 +64,10 @@ class Hymn_Module_Library
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
+	/**
+	 *	Not used atm.
+	 *	@todo what to do with this?
+	 */
 	public function addModuleToSource( Hymn_Structure_Module $module, Hymn_Structure_Source $source ): static
 	{
 		$this->available->addModuleToSource( $module, $source );

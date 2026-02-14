@@ -125,15 +125,15 @@ class Hymn_Module_Info
 	public function showModuleRelations( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
 	{
 		$module->relations->requiredBy	= [];
-		foreach( $library->listInstalledModules() as $moduleId => $installedModule )
-			if( array_key_exists( $moduleId, $installedModule->relations->needs ) )
+		foreach( $library->listInstalledModules() as $installedModule )
+			if( array_key_exists( $module->id, $installedModule->relations->needs ) )
 				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $installedModule->relations->needs[$module->id]->type )
 					$module->relations->requiredBy[$installedModule->id]	= $installedModule;
 
 		$module->relations->neededBy	= [];
-		foreach( $library->getAvailableModules() as $moduleId => $availableModule )
-			if( array_key_exists( $moduleId, $availableModule->relations->needs ) )
-				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$moduleId]->type )
+		foreach( $library->getAvailableModules() as $availableModule )
+			if( array_key_exists( $module->id, $availableModule->relations->needs ) )
+				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $availableModule->relations->needs[$module->id]->type )
 					$module->relations->neededBy[$availableModule->id]	= $availableModule;
 
 		if( count( $module->relations->needs ) ){

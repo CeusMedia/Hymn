@@ -39,6 +39,7 @@ A1. Project Creation and Source Management
 - source-index [-v] SOURCE                    Show index of source if available
 - source-index-clear SOURCE                   Remove source index files
 - source-index-create SOURCE                  Generate source index files
+- source-validate [-qv] SOURCE                Validate module XML files of all modules in source
 
 A2. Project Setup and Information
 ------------------------------------------------------------------------------
@@ -95,6 +96,8 @@ B3. App Module Management
 - app-module-config-get MODULE.KEY            Get config value of installed module by config key
 - app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 - app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
+- app-module-config-uncache                   Remove app module cache
+- app-module-config-validate                  Validate XML file of installed modules
 - app-module-reconfigure [-dqv] MODULE        Configure installed module
 
 B4. App Database Management

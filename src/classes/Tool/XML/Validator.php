@@ -43,6 +43,18 @@ class Hymn_Tool_XML_Validator
 	protected array $error	= [];
 
 	/**
+	 *	Returns last error.
+	 *	@access		public
+	 *	@return		?object{error: string, line: int, message: string }
+	 */
+	public function getError(): ?object
+	{
+		if( $this->error )
+			return (object) $this->error;
+		return NULL;
+	}
+
+	/**
 	 *	Returns last error line.
 	 *	@access		public
 	 *	@return		int
