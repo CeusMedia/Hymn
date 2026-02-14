@@ -49,54 +49,86 @@ class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Comma
 	public function run(): void
 	{
 		if( !file_exists( Hymn_Client::$fileName ) )
-			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
+			throw new RuntimeException( vsprintf( "Hymn project '%s' is missing. Please run 'hymn init'!", [
+				Hymn_Client::$fileName
+			] ) );
 
-		$list		= [];
-		$tree		= [];
-		$library	= $this->getLibrary();
-		foreach( $library->listInstalledModules() as $moduleId => $module ){
-			foreach( $module->hooks as $resource => $events ){
-				foreach( $events as $event => $hooks ){
-					foreach( $hooks as $hook ){
-						$id		= $resource.'_'.$event.'_'.$moduleId.'_'.$hook->callback;
-						$dto	= (object) [
-							'moduleId'		=> $moduleId,
-							'resource'		=> $resource,
-							'event'			=> $event,
-							'callback'		=> $hook->callback,
-							'level'			=> $hook->level,
-						];
-						$list[$id]	= $dto;
-						$tree[$resource][$event][]	= $dto;
-					}
-				}
-			}
-		}
-		ksort( $list );
-
+		$tree	= $this->collectHooksFromInstalledModules();
 		if( $this->flags->verbose ){
-			foreach( $tree as $resource => $events ){
-				$this->out( '- Resource: '.$resource );
-				foreach( $events as $event => $hooks ){
-					$this->out( '  - Event: '.$event );
-					foreach( $hooks as $hook ){
-						$this->out( '    - Module: '.$hook->moduleId );
-						$this->out( '      Callback: '.$hook->callback );
-						if( 5 !== $hook->level )
-							$this->out( '      Level: '.$hook->level );
-					}
+			$this->printTree( $tree );
+			return;
+		}
+		foreach( $this->reduceTreeToList( $tree ) as $hook ) {
+			$this->out( vsprintf( '- %s > %s >> [%s] %s', [
+				$hook->resource,
+				$hook->event,
+				$hook->moduleId,
+				$hook->callback,
+			] ) );
+		}
+	}
+
+
+	//  --  PROTECTED  --  //
+
+
+	/**
+	 *	Traverses installed modules to collect hook information.
+	 *	Use ::printTree to display this tree.
+	 *	Use ::reduceTreeToList to create a simple list of collected hook information.
+	 *
+	 *	@return		array<string,array<string,Hymn_Structure_ModuleHook[]>>
+	 */
+	protected function collectHooksFromInstalledModules(): array
+	{
+		$tree	= [];
+		foreach( $this->getLibrary()->listInstalledModules() as $moduleId => $module )
+			foreach( $module->hooks as $resource => $events )
+				foreach( $events as $event => $hooks )
+					foreach( $hooks as $hook )
+						$tree[$resource][$event][]	= new Hymn_Structure_ModuleHook(
+							$moduleId,
+							$resource,
+							$event,
+							$hook->callback,
+							$hook->level,
+						);
+		return $tree;
+	}
+
+	/**
+	 *	@param		array<string,array<string,Hymn_Structure_ModuleHook[]>>		$tree
+	 *	@return		void
+	 */
+	protected function printTree( array $tree ): void
+	{
+		foreach( $tree as $resource => $events ){
+			$this->out( '- Resource: '.$resource );
+			foreach( $events as $event => $hooks ){
+				$this->out( '  - Event: '.$event );
+				foreach( $hooks as $hook ){
+					$this->out( '    - Module: '.$hook->moduleId );
+					$this->out( '      Callback: '.$hook->callback );
+					if( 5 !== $hook->level )
+						$this->out( '      Level: '.$hook->level );
 				}
 			}
 		}
-		else{
-			foreach( $list as $hook ) {
-				$this->out( vsprintf( '- %s > %s >> [%s] %s', [
-					$hook->resource,
-					$hook->event,
-					$hook->moduleId,
-					$hook->callback,
-				] ) );
-			}
-		}
+	}
+
+	/**
+	 *	Reduces tree of collected module hooks to a list of module hook information.
+	 *	@param		array<string,array<string,Hymn_Structure_ModuleHook[]>>		$tree
+	 *	@return		array<string,Hymn_Structure_ModuleHook>
+	 */
+	protected function reduceTreeToList( array $tree ): array
+	{
+		$list		= [];
+		foreach( $tree as $resource => $events )
+			foreach( $events as $event => $hooks )
+				foreach( $hooks as $hook )
+					$list[$resource.'_'.$event.'_'.$hook->moduleId.'_'.$hook->callback]	= $hook;
+		ksort( $list );
+		return $list;
 	}
 }

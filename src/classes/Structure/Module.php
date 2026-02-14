@@ -41,9 +41,9 @@ class Hymn_Structure_Module
 {
 	public string $id;
 	public ?string $source				= NULL;
-	public ?string $sourceId				= NULL;
-	public ?string $sourcePath				= NULL;
-	public ?string $sourceType				= NULL;
+	public ?string $sourceId			= NULL;
+	public ?string $sourcePath			= NULL;
+	public ?string $sourceType			= NULL;
 	public string $file;
 	public ?string $uri					= NULL;
 	public ?string $path				= NULL;

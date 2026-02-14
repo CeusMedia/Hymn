@@ -105,7 +105,7 @@ class Hymn_Module_Installer
 		/** @var string $xml */
 		$xml	= file_get_contents( $target );
 		$xml	= new Hymn_Tool_XML_Element( $xml );
-		$type	= $this->app->type ?? 1;
+		$type	= $this->app->installType ?? 'live';
 		if( !$this->flags->dry ){																//  if not in dry mode
 			$xml->version->setAttribute( 'install-type', $type );
 			$xml->version->setAttribute( 'install-source', $module->sourceId );
@@ -126,14 +126,14 @@ class Hymn_Module_Installer
 			$value			= $moduleConfigData->value;											//  note original module config value
 			$configValue	= $isInConfig ? $configModule[$moduleConfigKey] : $value;			//  note configured nodule config value as string
 			if( $isBoolean && $isInConfig ){													//  override boolean module config value by hymn file
-				$valueAsString	= strtolower( trim( $configValue ) );
+				$valueAsString	= strtolower( trim( (string) $configValue ) );
 				$configValue	= NULL;
 				if( in_array( $valueAsString, ['no', 'false', '0'] ) )
 					$configValue	= FALSE;
 				else if( in_array( $valueAsString, ['yes', 'true', '1'] ) )
 					$configValue	= TRUE;
 			}
-			$hasValue	= $isBoolean ? NULL !== $configValue : '' !== trim( $configValue );
+			$hasValue	= $isBoolean ? NULL !== $configValue : '' !== trim( (string) $configValue );
 			if( $moduleConfigData->mandatory && !$hasValue ){
 				if( $this->flags->quiet ){														//  in quiet mode no input is allowed
 					if( $this->flags->force )													//  don't quit (with exception) in force mode

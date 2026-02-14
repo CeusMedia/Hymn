@@ -64,9 +64,20 @@ class Hymn_Module_Library
 		$this->available	= new Hymn_Module_Library_Available( $client );
 	}
 
-	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
+	/**
+	 *	Not used atm.
+	 *	@todo what to do with this?
+	 */
+	public function addModuleToSource( Hymn_Structure_Module $module, Hymn_Structure_Source $source ): static
+	{
+		$this->available->addModuleToSource( $module, $source );
+		return $this;
+	}
+
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		$this->available->addSource( $sourceId, $path, $type, $active, $title );
+		return $this;
 	}
 
 	public function getActiveSources( bool $withModules = FALSE ): array

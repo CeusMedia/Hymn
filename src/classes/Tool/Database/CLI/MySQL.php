@@ -158,7 +158,7 @@ class Hymn_Tool_Database_CLI_MySQL
 	{
 		$quotedPrefix	= preg_quote( $prefix, '@' );
 		$regExp		= "@(EXISTS|FROM|INTO|TABLE|TABLES|for table)( `)(".$quotedPrefix.")(.+)(`)@U";	//  build regular expression
-		$callback	= [$this, '_callbackReplacePrefix'];											//  create replace callback
+		$callback	= [$this, 'callbackReplacePrefix'];											//  create replace callback
 
 		rename( $fileName, $fileName."_" );														//  move dump file to source file
 		$fpIn		= fopen( $fileName."_", "r" );									//  open source file
@@ -194,7 +194,7 @@ class Hymn_Tool_Database_CLI_MySQL
 
 	/*  --  PROTECTED  --  */
 
-	protected function _callbackReplacePrefix( array $matches ): string
+	protected function callbackReplacePrefix( array $matches ): string
 	{
 		if( $matches[1] === 'for table' )
 			return $matches[1].$matches[2].$matches[4].$matches[5];

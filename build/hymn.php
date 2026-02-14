@@ -65,4 +65,5 @@ if( version_compare( PHP_VERSION, '8.0', '<' ) ){
 }
 
 new Hymn_Loader();																//  load hymn classes
-new Hymn_Client( $arguments );													//  start hymn client
+$client	= new Hymn_Client( $arguments );										//  start hymn client
+$client->run();

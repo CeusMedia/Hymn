@@ -157,46 +157,6 @@ class Hymn_Client
 			self::$mode		= file_get_contents( $phar.'.mode' ) ?: 'prod';
 		if( file_exists( $phar.'.php' ) )
 			self::$phpPath	= file_get_contents( $phar.'.php' ) ?: '/usr/bin/env php';
-
-		try{
-			$this->parseArguments( $arguments );
-			$this->realizeLanguage();
-			$this->output		= new Hymn_Tool_CLI_Output( $this, $exit );
-			$this->outVeryVerbose( 'hymn v'.self::$version );
-			$this->outVeryVerbose( $this->getMemoryUsage( 'at start' ) );
-
-			if( getEnv( 'HTTP_HOST' ) )
-				throw new RuntimeException( 'Access denied' );
-			$action	= $this->arguments->getArgument();
-			if( !$action && $this->arguments->getOption( 'help' ) ){
-				array_unshift( $arguments, 'help' );
-				$this->parseArguments( $arguments, [], TRUE );
-			}
-			else if( $this->arguments->getOption( 'version' ) ){
-				array_unshift( $arguments, 'version' );
-				$this->parseArguments( $arguments, [], TRUE );
-			}
-
-			self::$fileName		= (string) $this->arguments->getOption( 'file' );
-			$this->dispatch();
-		}
-		catch( Exception $e ){
-			$this->outError( $e->getMessage().'.' );
-			$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
-			exit( Hymn_Client::EXIT_ON_SETUP );
-		}
-		finally{
-			$this->outVeryVerbose( $this->getMemoryUsage( 'at the end' ) );
-		}
-		if( $this->exit )
-			exit( Hymn_Client::EXIT_ON_END );
-	}
-
-	public function getFramework(): Hymn_Tool_Framework
-	{
-		if( !$this->framework )
-			$this->framework	= new Hymn_Tool_Framework();
-		return $this->framework;
 	}
 
 	public function getConfig(): Hymn_Structure_Config
@@ -218,6 +178,13 @@ class Hymn_Client
 		if( !$this->database )
 			$this->database		= new Hymn_Tool_Database_PDO( $this );
 		return $this->database;
+	}
+
+	public function getFramework(): Hymn_Tool_Framework
+	{
+		if( !$this->framework )
+			$this->framework	= new Hymn_Tool_Framework();
+		return $this->framework;
 	}
 
 	public function getLocale(): ?Hymn_Tool_Locale
@@ -350,6 +317,43 @@ class Hymn_Client
 	{
 		$this->output?->outVeryVerbose( $lines, $newLine );
 		return $this;
+	}
+
+	public function run(): void
+	{
+		try{
+			$arguments	= $this->originalArguments;
+			$this->parseArguments( $arguments );
+			$this->realizeLanguage();
+			$this->output		= new Hymn_Tool_CLI_Output( $this, $this->exit );
+			$this->outVeryVerbose( 'hymn v'.self::$version );
+			$this->outVeryVerbose( $this->getMemoryUsage( 'at start' ) );
+
+			if( getEnv( 'HTTP_HOST' ) )
+				throw new RuntimeException( 'Access denied' );
+			$action	= $this->arguments->getArgument();
+			if( !$action && $this->arguments->getOption( 'help' ) ){
+				array_unshift( $arguments, 'help' );
+				$this->parseArguments( $arguments, [], TRUE );
+			}
+			else if( $this->arguments->getOption( 'version' ) ){
+				array_unshift( $arguments, 'version' );
+				$this->parseArguments( $arguments, [], TRUE );
+			}
+
+			self::$fileName		= (string) $this->arguments->getOption( 'file' );
+			$this->dispatch();
+		}
+		catch( Exception $e ){
+			$this->outError( $e->getMessage().'.' );
+			$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
+			exit( Hymn_Client::EXIT_ON_SETUP );
+		}
+		finally{
+			$this->outVeryVerbose( $this->getMemoryUsage( 'at the end' ) );
+		}
+		if( $this->exit )
+			exit( Hymn_Client::EXIT_ON_END );
 	}
 
 	public function runCommand( string $command, array $arguments = [], array $addOptions = [], array $ignoreOptions = [] ): void
