@@ -166,6 +166,11 @@ class Hymn_Module_Library
 		return $module;
 	}
 
+	public function isActiveSource( string $sourceId ): bool
+	{
+		return array_key_exists( $sourceId, $this->getActiveSources() );
+	}
+
 	public function isAvailableModuleInSource( string $moduleId, string $sourceId ): bool
 	{
 		if( '' === trim( $moduleId ) )
@@ -176,11 +181,6 @@ class Hymn_Module_Library
 	public function isInstalledModule( string $moduleId ): bool
 	{
 		return $this->installed->has( $moduleId );
-	}
-
-	public function isActiveSource( string $sourceId ): bool
-	{
-		return array_key_exists( $sourceId, $this->getActiveSources() );
 	}
 
 	public function isSource( string $sourceId ): bool
@@ -211,15 +211,15 @@ class Hymn_Module_Library
 		return $this->installed->get( $moduleId );
 	}
 
-	public function useCache( bool $useCache = TRUE ): self
-	{
-		$this->useCache		= $useCache;
-		return $this;
-	}
-
 	public function setReadMode( int $mode ): self
 	{
 		$this->available->setMode( $mode );
+		return $this;
+	}
+
+	public function useCache( bool $useCache = TRUE ): self
+	{
+		$this->useCache		= $useCache;
 		return $this;
 	}
 }

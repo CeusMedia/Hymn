@@ -160,6 +160,19 @@ class Hymn_Tool_Database_PDO
 	}
 
 	/**
+	 *	Returns database access configuration as data object.
+	 *	@access		public
+	 *	@return		Hymn_Tool_Database_Source
+	 */
+	public function getConfig(): Hymn_Tool_Database_Source
+	{
+		$this->prepareConnection( FALSE );
+		if( !$this->dba )
+			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
+		return $this->dba;
+	}
+
+	/**
 	 *	Returns database access configuration as object or a single pair by given key.
 	 *	@access		public
 	 *	@param		string		$key		Key to return single pair for
@@ -178,29 +191,6 @@ class Hymn_Tool_Database_PDO
 	}
 
 	/**
-	 *	Returns database access configuration as data object.
-	 *	@access		public
-	 *	@return		Hymn_Tool_Database_Source
-	 */
-	public function getConfig(): Hymn_Tool_Database_Source
-	{
-		$this->prepareConnection( FALSE );
-		if( !$this->dba )
-			$this->client->outError( 'Database support is not configured (on getConfig).', Hymn_Client::EXIT_ON_SETUP );
-		return $this->dba;
-	}
-
-	/**
-	 *	Indicates whether a database connection has been established.
-	 *	@access		public
-	 *	@return		boolean
-	 */
-	public function isConnected(): bool
-	{
-		return (bool) $this->dbc;
-	}
-
-	/**
 	 *	Returns list of tables within database.
 	 *	With given prefix, the returned list of tables will be filtered.
 	 *	@access		public
@@ -214,6 +204,16 @@ class Hymn_Tool_Database_PDO
 		if( FALSE !== $result )
 			return $result->fetchAll( PDO::FETCH_COLUMN );
 		return [];
+	}
+
+	/**
+	 *	Indicates whether a database connection has been established.
+	 *	@access		public
+	 *	@return		boolean
+	 */
+	public function isConnected(): bool
+	{
+		return (bool) $this->dbc;
 	}
 
 	/**

@@ -114,7 +114,7 @@ class Hymn_Module_Installer
 
 		//  get configured module config pairs
 		$configModule	= [];
-		if( isset( $this->config->modules[$module->id] ) )									//  module not mentioned in hymn file
+		if( isset( $this->config->modules[$module->id] ) )										//  module not mentioned in hymn file
 			if( isset( $this->config->modules[$module->id]->config ) )
 				$configModule	= $this->config->modules[$module->id]->config;
 

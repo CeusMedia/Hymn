@@ -210,6 +210,12 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 		return in_array( $name, $names );
 	}
 
+	public function remove(): void
+	{
+		$dom	= dom_import_simplexml( $this );
+		$dom->parentNode->removeChild( $dom );
+	}
+
 	/**
 	 *	Removes an attribute by its name.
 	 *	@access		public
@@ -227,12 +233,6 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 			}
 		}
 		return FALSE;
-	}
-
-	public function remove(): void
-	{
-		$dom	= dom_import_simplexml( $this );
-		$dom->parentNode->removeChild( $dom );
 	}
 
 	public function removeChild( string $name, ?int $number = NULL ): int

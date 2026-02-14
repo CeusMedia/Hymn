@@ -140,6 +140,14 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
+	 *	@return		string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
 	 *	@param		bool		$asTrimmedString		Default: no
 	 *	@return		bool|float|int|string|NULL
 	 */
@@ -151,14 +159,6 @@ class Hymn_Tool_ConfigValue
 			return trim( strval( $this->value ) );
 		}
 		return $this->value;
-	}
-
-	/**
-	 *	@return		string
-	 */
-	public function getType(): string
-	{
-		return $this->type;
 	}
 
 	/**
@@ -194,21 +194,6 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
-	 *	@param		int|float|bool|string|NULL	$value
-	 *	@return		static
-	 */
-	public function setValue( int|float|bool|string|NULL $value ): static
-	{
-		$value		= trim( (string) $value );
-		if( 'bool' === $this->type )															//  value is boolean
-			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
-		else
-			$value	= settype( $value, $this->type );
-		$this->value	= $value;
-		return $this;
-	}
-
-	/**
 	 *	@param		string|NULL		$type
 	 *	@return		static
 	 */
@@ -223,6 +208,21 @@ class Hymn_Tool_ConfigValue
 		if( !in_array( $type, $types, TRUE ) )
 			throw new DomainException( 'Invalid config value type: '.$type );
 		$this->type	= $type;
+		return $this;
+	}
+
+	/**
+	 *	@param		int|float|bool|string|NULL	$value
+	 *	@return		static
+	 */
+	public function setValue( int|float|bool|string|NULL $value ): static
+	{
+		$value		= trim( (string) $value );
+		if( 'bool' === $this->type )															//  value is boolean
+			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
+		else
+			$value	= settype( $value, $this->type );
+		$this->value	= $value;
 		return $this;
 	}
 }

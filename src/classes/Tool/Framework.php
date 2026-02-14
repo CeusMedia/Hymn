@@ -47,16 +47,6 @@ class Hymn_Tool_Framework
 		$this->detect( NULL, FALSE );
 	}
 
-	public function getVersion(): ?string
-	{
-		return $this->version;
-	}
-
-	public function isInstalled(): bool
-	{
-		return $this->isInstalled;
-	}
-
 	public function checkModuleSupport( object $module ): bool
 	{
 		return TRUE;
@@ -80,6 +70,16 @@ class Hymn_Tool_Framework
 			] ) );
 		}
 		return TRUE;*/
+	}
+
+	public function getVersion(): ?string
+	{
+		return $this->version;
+	}
+
+	public function isInstalled(): bool
+	{
+		return $this->isInstalled;
 	}
 
 	protected function detect( ?string $pathToFramework = NULL, bool $strict = TRUE ): bool

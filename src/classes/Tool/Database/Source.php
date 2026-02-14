@@ -47,6 +47,15 @@ class Hymn_Tool_Database_Source
 	public ?string $password	= NULL;
 	public array $modules	= [];
 
+	public static function fromArray( array $data ): self
+	{
+		$instance = new self( $data['driver'] );
+		$instance->setResource( $data['host'], $data['port'] );
+		$instance->setAccess( $data['username'], $data['password'] );
+		$instance->setDatabase( $data['name'], $data['prefix'] );
+		return $instance;
+	}
+
 	public function __construct( string $driver )
 	{
 		$this->driver	= $driver;
@@ -71,14 +80,5 @@ class Hymn_Tool_Database_Source
 		$this->host = $host;
 		$this->port = $port;
 		return $this;
-	}
-
-	public static function fromArray( array $data ): self
-	{
-		$instance = new self( $data['driver'] );
-		$instance->setResource( $data['host'], $data['port'] );
-		$instance->setAccess( $data['username'], $data['password'] );
-		$instance->setDatabase( $data['name'], $data['prefix'] );
-		return $instance;
 	}
 }

@@ -247,15 +247,6 @@ class Hymn_Client
 		return $mode;
 	}*/
 
-	public function getModuleInstallType( string $moduleId, string $defaultInstallType = 'copy' ): string
-	{
-		$type	= $this->config->application->installType ?? $defaultInstallType;
-		if( isset( $this->config->modules[$moduleId] ) )
-			if( NULL !== $this->config->modules[$moduleId]->installType )
-				$type	= $this->config->modules[$moduleId]->installType;
-		return $type;
-	}
-
 	/**
 	 *	@param		string		$moduleId
 	 *	@param		array		$availableSourceIds
@@ -278,6 +269,20 @@ class Hymn_Client
 				return $defaultInstallSourceId;														//  return default source
 
 		return current( $availableSourceIds );														//  return first available source
+	}
+
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$defaultInstallType
+	 *	@return		string
+	 */
+	public function getModuleInstallType( string $moduleId, string $defaultInstallType = 'copy' ): string
+	{
+		$type	= $this->config->application->installType ?? $defaultInstallType;
+		if( isset( $this->config->modules[$moduleId] ) )
+			if( NULL !== $this->config->modules[$moduleId]->installType )
+				$type	= $this->config->modules[$moduleId]->installType;
+		return $type;
 	}
 
 	/**

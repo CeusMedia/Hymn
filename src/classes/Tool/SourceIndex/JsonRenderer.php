@@ -74,23 +74,23 @@ class Hymn_Tool_SourceIndex_JsonRenderer
 
 	/**
 	 *	@access		public
-	 *	@param		boolean		$printPretty		Flag: use pretty print on JSON encode
-	 *	@return		self
-	 */
-	public function setPrettyPrint( bool $printPretty ): self
-	{
-		$this->printPretty	= $printPretty;
-		return $this;
-	}
-
-	/**
-	 *	@access		public
 	 *	@param		array		$modules		...
 	 *	@return		self
 	 */
 	public function setModules( array $modules ): self
 	{
 		$this->modules	= $modules;
+		return $this;
+	}
+
+	/**
+	 *	@access		public
+	 *	@param		boolean		$printPretty		Flag: use pretty print on JSON encode
+	 *	@return		self
+	 */
+	public function setPrettyPrint( bool $printPretty ): self
+	{
+		$this->printPretty	= $printPretty;
 		return $this;
 	}
 

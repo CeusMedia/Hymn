@@ -302,6 +302,37 @@ class Hymn_Module_Library_Available
 
 	//  --  PROTECTED  --  //
 
+	/**
+	 *	@param		object	$module
+	 *	@param		string											$filePath
+	 *	@return		Hymn_Structure_Module
+	 */
+	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
+	{
+		//  work in progress
+		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
+		foreach( $module->config ?? [] as $config )
+			$obj->config[]	= new Hymn_Structure_Module_Config( $config->key, $config->value, $config->type, $config->title );
+		/** @var object{callback: string, resource: string, event: string, level: int} $hook */
+		foreach( $config->hooks ?? [] as $hook )
+			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
+
+		$list[$module->id]	= $module;
+		$module->config					= (array) $module->config;
+		$module->hooks					= (array) $module->hooks;
+		foreach( $module->hooks as $resource => $events )
+			$module->hooks[$resource]	= (array) $module->hooks[$resource];
+		foreach( $module->files as $category => $files )
+			$module->files->{$category}	=  (array) $files;
+		$module->relations->needs		= (array) $module->relations->needs;
+		$module->relations->supports	= (array) $module->relations->supports;
+//			$module->isDeprecated			= isset( $module->deprecation );
+		if( isset( $module->frameworks ) )
+			$module->frameworks			= (array) $module->frameworks;
+		return $obj;
+
+	}
+
 	protected function decorateModuleWithPaths( Hymn_Structure_Module $module, string $sourcePath ): void
 	{
 		$pathname	= str_replace( "_", "/", $module->id ).'/';						//  assume source module path from module ID
@@ -364,52 +395,6 @@ class Hymn_Module_Library_Available
 		return $list;*/
 	}
 
-	protected function loadModulesInSources( bool $force = FALSE ): void
-	{
-		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
-			return;																					//  skip this rerun
-		$this->modules	= [];																	//  reset module list
-		foreach($this->sources as $source ){														//  iterate sources
-			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $source->id ) );
-			if( !$source->active )																	//  if source is deactivated
-				continue;																			//  skip this source
-			$this->modules[$source->id]	= [];													//  prepare empty module list for source
-			foreach( $this->listModulesInSource( $source ) as $module ){								//  iterate modules in source path
-				$module->sourceId	= $source->id;													//  extend found module by source ID
-				$module->sourcePath	= $source->path;													//  extend found module by source path
-				$module->sourceType	= $source->type;													//  extend found module by source type
-				$this->modules[$source->id][$module->id] = $module;									//  add found module to general module map
-				ksort( $this->modules[$source->id] );												//  sort source modules in general module map
-			}
-			$this->client->outVeryVerbose( vsprintf( '- Found %d modules', [
-				count( $this->modules[$source->id] )
-			] ) );
-		}
-		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after loading module sources' ) );
-//		ksort( $this->modules );																	//  sort general module map by source IDs
-	}
-
-	/**
-	 * @param string $fileSerial
-	 * @param string $path
-	 * @return array<mixed,array<string,Hymn_Structure_Module>>
-	 */
-	protected function loadModulesFromSerialFile( string $fileSerial, string $path ): array
-	{
-		$this->client->outVeryVerbose( '- Strategy: serial file' );
-		$content	= file_get_contents( $fileSerial );
-		if( FALSE === $content )
-			throw new RuntimeException( 'Reading file "'.$fileSerial.'" failed' );
-		$index		= unserialize( $content );
-		foreach( $index->modules as $module ){
-			$module->frameworks		= (array) $module->frameworks;
-//			$module->isDeprecated	= isset( $module->deprecation );
-			$this->decorateModuleWithPaths( $module, $path );
-		}
-		$list	= $index->modules;
-		return [$index, $list];
-	}
-
 	/**
 	 *	@param		string		$fileJson
 	 *	@param		array<string,Hymn_Structure_Module>	$list
@@ -433,35 +418,26 @@ class Hymn_Module_Library_Available
 	}
 
 	/**
-	 *	@param		object	$module
-	 *	@param		string											$filePath
-	 *	@return		Hymn_Structure_Module
+	 * @param string $fileSerial
+	 * @param string $path
+	 * @return array<mixed,array<string,Hymn_Structure_Module>>
 	 */
-	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
+	protected function loadModulesFromSerialFile( string $fileSerial, string $path ): array
 	{
-		//  work in progress
-		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
-		foreach( $module->config ?? [] as $config )
-			$obj->config[]	= new Hymn_Structure_Module_Config( $config->key, $config->value, $config->type, $config->title );
-		/** @var object{callback: string, resource: string, event: string, level: int} $hook */
-		foreach( $config->hooks ?? [] as $hook )
-			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
-
-		$list[$module->id]	= $module;
-		$module->config					= (array) $module->config;
-		$module->hooks					= (array) $module->hooks;
-		foreach( $module->hooks as $resource => $events )
-			$module->hooks[$resource]	= (array) $module->hooks[$resource];
-		foreach( $module->files as $category => $files )
-			$module->files->{$category}	=  (array) $files;
-		$module->relations->needs		= (array) $module->relations->needs;
-		$module->relations->supports	= (array) $module->relations->supports;
-//			$module->isDeprecated			= isset( $module->deprecation );
-		if( isset( $module->frameworks ) )
-			$module->frameworks			= (array) $module->frameworks;
-		return $obj;
-
+		$this->client->outVeryVerbose( '- Strategy: serial file' );
+		$content	= file_get_contents( $fileSerial );
+		if( FALSE === $content )
+			throw new RuntimeException( 'Reading file "'.$fileSerial.'" failed' );
+		$index		= unserialize( $content );
+		foreach( $index->modules as $module ){
+			$module->frameworks		= (array) $module->frameworks;
+//			$module->isDeprecated	= isset( $module->deprecation );
+			$this->decorateModuleWithPaths( $module, $path );
+		}
+		$list	= $index->modules;
+		return [$index, $list];
 	}
+
 	/**
 	 *	@param		string		$path
 	 *	@param		array		$list
@@ -487,6 +463,31 @@ class Hymn_Module_Library_Available
 			}
 		}
 		return $list;
+	}
+
+	protected function loadModulesInSources( bool $force = FALSE ): void
+	{
+		if( count( $this->modules ) && !$force )													//  modules of all sources already mapped
+			return;																					//  skip this rerun
+		$this->modules	= [];																	//  reset module list
+		foreach($this->sources as $source ){														//  iterate sources
+			$this->client->outVeryVerbose( sprintf( 'Loading source "%s":', $source->id ) );
+			if( !$source->active )																	//  if source is deactivated
+				continue;																			//  skip this source
+			$this->modules[$source->id]	= [];													//  prepare empty module list for source
+			foreach( $this->listModulesInSource( $source ) as $module ){								//  iterate modules in source path
+				$module->sourceId	= $source->id;													//  extend found module by source ID
+				$module->sourcePath	= $source->path;													//  extend found module by source path
+				$module->sourceType	= $source->type;													//  extend found module by source type
+				$this->modules[$source->id][$module->id] = $module;									//  add found module to general module map
+				ksort( $this->modules[$source->id] );												//  sort source modules in general module map
+			}
+			$this->client->outVeryVerbose( vsprintf( '- Found %d modules', [
+				count( $this->modules[$source->id] )
+			] ) );
+		}
+		$this->client->outVeryVerbose( $this->client->getMemoryUsage( 'after loading module sources' ) );
+//		ksort( $this->modules );																	//  sort general module map by source IDs
 	}
 }
 /*
