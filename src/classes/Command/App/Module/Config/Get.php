@@ -59,8 +59,8 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 			throw new InvalidArgumentException( 'Key must be of syntax "Module_Name[.(section.)key]"' );
 		$configKey	= join( '.', $keyParts );
 
+		$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 		if( !$keyParts || $configKey === '*' ){
-			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			foreach( $configurator->getAll( $moduleId ) as $item ){
 				if( $this->flags->verbose ){
 					$type	= preg_replace( '/^bool$/', 'boolean', $item->type );
@@ -81,7 +81,6 @@ class Hymn_Command_App_Module_Config_Get extends Hymn_Command_Abstract implement
 			}
 		}
 		else{
-			$configurator	= new Hymn_Module_Config( $this->client, $this->getLibrary() );
 			$config			= $configurator->get( $moduleId, $configKey );
 			$this->out( $config->value );
 		}

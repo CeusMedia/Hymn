@@ -51,7 +51,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run(): void
 	{
-		if( $this->flags->dry && !$this->flags->quiet )
+		if( $this->flags->dry )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
 		$config		= $this->client->getConfig();
@@ -96,7 +96,7 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				$this->client->getFramework()->checkModuleSupport( $module );
 			}
 			catch( Exception $e ){
-				$this->out( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
+				$this->outError( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
 				continue;
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id );
@@ -105,10 +105,8 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 			$isCalledModule	= in_array( $module->id, $moduleIds );
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleIds );
 			if( $isInstalled && !$isForced ){
-				if( !$this->flags->quiet ){
-					$this->client->outVerbose( "Module '".$module->id."' is already installed" );
-					continue;
-				}
+				$this->client->outVerbose( "Module '".$module->id."' is already installed" );
+				continue;
 			}
 			$sourceId	= $this->detectModuleSource( $module->id );
 			$sourceId	= $this->client->getModuleInstallSource( $module->id, $activeSourceIds, $sourceId );
@@ -120,14 +118,13 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 				continue;
 			}
 			$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-			if( !$this->flags->quiet )
-				$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
-					$this->flags->dry ? 'Dry: ' : '',
-					$module->id,
-					$module->sourceId,
-					$module->version->current,
-					$installType
-				] ) );
+			$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
+				$this->flags->dry ? 'Dry: ' : '',
+				$module->id,
+				$module->sourceId,
+				$module->version->current,
+				$installType
+			] ) );
 			$installer->install( $module, $installType );
 		}
 

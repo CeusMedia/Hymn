@@ -330,7 +330,6 @@ class Hymn_Module_Library_Available
 		if( isset( $module->frameworks ) )
 			$module->frameworks			= (array) $module->frameworks;
 		return $obj;
-
 	}
 
 	protected function decorateModuleWithPaths( Hymn_Structure_Module $module, string $sourcePath ): void

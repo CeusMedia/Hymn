@@ -125,20 +125,15 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 			$this->client->outVerbose( 'No updatable modules found.' );						//  print status topic: Modules > Outdated
 			return static::CODE_NONE;
 		}
-		if( !$this->flags->quiet ){
-			$message	= '%d updatable modules found:';
-			$this->out( sprintf( $message, count( $outdatedModules ) ) );							//  print status topic: Modules > Outdated
-		}
+		$this->out( sprintf( '%d updatable modules found:', count( $outdatedModules ) ) );			//  print status topic: Modules > Outdated
 		foreach( $outdatedModules as $update ){														//  iterate list of outdated modules
-			if( !$this->flags->quiet ){
-				$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
-					$update->id,																	//  - module ID
-					$update->installed,																//  - currently installed version
-					$update->available																//  - available version
-				] ) );
-				if( $this->flags->verbose )
-					$this->printModuleUpdateChangelog( $update, '  ' );
-			}
+			$this->out( vsprintf( "- %s: %s -> %s", [									//  print outdated module and:
+				$update->id,																	//  - module ID
+				$update->installed,																//  - currently installed version
+				$update->available																//  - available version
+			] ) );
+			if( $this->flags->verbose )
+				$this->printModuleUpdateChangelog( $update, '  ' );
 		}
 		return static::CODE_MODULES_OUTDATED;
 	}

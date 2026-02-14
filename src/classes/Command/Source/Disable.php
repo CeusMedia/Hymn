@@ -65,8 +65,7 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 		}
 
 		if( $this->flags->dry ){
-			if( !$this->flags->quiet )
-				$this->out( 'Source "'.$source->id.'" would have been disabled.' );
+			$this->out( 'Source "'.$source->id.'" would have been disabled.' );
 			return;
 		}
 		$json	= Hymn_Tool_ConfigFile::read( Hymn_Client::$fileName );
@@ -74,7 +73,6 @@ class Hymn_Command_Source_Disable extends Hymn_Command_Source_Abstract implement
 		if( isset( $json->sources[$source->id]->default ) )
 			unset( $json->sources[$source->id]->default );
 		Hymn_Tool_ConfigFile::save( $json, Hymn_Client::$fileName );
-		if( !$this->flags->quiet )
-			$this->out( 'Source "'.$source->id.'" has been disabled.' );
+		$this->out( 'Source "'.$source->id.'" has been disabled.' );
 	}
 }

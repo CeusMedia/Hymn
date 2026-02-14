@@ -59,8 +59,7 @@ class Hymn_Command_App_Base_Config_Enable extends Hymn_Command_Abstract implemen
 		if( !$editor->hasProperty( $key, FALSE ) )
 			throw new InvalidArgumentException( 'Base config key "'.$key.'" is missing' );
 		if( $editor->isActiveProperty( $key ) ){
-			if( !$this->flags->quiet )
-				$this->out( 'Base config key "'.$key.'" already is enabled' );
+			$this->out( 'Base config key "'.$key.'" already is enabled' );
 			return;
 		}
 		if( !$this->flags->dry ){

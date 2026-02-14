@@ -136,6 +136,8 @@ class Hymn_Tool_CLI_Output
 
 	/**
 	 *	Prints out error message.
+	 *	Attention: Ignores quiet mode.
+	 *
 	 *	@access		public
 	 *	@param		string			$message		Error message to print
 	 *	@param		integer|NULL	$exitCode		Exit with error code, if given, otherwise do not exit (default)

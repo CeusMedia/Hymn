@@ -61,8 +61,7 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		$prefix	= $dbc->getConfigValue( 'prefix' );
 		$tables	= $dbc->getTables( $prefix );
 		if( !$tables ){
-			if( !$this->flags->quiet )
-				$this->out( 'Database is empty' );
+			$this->out( 'Database is empty' );
 			return;
 		}
 		if( !( $this->flags->force ) ){
@@ -90,7 +89,6 @@ class Hymn_Command_Database_Clear extends Hymn_Command_Abstract implements Hymn_
 		}
 		if( !$this->flags->dry )
 			$dbc->exec( 'SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;' );
-		if( !$this->flags->quiet )
-			$this->out( 'Database cleared' );
+		$this->out( 'Database cleared' );
 	}
 }
