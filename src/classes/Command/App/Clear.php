@@ -1,8 +1,10 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	...
  *
-e *	Copyright (c) 2014-2026 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2014-2026 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by

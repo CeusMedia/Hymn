@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -277,7 +279,7 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@return		bool
 	 */
 	public function hasProperty( string $key, bool $activeOnly = TRUE ): bool
-  {
+	{
 		if( $activeOnly )
 			return isset( $this->properties[$key] );
 		if( isset( $this->properties[$key] ) )
@@ -316,7 +318,7 @@ class Hymn_Tool_BaseConfigEditor
 	}
 
 	protected function checkFile( string $fileName ): void
-  {
+	{
 		if( !file_exists( $fileName ) )
 			throw new RuntimeException( 'File "'.addslashes( $fileName ).'" is not existing' );
 		if( !is_file( $fileName ) )
@@ -328,7 +330,7 @@ class Hymn_Tool_BaseConfigEditor
 	}
 
 	protected function createFileIfNotExists( string $fileName ): void
-  {
+	{
 		if( !file_exists( $fileName ) )
 			touch( $fileName );
 	}
@@ -339,7 +341,7 @@ class Hymn_Tool_BaseConfigEditor
 	 *	@return		void
 	 */
 	protected function read(): void
-  {
+	{
 		$this->disabled		= [];
 		$this->properties	= [];
 		$this->lines		= [];

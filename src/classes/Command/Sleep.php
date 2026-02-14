@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	Pauses execution by given amount of seconds.
  *

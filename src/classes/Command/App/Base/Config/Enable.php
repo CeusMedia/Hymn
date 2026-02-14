@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -39,8 +41,8 @@ class Hymn_Command_App_Base_Config_Enable extends Hymn_Command_Abstract implemen
 {
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: dry, force, quiet, verbose
+	 *	Implements flags: dry, quiet, verbose
+	 *	Missing flags: force
 	 *	@todo		implement missing flags
 	 *	@access		public
 	 *	@return		void

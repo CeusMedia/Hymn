@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -76,13 +78,13 @@ class Hymn_Module_Info
 				foreach( $sectionFiles as $file ){
 					$line	= $file->file;
 					$attr	= [];
-					if( $sectionKey === 'styles' ){
+					if( 'styles' === $sectionKey ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 						if( !empty( $file->load ) )
 						$attr['load']	= $file->load;
 					}
-					else if( $sectionKey === 'images' ){
+					else if( 'images' === $sectionKey ){
 						if( !empty( $file->source ) )
 						$attr['source']	= $file->source;
 					}
@@ -165,7 +167,7 @@ class Hymn_Module_Info
 			 * @var Hymn_Structure_Module_Relation $relation
 			 */
 			foreach( $module->relations->needs as $moduleId => $relation )
-				$this->client->out( 'c- '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
+				$this->client->out( '    - '.ucfirst( $this->resolveRelationType( $relation->type ) ).': '.$moduleId );
 		}
 		if( count( $module->relations->supports ) ){
 			$this->client->out( ' - Modules supported: ' );

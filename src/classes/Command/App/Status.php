@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Compares installed against available modules to collect outdated modules.
  *	Shows outdated modules with logged changes, if available and verbose.

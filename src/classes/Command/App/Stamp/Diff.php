@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	Compare stamp against installed modules.
  *

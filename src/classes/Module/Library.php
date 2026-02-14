@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -72,11 +74,23 @@ class Hymn_Module_Library
 		return $this->available->getActiveSources( $withModules );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		?string		$sourceId
+	 *	@param		bool		$strict
+	 *	@return		Hymn_Structure_Module|NULL
+	 */
 	public function getAvailableModule( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		return $this->available->get( $moduleId, $sourceId, $strict );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		bool		$strict
+	 *	@return		Hymn_Structure_Module|NULL
+	 */
 	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		if( '' === trim( $moduleId ) ){
@@ -87,6 +101,13 @@ class Hymn_Module_Library
 		return $this->available->getFromSource( $moduleId, $sourceId, $strict );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@param		string		$versionInstalled
+	 *	@param		string		$versionAvailable
+	 *	@return		array
+	 */
 	public function getAvailableModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
 		return $this->available->getModuleLogChanges( $moduleId, $sourceId, $versionInstalled, $versionAvailable );

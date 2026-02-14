@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Locale singleton handler.
  *
@@ -137,8 +139,7 @@ class Hymn_Tool_Locale
 		/** @var string $text */
 		$text		= file_get_contents( $filePath );								//  read existing text file
 		$text		= str_replace( "%version%", $this->version, $text );		//  insert client version
-		$text		= str_replace( "%language%", $this->language, $text );	//  insert client language
-		return $text;																//  return text as string
+		return str_replace( "%language%", $this->language, $text );	//  insert client language
 	}
 
 	/**

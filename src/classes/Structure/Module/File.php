@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Module definition: File.
  *
@@ -17,8 +19,8 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
- *	@category		Library
- *	@package		Hymn.Structure.Module
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -28,8 +30,8 @@
 /**
  *	Module definition: File.
  *
- *	@category		Library
- *	@package		Hymn.Structure.Module
+ *	@category		Tool
+ *	@package		CeusMedia.Hymn.Structure.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2022-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3

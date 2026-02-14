@@ -1,4 +1,6 @@
 <?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+declare(strict_types=1);
+
 /**
  *	XML element based on SimpleXMLElement with improved attribute and content handling.
  *

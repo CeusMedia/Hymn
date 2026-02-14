@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -70,10 +72,10 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$type
 	 *	@param		bool		$active
 	 *	@param		?string		$title
-	 *	@return		void
+	 *	@return		static
 	 *	@throws		Exception
 	 */
-	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): void
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
 			throw new Exception( 'Source already set by ID: '.$sourceId );
@@ -85,12 +87,13 @@ class Hymn_Module_Library_Available
 			'type'		=> $type,
 			'active'	=> $active,
 			'isDefault'	=> $isDefault,
-			'title'		=> $title,
+			'title'		=> $title ?? '',
 			'date'		=> NULL,
 		] );
 		if( 1 === count( $this->sources ) )
 			$this->sources[$sourceId]->isDefault	= TRUE;
 //		ksort( $this->sources );
+		return $this;
 	}
 
 	/**
@@ -300,7 +303,7 @@ class Hymn_Module_Library_Available
 	//  --  PROTECTED  --  //
 
 	protected function decorateModuleWithPaths( Hymn_Structure_Module $module, string $sourcePath ): void
-  {
+	{
 		$pathname	= str_replace( "_", "/", $module->id ).'/';						//  assume source module path from module ID
 		$module->absolutePath	= realpath( $sourcePath.$pathname )."/";						//  extend found module by real source path
 //		$module->pathname		= $pathname;														//  extend found module by relative path

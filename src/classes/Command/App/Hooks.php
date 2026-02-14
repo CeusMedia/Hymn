@@ -1,6 +1,9 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
- *	...
+ *	Lists found hooks in installed modules.
+ *	Prints tree in verbose mode.
  *
  *	Copyright (c) 2014-2026 Christian Würker (ceusmedia.de)
  *
@@ -25,7 +28,8 @@
  *	@link			https://github.com/CeusMedia/Hymn
  */
 /**
- *	...
+ *	Lists found hooks in installed modules.
+ *	Prints tree in verbose mode.
  *
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Command
@@ -33,15 +37,12 @@
  *	@copyright		2014-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
- *	@todo			code documentation
  */
 class Hymn_Command_App_Hooks extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose
-	 *	@todo		implement missing flags
+	 *	Implements flags: verbose
 	 *	@access		public
 	 *	@return		void
 	 */

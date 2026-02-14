@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpUnused */
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -41,6 +43,7 @@ class Hymn_Command_Source_Remove extends Hymn_Command_Source_Abstract implements
 	 *	Execute this command.
 	 *	Implements flags: dry, force, quiet, verbose
 	 *	@access		public
+	 *	@param		?Hymn_Tool_CLI_Arguments	$arguments
 	 *	@return		void
 	 */
 	public function run( ?Hymn_Tool_CLI_Arguments $arguments = NULL ): void

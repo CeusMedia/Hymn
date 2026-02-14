@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	Validates XML.
  *
@@ -48,7 +50,7 @@ class Hymn_Tool_XML_Validator
 	public function getError(): ?object
 	{
 		if( $this->error )
-			return (object) $this->error['line'];
+			return (object) $this->error;
 		return NULL;
 	}
 

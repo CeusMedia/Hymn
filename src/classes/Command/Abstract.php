@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  *	...
  *
@@ -191,7 +193,7 @@ abstract class Hymn_Command_Abstract
 	 *	@todo		sharpen return value
 	 *	@todo		finish code doc
 	 */
-	protected function evaluateSourceId( ?string $sourceId = NULL, bool $strict = TRUE )
+	protected function evaluateSourceId( ?string $sourceId = NULL, bool $strict = TRUE ): string|FALSE|NULL
 	{
 		$all	= ['all', '*'];
 		if( is_null( $sourceId ) || in_array( $sourceId, $all ) )
