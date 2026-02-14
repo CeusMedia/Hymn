@@ -3,7 +3,7 @@
 /**
  *	Reader for local module XML files.
  *
- *	Copyright (c) 2012-2025 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2026 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -44,7 +44,7 @@ use Hymn_Structure_Module_Version as VersionDefinition;
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2025 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */

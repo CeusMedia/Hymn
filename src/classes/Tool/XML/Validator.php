@@ -22,7 +22,7 @@ declare(strict_types=1);
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2025 Christian Würker
+ *	@copyright		2014-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
@@ -32,7 +32,7 @@ declare(strict_types=1);
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Tool.XML
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2014-2025 Christian Würker
+ *	@copyright		2014-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			Unit Test

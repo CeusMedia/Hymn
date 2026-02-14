@@ -8,7 +8,7 @@ declare(strict_types=1);
  *	Attention: This is NOT the hook definition of a module.
  *	This would be Hymn_Structure_Module_Hook.
  *
- *	Copyright (c) 2022-2025 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2022-2026 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ declare(strict_types=1);
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Structure
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2020-2025 Christian Würker (ceusmedia.de)
+ *	@copyright		2020-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -41,7 +41,7 @@ declare(strict_types=1);
  *	@category		Tool
  *	@package		CeusMedia.Hymn.Structure
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2020-2025 Christian Würker (ceusmedia.de)
+ *	@copyright		2020-2026 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
