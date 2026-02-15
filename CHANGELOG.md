@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.4
+- Integrate updates from 1.1.0. 
+
 ## v1.0.3
 - Improve exception handling on module indexing / reading.
 - Allow module config value on/off as boolean.
