@@ -106,7 +106,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	 *	Collect files to remove, based on index of files with keep rule dates.
 	 *	Returns list of filenames, selected to be removed.
 	 *
-	 *	@param		array<string,Hymn_Structure_KeepRuleDate>	$index
+	 *	@param		array<string,Hymn_Structure_Database_KeepRuleDate>	$index
 	 *	@param		int			$keepDaily
 	 *	@param		int			$keepWeekly
 	 *	@param		int			$keepMonthly
@@ -139,7 +139,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 	/**
 	 *	Returns map of files with keep rule dates.
 	 *	@param		string		$pathName
-	 *	@return		array<string,Hymn_Structure_KeepRuleDate>
+	 *	@return		array<string,Hymn_Structure_Database_KeepRuleDate>
 	 */
 	protected function findFilesInPath( string $pathName ): array
 	{
@@ -152,7 +152,7 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$fileName	= $entry->getFilename();
 			if( preg_match( $regex, $fileName ) ){
 				$timestamp	= preg_replace( $regex, '\\2 \\3', $fileName );
-				$date		= new Hymn_Structure_KeepRuleDate( $timestamp );
+				$date		= new Hymn_Structure_Database_KeepRuleDate( $timestamp );
 				$date->isWeekly		= FALSE;
 				$date->isMonthly	= FALSE;
 				$date->isYearly		= FALSE;

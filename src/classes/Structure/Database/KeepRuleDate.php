@@ -39,7 +39,7 @@ declare(strict_types=1);
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
  */
-class Hymn_Structure_KeepRuleDate extends DateTime
+class Hymn_Structure_Database_KeepRuleDate extends DateTime
 {
 	/**
 	 *	@param		string				$datetime
