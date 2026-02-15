@@ -1,11 +1,27 @@
 # Change Log
 
+## v1.1.1
+- 1.0.3: Improve exception handling on module indexing / reading.
+- 1.0.3: Allow module config value on/off as boolean.
+- 1.0.3: Show why a modules is installed in module info.
+- 1.0.3: On app-graph, create SVG next to PNG and graph file.
+- 1.0.3: Add command app-module-config-uncache.
+- 1.0.3: Add command app-module-config-validate.
+
 ## v1.1.0
 - 1.0.2: Fix structure migration bug in module update.
 - 1.0.2: Add log output of updatable modules.
 - 1.0.2: Module relation type is now integer.
 - 1.0.2: Fix installation to theme source.Add graph structure for module relations.
 - Add graph structure for module relations.
+
+## v1.0.3
+- Improve exception handling on module indexing / reading.
+- Allow module config value on/off as boolean.
+- Show why a modules is installed in module info.
+- On app-graph, create SVG next to PNG and graph file.
+- Add command app-module-config-uncache.
+- Add command app-module-config-validate.
 
 ## v1.0.2
 - Fix structure migration bug in module update.

@@ -48,7 +48,7 @@ class Hymn_Client
 	public const int FLAG_NO_FILES			= 64;
 	public const int FLAG_NO_INTERACTION	= 128;
 
-	public const FLAGS					= [
+	public const array FLAGS				= [
 		self::FLAG_VERY_VERBOSE,
 		self::FLAG_VERBOSE,
 		self::FLAG_QUIET,
@@ -67,7 +67,7 @@ class Hymn_Client
 	public const int EXIT_ON_EXEC			= 16;
 	public const int EXIT_ON_OUTPUT			= 32;
 
-	public const EXITS					= [
+	public const array EXITS				= [
 		self::EXIT_ON_END,
 		self::EXIT_ON_LOAD,
 		self::EXIT_ON_SETUP,
@@ -83,7 +83,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.1.0';
+	public static string $version				= '1.1.1-a';
 
 	public static string $mode					= 'prod';
 
