@@ -150,7 +150,7 @@ class Hymn_Command_Module_Info extends Hymn_Command_Abstract implements Hymn_Com
 
 	protected function showInstalledModuleBasicInfo( Hymn_Structure_Module $installedModule, Hymn_Structure_Module $availableModule ): void
 	{
-		$installTypes	= [0 => 'Copy', 1 => 'Link'];
+		$installTypes	= [0 => 'Copy', 1 => 'Link', 'copy' => 'Copy', 'link' => 'Link'];
 		$this->out( ' - Installed:' );
 		$this->out( '    - Version: '.$installedModule->version->current );
 		$this->out( '    - Source:  '.$installedModule->install->source );
