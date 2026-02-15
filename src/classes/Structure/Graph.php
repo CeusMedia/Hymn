@@ -249,7 +249,7 @@ class Hymn_Structure_Graph
 		foreach( $parents as $parent ){								//  we are in the middle of a trace
 			$clone		= $steps;									//  copy trace so far
 			$clone[]	= $module;									//  note this module on cloned trace
-			$this->bubbleUp( $parent, $ways, $clone );			//  continue tracing for this module
+			$this->bubbleUp( $parent->module, $ways, $clone );		//  continue tracing for this module
 		}
 	}
 }

@@ -92,7 +92,7 @@ class Hymn_Module_Graph
 	 *	Calculates order key by call level and needed modules.
 	 *	Resulting list will start with modules which are needed by others and end with meta modules.
 	 *	@access		public
-	 *	@return		array
+	 *	@return		array<string, Hymn_Structure_Module>
 	 */
 	public function getModulesOrderedByDependency(): array
 	{

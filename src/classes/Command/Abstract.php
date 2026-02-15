@@ -235,9 +235,8 @@ abstract class Hymn_Command_Abstract
 	 */
 	protected function getLibrary( bool $forceReload = FALSE ): Hymn_Module_Library
 	{
-		$config	= $this->client->getConfig();
 		if( is_null( $this->library ) || $forceReload )												//  library not loaded yet or reload is forced
-			$this->readLibrary( $config );
+			$this->readLibrary( $this->client->getConfig() );
 		return $this->library;																		//  return loaded library
 	}
 

@@ -80,6 +80,10 @@ class Hymn_Module_Library
 		return $this;
 	}
 
+	/**
+	 *	@param		bool		$withModules		Default: no
+	 *	@return		array<string,Hymn_Structure_Source>
+	 */
 	public function getActiveSources( bool $withModules = FALSE ): array
 	{
 		return $this->available->getActiveSources( $withModules );

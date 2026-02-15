@@ -138,7 +138,7 @@ class Hymn_Module_Library_Available
 
 	/**
 	 *	@param		bool		$withModules		Default: no
-	 *	@return		Hymn_Structure_Source[]
+	 *	@return		array<string,Hymn_Structure_Source>
 	 */
 	public function getActiveSources( bool $withModules = FALSE ): array
 	{
@@ -272,7 +272,7 @@ class Hymn_Module_Library_Available
 	/**
 	 *	@param		array		$filters
 	 *	@param		bool		$withModules
-	 *	@return		array<Hymn_Structure_Source>
+	 *	@return		array<string,Hymn_Structure_Source>
 	 */
 	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{

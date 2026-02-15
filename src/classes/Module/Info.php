@@ -177,6 +177,37 @@ class Hymn_Module_Info
 	}
 
 	/**
+	 *	@param		Hymn_Module_Library			$library
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		void
+	 */
+	public function showWhy( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
+	{
+		$relation		= new Hymn_Module_Graph( $this->client, $library );
+		foreach( $library->listInstalledModules() as $installedModule )
+			$relation->addModule( $installedModule );
+
+		$ways	= $relation->findWaysUpFromModule( $module );
+
+		$filteredWays	= [];
+		foreach( $ways as $steps ){
+			if( 1 === count( $steps ) )
+				continue;
+			$filteredWays[] = array_slice( $steps, 1 );
+		}
+		if( [] === $filteredWays )
+			return;
+
+		$this->client->out( ' - Needed by modules: ' );
+		foreach( $filteredWays as $steps ){
+			$items	= array_map( function ( $module ) {
+				return $module->title;
+			}, $steps );
+			$this->client->out( '    - '.join( ' <- ', $items ) );
+		}
+	}
+
+	/**
 	 *	Map relation type from integer to string.
 	 *	@param		int		$type
 	 *	@return		string
