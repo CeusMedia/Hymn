@@ -41,6 +41,12 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 {
 	protected string $installType	= "link";
 
+	/** @var	array<string>							$activeSourceIds  */
+	protected array $activeSourceIds;
+
+	/**	@var	array<string,Hymn_Structure_Source>		$activeSourceList */
+	protected array $activeSourceList;
+
 	/**
 	 *	Execute this command.
 	 *	Implements flags:
@@ -54,78 +60,22 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		if( $this->flags->dry )
 			$this->out( "## DRY RUN: Simulated actions - no changes will take place." );
 
-		$config		= $this->client->getConfig();
-//		$this->client->getDatabase()->connect();													//  setup connection to database
-		$library	= $this->getLibrary();
-		$relation	= new Hymn_Module_Graph( $this->client, $library );
+		$moduleIds	= $this->client->arguments->getArguments();
 
-		$moduleIds			= $this->client->arguments->getArguments();
-//		$defaultSourceId		= $library->getDefaultSource();
-		$activeSourceList	= $library->getActiveSources();
-		$activeSourceIds	= array_keys( $activeSourceList );
-		$listInstalled		= $library->listInstalledModules();
+		if( $moduleIds )
+			$relation	= $this->getGraphOfRequestedModuleIds( $moduleIds );
+		else
+			$relation	= $this->getGraphOfAllUninstalledButConfiguredModules();
 
-		if( $moduleIds ){
-			foreach( $moduleIds as $moduleId ){
-				$sourceId	= $this->detectModuleSource( $moduleId );
-				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
-				$module		= $library->getAvailableModule( $moduleId, $sourceId );
-				if( $module->isActive )
-					$relation->addModule( $module );
-			}
-		}
-		else{
-			$this->out( 'Mode: Install ALL ('.count( $config->modules ).')' );
-			foreach( $config->modules as $moduleId => $moduleConfig ){
-				if( '' === $moduleId || str_starts_with( $moduleId, '@' ) )
-					continue;
-				$sourceId	= $this->detectModuleSource( $moduleId );
-				$sourceId	= $this->client->getModuleInstallSource( $moduleId, $activeSourceIds, $sourceId );
-				$module		= $library->getAvailableModule( $moduleId, $sourceId );
-				if( $module->isActive ){
-					$relation->addModule( $module );
-					$this->client->outVerbose( '- implies module '.$moduleId.' (from '.$sourceId.')' );
-				}
-			}
-		}
-
-		$installer	= new Hymn_Module_Installer( $this->client, $library );
-		$modules	= $relation->getOrder();
-		foreach( $modules as $module ){
-			try{
-				$this->client->getFramework()->checkModuleSupport( $module );
-			}
-			catch( Exception $e ){
-				$this->outError( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
-				continue;
-			}
-			$installType	= $this->client->getModuleInstallType( $module->id );
-//			$installMode	= $this->client->getModuleInstallMode( $module->id );
-			$isInstalled	= array_key_exists( $module->id, $listInstalled );
+		foreach( $relation->getModulesOrderedByDependency() as $module ){
+			$isInstalled	= array_key_exists( $module->id, $this->getLibrary()->listInstalledModules() );
 			$isCalledModule	= in_array( $module->id, $moduleIds );
 			$isForced		= $this->flags->force && ( $isCalledModule || !$moduleIds );
 			if( $isInstalled && !$isForced ){
 				$this->client->outVerbose( "Module '".$module->id."' is already installed" );
 				continue;
 			}
-			$sourceId	= $this->detectModuleSource( $module->id );
-			$sourceId	= $this->client->getModuleInstallSource( $module->id, $activeSourceIds, $sourceId );
-			/** @var Hymn_Structure_Module $module */
-			$module		= $library->getUncachedAvailableModuleFromSource( $module->id, $sourceId );
-
-			if( empty( $module->sourceId ) ){
-				$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );
-				continue;
-			}
-			$installType	= $this->client->getModuleInstallType( $module->id, $installType );
-			$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
-				$this->flags->dry ? 'Dry: ' : '',
-				$module->id,
-				$module->sourceId,
-				$module->version->current,
-				$installType
-			] ) );
-			$installer->install( $module, $installType );
+			$this->installModule( $module );
 		}
 
 /*		//  todo: custom install mode: define SQL to import in hymn file
@@ -135,6 +85,17 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 					$installer->executeSql( file_get_contents( $import ) );							//  broken on this point since extraction to Hymn_Module_SQL
 			}
 		}*/
+	}
+
+
+	//  --  PROTECTED  --  //
+
+
+	protected function __onInit(): void
+	{
+		$library	= $this->getLibrary();
+		$this->activeSourceList	= $library->getActiveSources();
+		$this->activeSourceIds	= array_keys( $this->activeSourceList );
 	}
 
 	protected function detectModuleSource( string $moduleId ): ?string
@@ -160,5 +121,74 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		if( $moduleSourceIds )
 			return $moduleSourceIds[0];
 		return NULL;
+	}
+
+	protected function getGraphOfRequestedModuleIds( array $moduleIds ): Hymn_Module_Graph
+	{
+		$library	= $this->getLibrary();
+		$relation	= new Hymn_Module_Graph( $this->client, $library );
+		foreach( $moduleIds as $moduleId ){
+			$sourceId	= $this->detectModuleSource( $moduleId );
+			$sourceId	= $this->client->getModuleInstallSource( $moduleId, $this->activeSourceIds, $sourceId );
+			$module		= $library->getAvailableModule( $moduleId, $sourceId );
+			if( $module->isActive )
+				$relation->addModule( $module );
+		}
+		return $relation;
+	}
+
+	protected function getGraphOfAllUninstalledButConfiguredModules(): Hymn_Module_Graph
+	{
+		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
+		$relation	= new Hymn_Module_Graph( $this->client, $library );
+
+		$this->out( 'Mode: Install ALL ('.count( $config->modules ).')' );
+		foreach( $config->modules as $moduleId => $moduleConfig ){
+			if( '' === $moduleId || str_starts_with( $moduleId, '@' ) )
+				continue;
+			$sourceId	= $this->detectModuleSource( $moduleId );
+			$sourceId	= $this->client->getModuleInstallSource( $moduleId, $this->activeSourceIds, $sourceId );
+			$module		= $library->getAvailableModule( $moduleId, $sourceId );
+			if( $module->isActive ){
+				$relation->addModule( $module );
+				$this->client->outVerbose( '- implies module '.$moduleId.' (from '.$sourceId.')' );
+			}
+		}
+		return $relation;
+	}
+
+	protected function installModule( Hymn_Structure_Module $module ): bool
+	{
+		try{
+			$this->client->getFramework()->checkModuleSupport( $module );
+		}
+		catch( Exception $e ){
+			$this->outError( 'Error: '.$e->getMessage().'.' );				//  error, but continue, not exit
+			return FALSE;
+		}
+
+		$library	= $this->getLibrary();
+		$installer	= new Hymn_Module_Installer( $this->client, $library );
+		$installType	= $this->client->getModuleInstallType( $module->id );
+//			$installMode	= $this->client->getModuleInstallMode( $module->id );
+		$sourceId	= $this->detectModuleSource( $module->id );
+		$sourceId	= $this->client->getModuleInstallSource( $module->id, $this->activeSourceIds, $sourceId );
+		/** @var Hymn_Structure_Module $module */
+		$module		= $library->getUncachedAvailableModuleFromSource( $module->id, $sourceId );
+
+		if( empty( $module->sourceId ) ){
+			$this->outError( "Module '".$module->id."' is not assigned to a source - skipped" );
+			return FALSE;
+		}
+		$installType	= $this->client->getModuleInstallType( $module->id, $installType );
+		$this->out( vsprintf( "%sInstalling module '%s' (from %s) version %s as %s ...", [
+			$this->flags->dry ? 'Dry: ' : '',
+			$module->id,
+			$module->sourceId,
+			$module->version->current,
+			$installType
+		] ) );
+		return $installer->install( $module, $installType );
 	}
 }

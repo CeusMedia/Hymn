@@ -48,7 +48,6 @@ class Hymn_Module_Files
 	 *	Creates a path.
 	 *	A nested path will be created recursively.
 	 *	No error messages will be shown but the return value indicates the result.
-	 *	Does nothing if flag 'db' is set to 'only'.
 	 *	@static
 	 *	@access		public
 	 *	@param		string		$path		Path to create
@@ -83,7 +82,8 @@ class Hymn_Module_Files
 
 	/**
 	 *	Tries to link or copy all module files into application.
-	 *	Does nothing if flag 'db' is set to 'only'.
+	 *	Does nothing if flag 'noFiles' is set.
+	 *	Does not copy or link if flag 'dry' is set.
 	 *	@access		public
 	 *	@param 		Hymn_Structure_Module 		$module			Module object
 	 *	@param		string		$installType	One of {link, copy}
@@ -156,7 +156,8 @@ class Hymn_Module_Files
 
 	/**
 	 *	Removed installed files of module.
-	 *	Does nothing if flag 'db' is set to 'only'.
+	 *	Does nothing if flag 'noFiles' is set.
+	 *	Does not remove if flag 'dry' is set.
 	 *	@access		public
 	 *	@param		Hymn_Structure_Module	$module			Module object
 	 *	@param		boolean					$tryMode		Flag: force no changes, only try (default: no)

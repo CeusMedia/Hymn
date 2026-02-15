@@ -178,14 +178,14 @@ class Hymn_Tool_CLI_Table
 	protected function strlen( string $string ): int
 	{
 		if( !function_exists( 'mb_strlen' ) )
-			return strlen( utf8_decode( $string ) );
+			return strlen( mb_convert_encoding( $string, 'ISO-8859-1', 'UTF-8' ) );
 		return mb_strlen( $string, $this->encoding );
 	}
 
 	protected function substr( string $string, int $start, ?int $length = NULL ): string
 	{
 		if( !function_exists( 'mb_substr' ) )
-			return utf8_encode( substr( utf8_decode( $string ), $start, $length ) );
+			return mb_convert_encoding( substr( mb_convert_encoding( $string, 'ISO-8859-1', 'UTF-8' ), $start, $length ), 'UTF-8', 'ISO-8859-1' );
 		return mb_substr( $string, $start, $length, $this->encoding );
 	}
 

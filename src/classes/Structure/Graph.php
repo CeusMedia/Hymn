@@ -120,7 +120,8 @@ class Hymn_Structure_Graph
 
 	/**
 	 *	@param		Hymn_Structure_Module		$module
-	 *	@return		array
+	 *	@return		array<array<Hymn_Structure_Module>>
+	 *	@throws		RuntimeException			if no modules were loaded
 	 */
 	public function findWaysUpFromModule( Hymn_Structure_Module $module ): array
 	{
@@ -248,7 +249,7 @@ class Hymn_Structure_Graph
 		foreach( $parents as $parent ){								//  we are in the middle of a trace
 			$clone		= $steps;									//  copy trace so far
 			$clone[]	= $module;									//  note this module on cloned trace
-			$this->bubbleUp( $parent, $ways, $clone );			//  continue tracing for this module
+			$this->bubbleUp( $parent->module, $ways, $clone );		//  continue tracing for this module
 		}
 	}
 }

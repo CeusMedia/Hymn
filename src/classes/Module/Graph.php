@@ -78,11 +78,21 @@ class Hymn_Module_Graph
 	}
 
 	/**
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		array<array<Hymn_Structure_Module>>
+	 *	@throws		RuntimeException			if no modules were loaded
+	 */
+	public function findWaysUpFromModule( Hymn_Structure_Module $module ): array
+	{
+		return $this->graph->findWaysUpFromModule( $module );
+	}
+
+	/**
 	 *	Return list of all needed modules by installation order.
 	 *	Calculates order key by call level and needed modules.
 	 *	Resulting list will start with modules which are needed by others and end with meta modules.
 	 *	@access		public
-	 *	@return		array
+	 *	@return		array<string, Hymn_Structure_Module>
 	 */
 	public function getModulesOrderedByDependency(): array
 	{

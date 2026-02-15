@@ -94,9 +94,10 @@ class Hymn_Tool_XML_Validator
 			$msg	= "%s at line %d";
 			$error	= xml_error_string( xml_get_error_code( $parser ) );
 			$line	= xml_get_current_line_number( $parser );
+			$this->error['message']	= sprintf( $msg, $error, $line );
 			$this->error['error']	= $error;
 			$this->error['line']	= $line;
-			$this->error['message']	= sprintf( $msg, $error, $line );
+			$this->error['xml']		= $xml;
 			xml_parser_free( $parser );
 			return FALSE;
 		}

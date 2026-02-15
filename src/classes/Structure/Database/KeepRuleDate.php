@@ -1,8 +1,8 @@
-<?php
+<?php /** @noinspection PhpUnused */
 declare(strict_types=1);
 
 /**
- *	...
+ *    ...
  *
  *	Copyright (c) 2014-2026 Christian Würker (ceusmedia.de)
  *
@@ -20,65 +20,40 @@ declare(strict_types=1);
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Tool.Database
+ *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo			code documentation
  */
+
 /**
  *	...
  *
  *	@category		Tool
- *	@package		CeusMedia.Hymn.Tool.Database
+ *	@package		CeusMedia.Hymn.Command.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2014-2026 Christian Würker
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
+ *	@todo			code documentation
  */
-class Hymn_Tool_Database_Source
+class Hymn_Structure_Database_KeepRuleDate extends DateTime
 {
-	public string $driver;
-	public ?string $host		= NULL;
-	public ?int $port			= NULL;
-	public ?string $name		= NULL;
-	public ?string $prefix		= NULL;
-	public ?string $username	= NULL;
-	public ?string $password	= NULL;
-	public array $modules		= [];
-
-	public static function fromArray( array $data ): self
+	/**
+	 *	@param		string				$datetime
+	 *	@param		DateTimeZone|NULL	$timezone
+	 */
+	public function __construct( string $datetime = 'now', DateTimeZone|NULL $timezone = NULL )
 	{
-		$instance = new self( $data['driver'] );
-		$instance->setResource( $data['host'], $data['port'] );
-		$instance->setAccess( $data['username'], $data['password'] );
-		$instance->setDatabase( $data['name'], $data['prefix'] );
-		return $instance;
+		try {
+			parent::__construct( $datetime, $timezone );
+		} catch( Exception ){
+		}
 	}
 
-	public function __construct( string $driver )
-	{
-		$this->driver	= $driver;
-	}
-
-	public function setAccess( ?string $username = NULL, string $password = NULL ): self
-	{
-		$this->username = $username;
-		$this->password = $password;
-		return $this;
-	}
-
-	public function setDatabase( string $name, ?string $prefix = NULL ): self
-	{
-		$this->name = $name;
-		$this->prefix = $prefix;
-		return $this;
-	}
-
-	public function setResource( string $host, ?int $port = NULL ): self
-	{
-		$this->host = $host;
-		$this->port = $port;
-		return $this;
-	}
+	public bool $isMonthly = FALSE;
+	public bool $isWeekly = FALSE;
+	public bool $isYearly = FALSE;
 }

@@ -111,7 +111,9 @@ class Hymn_Module_Library_Available
 	 *	@param		?string		$sourceId
 	 *	@param		bool		$strict			Default: yes
 	 *	@return		?Hymn_Structure_Module
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function get( string $moduleId, string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
@@ -130,13 +132,13 @@ class Hymn_Module_Library_Available
 				if( NULL === $candidate->deprecation )
 					return $candidate;
 		if( $strict )
-			throw new Exception( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
+			throw new DomainException( __METHOD__.' > Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
 	/**
 	 *	@param		bool		$withModules		Default: no
-	 *	@return		Hymn_Structure_Source[]
+	 *	@return		array<string,Hymn_Structure_Source>
 	 */
 	public function getActiveSources( bool $withModules = FALSE ): array
 	{
@@ -192,7 +194,9 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$sourceId
 	 *	@param		bool		$strict			Default: yes
 	 *	@return		?Hymn_Structure_Module
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function getFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
@@ -211,7 +215,7 @@ class Hymn_Module_Library_Available
 			if( $module->id === $moduleId )
 				return $module;
 		if( $strict )
-			throw new Exception( 'Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
+			throw new DomainException( 'Invalid module ID: '.$moduleId.' (source: '.$sourceId.')' );
 		return NULL;
 	}
 
@@ -221,7 +225,9 @@ class Hymn_Module_Library_Available
 	 *	@param		string		$versionInstalled
 	 *	@param		string		$versionAvailable
 	 *	@return		array
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if not module ID is given
+	 *	@throws		DomainException				if source ID is invalid
+	 *	@throws		DomainException				if module ID is invalid
 	 */
 	public function getModuleLogChanges( string $moduleId, string $sourceId, string $versionInstalled, string $versionAvailable ): array
 	{
@@ -266,7 +272,7 @@ class Hymn_Module_Library_Available
 	/**
 	 *	@param		array		$filters
 	 *	@param		bool		$withModules
-	 *	@return		array<Hymn_Structure_Source>
+	 *	@return		array<string,Hymn_Structure_Source>
 	 */
 	public function getSources( array $filters = [], bool $withModules = FALSE ): array
 	{
@@ -296,7 +302,7 @@ class Hymn_Module_Library_Available
 		$pathname	= str_replace( "_", "/", $moduleId ).'/';										//  assume source module path from module ID
 		$filename	= $path.$pathname.'module.xml';													//  assume module config file name in assumed source module path
 		if( !file_exists( $filename ) )																//  assume module config file is not existing
-			throw new RangeException( 'Missing module XML file in in '.$pathname );			//  throw exception
+			throw new RangeException( 'Missing module XML file in '.$pathname );					//  throw exception
 		$module		= Hymn_Module_Reader2::load( $filename, $moduleId );								//  otherwise load module configuration from source XML file
 		$this->decorateModuleWithPaths( $module, $path );
 		return $module;																				//  return module
@@ -319,6 +325,7 @@ class Hymn_Module_Library_Available
 	 */
 	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
 	{
+		/** @var Hymn_Structure_Module $module $obj */
 		//  work in progress
 		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
 		foreach( $module->config ?? [] as $config )
@@ -327,12 +334,11 @@ class Hymn_Module_Library_Available
 		foreach( $config->hooks ?? [] as $hook )
 			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
 
-		$list[$module->id]	= $module;
 		$module->config					= (array) $module->config;
 		$module->hooks					= (array) $module->hooks;
 		foreach( $module->hooks as $resource => $events )
 			$module->hooks[$resource]	= (array) $module->hooks[$resource];
-		foreach( $module->files as $category => $files )
+		foreach( $module->files->toArray() as $category => $files )
 			$module->files->{$category}	=  (array) $files;
 		$module->relations->needs		= (array) $module->relations->needs;
 		$module->relations->supports	= (array) $module->relations->supports;

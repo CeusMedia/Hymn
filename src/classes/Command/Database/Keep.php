@@ -66,6 +66,9 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 		$keepMonthly	= abs( $this->client->arguments->getOption( 'monthly' ) );
 		$keepYearly		= abs( $this->client->arguments->getOption( 'yearly' ) );
 
+		if( !$keepDaily )
+			$this->client->outError( 'No daily rule given. All database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
+
 		/*  --  GET PATHNAME  --  */
 		$pathName	= $this->defaultPath;
 		if( $arg1 && file_exists( $arg1 ) &&  is_dir( $arg1 ) )
@@ -74,34 +77,44 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			$this->client->outError( 'No database dump folder found.', Hymn_Client::EXIT_ON_RUN );
 		$pathName	= rtrim( $pathName, '/' ).'/';
 
-		/*  --  LIST ALL FILES  --  */
-		$index	= [];
-		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
-		foreach( new DirectoryIterator( $pathName ) as $entry ){
-			if( $entry->isDir() || $entry->isDot() )
-				continue;
-			$fileName	= $entry->getFilename();
-			if( preg_match( $regex, $fileName ) ){
-				$timestamp	= preg_replace( $regex, '\\2 \\3', $fileName );
-				$date		= new KeepRuleDate( $timestamp );
-				$date->isWeekly		= FALSE;
-				$date->isMonthly	= FALSE;
-				$date->isYearly		= FALSE;
-				if( $date->format( 'N' ) === '0' )
-					$date->isWeekly	= TRUE;
-				if( $date->format( 'j' ) === '1' )
-					$date->isMonthly	= TRUE;
-				if( $date->format( 'j' ) === '1' && $date->format( 'n' ) === '1' )
-					$date->isYearly	= TRUE;
-				$index[$fileName]	= $date;
-			}
+		$index	= $this->findFilesInPath( $pathName );
+		$list	= $this->collectFilesToRemove( $index, $keepDaily, $keepWeekly, $keepMonthly, $keepYearly );
+
+		if( [] === $list ){
+			$this->out( 'All database dumps were matching the rules and are kept.' );
+			exit( Hymn_Client::EXIT_ON_RUN );
 		}
-		krsort( $index );
 
-		if( !$keepDaily )
-			$this->client->outError( 'No daily rule given. All database dumps are kept.', Hymn_Client::EXIT_ON_RUN );
+		if( $this->flags->dry ){
+			$this->out( count( $list ).' database dumps would have been removed.' );
+			return;
+		}
 
-		/*  --  COLLECT FILES TO REMOVE  --  */
+		foreach( $list as $fileName ){
+			$this->client->outVerbose( '- Removing: '.$fileName );
+			@unlink( $pathName.$fileName );
+		}
+		$this->out( count( $list ).' database dumps removed.' );
+	}
+
+	protected function __onInit(): void
+	{
+		$this->defaultPath	= $this->client->getConfigPath().'sql/';
+	}
+
+	/**
+	 *	Collect files to remove, based on index of files with keep rule dates.
+	 *	Returns list of filenames, selected to be removed.
+	 *
+	 *	@param		array<string,Hymn_Structure_Database_KeepRuleDate>	$index
+	 *	@param		int			$keepDaily
+	 *	@param		int			$keepWeekly
+	 *	@param		int			$keepMonthly
+	 *	@param		int			$keepYearly
+	 *	@return		array<string>
+	 */
+	protected function collectFilesToRemove( array $index, int $keepDaily, int $keepWeekly, int $keepMonthly, int $keepYearly ): array
+	{
 		$nrDaily	= 0;
 		$nrWeekly	= 0;
 		$nrMonthly	= 0;
@@ -120,42 +133,40 @@ class Hymn_Command_Database_Keep extends Hymn_Command_Abstract implements Hymn_C
 			if( !( $isValidWeekly || $isValidMonthly || $isValidYearly ) )
 				$list[]	= $fileName;
 		}
-		if( !$list ){
-			$this->out( 'All database dumps were matching the rules and are kept.' );
-			exit( Hymn_Client::EXIT_ON_RUN );
-		}
-		foreach( $list as $fileName ){
-			$this->client->outVerbose( '- Removing: '.$fileName );
-			if( !$this->flags->dry )
-				@unlink( $pathName.$fileName );
-		}
-		if( !$this->flags->quiet )
-			if( $this->flags->dry )
-				$this->out( count( $list ).' database dumps would have been removed.' );
-			else
-				$this->out( count( $list ).' database dumps removed.' );
+		return $list;
 	}
 
-	protected function __onInit(): void
-	{
-		$this->defaultPath	= $this->client->getConfigPath().'sql/';
-	}
-}
-
-class KeepRuleDate extends DateTime
-{
 	/**
-	 * @param		string					$datetime
-	 * @param		DateTimeZone|NULL		$timezone
+	 *	Returns map of files with keep rule dates.
+	 *	@param		string		$pathName
+	 *	@return		array<string,Hymn_Structure_Database_KeepRuleDate>
 	 */
-	public function __construct( string $datetime = 'now', DateTimeZone|NULL $timezone = null )
+	protected function findFilesInPath( string $pathName ): array
 	{
-		try{
-			parent::__construct( $datetime, $timezone );
-		} catch ( Exception $e ){}
+		/*  --  LIST ALL FILES  --  */
+		$index	= [];
+		$regex	= '/^(dump_)([0-9-]+)_([0-9:]+)\.(sql)(.*)$/u';
+		foreach( new DirectoryIterator( $pathName ) as $entry ){
+			if( $entry->isDir() || $entry->isDot() )
+				continue;
+			$fileName	= $entry->getFilename();
+			if( preg_match( $regex, $fileName ) ){
+				$timestamp	= preg_replace( $regex, '\\2 \\3', $fileName );
+				$date		= new Hymn_Structure_Database_KeepRuleDate( $timestamp );
+				$date->isWeekly		= FALSE;
+				$date->isMonthly	= FALSE;
+				$date->isYearly		= FALSE;
+				if( $date->format( 'N' ) === '0' )
+					$date->isWeekly	= TRUE;
+				if( $date->format( 'j' ) === '1' )
+					$date->isMonthly	= TRUE;
+				if( $date->format( 'j' ) === '1' && $date->format( 'n' ) === '1' )
+					$date->isYearly	= TRUE;
+				$index[$fileName]	= $date;
+			}
+		}
+		krsort( $index );
+		return $index;
 	}
-
-	public bool $isMonthly		= FALSE;
-	public bool $isWeekly		= FALSE;
-	public bool $isYearly		= FALSE;
 }
+

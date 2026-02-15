@@ -122,30 +122,6 @@ class Hymn_Module_Info
 		}
 	}
 
-	/**
-	 *	@param		Hymn_Module_Library			$library
-	 *	@param		Hymn_Structure_Module		$module
-	 *	@return		void
-	 */
-	public function showWhy( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
-	{
-		$relation		= new Hymn_Module_Graph( $this->client, $library );
-		foreach( $library->listInstalledModules() as $installedModule )
-			$relation->addModule( $installedModule );
-
-		$ways	= $relation->findWaysUpFromModule( $module );
-		if( [] === $ways )
-			return;
-//			$this->client->out( 'Not needed by any installed module.' );
-		$this->client->out( ' - Needed by modules: ' );
-		foreach( $ways as $steps ){
-			$items	= array_map( function ( $module ) {
-				return $module->title;
-			}, array_slice( $steps, 1 ) );
-			$this->client->out( '   - '.join( ' <- ', $items ) );
-		}
-	}
-
 	public function showModuleRelations( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
 	{
 		$module->relations->requiredBy	= [];
@@ -198,6 +174,37 @@ class Hymn_Module_Info
 		/** @var object{note: string, version: string} $item */
 	  foreach( $module->version->log as $item )
 			$this->client->out( '    - '.str_pad( $item->version, 10 ).' '.$item->note );
+	}
+
+	/**
+	 *	@param		Hymn_Module_Library			$library
+	 *	@param		Hymn_Structure_Module		$module
+	 *	@return		void
+	 */
+	public function showWhy( Hymn_Module_Library $library, Hymn_Structure_Module $module ): void
+	{
+		$relation		= new Hymn_Module_Graph( $this->client, $library );
+		foreach( $library->listInstalledModules() as $installedModule )
+			$relation->addModule( $installedModule );
+
+		$ways	= $relation->findWaysUpFromModule( $module );
+
+		$filteredWays	= [];
+		foreach( $ways as $steps ){
+			if( 1 === count( $steps ) )
+				continue;
+			$filteredWays[] = array_slice( $steps, 1 );
+		}
+		if( [] === $filteredWays )
+			return;
+
+		$this->client->out( ' - Needed by modules: ' );
+		foreach( $filteredWays as $steps ){
+			$items	= array_map( function ( $module ) {
+				return $module->title;
+			}, $steps );
+			$this->client->out( '    - '.join( ' <- ', $items ) );
+		}
 	}
 
 	/**
