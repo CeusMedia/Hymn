@@ -1,0 +1,13 @@
+{
+    "name": "my-company/my-project",
+    "require": {
+        "ceus-media/hydrogen-modules": "^1.1"
+    },
+    "authors": [
+        {
+            "name": "John Doe",
+            "email": "john.doe@example.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
