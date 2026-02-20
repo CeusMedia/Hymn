@@ -60,7 +60,7 @@ class Hymn_Command_Source_List extends Hymn_Command_Abstract implements Hymn_Com
 				'  - Type:     '.ucfirst( $source->type ),
 				'  - Path:     '.$source->path,
 				'  - Active:   '.( $source->active ? 'yes' : 'no' ),
-				'  - Default:  '.( $source->default ? 'yes' : 'no' ),
+				'  - Default:  '.( $source->isDefault ? 'yes' : 'no' ),
 				'  - Modules:  '.count( $modules ),
 			] );
 			if( !empty( $source->date ) )

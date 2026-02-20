@@ -115,7 +115,7 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$relation->addModule( $module );
 		}
 
-		foreach( $relation->getOrder() as $module ){
+		foreach( $relation->getModulesOrderedByDependency() as $module ){
 			try{
 				if( array_key_exists( $module->id, $listInstalled ) )
 					continue;
