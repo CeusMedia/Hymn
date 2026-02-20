@@ -1,5 +1,7 @@
 <?php
-$path			= realpath( __DIR__.'/../src/classes' ).'/';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$pathClasses			= realpath( __DIR__.'/../src/classes' ).'/';
 $directories	= [
 	'',
 	'Module',
@@ -16,11 +18,11 @@ $directories	= [
 	'Tool/XML',
 ];
 
-require_once $path.'Command/Interface.php';
-require_once $path.'Command/Abstract.php';
+require_once $pathClasses.'Command/Interface.php';
+require_once $pathClasses.'Command/Abstract.php';
 
 foreach( $directories as $directory )
-	loadClassesInPath( $path.$directory );
+	loadClassesInPath( $pathClasses.$directory );
 
 function loadClassesInPath( $path ){
 	foreach( new DirectoryIterator( $path ) as $entry ){
@@ -36,7 +38,3 @@ if( !class_exists( 'PHPUnit_Framework_TestCase' ) ){
 	}
 }
 
-require_once __DIR__.'/IntegrationTestCase.php';
-require_once __DIR__.'/IntegrationTestContext.php';
-require_once __DIR__.'/IntegrationTestContextManager.php';
-require_once __DIR__.'/IntegrationTestHymnResponse.php';
