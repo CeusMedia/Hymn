@@ -13,7 +13,7 @@ class Hymn_IntegrationTest_ContextManager
 		$this->setContextPath( $pathContexts );
 	}
 
-	public function createFromTemplate( string $templateKey, ?string $contextKey )
+	public function createFromTemplate( string $templateKey, ?string $contextKey, bool $force = FALSE )
 	{
 		$contextKey		= $contextKey ?? $this->generateContextKey();
 
@@ -30,9 +30,22 @@ class Hymn_IntegrationTest_ContextManager
 		$context->setKey( $contextKey );
 		$context->setTemplateKey( $templateKey );
 
-		exec( 'cp -Rp '.escapeshellcmd( $templatePath ).' '.$targetPath, $output, $resultCode );
-		if( 0 !== $resultCode )
-			throw new RuntimeException( 'Copying template failed' );
+		if( file_exists( $targetPath ) && $force )
+			exec( 'rm -R '.$targetPath );
+
+		if( !file_exists( $targetPath ) ){
+			$command	= 'cp -Rp '.escapeshellcmd( $templatePath ).' '.$targetPath;
+			exec( $command, $output, $resultCode );
+			if( file_exists( $targetPath.'.hymn.test' ) )
+				exec( 'mv '.$targetPath.'.hymn.test '.$targetPath.'.hymn' );
+			else if( file_exists( $targetPath.'.hymn.dist' ) )
+				exec( 'mv '.$targetPath.'.hymn.dist '.$targetPath.'.hymn' );
+			if( file_exists( $targetPath.'Makefile' ) )
+				exec( 'cd '.$targetPath.' && make configure && composer install --quiet' );
+
+			if( 0 !== $resultCode )
+				throw new RuntimeException( 'Copying template failed' );
+		}
 		$context->setStatus( Hymn_IntegrationTest_Context::STATUS_COPIED );
 		return $context;
 	}
