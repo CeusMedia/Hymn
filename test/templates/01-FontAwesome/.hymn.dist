@@ -1,0 +1,32 @@
+{
+    "application": {
+        "title": "My Project",
+        "url": "https:\/\/example.com\/",
+        "uri": "",
+        "installMode": "test",
+        "installType": "copy"
+    },
+    "sources": {
+        "CeusMedia_Public": {
+            "active": true,
+            "title": "Collection of public module library maintained by Ceus Media",
+            "type": "folder",
+            "path": ""
+        }
+    },
+    "modules": [],
+    "system": {
+        "user": "john",
+        "group": "www-data"
+    },
+    "database": {
+        "driver": "mysql",
+        "host": "localhost",
+        "port": "3306",
+        "username": "john",
+        "password": "doe",
+        "name": "test",
+        "prefix": "",
+        "modules": ""
+    }
+}

@@ -30,11 +30,15 @@ class Hymn_IntegrationTest_BasicTest extends Hymn_IntegrationTest_Case
 
 	public function testContext(): void
 	{
-		$this->createContextFromTemplate( '01-FontAwesome', 'c01-FontAwesome' );
+		$this->createContextFromTemplate( '01-FontAwesome', 'ctx_01-FontAwesome', TRUE );
 		$result	= $this->runHymn( 'app-info' );
 //		print_r( $result->getLines() );
 
 		$resultBlock	= join( PHP_EOL, $result->getLines() );
 		$this->assertStringContainsString( 'title => My Project', $resultBlock );
+
+
+		$result	= $this->runHymn( 'app-install UI_Font_Fira' );
+		print_r( $result->getLines() );
 	}
 }
