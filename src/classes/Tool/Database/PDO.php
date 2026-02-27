@@ -176,10 +176,10 @@ class Hymn_Tool_Database_PDO
 	 *	Returns database access configuration as object or a single pair by given key.
 	 *	@access		public
 	 *	@param		string		$key		Key to return single pair for
-	 *	@return		string
+	 *	@return		int|string
 	 *	@throws		DomainException			if key is not set in configuration
 	 */
-	public function getConfigValue( string $key ): string
+	public function getConfigValue( string $key ): int|string
 	{
 		$this->prepareConnection( FALSE );
 		if( !$this->dba )
