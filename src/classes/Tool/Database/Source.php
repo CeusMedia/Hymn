@@ -50,7 +50,7 @@ class Hymn_Tool_Database_Source
 	public static function fromArray( array $data ): self
 	{
 		$instance = new self( $data['driver'] );
-		$instance->setResource( $data['host'], $data['port'] );
+		$instance->setResource( $data['host'], (int) $data['port'] );
 		$instance->setAccess( $data['username'], $data['password'] );
 		$instance->setDatabase( $data['name'], $data['prefix'] );
 		return $instance;
