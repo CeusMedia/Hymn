@@ -52,9 +52,15 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 //		$key	= $this->client->arguments->getArgument();
 		$library	= $this->getLibrary();
 		$pathDump	= $this->client->getConfigPath().'dumps/';
-		$sourceId	= $this->client->arguments->getArgument();
+		$pathName	= $this->client->arguments->getArgument() ?? '';
+		$sourceId	= $this->client->arguments->getArgument( 1 );
 		$sourceId	= $this->evaluateSourceId( $sourceId );
 		$datetime	= date( 'Y-m-d_H:i:s' );
+
+		if( '' !== $pathName && file_exists( $pathName ) && is_dir( $pathName ) ){				//  first parameter is an existing path
+			$pathDump	= $pathName;															//  force path by parameter
+			$pathName	= '';																	//  forget about given path/file parameter
+		}
 
 		if( $sourceId ){
 			$modules	= $library->listInstalledModules( $sourceId );
@@ -66,8 +72,12 @@ class Hymn_Command_App_Stamp_Dump extends Hymn_Command_Abstract implements Hymn_
 			$fileName	= $pathDump.'stamp_'.$datetime.'.serial';
 			$this->out( count( $modules )." modules installed:" );
 		}
+
+		if( '' !== $pathName && !file_exists( $pathName ) )										//  force relative file path and name by parameter
+			$fileName	= $pathName;
+
 		if( dirname( $fileName) )																//  path is not existing
-			exec( "mkdir -p ".dirname( $fileName ) );											//  create path
+			exec( "mkdir -p ".dirname( $fileName ) );									//  create path
 
 		ksort( $modules );
 		$data	= new Hymn_Structure_Stamp();

@@ -15,6 +15,10 @@
 - 1.0.2: Fix installation to theme source.Add graph structure for module relations.
 - Add graph structure for module relations.
 
+## v1.0.4
+- Integrate updates from 1.1.0.
+- Command app-stamp-dump supports target file or path.
+
 ## v1.0.3
 - Improve exception handling on module indexing / reading.
 - Allow module config value on/off as boolean.
