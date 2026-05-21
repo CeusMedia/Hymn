@@ -1,7 +1,8 @@
 # Change Log
 
 ## v1.0.4
-- Integrate updates from 1.1.0. 
+- Integrate updates from 1.1.0.
+- Command app-stamp-dump supports target file or path.
 
 ## v1.0.3
 - Improve exception handling on module indexing / reading.
