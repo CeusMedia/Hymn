@@ -88,7 +88,7 @@ class Hymn_Command_App_Module_Config_Validate extends Hymn_Command_Abstract impl
 	{
 		$list	= [];
 		foreach( $errors as $error ){
-			$lineNr	= str_pad( trim( $error->line ), 5, ' ' );
+			$lineNr	= str_pad( trim( (string) $error->line ), 5, ' ' );
 			$list[]	= '  '.$lineNr.'| '.trim( $error->message );
 		}
 		return $list;

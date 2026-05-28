@@ -40,11 +40,11 @@ declare(strict_types=1);
 
 class Hymn_Structure_Graph
 {
-	public const int STATUS_EMPTY		= 0;
-	public const int STATUS_CHANGED		= 1;
-	public const int STATUS_LINKED		= 2;
-	public const int STATUS_PRODUCED	= 3;
-	public const int STATUS_DRAWN		= 4;
+	public const STATUS_EMPTY		= 0;
+	public const STATUS_CHANGED		= 1;
+	public const STATUS_LINKED		= 2;
+	public const STATUS_PRODUCED	= 3;
+	public const STATUS_DRAWN		= 4;
 
 	/** @var	Hymn_Module_Library				$library */
 	public Hymn_Module_Library $library;
