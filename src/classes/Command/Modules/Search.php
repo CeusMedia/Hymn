@@ -49,9 +49,14 @@ class Hymn_Command_Modules_Search extends Hymn_Command_Abstract implements Hymn_
 	{
 //		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
-		$term		= $this->client->arguments->getArgument();
+		$term		= trim( $this->client->arguments->getArgument() ?? '' );
 		$sourceId	= $this->client->arguments->getArgument( 1 );
+
+		if( '' === $term )
+			$this->client->outError( 'No module ID or search term given.', Hymn_Client::EXIT_ON_INPUT );
+
 		$sourceId	= $this->evaluateSourceId( $sourceId );
+
 
 		$msgTotal		= '%d module(s) found in all module sources:';
 		$msgEntry		= '%s (%s)';
