@@ -8,8 +8,10 @@ help: ## show this help
 	@cat src/locales/en/make.txt
 #	@-fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/:.*##/:/'
 
-create: create-phar ## alias for create-phar
-
+create: ## create productive version of PHAR file locally after running all available tests
+	@composer test:all
+	@test -f hymn.phar && rm hymn.phar || true
+	@${PHP} build/create.php --mode=${MODE} --php="${PHP}" && chmod +x hymn.phar || true
 
 create-phar: ## create productive version of PHAR file locally
 	@test -f hymn.phar && rm hymn.phar || true

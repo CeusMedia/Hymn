@@ -26,6 +26,9 @@ declare(strict_types=1);
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Composer\InstalledVersions;
+
 /**
  *	...
  *
@@ -91,7 +94,7 @@ class Hymn_Module_Installer
 	 *	@throws		Exception					if the XML data could not be parsed.
 	 */
 	public function configure( Hymn_Structure_Module $module ): void
-  {
+	{
 		$source		= $module->install->path.'module.xml';
 		$target		= $this->client->getConfigPath().'modules/'.$module->id.'.xml';
 		if( !$this->flags->dry ){																//  if not in dry mode
@@ -191,6 +194,8 @@ class Hymn_Module_Installer
 	public function install( Hymn_Structure_Module $module, string $installType = 'link' ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
+		$this->checkNeededPackages( $module );
+
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
@@ -228,6 +233,42 @@ class Hymn_Module_Installer
 			$message	= "Uninstallation of module '%s' failed.\ņ%s";
 			$message	= sprintf( $message, $module->id, $e->getMessage() );
 			throw new RuntimeException( $message, 0, $e );
+		}
+	}
+
+	/**
+	 * @param Hymn_Structure_Module $module
+	 * @return void
+	 */
+	protected function checkNeededPackages( Hymn_Structure_Module $module ): void
+	{
+		@include_once( 'vendor/composer/InstalledVersions.php' );
+		$this->client->outVerbose( 'Checking related packages...' );
+		if( !class_exists( '\\Composer\\InstalledVersions' ) )
+			return;
+		foreach( $module->relations->needs as $needs ){
+			if( Hymn_Structure_Module_Relation::TYPE_PACKAGE !== $needs->type )
+				continue;
+			if( !InstalledVersions::isInstalled( $needs->id ) ){
+				$message	= 'Package "'.$needs->id.'" needs to be installed.';
+				$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
+			}
+			$versionInstalled	= InstalledVersions::getPrettyVersion( $needs->id );
+			$this->client->outVerbose( '- '.$needs->id.' | required: '.$needs->version.' | installed: '.$versionInstalled );
+			if( str_starts_with( $versionInstalled, 'dev-' ) || str_ends_with( $versionInstalled, '-dev' ) ){
+				$message	= 'Installed version of package "%s is unstable and may not meet the requirements (%s).';
+				$this->client->out( vsprintf( $message, [$needs->id, $needs->version] ) );
+				return;
+			}
+			$neededVersions	= $needs->version;
+			$neededVersions	= preg_replace( '@(^\|)\|(^\|)@', '\\1 || \\2', $neededVersions );
+
+			$constraint			= new Hymn_Tool_SemVer_Constraint( $neededVersions );
+			$semanticVersion	= Hymn_Tool_SemVer_Version::fromString( $versionInstalled );
+			if( $constraint->checkVersion( $semanticVersion ) )
+				return;
+			$message	= 'Package "'.$needs->id.'" needs to be installed in version '.$needs->version;
+			$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
 		}
 	}
 }
