@@ -83,12 +83,12 @@ class Hymn_Module_Library_Available
 	 *	@param		bool		$active
 	 *	@param		?string		$title
 	 *	@return		static
-	 *	@throws		Exception
+	 *	@throws		InvalidArgumentException	if source already exists
 	 */
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
-			throw new Exception( 'Source already set by ID: '.$sourceId );
+			throw new InvalidArgumentException( 'Source already set by ID: '.$sourceId );
 		$activeSources	= $this->getSources( ['default' => TRUE] );
 		$isDefault		= $active && !count( $activeSources );
 		$this->sources[$sourceId]	= Hymn_Structure_Source::fromArray( [

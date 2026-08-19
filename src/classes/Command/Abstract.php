@@ -183,6 +183,31 @@ abstract class Hymn_Command_Abstract
 		$this->client->outDeprecation( $messageLines );
 	}
 
+	protected function detectModuleSource( string $moduleId ): ?string
+	{
+		if( '' === trim( $moduleId ) )
+			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot by empty' );
+
+		$config		= $this->client->getConfig();
+		$library	= $this->getLibrary();
+		$defaultId	= $library->getDefaultSource();
+		if( !empty( $config->modules[$moduleId]->source ) ){
+			$sourceByHymn	= trim( $config->modules[$moduleId]->source );
+			if( $library->isAvailableModuleInSource( $moduleId, $sourceByHymn ) )
+				return $sourceByHymn;
+		}
+/*		if( $library->isInstalledModule( $moduleId ) ){
+		}*/
+		if( $defaultId ){
+			if( $library->isAvailableModuleInSource( $moduleId, $defaultId ) )
+				return $defaultId;
+		}
+		$moduleSourceIds	= array_keys( $library->getAvailableModuleSources( $moduleId ) );
+		if( $moduleSourceIds )
+			return $moduleSourceIds[0];
+		return NULL;
+	}
+
 	/**
 	 *	...
 	 *	@access		protected

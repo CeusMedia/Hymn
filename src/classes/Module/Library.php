@@ -74,6 +74,15 @@ class Hymn_Module_Library
 		return $this;
 	}
 
+	/**
+	 *	@param		string		$sourceId
+	 *	@param		string		$path
+	 *	@param		string		$type
+	 *	@param		bool		$active
+	 *	@param		?string		$title
+	 *	@return		static
+	 *	@throws		InvalidArgumentException	if source already exists
+	 */
 	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
 	{
 		$this->available->addSource( $sourceId, $path, $type, $active, $title );
@@ -105,6 +114,7 @@ class Hymn_Module_Library
 	 *	@param		string		$sourceId
 	 *	@param		bool		$strict
 	 *	@return		Hymn_Structure_Module|NULL
+	 *	@deprecated	not used anymore -> to be deleted
 	 */
 	public function getAvailableModuleFromSource( string $moduleId, string $sourceId, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
@@ -147,6 +157,29 @@ class Hymn_Module_Library
 		return $this->available->getDefaultSource();
 	}
 
+	public function getOutdatedModules(): array
+	{
+		$listInstalled		= $this->listInstalledModules();										//  get list of installed modules
+		$outdatedModules	= [];																	//  prepare empty list of updatable modules
+		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
+			$source				= $installedModule->install->source;								//  get installed module
+			$availableModule	= $this->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
+			if( $availableModule ){																	//  installed module is available at least
+				$versionInstalled	= $installedModule->version->current;							//  shortcut installed module version
+				$versionAvailable	= $availableModule->version->current;							//  shortcut available module version
+				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){			//  installed module is outdated
+					$outdatedModules[$installedModule->id]	= (object) [							//  note updatable module
+						'id'		=> $installedModule->id,
+						'installed'	=> $versionInstalled,
+						'available'	=> $versionAvailable,
+						'source'	=> $installedModule->install->source,
+					];
+				}
+			}
+		}
+		return $outdatedModules;
+	}
+
 	public function getSource( string $sourceId, bool $withModules = FALSE ): Hymn_Structure_Source
 	{
 		return $this->available->getSource( $sourceId, $withModules );
@@ -170,6 +203,11 @@ class Hymn_Module_Library
 	 *	@param		string		$moduleId
 	 *	@param		string		$sourceId
 	 *	@return		object		Uncached module data object
+	 *	@throws		RangeException		if module.xml not found in module path (resolved from ID)
+	 *	@throws		RuntimeException	if XML file did not pass validation
+	 *	@throws		Exception			if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException	if SQL update script is missing version
+	 *	@throws		RuntimeException	if inline function found in hook (which is deprecated)
 	 */
 	public function getUncachedAvailableModuleFromSource( string $moduleId, string $sourceId ): object
 	{
@@ -181,11 +219,21 @@ class Hymn_Module_Library
 		return $module;
 	}
 
+	/**
+	 *	@param		string		$sourceId
+	 *	@return		bool
+	 *	@deprecated	not used anymore -> to be deleted
+	 */
 	public function isActiveSource( string $sourceId ): bool
 	{
 		return array_key_exists( $sourceId, $this->getActiveSources() );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$sourceId
+	 *	@return		bool
+	 */
 	public function isAvailableModuleInSource( string $moduleId, string $sourceId ): bool
 	{
 		if( '' === trim( $moduleId ) )
@@ -193,11 +241,19 @@ class Hymn_Module_Library
 		return (bool) $this->available->getFromSource( $moduleId, $sourceId, FALSE );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		bool
+	 */
 	public function isInstalledModule( string $moduleId ): bool
 	{
 		return $this->installed->has( $moduleId );
 	}
 
+	/**
+	 *	@param		string		$sourceId
+	 *	@return		bool
+	 */
 	public function isSource( string $sourceId ): bool
 	{
 		return array_key_exists( $sourceId, $this->getSources() );
@@ -220,18 +276,30 @@ class Hymn_Module_Library
 	 *	@param		string		$moduleId
 	 *	@return		Hymn_Structure_Module
 	 *	@throws		RangeException		if module is not installed
+	 *	@throws		RuntimeException	if XML file did not pass validation
+	 *	@throws		Exception			if XML file could not been loaded and parsed
+	 *	@throws		RuntimeException	if SQL update script is missing version
+	 *	@throws		RuntimeException	if inline function found in hook (which is deprecated)
 	 */
 	public function readInstalledModule( string $moduleId ): Hymn_Structure_Module
 	{
 		return $this->installed->get( $moduleId );
 	}
 
+	/**
+	 *	@param		int			$mode
+	 *	@return		self
+	 */
 	public function setReadMode( int $mode ): self
 	{
 		$this->available->setMode( $mode );
 		return $this;
 	}
 
+	/**
+	 *	@param		bool		$useCache
+	 *	@return		self
+	 */
 	public function useCache( bool $useCache = TRUE ): self
 	{
 		$this->useCache		= $useCache;

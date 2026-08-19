@@ -258,7 +258,7 @@ class Hymn_Module_Installer
 			if( str_starts_with( $versionInstalled, 'dev-' ) || str_ends_with( $versionInstalled, '-dev' ) ){
 				$message	= 'Installed version of package "%s is unstable and may not meet the requirements (%s).';
 				$this->client->out( vsprintf( $message, [$needs->id, $needs->version] ) );
-				return;
+				continue;
 			}
 			$neededVersions	= $needs->version;
 			$neededVersions	= preg_replace( '@(^\|)\|(^\|)@', '\\1 || \\2', $neededVersions );
