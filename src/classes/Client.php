@@ -83,7 +83,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.6-semver';
+	public static string $version				= '1.0.5b';
 
 	public static string $mode					= 'prod';
 
@@ -152,7 +152,7 @@ class Hymn_Client
 
 		$phar	= Hymn_Client::$pharPath;
 		$baseArgumentOptionsJson	= file_get_contents( $phar.'baseArgumentOptions.json' );
-		$this->baseArgumentOptions	= json_decode( $baseArgumentOptionsJson, TRUE );
+		$this->baseArgumentOptions	= json_decode( $baseArgumentOptionsJson, TRUE, 512, JSON_THROW_ON_ERROR );
 		if( file_exists( $phar.'.mode' ) )
 			self::$mode		= file_get_contents( $phar.'.mode' ) ?: 'prod';
 		if( file_exists( $phar.'.php' ) )

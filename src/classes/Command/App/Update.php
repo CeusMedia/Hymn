@@ -151,57 +151,16 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 		if( isset( $config->application->installMode ) )
 			$this->installMode	= $config->application->installMode;
 
-		$outdatedModules	= [];																	//  prepare empty list of updatable modules
-		foreach( $listInstalled as $installedModule ){												//  iterate installed modules
-			$source				= $installedModule->install->source;								//  get installed module
-			$availableModule	= $library->getAvailableModule( $installedModule->id, $source, FALSE );		//  get available module
-			if( $availableModule ){																	//  installed module is available at least
-				$versionInstalled	= $installedModule->version->current;							//  shortcut installed module version
-				$versionAvailable	= $availableModule->version->current;							//  shortcut available module version
-				if( version_compare( $versionAvailable, $versionInstalled, '>' ) ){			//  installed module is outdated
-					$outdatedModules[$installedModule->id]	= (object) [							//  note updatable module
-						'id'		=> $installedModule->id,
-						'installed'	=> $versionInstalled,
-						'available'	=> $versionAvailable,
-						'source'	=> $installedModule->install->source,
-					];
-				}
-			}
-		}
-
+		$outdatedModules	= $library->getOutdatedModules();											//  prepare empty list of updatable modules
 		$modulesToUpdate	= $outdatedModules;														//  updatable modules are all outdated modules
+
 		$moduleIds			= $this->client->arguments->getArguments();
 		if( $moduleIds ){
-			$outdatedModuleIds	= array_keys( $outdatedModules );
-			$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );		//  replace wildcarded modules
-
-			$modulesToUpdate	= [];																//  start with empty list again
-			foreach( $moduleIds as $moduleId ){														//  iterate given modules
-				if( !array_key_exists( $moduleId, $listInstalled ) )								//  module is not installed, no update
-					$this->out( sprintf(
-						"Module '%s' is not installed and cannot be updated",
-						$moduleId
-					) );
-				else if( !array_key_exists( $moduleId, $outdatedModules ) ){						//  module is not outdated, no update
-					if( $this->flags->force ){
-						$installedModule	= $listInstalled[$moduleId];
-						$modulesToUpdate[$moduleId]	= (object) [
-							'id'		=> $installedModule->id,
-							'installed'	=> $installedModule->version->current,
-							'available'	=> $installedModule->version->current,
-							'source'	=> $installedModule->install->source,
-						];
-					}
-					else{
-						$this->out( sprintf(
-							"Module '%s' is not outdated and cannot be updated",
-							$moduleId
-						) );
-					}
-				}
-				else																				//  module is updatable
-					$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
-			}
+			$modulesToUpdate	= $this->getModulesToUpdateFromIdListAndKnownUpdateModules(
+				$moduleIds,
+				$listInstalled,
+				$outdatedModules
+			);
 		}
 
 		$updater	= new Hymn_Module_Updater( $this->client, $library );
@@ -224,5 +183,40 @@ class Hymn_Command_App_Update extends Hymn_Command_Abstract implements Hymn_Comm
 			$this->out( $message );
 			$updater->update( $module, $installType );
 		}
+	}
+
+	protected function getModulesToUpdateFromIdListAndKnownUpdateModules( array $moduleIds, array $installedModules, array $outdatedModules ): array
+	{
+		$outdatedModuleIds	= array_keys( $outdatedModules );
+		$moduleIds	= $this->realizeWildcardedModuleIds( $moduleIds, $outdatedModuleIds );		//  replace wildcarded modules
+
+		$modulesToUpdate	= [];																//  start with empty list again
+		foreach( $moduleIds as $moduleId ){														//  iterate given modules
+			if( !array_key_exists( $moduleId, $installedModules ) )								//  module is not installed, no update
+				$this->out( sprintf(
+					"Module '%s' is not installed and cannot be updated",
+					$moduleId
+				) );
+			else if( !array_key_exists( $moduleId, $outdatedModules ) ){						//  module is not outdated, no update
+				if( $this->flags->force ){
+					$installedModule	= $installedModules[$moduleId];
+					$modulesToUpdate[$moduleId]	= (object) [
+						'id'		=> $installedModule->id,
+						'installed'	=> $installedModule->version->current,
+						'available'	=> $installedModule->version->current,
+						'source'	=> $installedModule->install->source,
+					];
+				}
+				else{
+					$this->out( sprintf(
+						"Module '%s' is not outdated and cannot be updated",
+						$moduleId
+					) );
+				}
+			}
+			else																				//  module is updatable
+				$modulesToUpdate[$moduleId]	= $outdatedModules[$moduleId];						//  note module by copy from outdated modules
+		}
+		return $modulesToUpdate;
 	}
 }

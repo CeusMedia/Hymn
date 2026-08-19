@@ -26,6 +26,9 @@ declare(strict_types=1);
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  */
+
+use Composer\InstalledVersions;
+
 /**
  *	...
  *
@@ -228,62 +231,16 @@ class Hymn_Module_Updater
 	public function update( Hymn_Structure_Module $module, string $installType ): bool
 	{
 		$this->client->getFramework()->checkModuleSupport( $module );
+		$this->checkNeededPackages( $module );
+
 		$files	= new Hymn_Module_Files( $this->client );
 		$sql	= new Hymn_Module_SQL( $this->client );
 		try{
 			$appUri				= $this->config->application->uri;
-			$localModules		= $this->library->listInstalledModules();
 			$localModule		= $this->library->readInstalledModule( $module->id );
 			$localModule->path	= $appUri;
 
-			$availableModules	= $this->library->getAvailableModules();							//  get list of all available modules
-			$availableModuleMap	= [];															//  prepare map of available modules
-			foreach( $availableModules as $availableModule )										//  iterate module list
-				$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
-
-			$installer	= new Hymn_Module_Installer( $this->client, $this->library );
-
-			//  --  MODULES TO UNINSTALL
-			$installedModules	= [];
-			$neededModules		= [];
-			foreach( $localModule->relations->needs as $moduleId => $relation )
-				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
-					$installedModules[$moduleId]	= $relation;
-			foreach( $module->relations->needs as $moduleId => $relation )
-				if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
-					$neededModules[$moduleId]	= $relation;
-			$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
-				array_keys( $installedModules ),													//  ... by intersecting old list ...
-				array_keys( $neededModules )														//  ... with new list of needed modules
-			);
-			foreach( $moduleIdsToUninstall as $moduleIdToUninstall ){								//  iterate modules to uninstall
-				if( !array_key_exists( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
-					continue;																		//  skip this module
-				foreach( $localModules as $localModule ){											//  iterate installed modules
-					if( $localModule->id === $module->id )											//  module to check is module to update
-						continue;																	//  skip this module
-					if( array_key_exists( $moduleIdToUninstall, $localModule->relations->needs ) )	//  module is needed by another module
-						continue 2;																	//  to not uninstall module
-				}
-				$this->client->out( " - Uninstalling module '".$moduleIdToUninstall."' ..." );		//  inform about installation of needed module
-				$installer->uninstall( $localModule );												//  uninstall module
-			}
-
-			//  --  MODULES TO INSTALL
-			foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
-				if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )				//  relation is not a module
-					continue;
-				if( array_key_exists( $neededModuleId, $localModules ) )							//  related module is installed
-					continue;
-				if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){					//  related module is not available
-					$message	= 'Module "%s" is needed but not available.';						//  create exception message
-					throw new RuntimeException( sprintf( $message, $neededModuleId ) );				//  throw exception
-				}
-				$relatedModule	= $availableModuleMap[$neededModuleId];								//  get related module from map
-				if( !$this->flags->quiet )															//  quiet mode is off
-					$this->client->out( " - Installing needed module '".$neededModuleId."' ..." );	//  inform about installation of needed module
-				$installer->install( $relatedModule, $installType );								//  install related module
-			}
+			$this->realizeChangesOfUpdatingModuleRelations( $localModule, $module, $installType );
 
 			//  --  TRY TO HANDLE FILE AND DATABASE CHANGES
 			$files->removeFiles( $localModule, TRUE );												//  try run of: remove module files
@@ -304,6 +261,100 @@ class Hymn_Module_Updater
 		catch( Exception $e ){
 			$msg	= "Update of module '%s' failed.\n%s";
 			throw new RuntimeException( sprintf( $msg, $module->id, $e->getMessage() ), 0, $e );
+		}
+	}
+
+	/**
+	 *	@param		Hymn_Structure_Module	$localModule
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@param		string					$installType
+	 *	@return		void
+	 */
+	protected function realizeChangesOfUpdatingModuleRelations( Hymn_Structure_Module $localModule, Hymn_Structure_Module $module, string $installType ): void
+	{
+		$installer			= new Hymn_Module_Installer( $this->client, $this->library );
+		$localModules		= $this->library->listInstalledModules();
+		$availableModules	= $this->library->getAvailableModules();							//  get list of all available modules
+		$availableModuleMap	= [];																//  prepare map of available modules
+		foreach( $availableModules as $availableModule )										//  iterate module list
+			$availableModuleMap[$availableModule->id]	= $availableModule;						//  add module to map
+
+		//  --  MODULES TO UNINSTALL
+		$installedModules	= [];
+		$neededModules		= [];
+		foreach( $localModule->relations->needs as $moduleId => $relation )
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
+				$installedModules[$moduleId]	= $relation;
+		foreach( $module->relations->needs as $moduleId => $relation )
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE === $relation->type )				//  only if relation is a module
+				$neededModules[$moduleId]	= $relation;
+		$moduleIdsToUninstall	= array_diff(													//  calculate modules not needed anymore ...
+			array_keys( $installedModules ),													//  ... by intersecting old list ...
+			array_keys( $neededModules )														//  ... with new list of needed modules
+		);
+		foreach( $moduleIdsToUninstall as $moduleIdToUninstall ){								//  iterate modules to uninstall
+			if( !array_key_exists( $moduleIdToUninstall, $localModules ) )						//  module to uninstall is not installed
+				continue;																		//  skip this module
+			foreach( $localModules as $localModule ){											//  iterate installed modules
+				if( $localModule->id === $module->id )											//  module to check is module to update
+					continue;																	//  skip this module
+				if( array_key_exists( $moduleIdToUninstall, $localModule->relations->needs ) )	//  module is needed by another module
+					continue 2;																	//  to not uninstall module
+			}
+			$this->client->out( " - Uninstalling module '".$moduleIdToUninstall."' ..." );	//  inform about installation of needed module
+			$installer->uninstall( $localModule );												//  uninstall module
+		}
+
+		//  --  MODULES TO INSTALL
+		foreach( $module->relations->needs as $neededModuleId => $relation ){					//  iterate related modules
+			if( Hymn_Structure_Module_Relation::TYPE_MODULE !== $relation->type )				//  relation is not a module
+				continue;
+			if( array_key_exists( $neededModuleId, $localModules ) )							//  related module is installed
+				continue;
+			if( !array_key_exists( $neededModuleId, $availableModuleMap ) ){					//  related module is not available
+				$message	= 'Module "%s" is needed but not available.';						//  create exception message
+				throw new RuntimeException( sprintf( $message, $neededModuleId ) );				//  throw exception
+			}
+			$relatedModule	= $availableModuleMap[$neededModuleId];								//  get related module from map
+			if( !$this->flags->quiet )															//  quiet mode is off
+				$this->client->out( " - Installing needed module '".$neededModuleId."' ..." );	//  inform about installation of needed module
+			$installer->install( $relatedModule, $installType );								//  install related module
+		}
+	}
+
+	/**
+	 * @param Hymn_Structure_Module $module
+	 * @return void
+	 */
+	protected function checkNeededPackages( Hymn_Structure_Module $module ): void
+	{
+		@include_once( 'vendor/composer/InstalledVersions.php' );
+		$this->client->outVerbose( 'Checking related packages...' );
+		if( !class_exists( '\\Composer\\InstalledVersions' ) )
+			return;
+		foreach( $module->relations->needs as $needs ){
+			if( Hymn_Structure_Module_Relation::TYPE_PACKAGE !== $needs->type )
+				continue;
+			if( !InstalledVersions::isInstalled( $needs->id ) ){
+				$message	= 'Package "'.$needs->id.'" needs to be installed.';
+				$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
+			}
+			$versionInstalled	= InstalledVersions::getPrettyVersion( $needs->id );
+			$this->client->outVerbose( '- '.$needs->id.' | required: '.$needs->version.' | installed: '.$versionInstalled );
+			if( str_starts_with( $versionInstalled, 'dev-' ) || str_ends_with( $versionInstalled, '-dev' ) ){
+				$message	= 'Installed version of package "%s is unstable and may not meet the requirements (%s).';
+				$this->client->out( vsprintf( $message, [$needs->id, $needs->version] ) );
+				continue;
+			}
+			$neededVersions	= $needs->version;
+			$neededVersions	= preg_replace( '@(^\|)\|(^\|)@', '\\1 || \\2', $neededVersions );
+
+			$constraint			= new Hymn_Tool_SemVer_Constraint( $neededVersions );
+			$semanticVersion	= Hymn_Tool_SemVer_Version::fromString( $versionInstalled );
+			if( $constraint->checkVersion( $semanticVersion ) )
+				return;
+			$message	= 'Package "'.$needs->id.'" needs to be installed in version '.$needs->version;
+			$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
 		}
 	}
 }

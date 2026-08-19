@@ -98,31 +98,6 @@ class Hymn_Command_App_Install extends Hymn_Command_Abstract implements Hymn_Com
 		$this->activeSourceIds	= array_keys( $this->activeSourceList );
 	}
 
-	protected function detectModuleSource( string $moduleId ): ?string
-	{
-		if( '' === trim( $moduleId ) )
-			throw new InvalidArgumentException( __METHOD__.' > Module ID cannot by empty' );
-
-		$config		= $this->client->getConfig();
-		$library	= $this->getLibrary();
-		$defaultId	= $library->getDefaultSource();
-		if( !empty( $config->modules[$moduleId]->source ) ){
-			$sourceByHymn	= trim( $config->modules[$moduleId]->source );
-			if( $library->isAvailableModuleInSource( $moduleId, $sourceByHymn ) )
-				return $sourceByHymn;
-		}
-/*		if( $library->isInstalledModule( $moduleId ) ){
-		}*/
-		if( $defaultId ){
-			if( $library->isAvailableModuleInSource( $moduleId, $defaultId ) )
-				return $defaultId;
-		}
-		$moduleSourceIds	= array_keys( $library->getAvailableModuleSources( $moduleId ) );
-		if( $moduleSourceIds )
-			return $moduleSourceIds[0];
-		return NULL;
-	}
-
 	protected function getGraphOfRequestedModuleIds( array $moduleIds ): Hymn_Module_Graph
 	{
 		$library	= $this->getLibrary();

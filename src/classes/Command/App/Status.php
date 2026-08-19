@@ -84,7 +84,7 @@ class Hymn_Command_App_Status extends Hymn_Command_Abstract implements Hymn_Comm
 	/*  --  PROTECTED  --  */
 
 	/**
-	 *	@param		object		$update
+	 *	@param		object{id: string, source: string, installed: string, available: string}	$update
 	 *	@param		string		$indent
 	 *	@return		void
 	 */

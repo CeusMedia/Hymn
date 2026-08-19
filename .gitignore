@@ -3,5 +3,6 @@ vendor
 .idea
 .hymn
 build/.mode
+build/.php
 tool/.phpunit.cache
 drive
