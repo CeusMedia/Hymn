@@ -1,5 +1,10 @@
 # Change Log
 
+## v1.0.5
+- Add full-featured semantic versioning support.
+- Check related (composer) packages on install and update.
+- Add new commands module-install and module-update.
+
 ## v1.0.4
 - Integrate updates from 1.1.0.
 - Command app-stamp-dump supports target file or path.
