@@ -223,7 +223,7 @@ class Hymn_Command_App_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_
 				if( 'sql' !== $type )
 					$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
-				$version	= $moduleOld->version;
+				$version	= $moduleOld->version->installed;
 				foreach( array_values( $scripts ) as $nr => $script ){
 					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s-> %s', [
 						$nr + 1,
