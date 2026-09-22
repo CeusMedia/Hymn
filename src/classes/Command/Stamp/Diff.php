@@ -132,10 +132,10 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 *	...
 	 *	@access		protected
 	 *	@param		string		$pathName		...
-	 *	@param		string		$sourceId		...
+	 *	@param		?string		$sourceId		...
 	 *	@return		Hymn_Structure_Stamp
 	 */
-	protected function getStamp( string $pathName, string $sourceId ): Hymn_Structure_Stamp
+	protected function getStamp( string $pathName, ?string $sourceId = NULL ): Hymn_Structure_Stamp
 	{
 		if( '' !== $pathName ){
 			$fileName	= NULL;
@@ -170,7 +170,7 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 			if( ( $scripts = $diff->compareSqlByModules( $moduleOld, $moduleNew ) ) ){
 				$this->out( '   SQL: '.count( $scripts ).' update(s):' );
 				$this->client->outVerbose( '--  UPDATE '.strtoupper( $moduleNew->id ).'  --' );
-				$version	= $moduleOld->version;
+				$version	= $moduleOld->version->installed;
 				foreach( array_values( $scripts ) as $nr => $script ){
 					$this->client->outVerbose( vsprintf( '--  UPDATE (%d/%d) version %s-> %s', array(
 						$nr + 1,
