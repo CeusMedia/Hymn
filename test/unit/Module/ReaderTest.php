@@ -1,10 +1,10 @@
 <?php
-class Hymn_Test_Module_Reader2Test extends PHPUnit_Framework_TestCase
+class Hymn_Test_Module_ReaderTest extends PHPUnit_Framework_TestCase
 {
 	public function testDecorateObjectWithConfig()
 	{
 		$xmlFile	= __DIR__.'/../assets/moduleTest.xml';
-		$module	= Hymn_Module_Reader2::load( $xmlFile, 'Test' );
+		$module	= Hymn_Module_Reader::load( $xmlFile, 'Test' );
 //		print( json_encode( $module, JSON_PRETTY_PRINT ) );die;
 		self::assertFalse( $module->config['text']->mandatory );
 	}
@@ -12,7 +12,7 @@ class Hymn_Test_Module_Reader2Test extends PHPUnit_Framework_TestCase
 	public function testDecorateObjectWithRelations(): void
 	{
 		$xmlFile	= __DIR__.'/../assets/moduleRelationsTest.xml';
-		$module		= Hymn_Module_Reader2::load( $xmlFile, 'TestRelations' );
+		$module		= Hymn_Module_Reader::load( $xmlFile, 'TestRelations' );
 		$needs		= $module->relations->needs;
 
 		self::assertSame( ['Resource_Database', 'vendor/attribute', 'vendor/appended', 'vendor/both', 'vendor/without'], array_keys( $needs ) );

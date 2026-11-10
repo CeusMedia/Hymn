@@ -4,7 +4,7 @@
 
 | Requirement | Purpose |
 |-------------|---------|
-| PHP **8.1** or newer | |
+| PHP **8.3** or newer | |
 | `ext-dom`, `ext-json`, `ext-pdo`, `ext-simplexml`, `ext-xml` | reading modules and Hymn file, database access |
 | `ext-pdo_mysql` | database commands – only MySQL/MariaDB is supported |
 | `ext-intl` | optional: language detection for German output |
@@ -51,9 +51,9 @@ hymn self-update --dry -v   # show download URL and file to replace
 the linked file is replaced. It needs write access to that file and its folder, usually by `sudo`.
 The download is checked before, so on errors the installed file stays untouched.
 
-## Upgrading to 1.0.5
+## Upgrading to 1.1.1
 
-Version 1.0.5 fixes many errors, which changes some behaviour:
+Version 1.1.1 includes the changes of 1.0.5, which fixes many errors and changes some behaviour:
 
 - **Version constraints** of needed packages follow Composer: `^1.2` means `>=1.2.0 <2.0.0` (was
   `<1.3.0`), `~1.2` means `<2.0.0` (was: any version). Invalid constraints are errors – see [Versions](versions.md).
