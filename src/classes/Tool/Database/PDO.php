@@ -96,18 +96,14 @@ class Hymn_Tool_Database_PDO
 		if( !in_array( $this->dba->driver, PDO::getAvailableDrivers() ) ){
 			$this->client->outError( 'PDO driver "'.$this->dba->driver.'" is not available', Hymn_Client::EXIT_ON_SETUP );
 		}
-		while( empty( $this->dba->name ) ){
-			$this->dba->name		= (string) $this->ask( 'Database Name:' );
-		}
-		while( empty( $this->dba->username ) ){
-			$this->dba->username	= (string) $this->ask( 'Database Username:' );
-		}
-		while( empty( $this->dba->password ) ){
-			$this->dba->password	= (string) $this->ask( 'Database Password:' );
-		}
-		while( is_null( $this->dba->prefix ) ){
+		if( empty( $this->dba->name ) )
+			$this->dba->name		= (string) $this->ask( 'Database Name:', required: TRUE );
+		if( empty( $this->dba->username ) )
+			$this->dba->username	= (string) $this->ask( 'Database Username:', required: TRUE );
+		if( empty( $this->dba->password ) )
+			$this->dba->password	= (string) $this->ask( 'Database Password:', required: TRUE );
+		if( is_null( $this->dba->prefix ) )
 			$this->dba->prefix		= (string) $this->ask( 'Table Prefix:' );
-		}
 
 		if( strtolower( $this->dba->driver ) !== 'mysql' )											//  exclude other PDO drivers than 'mysql' @todo improve this until v1.0!
 			$this->client->outError( vsprintf( 'PDO driver "%s" is not supported at the moment', [
@@ -126,7 +122,7 @@ class Hymn_Tool_Database_PDO
 		$this->dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 		$this->dbc->query( 'SET CHARSET utf8' );
 		try{
-			$query	= 'SHOW DATABASES LIKE "'.$this->dba->name.'"';
+			$query	= 'SHOW DATABASES LIKE '.$this->dbc->quote( self::escapeLike( $this->dba->name ) );
 			$try1	= $this->dbc->query( $query );
 			if( FALSE !== $try1 && !$try1->fetch() ){
 				$this->client->outVerbose( 'Creating database "'.$this->dba->name.'" ...', FALSE );
@@ -141,7 +137,7 @@ class Hymn_Tool_Database_PDO
 			}
 		}
 		catch( Exception $e ){
-			$this->client->outError( 'SQL setup failed: '.$e->getMessage() );
+			$this->client->outError( 'SQL setup failed: '.$e->getMessage(), Hymn_Client::EXIT_ON_SETUP );
 		}
 	}
 
@@ -199,11 +195,34 @@ class Hymn_Tool_Database_PDO
 	 */
 	public function getTables( ?string $prefix = NULL ): array
 	{
-		$query		= "SHOW TABLES" . ( $prefix ? " LIKE '".$prefix."%'" : "" );
-		$result		= $this->query( $query );
-		if( FALSE !== $result )
-			return $result->fetchAll( PDO::FETCH_COLUMN );
-		return [];
+		$result		= $this->query( 'SHOW TABLES' );
+		if( FALSE === $result )
+			return [];
+		return self::filterTablesByPrefix( $result->fetchAll( PDO::FETCH_COLUMN ), $prefix );
+	}
+
+	/**
+	 *	Returns tables starting with prefix – literally, not as LIKE pattern, where _ would match any character.
+	 *	@param		array<string|int|float>		$tables
+	 *	@param		string|NULL		$prefix
+	 *	@return		list<string>
+	 */
+	public static function filterTablesByPrefix( array $tables, ?string $prefix ): array
+	{
+		$tables	= array_map( 'strval', $tables );
+		if( NULL === $prefix || '' === $prefix )
+			return array_values( $tables );
+		return array_values( array_filter( $tables, static fn( string $table ) => str_starts_with( $table, $prefix ) ) );
+	}
+
+	/**
+	 *	Escapes wildcards % and _ for use in LIKE patterns.
+	 *	@param		string		$value
+	 *	@return		string
+	 */
+	public static function escapeLike( string $value ): string
+	{
+		return str_replace( ['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value );
 	}
 
 	/**
@@ -232,7 +251,7 @@ class Hymn_Tool_Database_PDO
 
 	/*  --  PROTECTED  --  */
 
-	protected function ask( string $message, string $type = 'string', string|NULL $default = NULL, array $options = [], bool $break = TRUE ): float|bool|int|string
+	protected function ask( string $message, string $type = 'string', string|NULL $default = NULL, array $options = [], bool $break = TRUE, bool $required = FALSE ): float|bool|int|string
 	{
 		return Hymn_Tool_CLI_Question::getInstance(
 			$this->client,
@@ -241,7 +260,7 @@ class Hymn_Tool_Database_PDO
 			$default,
 			$options,
 			$break
-		)->ask();
+		)->setRequired( $required )->ask();
 	}
 
 	/**
@@ -284,7 +303,7 @@ class Hymn_Tool_Database_PDO
 			$this->dba = Hymn_Tool_Database_Source::fromArray( $this->dbaDefaults );				//  prepare database access information using defaults as template
 			foreach( $config->modules['Resource_Database']->config as $key => $value )				//  iterate config pairs of installed database resource module
 				if( preg_match( '/^access\./', $key ) )												//  config key prefix is matching
-					$this->dba->{preg_replace( '/^access\./', '', $key )}	= $value;				//  carry resource module config value to database access information
+					$this->dba->setValue( (string) preg_replace( '/^access\./', '', $key ), $value );	//  carry resource module config value to database access information
 		}
 		else if( $usesLinkedModules ){
 			$parts		= preg_split( '/\s*,\s*/', $config->database->modules ) ?: [];		//  split comma separated list if resource modules in registration format
@@ -303,7 +322,7 @@ class Hymn_Tool_Database_PDO
 							continue;
 						$key	= preg_replace( '/^'.$quotedPrefix.'/', '', $key );					//  otherwise remove prefix from config key
 					}
-					$this->dba->{$key}	= $value;													//  carry resource module config value to database access information
+					$this->dba->setValue( (string) $key, $value );								//  carry resource module config value to database access information
 				}
 				break;																				//  stop after first success
 			}

@@ -26,6 +26,32 @@
 - Fix config values on module update, read as true before.
 - Prefer latest.sql on database-load.
 - Allow numbers in Hymn file and null values in config.ini.
+- Fix crashes of commands on missing arguments.
+- Fix database access configured by module, eg. Resource_Database.
+- Fix yes/no questions and endless questions on end of input.
+- Support option --interactive=no for all questions.
+- Fix self-update: replace running file safely, check download, allow tags and branches.
+- Fix database-keep: crash on rules, weekly rule, exit code; add --weekly to help.
+- Fix database-clear and database-dump matching tables of other prefixes, like app2_ for app_.
+- Fix database-load and module updates ignoring SQL errors.
+- Fix MySQL passwords with special characters and removal of temporary options file.
+- Fix sub commands of app-info -v and silent exit on invalid options.
+- Command module-install installs needed modules, too.
+- Fix module-update for modules not available in source anymore.
+- Fix source of module set in Hymn file (sourceId) being ignored, support older key source.
+- Support install type per module in Hymn file.
+- Fix saving Hymn file dropping paths and unknown sections.
+- Fix app-install adding Resource_Database without configured database.
+- Support combined short flags, like -dv, and match flags completely.
+- Update help: add missing commands and options, fix English and German intro.
+- Add clearing of logs to app-clear, use configured paths for locks and logs.
+- Fix database-dump: portable table prefix placeholder, create missing folder, folder without slash.
+- Fix database-test and other database commands reporting connection errors.
+- Refuse module file paths outside of module and app folder, create no folders on dry runs.
+- Build: quote paths, check downloaded module schema, use local copy without network.
+- Fix default source if first source is inactive.
+- Make nullable parameters explicit, avoiding deprecation warnings on PHP 8.4.
+- Remove unused module reader, source index loading modes and read mode.
 - Add documentation (MkDocs) with command reference.
 
 ## v1.0.4

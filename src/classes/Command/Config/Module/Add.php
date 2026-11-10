@@ -52,7 +52,7 @@ class Hymn_Command_Config_Module_Add extends Hymn_Command_Abstract implements Hy
 		$filename	= Hymn_Client::$fileName;
 		$config		= Hymn_Tool_ConfigFile::read( $filename );
 
-		$moduleName	= $this->client->arguments->getArgument();
+		$moduleName	= $this->client->arguments->getArgument() ?? '';
 		if( !strlen( trim( $moduleName ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );
 		$moduleId	= str_replace( ":", "_", $moduleName );

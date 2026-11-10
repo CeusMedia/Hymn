@@ -205,7 +205,7 @@ class Hymn_Tool_Database_CLI_MySQL
 	{
 		$resultCode		= 0;
 		$resultOutput	= [];
-		exec( escapeshellarg( $command ).' '.$line, $resultOutput, $resultCode );
+		exec( escapeshellarg( $command ).' '.$line.' 2>&1', $resultOutput, $resultCode );		//  catch error messages, too
 		return (object) ['code' => $resultCode, 'output' => $resultOutput];
 	}
 

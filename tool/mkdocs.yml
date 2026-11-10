@@ -120,6 +120,7 @@ nav:
     - commands/index.md
     - "Project Creation and Source Management":
       - "init": commands/init.md
+      - "init-makefile": commands/init-makefile.md
       - "source-list": commands/source-list.md
       - "source-add": commands/source-add.md
       - "source-remove": commands/source-remove.md
@@ -175,6 +176,7 @@ nav:
       - "app-module-reconfigure": commands/app-module-reconfigure.md
     - "App Database Management":
       - "database-clear": commands/database-clear.md
+      - "database-console": commands/database-console.md
       - "database-dump": commands/database-dump.md
       - "database-load": commands/database-load.md
       - "database-keep": commands/database-keep.md
@@ -187,15 +189,12 @@ nav:
     - "Self Management":
       - "help": commands/help.md
       - "version": commands/version.md
+      - "changelog": commands/changelog.md
       - "self-update": commands/self-update.md
       - "test-syntax": commands/test-syntax.md
+      - "test": commands/test.md
+      - "sleep": commands/sleep.md
     - "Stamp Management":
       - "stamp-diff": commands/stamp-diff.md
-    - "Further commands":
-      - "database-console": commands/database-console.md
-      - "init-makefile": commands/init-makefile.md
-      - "sleep": commands/sleep.md
-      - "test": commands/test.md
-      - "changelog": commands/changelog.md
     # commands-nav:end
   - Changelog: changelog.md

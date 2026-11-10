@@ -40,7 +40,7 @@ declare(strict_types=1);
 class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 {
 	protected string $defaultFileName		= '.mysqlOptions.cfg';
-	protected string $actualFileName;
+	protected ?string $actualFileName		= NULL;
 	protected Hymn_Client $client;
 
 	public function __construct( Hymn_Client $client )
@@ -66,12 +66,12 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 		];
 		$optionList		= [];
 		foreach( $map as $optionsKey => $dbaKey ){
-			$trimmedValue 	= trim( (string) $dbc->getConfigValue( $dbaKey ) );
-			if( strlen( $trimmedValue ) )
-				$optionList[$optionsKey]	= $trimmedValue;
+			$value 	= (string) $dbc->getConfigValue( $dbaKey );
+			if( '' !== trim( $value ) )
+				$optionList[$optionsKey]	= $value;											//  not trimmed: spaces may be part of password
 		}
 		foreach( $optionList as $key => $value )
-			$lines[]	= $key.'='.$value;
+			$lines[]	= $key.'='.self::quoteValue( $value );
 		file_put_contents( $fileName, join( PHP_EOL, $lines ) );
 		$this->actualFileName	 = $fileName;
 		return $this;
@@ -88,15 +88,31 @@ class Hymn_Tool_Database_CLI_MySQL_OptionsFile
 		return file_exists( $fileName );
 	}
 
+	/**
+	 *	Removes options file: the given one, else the one created before, else the default one.
+	 *	@param		string|NULL		$fileName
+	 *	@return		self
+	 */
 	public function remove( ?string $fileName = NULL ): self
 	{
-		$fileName	= is_null( $fileName ) ? $this->defaultFileName : $fileName;
+		$fileName	= $fileName ?? $this->actualFileName ?? $this->defaultFileName;
 		if( $this->has( $fileName ) )
 			@unlink( $fileName );
 		return $this;
 	}
 
-	public function setDefaultFileName( string$fileName ): self
+	/**
+	 *	Quotes value for MySQL option files: in double quotes, escaping backslashes and double quotes.
+	 *	Without quotes, a # would start a comment and surrounding spaces would be lost.
+	 *	@param		string		$value
+	 *	@return		string
+	 */
+	public static function quoteValue( string $value ): string
+	{
+		return '"'.addcslashes( $value, '\\"' ).'"';
+	}
+
+	public function setDefaultFileName( string $fileName ): self
 	{
 		$this->defaultFileName	= $fileName;
 		return $this;

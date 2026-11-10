@@ -6,10 +6,10 @@
 
 hymn - Hydrogen Management
 
-CLI tool for applications built on Hydrogen framework
+CLI-Werkzeug für Anwendungen auf Basis des Hydrogen-Frameworks
 
-See: https://github.com/CeusMedia/Hymn
-     https://github.com/CeusMedia/HydrogenFramework
+Mehr: https://github.com/CeusMedia/Hymn
+      https://github.com/CeusMedia/HydrogenFramework
 
 Version: %version% (%language%)
 
@@ -18,8 +18,8 @@ Usage: hymn KOMMANDO [ARG]*
 Schlüsselwörter kurz erklärt:
 - Projekt   = Vorlage für eine App-Installation, definiert durch Hymn-Datei
 - App       = Menge von installierten Modulen im Rahmen einer Projektkonfiguration
-- Quelle    = Container mit installiertbaren Modulen
-- Modul     = Zustammenstellung von Dateien und Definition zur Installation in einer App
+- Quelle    = Container mit installierbaren Modulen
+- Modul     = Zusammenstellung von Dateien und Definitionen zur Installation in einer App
 
 Kommandos:
 
@@ -31,6 +31,7 @@ For creating and extending an App's Hymn config file, you execute these commands
 A1. Project Creation and Source Management
 ------------------------------------------------------------------------------
 - init                                        Create initial Hymn file for this project
+- init-makefile [-bnp] [FILE]                 Create Makefile for app (with backend, public, nonfree targets)
 - source-list                                 List library sources registered in Hymn file
 - source-add                                  Add module source of modules to Hymn file
 - source-remove KEY                           Remove module source from Hymn file
@@ -58,7 +59,7 @@ A3. Project Module Management
 A4. Project Module Information
 ------------------------------------------------------------------------------
 - module-info [-v] MODULE [SOURCE]            Show information about module (in library source)
-- module-install [-dv] MODULE                 Install module into app
+- module-install [-dv] MODULE [SOURCE]        Install module (and needed modules) into app
 - module-update [-dv] MODULE                  Update module installed in app
 - modules-available [SOURCE]                  List modules available (in library source)
 - modules-installed [SOURCE]                  List modules installed within application (from library source)
@@ -84,7 +85,7 @@ B2. App Instance & Module Management
 ------------------------------------------------------------------------------
 - app-info [-v]                               Show app setup
 - app-status [-v]                             Show status of app and its modules
-- app-graph                                   Render module relations graph (see config/modules.graph.png)
+- app-graph                                   Render module relations graph (config/modules.graph.png and .svg)
 - app-hooks                                   List registered event hooks of installed modules
 - app-move [-dv] DESTINATION [URL]            Move app to another folder (and adjust app base URL)
 - app-relink [-dv] SOURCE                     Fix links after manuel app movement (if link mode)
@@ -105,19 +106,20 @@ B3. App Module Management
 B4. App Database Management
 ------------------------------------------------------------------------------
 - database-clear [-dfqv]                      Drop database tables
-- database-console [QUERY]                    Run SQL query
+- database-console QUERY                      Run SQL query (no DROP or DELETE) and show result
 - database-dump [PATH]                        Export database to SQL file
-- database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
 - database-load [PATH|FILE]                   Import (specific or latest) SQL file
+- database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
 
 Keep Rules:
---daily=[DAYS]             Number of daily dumps to keep
---monthly=[MONTHS]         Number of monthly dumps to keep
---yearly=[YEARS]           Number of yearly dumps to keep
+--daily=[NUMBER]           Number of newest dumps to keep (required)
+--weekly=[NUMBER]          Number of Sunday dumps to keep
+--monthly=[NUMBER]         Number of dumps of 1st of month to keep
+--yearly=[NUMBER]          Number of dumps of January 1st to keep
 
 B5. App Module Management: Stamps
 ------------------------------------------------------------------------------
-- app-stamp-dump [SOURCE]                              Export current module settings into a stamp file
+- app-stamp-dump [PATH|FILE] [SOURCE]                  Export current module settings into a stamp file
 - app-stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between installed modules and stamp
 - app-stamp-load [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Restore module settings of stamp (not implemented yet)
 - app-stamp-prospect TYPE [SOURCE]                     Show changes when updating outdated modules
@@ -148,8 +150,11 @@ C1. Self Management
 ------------------------------------------------------------------------------
 - help                                        Show this help screen
 - version                                     Show current hymn version
+- changelog                                   Show changes of hymn versions
 - self-update [-dv] [VERSION]                 Replace hymn binary by master or given version
 - test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
+- test [-rqv] [PATH]                          Alias of test-syntax
+- sleep SECONDS                               Wait some seconds (at most 3600), eg. in scripts
 
 C2. Stamp Management
 ------------------------------------------------------------------------------
@@ -159,10 +164,20 @@ C2. Stamp Management
 Options:
 ------------------------------------------------------------------------------
 -d | --dry                 Actions are simulated only
--f | --force               Continue actions on error or warnings + avoid any caches (incl. module source indices)
+-f | --force               Continue actions on error or warnings
 -q | --quiet               Avoid any output
 -v | --verbose             Be verbose about taken steps
--r | --recursive           Perform file actions recursively (used by test-syntax only)
+-vv | --very-verbose       Be even more verbose, eg. about memory usage
+-h | --help                Show this help screen (without command)
+--version                  Show current hymn version
 --file=[.hymn]             Alternative path of Hymn file
---prefix=[<%prefix%>]      Set database table prefix in dump
 --db=[yes,no,only]         Switch to enable changes in database (default: yes)
+--interactive=[yes,no]     Ask for missing values (default: yes)
+
+Short flags can be combined, eg. -dv for -d -v.
+
+Options of single commands:
+-r | --recursive           Perform file actions recursively (test-syntax only)
+--prefix=[PREFIX]          Table prefix in dump, default: <%?prefix%> (database-dump only)
+--path=[PATH]              Folder for dump file (database-dump only)
+--age=[MINUTES]            Minimum age of locks to remove (app-clear only)

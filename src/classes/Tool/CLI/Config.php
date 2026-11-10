@@ -95,7 +95,8 @@ class Hymn_Tool_CLI_Config
 	 */
 	protected function applyAppConfiguredDatabaseConfigToModules( array $modules = [] ): bool
 	{
-		if( !isset( $this->config->database ) )
+		$database	= $this->config->database;
+		if( '' === $database->driver && '' === $database->name )									//  no database configured in Hymn file
 			return FALSE;
 
 		if( [] === $modules ){																		//  no map of resource modules with config option key prefix given on function call

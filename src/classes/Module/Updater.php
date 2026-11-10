@@ -83,7 +83,7 @@ class Hymn_Module_Updater
 	 *	@param		string|NULL		$sourceId		ID of source to reduce to
 	 *	@return		array		List of outdated modules
 	 */
-	public function getUpdatableModules( string $sourceId = NULL ): array
+	public function getUpdatableModules( ?string $sourceId = NULL ): array
 	{
 		$outdated		= [];																		//  prepare list of outdated modules
 		foreach( $this->library->listInstalledModules( $sourceId ) as $installed ){					//  iterate installed modules

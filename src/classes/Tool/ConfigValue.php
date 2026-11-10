@@ -181,6 +181,19 @@ class Hymn_Tool_ConfigValue
 	}
 
 	/**
+	 *	@deprecated		use setValue and setType instead
+	 */
+	public function set( int|float|bool|string $value, ?string $type = NULL ): static
+	{
+		$this->setType( $type === NULL ? $this->type : $type );
+		$value		= trim( (string) $value );
+		if( in_array( strtolower( $this->type ), ['boolean', 'bool'] ) )						//  value is boolean
+			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
+		$this->value	= $value;
+		return $this;
+	}
+
+	/**
 	 *	@param		string|NULL		$type
 	 *	@return		static
 	 */

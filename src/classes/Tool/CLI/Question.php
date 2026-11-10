@@ -39,12 +39,16 @@ declare(strict_types=1);
  */
 class Hymn_Tool_CLI_Question
 {
+	protected const ANSWERS_YES		= ['y', 'yes', 'j', 'ja', '1', 'true'];
+	protected const ANSWERS_NO		= ['n', 'no', 'nein', '0', 'false'];
+
 	protected Hymn_Client $client;
 	protected string $message;
 	protected string $type			= 'string';
 	protected ?string $default		= NULL;
 	protected ?array $options		= NULL;
 	protected bool $break			= TRUE;
+	protected bool $required		= FALSE;
 
 	/**
 	 *	Static constructor.
@@ -90,9 +94,7 @@ class Hymn_Tool_CLI_Question
 		$options		= $this->options;
 		if( $typeIsBoolean ){
 			$options	= ['y', 'n'];
-			$default	= 'no';
-			if( in_array( strtolower( $this->default ?? '' ), ['y', 'yes', '1'] ) )
-				$default	= 'yes';
+			$default	= in_array( strtolower( $this->default ?? '' ), self::ANSWERS_YES, TRUE ) ? 'y' : 'n';
 		}
 		if( /*!$typeIsBoolean && */strlen( trim( $default ?? '' ) ) )
 			$message	.= " [".$default."]";
@@ -100,22 +102,43 @@ class Hymn_Tool_CLI_Question
 			$message	.= " (".implode( "|", $options ).")";
 		if( !$this->break )
 			$message	.= ": ";
+		if( $this->client->flags & Hymn_Client::FLAG_NO_INTERACTION )							//  questions are disabled by --interactive=no
+			return $this->convert( $this->answerWithoutInteraction( $default, $options ), $typeIsBoolean, $typeIsInteger, $typeIsNumber );
+
+		$handle	= defined( 'STDIN' ) ? STDIN : fopen( 'php://stdin', 'r' );						//  shared handle: keeps buffered input for next questions
 		do{
 			$this->client->out( $message, $this->break );
-			/** @var resource $handle */
-			$handle	= fopen( "php://stdin","r" );
-			$input	= trim( (string) fgets( $handle ) );
+			$line	= $handle ? fgets( $handle ) : FALSE;
+			$isEnd	= FALSE === $line;															//  end of input reached, eg. in pipe or cron job
+			$input	= trim( (string) $line );
 			if( !strlen( $input ) && $default )
 				$input	= $default;
+			if( $typeIsBoolean )																	//  accept yes/no in several notations
+				$input	= match( TRUE ){
+					in_array( strtolower( $input ), self::ANSWERS_YES, TRUE )	=> 'y',
+					in_array( strtolower( $input ), self::ANSWERS_NO, TRUE )	=> 'n',
+					default														=> $input,
+				};
+			$isValid	= !is_array( $options ) || 0 === count( $options ) || in_array( $input, $options );
+			if( $this->required && '' === $input )													//  answer is required but empty
+				$isValid	= FALSE;
+			if( !$isValid && $isEnd )																//  no more input to ask for
+				throw new RuntimeException( 'No valid answer for question "'.$this->message.'": end of input' );
 		}
-		while( is_array( $options ) && 0 !== count( $options ) && !in_array( $input, $options ) );
-		if( $typeIsBoolean )
-			$input	= in_array( strtolower( $input ), ['y', 'yes', '1'] );
-		if( $typeIsInteger )
-			$input	= (int) $input;
-		if( $typeIsNumber )
-			$input	= (float) $input;
-		return $input;
+		while( !$isValid );
+		return $this->convert( $input, $typeIsBoolean, $typeIsInteger, $typeIsNumber );
+	}
+
+	/**
+	 *	Sets whether an empty answer is refused.
+	 *	Without input (end of input or --interactive=no), an exception is thrown instead of asking again.
+	 *	@param		bool		$required
+	 *	@return		self
+	 */
+	public function setRequired( bool $required = TRUE ): self
+	{
+		$this->required	= $required;
+		return $this;
 	}
 
 	public function setBreak( bool $break = TRUE ): self
@@ -140,5 +163,34 @@ class Hymn_Tool_CLI_Question
 	{
 		$this->type		= $type;
 		return $this;
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Returns default answer, if interaction is disabled.
+	 *	@param		string|NULL		$default
+	 *	@param		array|NULL		$options
+	 *	@return		string
+	 *	@throws		RuntimeException		if no valid default is available
+	 */
+	protected function answerWithoutInteraction( ?string $default, ?array $options ): string
+	{
+		$answer		= $default ?? '';
+		$isValid	= !is_array( $options ) || 0 === count( $options ) || in_array( $answer, $options, TRUE );
+		if( $isValid && !( $this->required && '' === $answer ) )
+			return $answer;
+		throw new RuntimeException( 'Answer for question "'.$this->message.'" needed, but interaction is disabled' );
+	}
+
+	protected function convert( string $input, bool $typeIsBoolean, bool $typeIsInteger, bool $typeIsNumber ): float|bool|int|string
+	{
+		if( $typeIsBoolean )
+			return 'y' === $input;
+		if( $typeIsInteger )
+			return (int) $input;
+		if( $typeIsNumber )
+			return (float) $input;
+		return $input;
 	}
 }

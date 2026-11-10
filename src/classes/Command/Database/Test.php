@@ -39,13 +39,32 @@ declare(strict_types=1);
  */
 class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
+	/** @var string $lastError Reason of last failed test */
+	public static string $lastError	= '';
+
+	/**
+	 *	Indicates whether database can be connected and read.
+	 *	On failure, the reason is available in static property lastError.
+	 *	@param		Hymn_Client		$client
+	 *	@return		bool
+	 */
 	public static function test( Hymn_Client $client ): bool
 	{
-		$dbc		= $client->getDatabase();
-		if( !$dbc->isConnected() )
-			$dbc->connect( TRUE );												//  force setup of new connection to database
-		$result	= $dbc->query( "SHOW TABLES" );
-		return is_array( $result->fetchAll() );
+		self::$lastError	= '';
+		try{
+			$dbc		= $client->getDatabase();
+			if( !$dbc->isConnected() )
+				$dbc->connect( TRUE );															//  force setup of new connection to database
+			$result	= $dbc->query( 'SHOW TABLES' );
+			if( FALSE === $result )
+				throw new RuntimeException( 'Reading tables failed' );
+			$result->fetchAll();
+			return TRUE;
+		}
+		catch( PDOException|RuntimeException $e ){
+			self::$lastError	= $e->getMessage();
+			return FALSE;
+		}
 	}
 
 	/**
@@ -61,7 +80,7 @@ class Hymn_Command_Database_Test extends Hymn_Command_Abstract implements Hymn_C
 		if( $this->client->flags & Hymn_Client::FLAG_NO_DB )
 			return;
 		if( !self::test( $this->client ) )
-			$this->outError( "Database is NOT connected.", Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( 'Database can NOT be connected: '.self::$lastError, Hymn_Client::EXIT_ON_SETUP );
 		$this->out( "Database can be connected." );
 	}
 }

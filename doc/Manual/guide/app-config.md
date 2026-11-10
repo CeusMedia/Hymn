@@ -55,9 +55,10 @@ theme, which decide where styles and images of modules go.
 ## Cache, locks and logs
 
 ```sh
-hymn app-clear                  # all: module cache and locks
+hymn app-clear                  # all: module cache, locks and logs
 hymn app-clear cache            # module cache config/modules.cache.serial
 hymn app-clear locks --age=60   # job locks older than 60 minutes
+hymn app-clear logs             # log files *.log, *.log.1, *.log.gz in path logs
 hymn app-module-config-uncache  # remove app module cache
 ```
 

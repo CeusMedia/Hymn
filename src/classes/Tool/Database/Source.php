@@ -61,17 +61,38 @@ class Hymn_Tool_Database_Source
 		$this->driver	= $driver;
 	}
 
-	public function setAccess( ?string $username = NULL, string $password = NULL ): self
+	public function setAccess( ?string $username = NULL, ?string $password = NULL ): self
 	{
 		$this->username = $username;
 		$this->password = $password;
 		return $this;
 	}
 
-	public function setDatabase( string $name, ?string $prefix = NULL ): self
+	public function setDatabase( ?string $name, ?string $prefix = NULL ): self
 	{
 		$this->name = $name;
 		$this->prefix = $prefix;
+		return $this;
+	}
+
+	/**
+	 *	Sets access information by key, eg. from module configuration, converting value to type of property.
+	 *	Unknown keys are ignored.
+	 *	@param		string		$key		One of: driver, host, port, name, prefix, username, password
+	 *	@param		mixed		$value		Value to set, empty driver, host and port keep their defaults
+	 *	@return		self
+	 */
+	public function setValue( string $key, mixed $value ): self
+	{
+		$value	= is_scalar( $value ) ? (string) $value : NULL;
+		match( $key ){
+			'driver'	=> $this->driver	= '' !== trim( $value ?? '' ) ? $value : $this->driver,	//  keep default on empty value
+			'host'		=> $this->host		= '' !== trim( $value ?? '' ) ? $value : $this->host,	//  keep default on empty value
+			'port'		=> $this->port		= '' !== trim( $value ?? '' ) ? (int) $value : $this->port,	//  keep default on empty value
+			'name', 'prefix', 'username', 'password'
+						=> $this->{$key}	= $value,
+			default		=> NULL,
+		};
 		return $this;
 	}
 

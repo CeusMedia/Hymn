@@ -39,61 +39,33 @@ declare(strict_types=1);
  */
 class Hymn_Command_Self_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
-	protected string $pharDownloadUrl	= 'https://github.com/CeusMedia/Hymn/raw/<VERSION>/hymn.phar';
-
 	/**
 	 *	Execute this command.
-	 *	@todo		implement missing flags
+	 *	Downloads PHAR file of given version (tag or branch, default: master) and replaces installed one.
+	 *	Implements flags: dry, quiet, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function run(): void
 	{
-		$version	= $this->client->arguments->getArgument();
-		$version	= strlen( trim( $version ) ) ? $version : 'master';
-		if( 'master' !== $version && !preg_match( '/^[0-9.]+$/', $version ) )
-			throw new InvalidArgumentException( 'No valid version given: '.$version );
-		$urlHymn	= str_replace( '<VERSION>', $version, $this->pharDownloadUrl );
-		$pathFile	= $this->getHymnFilePath();
-		if( !$pathFile )
+		$version	= trim( $this->client->arguments->getArgument() ?? '' );
+		$version	= '' !== $version ? $version : 'master';
+		$updater	= new Hymn_Tool_PharUpdate();
+		$url		= $updater->getUrl( $version );												//  throws exception on invalid version
+		$pathFile	= Hymn_Tool_PharUpdate::detectInstalledFile();
+		if( NULL === $pathFile )
 			throw new RuntimeException( 'Hymn not found' );
 		$this->out( 'Version installed: '.Hymn_Client::$version );
-		$this->out( 'Download: '.$urlHymn );
+		$this->out( 'Download: '.$url );
+		$this->client->outVerbose( 'Target: '.$pathFile );
 
-		if( !$this->flags->dry ){
-			$this->downloadFile( $urlHymn, $pathFile );
-			$this->client->outVerbose( 'Saved to: '.$pathFile );
-		}
+		if( $this->flags->dry )
+			return;
+		$bytes	= $updater->update( $version, $pathFile );
+		$this->client->outVerbose( 'Saved '.Hymn_Tool_FileSize::formatBytes( $bytes ).' to: '.$pathFile );
 		if( !$this->flags->quiet ){
 			$this->out( 'Version installed: ', FALSE );
-			passthru( 'hymn version' );
+			passthru( escapeshellarg( $pathFile ).' version' );									//  ask new version of replaced file
 		}
-	}
-
-	protected function downloadFile( string $url, string $file ): void
-	{
-		if( !( $fpSave = @fopen( $file, 'wb' ) ) )													//  try to open target file for writing
-			throw new RuntimeException( 'Permission denied to change '.$file );						//  otherwise quit with exception
-		if( !( $fpLoad = fopen( $url, 'rb' ) ) )													//  try to open source URL for reading
-			throw new RuntimeException( 'Failed to open stream to URL' );							//  otherwise quit with exception
-		while( !feof( $fpLoad ) )																	//  read source until end of file
-			fwrite( $fpSave, fread( $fpLoad, 4096 ) );												//  copy 4K block from source to target
-		fclose( $fpSave );																			//  close target file
-		fclose( $fpLoad );																			//  close connection to source URL
-	}
-
-	protected function getHymnFilePath(): ?string
-	{
-		exec( 'whereis hymn', $output/*, $b*/ );
-		if( is_array( $output ) && count( $output ) ){
-			foreach( $output as $line ){
-				if( preg_match( '/^hymn: (.+)$/', $line ) ){
-					/** @var string $line */
-					$line	= preg_replace( '/^hymn: /', '', $line );
-					return $line;
-				}
-			}
-		}
-		return NULL;
 	}
 }

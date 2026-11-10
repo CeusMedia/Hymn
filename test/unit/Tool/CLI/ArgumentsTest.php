@@ -83,4 +83,47 @@ class Hymn_Test_Tool_CLI_ArgumentsTest extends PHPUnit_Framework_TestCase
 		$arguments->setArgument( 1, 'C' );
 		self::assertSame( 'C', $arguments->getArgument( 1 ) );
 	}
+
+	public function testCombinedShortFlags(): void
+	{
+		$arguments	= new Hymn_Tool_CLI_Arguments( ['app-install', '-dfv', 'UI_Bootstrap'], $this->options );
+		self::assertTrue( $arguments->getOption( 'dry' ) );
+		self::assertTrue( $arguments->getOption( 'force' ) );
+		self::assertTrue( $arguments->getOption( 'verbose' ) );
+		self::assertSame( ['app-install', 'UI_Bootstrap'], $arguments->getArguments() );
+	}
+
+	public function testVeryVerboseIsNotSplit(): void
+	{
+		$arguments	= new Hymn_Tool_CLI_Arguments( ['app-info', '-vv'], $this->options );
+		self::assertTrue( $arguments->getOption( 'very-verbose' ) );
+		self::assertNull( $arguments->getOption( 'verbose' ) );								//  set as flag by client, see Client::realizeFlags
+	}
+
+	public function testUnknownLettersAreNotSplit(): void
+	{
+		$arguments	= new Hymn_Tool_CLI_Arguments( ['app-install', '-dx'], $this->options );
+		self::assertNull( $arguments->getOption( 'dry' ) );
+		self::assertSame( ['app-install', '-dx'], $arguments->getArguments() );
+	}
+
+	public function testFlagsMustMatchCompletely(): void
+	{
+		$arguments	= new Hymn_Tool_CLI_Arguments( ['app-install', '-dfoo', '--helper', '--dry-run', '--versions'], $this->options );
+		self::assertNull( $arguments->getOption( 'dry' ) );
+		self::assertNull( $arguments->getOption( 'help' ) );
+		self::assertNull( $arguments->getOption( 'version' ) );
+		self::assertSame( ['app-install', '-dfoo', '--helper', '--dry-run', '--versions'], $arguments->getArguments() );
+	}
+
+	public function testCombinedFlagsWithCommandSpecificFlags(): void
+	{
+		$arguments	= new Hymn_Tool_CLI_Arguments( ['init-makefile', '-bpq'], $this->options );
+		$arguments->registerOption( 'backend', '/^(-b|--backend)$/', TRUE, FALSE );
+		$arguments->registerOption( 'public', '/^(-p|--public)$/', TRUE, FALSE );
+		$arguments->parse();
+		self::assertTrue( $arguments->getOption( 'backend' ) );
+		self::assertTrue( $arguments->getOption( 'public' ) );
+		self::assertTrue( $arguments->getOption( 'quiet' ) );
+	}
 }

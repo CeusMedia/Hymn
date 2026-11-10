@@ -39,20 +39,7 @@ declare(strict_types=1);
  */
 class Hymn_Module_Library_Available
 {
-	const int MODE_AUTO			= 0;
-	const int MODE_FOLDER		= 1;
-	const int MODE_JSON			= 2;
-	const int MODE_SERIAL		= 3;
-
-	const array MODES				= [
-		self::MODE_AUTO,
-		self::MODE_FOLDER,
-		self::MODE_JSON,
-		self::MODE_SERIAL,
-	];
-
 	protected Hymn_Client $client;
-	protected int $mode					= self::MODE_AUTO;
 
 	/** @var array<string,array<string,Hymn_Structure_Module>> $modules  */
 	protected array $modules			= [];
@@ -85,12 +72,12 @@ class Hymn_Module_Library_Available
 	 *	@return		static
 	 *	@throws		InvalidArgumentException	if source already exists
 	 */
-	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, ?string $title = NULL ): static
 	{
 		if( in_array( $sourceId, array_keys( $this->sources ) ) )
 			throw new InvalidArgumentException( 'Source already set by ID: '.$sourceId );
-		$activeSources	= $this->getSources( ['default' => TRUE] );
-		$isDefault		= $active && !count( $activeSources );
+		$defaultSources	= $this->getSources( ['isDefault' => TRUE] );
+		$isDefault		= $active && [] === $defaultSources;										//  first active source is default
 		$this->sources[$sourceId]	= Hymn_Structure_Source::fromArray( [
 			'id'		=> $sourceId,
 			'path'		=> $path,
@@ -100,8 +87,6 @@ class Hymn_Module_Library_Available
 			'title'		=> $title ?? '',
 			'date'		=> NULL,
 		] );
-		if( 1 === count( $this->sources ) )
-			$this->sources[$sourceId]->isDefault	= TRUE;
 //		ksort( $this->sources );
 		return $this;
 	}
@@ -115,7 +100,7 @@ class Hymn_Module_Library_Available
 	 *	@throws		DomainException				if source ID is invalid
 	 *	@throws		DomainException				if module ID is invalid
 	 */
-	public function get( string $moduleId, string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
+	public function get( string $moduleId, ?string $sourceId = NULL, bool $strict = TRUE ): ?Hymn_Structure_Module
 	{
 		$this->loadModulesInSources();
 		if( $sourceId )
@@ -149,7 +134,7 @@ class Hymn_Module_Library_Available
 	 *	@param		string|NULL		$sourceId
 	 *	@return		array<string,Hymn_Structure_Module>
 	 */
-	public function getAll( string $sourceId = NULL ): array
+	public function getAll( ?string $sourceId = NULL ): array
 	{
 		$this->loadModulesInSources();
 		$list	= [];
@@ -263,9 +248,12 @@ class Hymn_Module_Library_Available
 	{
 		if( !array_key_exists( $sourceId, $this->sources ) )
 			throw new DomainException( 'Invalid source ID: '.$sourceId );
-		$source	= $this->sources[$sourceId];
-		if( !$withModules )
-			unset( $source->modules );
+		$source				= clone $this->sources[$sourceId];									//  copy: modules are set for caller, only
+		$source->modules	= [];
+		if( $withModules ){
+			$this->loadModulesInSources();
+			$source->modules	= $this->modules[$sourceId] ?? [];
+		}
 		return $source;
 	}
 
@@ -308,45 +296,7 @@ class Hymn_Module_Library_Available
 		return $module;																				//  return module
 	}
 
-	public function setMode( int $mode ): self
-	{
-		if( !in_array( $mode, self::MODES, TRUE ) )
-			throw new InvalidArgumentException( 'Invalid mode' );
-		$this->mode	= $mode;
-		return $this;
-	}
-
 	//  --  PROTECTED  --  //
-
-	/**
-	 *	@param		object	$module
-	 *	@param		string											$filePath
-	 *	@return		Hymn_Structure_Module
-	 */
-	protected function convertModuleDataObjectToStructureObject( object $module, string $filePath ): Hymn_Structure_Module
-	{
-		/** @var Hymn_Structure_Module $module $obj */
-		//  work in progress
-		$obj	= new Hymn_Structure_Module( $module->id, $module->version->current, $filePath );
-		foreach( $module->config ?? [] as $config )
-			$obj->config[]	= new Hymn_Structure_Module_Config( $config->key, $config->value, $config->type, $config->title );
-		/** @var object{callback: string, resource: string, event: string, level: int} $hook */
-		foreach( $config->hooks ?? [] as $hook )
-			$obj->hooks[]	= new Hymn_Structure_Module_Hook( $hook->callback, $hook->resource, $hook->event, $hook->level );
-
-		$module->config					= (array) $module->config;
-		$module->hooks					= (array) $module->hooks;
-		foreach( $module->hooks as $resource => $events )
-			$module->hooks[$resource]	= (array) $module->hooks[$resource];
-		foreach( $module->files->toArray() as $category => $files )
-			$module->files->{$category}	=  (array) $files;
-		$module->relations->needs		= (array) $module->relations->needs;
-		$module->relations->supports	= (array) $module->relations->supports;
-//			$module->isDeprecated			= isset( $module->deprecation );
-		if( isset( $module->frameworks ) )
-			$module->frameworks			= (array) $module->frameworks;
-		return $obj;
-	}
 
 	protected function decorateModuleWithPaths( Hymn_Structure_Module $module, string $sourcePath ): void
 	{
@@ -367,90 +317,9 @@ class Hymn_Module_Library_Available
 		$path	= $source->path;
 		$this->client->outVeryVerbose( '- Path: '.$path );
 
-//		!!! Cache has been disabled, since new module config structure
-//			- breaks with JSON serialization (classes objects vs stdclass)
-//			- breaks: Hymn_Structure_Module vs CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition
+		//  modules are read from module folders – source indices (index.json, index.serial) are not used,
+		//  since they do not support the module structure objects
 		return $this->loadModulesFromSourceFolder( $path, [] );
-/*
-		$fileJson	= $path.'/index.json';
-		$fileSerial	= $path.'/index.serial';
-
-		$mode		= $this->mode;
-
-//		!!! Auto mode and cache have been disabled, since new module config structure
-//		if( $mode === self::MODE_AUTO ){
-//			$mode	= self::MODE_FOLDER;
-//			$mode	= file_exists( $fileJson ) ? self::MODE_JSON : $mode;
-//			$mode	= file_exists( $fileSerial ) ? self::MODE_SERIAL : $mode;
-//		}
-
-		$list	= [];
-		switch( $mode ){
-			case self::MODE_SERIAL;
-				list($index, $list) = $this->loadModulesFromSerialFile( $fileSerial, $path );
-				break;
-			case self::MODE_JSON;
-				list($index, $list) = $this->loadModulesFromJsonFile( $fileJson, $list, $path );
-				break;
-			case self::MODE_FOLDER:
-				list($index, $list) = $this->loadModulesFrom($path, $list);
-				break;
-		}
-		$sourceTypesHavingMetaData = [self::MODE_SERIAL, self::MODE_JSON];				//  list of source types supporting source metadata
-		if( isset( $index ) && in_array( $mode, $sourceTypesHavingMetaData, TRUE ) ){	//  found source has meta data
-			$source	= $this->sources[$source->id];
-			if( isset( $index->date ) && strlen( trim( $index->date ) ) )				//  source index has date
-				$source->date	= $index->date;											//  define date of source
-			if( isset( $index->url ) && strlen( trim( $index->url ) ) )					//  source index a hyperlink
-				$source->url	= $index->url;												//  define hyperlink of source
-			if( isset( $index->description ) && strlen( trim( $index->description ) ) )	//  source index has a description
-				$source->title	= strip_tags( $index->description );
-		}
-//		$this->listModulesAvailable	= $list;									//  @todo realize sources in cache
-		return $list;*/
-	}
-
-	/**
-	 *	@param		string		$fileJson
-	 *	@param		array<string,Hymn_Structure_Module>	$list
-	 *	@param		string		$path
-	 *	@return		array
-	 */
-	protected function loadModulesFromJsonFile( string $fileJson, array $list, string $path ): array
-	{
-		$this->client->outVeryVerbose( '- Strategy: JSON file' );
-		$content	= file_get_contents( $fileJson );
-		if( FALSE === $content )
-			throw new RuntimeException( 'Reading file "'.$fileJson.'" failed' );
-		/** @var object{modules: array<object>} $index */
-		$index	= json_decode( $content );
-		foreach( $index->modules as $module ){
-			$module	= $this->convertModuleDataObjectToStructureObject( $module, $fileJson );
-			$this->decorateModuleWithPaths( $module, $path );
-			$list[$module->id]	= $module;
-		}
-		return [$index, $list];
-	}
-
-	/**
-	 * @param string $fileSerial
-	 * @param string $path
-	 * @return array<mixed,array<string,Hymn_Structure_Module>>
-	 */
-	protected function loadModulesFromSerialFile( string $fileSerial, string $path ): array
-	{
-		$this->client->outVeryVerbose( '- Strategy: serial file' );
-		$content	= file_get_contents( $fileSerial );
-		if( FALSE === $content )
-			throw new RuntimeException( 'Reading file "'.$fileSerial.'" failed' );
-		$index		= unserialize( $content );
-		foreach( $index->modules as $module ){
-			$module->frameworks		= (array) $module->frameworks;
-//			$module->isDeprecated	= isset( $module->deprecation );
-			$this->decorateModuleWithPaths( $module, $path );
-		}
-		$list	= $index->modules;
-		return [$index, $list];
 	}
 
 	/**

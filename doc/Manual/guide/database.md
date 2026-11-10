@@ -28,12 +28,18 @@ CREATE TABLE `<%?prefix%>users` ( ... );
 
 ```sh
 hymn database-dump                          # into config/sql/dump_<date>_<time>.sql
-hymn database-dump backup/                  # into another folder (must exist)
+hymn database-dump backup/                  # into another folder, created if missing
 hymn database-dump backup/before-update.sql # into a file
+hymn database-dump --prefix=test_           # rename tables in dump from app_... to test_...
 ```
 
 The dump is made by `mysqldump` and contains the tables with the configured prefix only.
 Tables listed by modules in setting `onDatabaseDumpSkipTables` are left out.
+
+In the dump, the table prefix is replaced by the placeholder `<%?prefix%>` – like in SQL scripts of
+modules. On [loading](#loading), the placeholder is replaced by the prefix of the target app, so dumps
+can be moved between apps with different prefixes. To write another prefix into the dump instead,
+use `--prefix=PREFIX`; `--prefix=` removes the prefix.
 
 ## Loading
 
@@ -59,14 +65,18 @@ hymn database-clear -f      # without confirmation
 [`database-keep`](../commands/database-keep.md) removes old dumps, keeping only those matching rules:
 
 ```sh
-hymn database-keep --daily=7 --monthly=12 --yearly=5
+hymn database-keep --daily=7 --weekly=4 --monthly=12 --yearly=5
+hymn database-keep --daily=7 --dry          # show which dumps would be removed
 ```
 
 | Rule | Keeps |
 |------|-------|
-| `--daily=N` | dumps of the last N days – required |
-| `--monthly=N` | dumps of the 1st of a month, for N months |
-| `--yearly=N` | dumps of January 1st, for N years |
+| `--daily=N` | the N newest dumps – required |
+| `--weekly=N` | the N newest dumps of a Sunday |
+| `--monthly=N` | the N newest dumps of the 1st of a month |
+| `--yearly=N` | the N newest dumps of January 1st |
+
+A dump is kept, if any rule matches. With one dump per night, `--daily=7` keeps the last week.
 
 ## Console
 

@@ -67,29 +67,25 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			return;
 
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( 'Database can NOT be connected: '.Hymn_Command_Database_Test::$lastError, Hymn_Client::EXIT_ON_SETUP );
 
 		$dbc			= $this->client->getDatabase();
 		$arguments		= $this->client->arguments;
 
-//		$path			= $arguments->getOption( 'path', $this->client->getConfigPath().'sql/' );	//  get path from option or default
-		$defaultPath	= $this->client->getConfigPath().'sql/';
-		$path			= $arguments->getOption( 'path' );										//  get path from option
-		$path			= $path ?: $defaultPath;													//  ... or default
-
-		$fileName		= (string) $arguments->getArgument( 0 );
-
-		if( !preg_match( '/[a-z0-9]/i', $fileName ) )										//  arguments has not valid value
-			$fileName	= $path;																	//  set path from option or default
-		if( str_ends_with( $fileName, '/' ) )														//  given argument is a path
-			$fileName	= $fileName.'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';					//  generate stamped file name
-		if( !dirname( $fileName) )																	//  path is not existing
-			exec( 'mkdir -p '.dirname( $fileName ) );										//  create path
+		$fileName		= self::resolveFileName(
+			$arguments->getArgument( 0 ),
+			$arguments->getOption( 'path' ),
+			$this->client->getConfigPath().'sql/'
+		);
+		$folder			= dirname( $fileName );
+		if( !is_dir( $folder ) && !mkdir( $folder, 0775, TRUE ) && !is_dir( $folder ) )			//  create folder, if missing
+			$this->outError( 'Creating folder '.$folder.' failed', Hymn_Client::EXIT_ON_EXEC );
 
 		$mysql	= new Hymn_Tool_Database_CLI_MySQL( $this->client );								//  get CLI handler for MySQL
-		$prefix	= $arguments->getOption( 'prefix' ) ?? $dbc->getConfigValue( 'prefix' );
-		if( '' !== trim( $prefix ) )
-			$mysql->setPrefixPlaceholder( trim( $prefix ) );
+		$prefix	= (string) $dbc->getConfigValue( 'prefix' );										//  tables with configured prefix are dumped
+		$prefixInDump	= $arguments->getOption( 'prefix' );										//  replacement of prefix in dump, default: placeholder
+		if( NULL !== $prefixInDump )
+			$mysql->setPrefixPlaceholder( trim( (string) $prefixInDump ) );
 
 		$tablesToSkip	= $this->getTablesToSkip();
 
@@ -100,6 +96,7 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 				'DB Server:    '.$dba->host.'@'.$dba->port,											//  show server host and port from config
 				'Database:     '.$dba->name,														//  show database name from config
 				'Table prefix: '.( $prefix ?: '(none)' ),											//  show table prefix from config
+				'In dump as:   '.( $prefixInDump ?? '<%?prefix%>' ),									//  show replacement of table prefix in dump
 				'Access as:    '.( $dba->username ?? '-' ),											//  show username from config
 			] );
 			if( $tablesToSkip )
@@ -119,6 +116,26 @@ class Hymn_Command_Database_Dump extends Hymn_Command_Abstract implements Hymn_C
 			$fileSize	= Hymn_Tool_FileSize::get( $fileName );										//  format file size
 		}
 		$this->out( 'Dumped export file to '.$fileName.' ('.$fileSize.')' );
+	}
+
+	/**
+	 *	Returns file name of dump: given file, file in given folder or file in path option or default path.
+	 *	Folders end with a slash or exist; generated file names contain date and time.
+	 *	@param		string|NULL		$argument		File or folder given as argument
+	 *	@param		string|NULL		$pathOption		Folder given by option --path
+	 *	@param		string			$defaultPath	Default folder, eg. config/sql/
+	 *	@return		string
+	 */
+	public static function resolveFileName( ?string $argument, ?string $pathOption, string $defaultPath ): string
+	{
+		$fileName	= trim( $argument ?? '' );
+		if( 1 !== preg_match( '/[a-z0-9]/i', $fileName ) )											//  no valid file or folder given
+			$fileName	= '' !== trim( $pathOption ?? '' ) ? trim( $pathOption ?? '' ) : $defaultPath;
+		if( is_dir( $fileName ) && !str_ends_with( $fileName, '/' ) )								//  existing folder without slash
+			$fileName	.= '/';
+		if( str_ends_with( $fileName, '/' ) )														//  folder: generate stamped file name
+			$fileName	.= 'dump_'.date( 'Y-m-d_H:i:s' ).'.sql';
+		return $fileName;
 	}
 
 	protected function getTablesToSkip(): array

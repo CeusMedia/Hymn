@@ -41,17 +41,17 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 {
 	protected array $argumentOptions	= [
 		'backend'		=> [
-			'pattern'	=> '/^-b|--backend/',
+			'pattern'	=> '/^(-b|--backend)$/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
 		],
 		'public'		=> [
-			'pattern'	=> '/^-p|--public/',
+			'pattern'	=> '/^(-p|--public)$/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
 		],
 		'nonfree'		=> [
-			'pattern'	=> '/^-n|--nonfree/',
+			'pattern'	=> '/^(-n|--nonfree)$/',
 			'resolve'	=> TRUE,
 			'default'	=> FALSE,
 		],
@@ -71,7 +71,7 @@ class Hymn_Command_Init_Makefile extends Hymn_Command_Abstract implements Hymn_C
 		$withPublic = $this->client->arguments->getOption( 'public' );
 		$withNonfree = $this->client->arguments->getOption( 'nonfree' );
 
-		$targetFileName	= trim( $this->client->arguments->getArgument( 0 ) );
+		$targetFileName	= trim( $this->client->arguments->getArgument( 0 ) ?? '' );
 
 
 		/*  --  CREATE MAKE FILE  --  */

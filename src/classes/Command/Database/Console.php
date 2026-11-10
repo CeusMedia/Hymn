@@ -59,7 +59,7 @@ class Hymn_Command_Database_Console extends Hymn_Command_Abstract implements Hym
 			$this->outError( 'DELETE is not allowed', Hymn_Client::EXIT_ON_INPUT );
 
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( 'Database can NOT be connected: '.Hymn_Command_Database_Test::$lastError, Hymn_Client::EXIT_ON_SETUP );
 
 //		if( !$dbc->isConnected() )
 //			$dbc->connect( TRUE );												//  force setup of new connection to database

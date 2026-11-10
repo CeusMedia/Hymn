@@ -36,7 +36,6 @@ declare(strict_types=1);
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
- *	@todo 			handle relations (new relations after update)
  */
 class Hymn_Command_Module_Install extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -70,6 +69,10 @@ class Hymn_Command_Module_Install extends Hymn_Command_Abstract implements Hymn_
 			$this->outError( 'Module "'.$moduleId.'" not found in source "'.$sourceId.'"', Hymn_Client::EXIT_ON_RUN );
 
 		$availableModule	= $library->getUncachedAvailableModuleFromSource( $moduleId, $sourceId );
+		foreach( $this->getNeededModulesToInstall( $availableModule ) as $neededModule ){		//  install needed modules first
+			$this->client->outVerbose( "Module '".$neededModule->id."' is needed by '".$availableModule->id."'" );
+			$this->installModule( $neededModule );
+		}
 		$this->installModule( $availableModule );
 	}
 
@@ -103,6 +106,31 @@ class Hymn_Command_Module_Install extends Hymn_Command_Abstract implements Hymn_
 				$this->outError( 'Source of module "'.$moduleId.'" could not been detected', Hymn_Client::EXIT_ON_INPUT );
 		}
 		return $this->client->getModuleInstallSource( $moduleId, $this->activeSourceIds, $sourceId );
+	}
+
+	/**
+	 *	Returns modules needed by module, but not installed yet, in order of installation.
+	 *	Their sources are detected like on app-install.
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@return		list<Hymn_Structure_Module>
+	 */
+	protected function getNeededModulesToInstall( Hymn_Structure_Module $module ): array
+	{
+		$library	= $this->getLibrary();
+		$graph		= new Hymn_Module_Graph( $this->client, $library );
+		$graph->addModule( $module );																//  adds needed modules recursively
+		$installed	= $library->listInstalledModules();
+		$list		= [];
+		foreach( $graph->getModulesOrderedByDependency() as $neededModule ){
+			if( $neededModule->id === $module->id || array_key_exists( $neededModule->id, $installed ) )
+				continue;
+			$sourceId	= $this->detectModuleSource( $neededModule->id );
+			if( NULL === $sourceId )
+				$this->outError( 'Needed module "'.$neededModule->id.'" is not available', Hymn_Client::EXIT_ON_RUN );
+			$sourceId	= $this->client->getModuleInstallSource( $neededModule->id, $this->activeSourceIds, $sourceId );
+			$list[]		= $library->getUncachedAvailableModuleFromSource( $neededModule->id, $sourceId );
+		}
+		return $list;
 	}
 
 	protected function installModule( Hymn_Structure_Module $module ): void

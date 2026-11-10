@@ -58,8 +58,8 @@ class Hymn_Command_Modules_Unneeded extends Hymn_Command_Abstract implements Hym
 			if( str_starts_with( $moduleId, '@' ) )
 				continue;
 			$sourceId	= NULL;
-			if( !empty( $moduleConfig->source ) )
-				$sourceId = $moduleConfig->source;
+			if( !empty( $moduleConfig->sourceId ) )
+				$sourceId = $moduleConfig->sourceId;
 			$module			= $library->getAvailableModule( $moduleId, $sourceId );
 			if( !$module->isActive )
 				continue;

@@ -49,8 +49,8 @@ class Hymn_Command_Stamp_Diff extends Hymn_Command_Abstract implements Hymn_Comm
 	 */
 	public function run(): void
 	{
-		$pathName	= $this->client->arguments->getArgument();
-		$type		= $this->client->arguments->getArgument( 1 );
+		$pathName	= $this->client->arguments->getArgument() ?? '';
+		$type		= $this->client->arguments->getArgument( 1 ) ?? '';
 		$sourceId	= $this->client->arguments->getArgument( 2 );
 		$moduleId	= $this->client->arguments->getArgument( 3 );
 		$sourceId	= $this->evaluateSourceId( $sourceId );
