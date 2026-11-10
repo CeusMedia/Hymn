@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_SemVer_Version_Renderer
 {
 	public static function render( Hymn_Tool_SemVer_Version $version ): string
@@ -8,9 +10,9 @@ class Hymn_Tool_SemVer_Version_Renderer
 			$version->getMinor(),
 			$version->getPatch()
 		] );
-		if( 0 !== strlen( $version->getPreRelease() ) )
+		if( '' !== $version->getPreRelease() )
 			$string	.= '-'.$version->getPreRelease();
-		if( $version->getBuild() > 0 )
+		if( '' !== $version->getBuild() )
 			$string	.= '+'.$version->getBuild();
 		return $string;
 	}

@@ -1,4 +1,10 @@
 <?php
+declare(strict_types=1);
+
+/**
+ *	Semantic version (major.minor.patch[-preRelease][+build]).
+ *	Build metadata is kept and rendered, but ignored on comparison (see SemVer 2.0.0, §10).
+ */
 class Hymn_Tool_SemVer_Version
 {
 	/** @var	integer */
@@ -13,8 +19,8 @@ class Hymn_Tool_SemVer_Version
 	/** @var	string */
 	protected string $preRelease	= '';
 
-	/** @var	integer */
-	protected int $build		= 0;
+	/** @var	string */
+	protected string $build		= '';
 
 	public static function fromString( string $versionString ): self
 	{
@@ -24,7 +30,7 @@ class Hymn_Tool_SemVer_Version
 	public function __construct( ?string $versionString = NULL )
 	{
 		if( $versionString !== NULL && strlen( trim( $versionString ) ) > 0 ){
-			$version	= self::fromString( $versionString );
+			$version	= self::fromString( trim( $versionString ) );
 			$this->setMajor( $version->getMajor() );
 			$this->setMinor( $version->getMinor() );
 			$this->setPatch( $version->getPatch() );
@@ -38,7 +44,7 @@ class Hymn_Tool_SemVer_Version
 		return $this->render();
 	}
 
-	public function getBuild(): int
+	public function getBuild(): string
 	{
 		return $this->build;
 	}
@@ -68,41 +74,24 @@ class Hymn_Tool_SemVer_Version
 		$this->major		+= 1;
 		$this->minor		= 0;
 		$this->patch		= 0;
-		$this->build		= 0;
+		$this->build		= '';
 		$this->preRelease	= '';
 		return $this;
-//		return new Version( $this->major + 1 );
 	}
 
 	public function incrementMinor(): self
 	{
 		$this->minor		+= 1;
 		$this->patch		= 0;
-		$this->build		= 0;
+		$this->build		= '';
 		$this->preRelease	= '';
 		return $this;
-//		return new Version( vsprintf( '%d.%d', array(
-//			$this->major,
-//			$this->minor + 1,
-//		) ) );
 	}
 
 	public function incrementPatch(): self
 	{
 		$this->patch		+= 1;
-		$this->build		= 0;
-		$this->preRelease	= '';
-		return $this;
-//		return new Version( vsprintf( '%d.%d.%d', array(
-//			$this->major,
-//			$this->minor,
-//			$this->patch + 1
-//		) ) );
-	}
-
-	public function incrementBuild(): self
-	{
-		$this->build		+= 1;
+		$this->build		= '';
 		$this->preRelease	= '';
 		return $this;
 	}
@@ -157,9 +146,19 @@ class Hymn_Tool_SemVer_Version
 		return Hymn_Tool_SemVer_Version_Renderer::render( $this );
 	}
 
-	public function satifies(Hymn_Tool_SemVer_Constraint $constraint ): bool
+	public function satisfies( Hymn_Tool_SemVer_Constraint|string $constraint ): bool
 	{
+		if( is_string( $constraint ) )
+			$constraint	= new Hymn_Tool_SemVer_Constraint( $constraint );
 		return $constraint->checkVersion( $this );
+	}
+
+	/**
+	 *	@deprecated	use satisfies instead (typo)
+	 */
+	public function satifies( Hymn_Tool_SemVer_Constraint $constraint ): bool
+	{
+		return $this->satisfies( $constraint );
 	}
 
 	public function setMajor( int $major ): self
@@ -186,10 +185,9 @@ class Hymn_Tool_SemVer_Version
 		return $this;
 	}
 
-	public function setBuild( int $build ): self
+	public function setBuild( string $build ): self
 	{
 		$this->build	= $build;
 		return $this;
 	}
-
 }

@@ -19,6 +19,14 @@
 - Add full-featured semantic versioning support.
 - Check related (composer) packages on install and update.
 - Add new commands module-install and module-update.
+- Fix version constraints: caret and tilde like Composer, support wildcards, ranges, AND/OR.
+- Fix package check: check all needed packages, support constraint appended to package name.
+- Find Composer of app by application URI.
+- Fix updater uninstalling wrong module on changed relations.
+- Fix config values on module update, read as true before.
+- Prefer latest.sql on database-load.
+- Allow numbers in Hymn file and null values in config.ini.
+- Add documentation (MkDocs) with command reference.
 
 ## v1.0.4
 - Integrate updates from 1.1.0.

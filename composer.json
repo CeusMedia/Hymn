@@ -33,6 +33,16 @@
     "scripts": {
         "dev:install-quiet": "composer install --quiet",
         "dev:update-quiet": "composer update --quiet",
+        "dev:docs": [
+            "@dev:docs-commands",
+            "tool/docs/docs.sh build"
+        ],
+        "dev:docs-commands": "php tool/docs/generate-commands.php",
+        "dev:docs-install": "tool/docs/docs.sh install",
+        "dev:docs-serve": [
+            "@dev:docs-commands",
+            "tool/docs/docs.sh serve"
+        ],
         "phar:create": [
             "@dev:install-quiet",
             "test -f hymn.phar && rm hymn.phar",
@@ -105,6 +115,10 @@
     "scripts-descriptions": {
         "dev:install": "Installs project dependencies for Development stage",
         "dev:update": "Updates project dependencies for Development stage",
+        "dev:docs": "Generate command reference and build documentation (MkDocs) into doc/Site/",
+        "dev:docs-commands": "Generate command reference pages into doc/Manual/commands/",
+        "dev:docs-install": "Install MkDocs Material into Python venv tool/docs/.venv (optional, else Docker is used)",
+        "dev:docs-serve": "Generate command reference and serve documentation on http://localhost:8000",
         "phar:create": "Create productive version of PHAR file locally",
         "phar:create-dev": "Create development version of PHAR file locally",
         "phar:install-copy": "Copy hymn.phar to /usr/local/bin",

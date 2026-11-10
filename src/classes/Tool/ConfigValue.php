@@ -208,7 +208,7 @@ class Hymn_Tool_ConfigValue
 		if( 'bool' === $this->type )															//  value is boolean
 			$value	= !in_array( strtolower( $value ), ['no', 'false', '0', ''] );				//  value is not negative
 		else
-			$value	= settype( $value, $this->type );
+			settype( $value, $this->type );														//  convert in place, returns success only
 		$this->value	= $value;
 		return $this;
 	}

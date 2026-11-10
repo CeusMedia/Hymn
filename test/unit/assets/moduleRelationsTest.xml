@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<module>
+    <title>Test Relations</title>
+    <description><![CDATA[For testing relations.]]></description>
+    <category>Test</category>
+    <version>1.0.0</version>
+    <log version="1.0.0">First release.</log>
+    <files/>
+    <relations>
+        <needs type="module">Resource_Database</needs>
+        <needs type="package" version="^3.0">vendor/attribute</needs>
+        <needs type="package">vendor/appended:^2.6.2</needs>
+        <needs type="package" version="^1.0">vendor/both:^9.9</needs>
+        <needs type="package">vendor/without</needs>
+        <supports type="package">vendor/supported: ~1.2 || ^2.0</supports>
+    </relations>
+</module>

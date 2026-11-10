@@ -222,9 +222,7 @@ class Hymn_Tool_BaseConfigEditor
 	{
 		if( $activeOnly && !$this->isActiveProperty( $key ) )
 			throw new InvalidArgumentException( 'Property "'.$key.'" is not set or inactive' );
-		if( isset( $this->properties[$key] ) )
-			return $this->properties[$key];
-		return $this->disabled[$key] ?? NULL;
+		return $this->properties[$key] ?? NULL;
 	}
 
 	/**
@@ -253,11 +251,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function hasProperty( string $key, bool $activeOnly = TRUE ): bool
 	{
-		if( $activeOnly )
-			return isset( $this->properties[$key] );
-		if( isset( $this->properties[$key] ) )
-			return TRUE;
-		return isset( $this->disabled[$key] );
+		return array_key_exists( $key, $this->properties );										//  also NULL values are properties, disabled ones as well
 	}
 
 	/**
@@ -268,10 +262,7 @@ class Hymn_Tool_BaseConfigEditor
 	 */
 	public function isActiveProperty( string $key ): bool
 	{
-		if( 0 !== count( $this->disabled ) )
-			if( in_array( $key, $this->disabled ) )
-				return FALSE;
-		return $this->hasProperty( $key );
+		return $this->hasProperty( $key ) && !in_array( $key, $this->disabled, TRUE );
 	}
 
 	/**
@@ -423,14 +414,16 @@ class Hymn_Tool_BaseConfigEditor
 	 *	Returns a build Property line.
 	 *	@access		private
 	 *	@param		string			$key			Key of  Property
-	 *	@param		string|bool		$value			Value of Property
+	 *	@param		string|bool|NULL	$value			Value of Property
 	 *	@param		string|NULL		$comment		Comment of Property
 	 *	@return		string
 	 */
-	private function buildLine( string $key, string|bool $value, ?string $comment = NULL ): string
+	private function buildLine( string $key, string|bool|NULL $value, ?string $comment = NULL ): string
 	{
 		if( $this->reservedWords && is_bool( $value ) )
 			$content	= $value ? 'yes' : 'no';
+		else if( $this->reservedWords && NULL === $value )
+			$content	= 'null';
 		else
 			$content	= '"'.addslashes( (string) $value ).'"';
 

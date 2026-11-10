@@ -1,4 +1,6 @@
-doc
+/doc/*
+!/doc/Manual
+/doc/Manual/commands
 vendor
 composer.lock
 .idea
@@ -7,3 +9,4 @@ build/.mode
 build/.php
 tool/.phpunit.cache
 drive
+/tool/docs/.venv

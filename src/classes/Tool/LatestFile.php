@@ -49,7 +49,7 @@ class Hymn_Tool_LatestFile
 		$this->client	= $client;
 	}
 
-	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = [] ): ?string
+	public function find( ?string $path = NULL, ?string $fileNamePattern = NULL, ?array $acceptedFileNames = NULL ): ?string
 	{
 		$path		= $path ?? $this->path;
 		$pattern	= $fileNamePattern ?? $this->fileNamePattern;

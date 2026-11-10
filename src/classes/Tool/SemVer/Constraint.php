@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 class Hymn_Tool_SemVer_Constraint
 {
@@ -12,6 +12,13 @@ class Hymn_Tool_SemVer_Constraint
 	/** @var	Hymn_Tool_SemVer_Constraint[] */
 	public array $ands			= [];
 
+	/** @var	Hymn_Tool_SemVer_Constraint_Range|NULL */
+	protected ?Hymn_Tool_SemVer_Constraint_Range $range	= NULL;
+
+	/**
+	 *	@param		string|NULL		$constraint
+	 *	@throws		InvalidArgumentException	if constraint is not supported
+	 */
 	public function __construct( ?string $constraint = NULL )
 	{
 		if( NULL !== $constraint ){
@@ -24,22 +31,21 @@ class Hymn_Tool_SemVer_Constraint
 
 	public function checkVersion( Hymn_Tool_SemVer_Version|string $version ): bool
 	{
-		if( count( $this->ands ) > 0 ){
-			$valid	= TRUE;
-			foreach( $this->ands as $constraint )
-				$valid	= $valid && $constraint->checkVersion( $version );
-			return $valid;
-		}
-		else if( count( $this->ors ) > 0 ){
-			$valid	= FALSE;
+		$version	= is_string( $version ) ? new Hymn_Tool_SemVer_Version( $version ) : $version;
+		if( count( $this->ors ) > 0 ){
 			foreach( $this->ors as $constraint )
-				$valid	= $valid || $constraint->checkVersion( $version );
-			return $valid;
+				if( $constraint->checkVersion( $version ) )
+					return TRUE;
+			return FALSE;
 		}
-		else{
-			$range	= new Hymn_Tool_SemVer_Constraint_Range( $this->constraint );
-			return $range->checkVersion( $version );
+		if( count( $this->ands ) > 0 ){
+			foreach( $this->ands as $constraint )
+				if( !$constraint->checkVersion( $version ) )
+					return FALSE;
+			return TRUE;
 		}
+		$this->range	??= new Hymn_Tool_SemVer_Constraint_Range( $this->constraint );
+		return $this->range->checkVersion( $version );
 	}
 
 	/**
@@ -63,6 +69,6 @@ class Hymn_Tool_SemVer_Constraint
 	 */
 	public function getOrs(): array
 	{
-		return $this->ands;
+		return $this->ors;
 	}
 }
