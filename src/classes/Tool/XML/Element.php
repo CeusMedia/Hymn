@@ -261,7 +261,7 @@ class Hymn_Tool_XML_Element extends SimpleXMLElement
 	 *	@param		string|NULL	$nsURI		Namespace URI of attribute
 	 *	@return		void
 	 */
-	public function setAttribute( string $name, string $value = NULL, ?string $namespace = NULL, ?string $nsURI = NULL ): void
+	public function setAttribute( string $name, ?string $value = NULL, ?string $namespace = NULL, ?string $nsURI = NULL ): void
 	{
 		if( $value !== NULL ){
 			if( !$this->hasAttribute( $name, $namespace ) ){

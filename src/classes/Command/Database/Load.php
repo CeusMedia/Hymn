@@ -57,7 +57,7 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			return;
 
 		if( !Hymn_Command_Database_Test::test( $this->client ) )
-			$this->outError( 'Database can NOT be connected.', Hymn_Client::EXIT_ON_SETUP );
+			$this->outError( 'Database can NOT be connected: '.Hymn_Command_Database_Test::$lastError, Hymn_Client::EXIT_ON_SETUP );
 
 		$fileName	= NULL;
 		$pathName	= $this->client->arguments->getArgument();
@@ -98,13 +98,21 @@ class Hymn_Command_Database_Load extends Hymn_Command_Abstract implements Hymn_C
 			}
 			else
 				$this->out( 'Loading import file '.$fileName.' ('.$fileSize.') ...' );
-			if( $this->flags->dry )
+			if( $this->flags->dry ){
 				$this->out( '-> Dry Mode: Import itself not executed.' );
-			else
-				$mysql->importFileWithPrefix( $fileName, $prefix );
+				return;
+			}
+			$result	= $mysql->importFileWithPrefix( $fileName, (string) $prefix );
 		}
 		catch( Exception $e ){
-			$this->out( 'Loading import file '.$fileName.' failed: '.$e->getMessage() );
+			$this->outError( 'Loading import file '.$fileName.' failed: '.$e->getMessage(), Hymn_Client::EXIT_ON_EXEC );
+			return;
+		}
+		if( 0 !== $result->code ){																	//  mysql reported errors
+			$this->outError( implode( PHP_EOL, array_merge(
+				['Loading import file '.$fileName.' failed (mysql exit code '.$result->code.'):'],
+				array_slice( $result->output, -10 )													//  last lines of mysql output
+			) ), Hymn_Client::EXIT_ON_EXEC );
 		}
 	}
 

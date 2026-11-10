@@ -191,8 +191,8 @@ abstract class Hymn_Command_Abstract
 		$config		= $this->client->getConfig();
 		$library	= $this->getLibrary();
 		$defaultId	= $library->getDefaultSource();
-		if( !empty( $config->modules[$moduleId]->source ) ){
-			$sourceByHymn	= trim( $config->modules[$moduleId]->source );
+		if( !empty( $config->modules[$moduleId]->sourceId ) ){										//  source of module is set in Hymn file
+			$sourceByHymn	= trim( $config->modules[$moduleId]->sourceId );
 			if( $library->isAvailableModuleInSource( $moduleId, $sourceByHymn ) )
 				return $sourceByHymn;
 		}
@@ -268,8 +268,6 @@ abstract class Hymn_Command_Abstract
 	protected function readLibrary( object $config ): void
 	{
 		$this->library	= new Hymn_Module_Library( $this->client );								//  create new module library
-		if( $this->flags->force )																//  on force mode
-			$this->library->setReadMode( Hymn_Module_Library_Available::MODE_FOLDER );			//  ... skip module source indices
 
 		if( !isset( $config->sources ) || 0 === count( (array) $config->sources ) ){
 			$this->client->out( 'Warning: No sources defined in Hymn file.' );					//  output warning

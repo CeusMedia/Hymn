@@ -82,7 +82,16 @@ arguments installs all of them, together with the modules they need.
 | Key | Meaning |
 |-----|---------|
 | `config` | module settings as key-value pairs, applied on install and update |
-| `sourceId` | source of the module – see note below |
+| `sourceId` | source to install the module from, if the source is active – otherwise it is detected |
+| `installType` | `link` or `copy` for this module, instead of `application.installType` |
+
+```json
+"modules": {
+	"UI_Bootstrap": {},
+	"Resource_Database": {"sourceId": "CeusMedia_Public", "config": {"access.username": "user"}},
+	"My_Theme": {"sourceId": "My_Modules", "installType": "copy"}
+}
+```
 
 A module without settings is written as empty object: `"UI_Bootstrap": {}`.
 Keys starting with `@` are ignored, so they can be used as comments: `"@note": {}`.
@@ -93,9 +102,8 @@ Manage modules with [`config-module-add`](../commands/config-module-add.md),
 [`config-module-set`](../commands/config-module-set.md). To write the current settings of installed
 modules back into the Hymn file, use [`app-module-config-dump`](../commands/app-module-config-dump.md).
 
-!!! warning "Source per module"
-    The source of a module is detected: the default source first, then any other active source having
-    the module. A `sourceId` in the Hymn file is read, but not considered yet.
+Without `sourceId`, the source of a module is detected: the default source first, then any other
+active source having the module. The older key `source` is read as well and saved as `sourceId`.
 
 ## database
 
@@ -112,7 +120,8 @@ and tested by [`database-test`](../commands/database-test.md). See [Database](da
 | `modules` | modules to receive the connection settings, default `Resource_Database:access.` |
 
 If no database `name` is set, Hymn takes the connection from the configuration of module
-`Resource_Database` (`access.*` settings) instead.
+`Resource_Database` (`access.*` settings) instead. Without section `database`, Hymn does not touch the
+database configuration of any module.
 
 ## system
 
@@ -138,6 +147,8 @@ Hydrogen applications, and settings `path.*` in `config/config.ini` override the
 | `cache` | `cache/` |
 | `contents` | `contents/` |
 
-!!! warning "Section `paths` is not saved"
-    Commands writing the Hymn file – like `source-add`, `database-config` or `config-module-add` – drop
-    the `paths` section. Prefer settings `path.*` in `config/config.ini`.
+Settings `path.*` in `config/config.ini` override these paths, but are not written into the Hymn file.
+
+## Further sections
+
+Sections unknown to Hymn, like your own settings or notes, are kept when commands save the Hymn file.

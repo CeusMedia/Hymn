@@ -163,9 +163,9 @@ class Hymn_Command_Database_Config extends Hymn_Command_Abstract implements Hymn
 
 		//  connection can be established
 //		$dbc->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT );
-		if( !$dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() )			//  given database is not existing
+		if( !$dbc->query( 'SHOW DATABASES LIKE '.$dbc->quote( Hymn_Tool_Database_PDO::escapeLike( $dba->name ) ) )->fetch() )			//  given database is not existing
 			$dbc->query( "CREATE DATABASE `".$dba->name."`" );							//  try to create database
-		if( $dbc->query( "SHOW DATABASES LIKE '".$dba->name."'" )->fetch() ){			//  this time database is existing
+		if( $dbc->query( 'SHOW DATABASES LIKE '.$dbc->quote( Hymn_Tool_Database_PDO::escapeLike( $dba->name ) ) )->fetch() ){			//  this time database is existing
 			$dbc->query( "USE `".$dba->name."`" );										//  switch to database
 			$result	= $dbc->query( "SHOW TABLES" );										//  try to read tables in database
 			if( is_object( $result ) && is_array( $result->fetchAll() ) )				//  read attempt has been successful

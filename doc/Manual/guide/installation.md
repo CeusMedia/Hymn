@@ -43,14 +43,36 @@ To build the PHAR file yourself, see [Development](development.md).
 ```sh
 hymn self-update            # latest version of branch master
 hymn self-update 1.0.4      # a tagged version
+hymn self-update 1.0.x      # latest version of a branch
+hymn self-update --dry -v   # show download URL and file to replace
 ```
 
-`self-update` downloads `hymn.phar` from GitHub and replaces the file found by `whereis hymn`,
-so it needs write access to that file – usually by `sudo`.
+`self-update` downloads `hymn.phar` from GitHub and replaces the running file – behind a symlink,
+the linked file is replaced. It needs write access to that file and its folder, usually by `sudo`.
+The download is checked before, so on errors the installed file stays untouched.
 
-!!! warning "Version format"
-    The version argument must consist of digits and dots only. Versions with a suffix, like `1.0.5c`,
-    are rejected – use the repository and `make` for those.
+## Upgrading to 1.0.5
+
+Version 1.0.5 fixes many errors, which changes some behaviour:
+
+- **Version constraints** of needed packages follow Composer: `^1.2` means `>=1.2.0 <2.0.0` (was
+  `<1.3.0`), `~1.2` means `<2.0.0` (was: any version). Invalid constraints are errors – see [Versions](versions.md).
+- **`module-install`** installs needed modules, too.
+- **Module updates** stop on SQL errors, unless `--force` is given.
+- **Source per module** (`sourceId`) and **install type per module** (`installType`) in the Hymn file are
+  respected now – check your Hymn file, if they are set. Saving the Hymn file keeps `paths` and
+  unknown sections.
+- **Without section `database`** in the Hymn file, `app-install` does not install `Resource_Database`
+  on its own anymore.
+- **Flags** must match completely – `-dfoo` is not `-d` anymore – and short flags can be combined, like `-dv`.
+- **Questions** end with an error on end of input, instead of asking forever, and `--interactive=no`
+  is respected by all commands. Yes/no questions accept `y`, `yes`, `n`, `no` and Enter.
+- **`database-dump`** writes the placeholder `<%?prefix%>` instead of the table prefix again, so dumps
+  can be loaded into apps with other prefixes – see [Database](database.md#dumping).
+- **File paths of modules** must stay within module and app folder, paths with `..` are refused.
+- **`self-update`** replaces the running PHAR file and checks the download before.
+
+See the [changelog](../changelog.md) for all changes.
 
 ## Language
 

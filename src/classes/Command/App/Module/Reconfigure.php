@@ -54,7 +54,7 @@ class Hymn_Command_App_Module_Reconfigure extends Hymn_Command_Abstract implemen
 
 	//	$config			= $this->client->getConfig();
 		$library		= $this->getLibrary();
-		$moduleId		= trim( $this->client->arguments->getArgument() );
+		$moduleId		= trim( $this->client->arguments->getArgument() ?? '' );
 
 		if( !$moduleId )
 			$this->outError( "No module id given", Hymn_Client::EXIT_ON_INPUT );

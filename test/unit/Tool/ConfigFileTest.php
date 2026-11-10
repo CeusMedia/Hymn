@@ -108,6 +108,62 @@ class Hymn_Test_Tool_ConfigFileTest extends PHPUnit_Framework_TestCase
 		self::assertSame( 'app', $again->database->name );
 	}
 
+	public function testModuleSourceAndInstallType(): void
+	{
+		$config	= $this->readJson( ['modules' => [
+			'A'	=> ['sourceId' => 'Public', 'installType' => 'copy'],
+			'B'	=> ['source' => 'Legacy'],														//  older key
+			'C'	=> ['sourceId' => 'New', 'source' => 'Old'],										//  sourceId wins
+		]] );
+		self::assertSame( 'Public', $config->modules['A']->sourceId );
+		self::assertSame( 'copy', $config->modules['A']->installType );
+		self::assertSame( 'Legacy', $config->modules['B']->sourceId );
+		self::assertNull( $config->modules['B']->installType );
+		self::assertSame( 'New', $config->modules['C']->sourceId );
+
+		Hymn_Tool_ConfigFile::save( $config, $this->file );
+		$json	= json_decode( (string) file_get_contents( $this->file ) );
+		self::assertSame( 'copy', $json->modules->A->installType );
+		self::assertSame( 'Legacy', $json->modules->B->sourceId );								//  written with current key
+		self::assertObjectNotHasProperty( 'source', $json->modules->B );
+	}
+
+	public function testSaveKeepsPathsOfFileOnly(): void
+	{
+		$config	= $this->readJson( ['application' => ['title' => 'A'], 'paths' => ['images' => 'img/', 'custom' => 'custom/']] );
+		self::assertSame( 'img/', $config->paths->images );
+		self::assertSame( 'custom/', $config->paths->custom );									//  further path
+		$config->paths->locales	= 'runtime/';													//  eg. by config.ini: not to be saved
+
+		Hymn_Tool_ConfigFile::save( $config, $this->file );
+		$json	= json_decode( (string) file_get_contents( $this->file ), TRUE );
+		self::assertSame( ['images' => 'img/', 'custom' => 'custom/'], $json['paths'] );
+	}
+
+	public function testSaveWithoutPaths(): void
+	{
+		$config	= $this->readJson( ['application' => ['title' => 'A']] );
+		Hymn_Tool_ConfigFile::save( $config, $this->file );
+		self::assertArrayNotHasKey( 'paths', json_decode( (string) file_get_contents( $this->file ), TRUE ) );
+	}
+
+	public function testSaveKeepsOtherSections(): void
+	{
+		$config	= $this->readJson( ['application' => ['title' => 'A'], 'custom' => ['keep' => 'me', 'list' => [1, 2]], 'note' => 'text'] );
+		Hymn_Tool_ConfigFile::save( $config, $this->file );
+		$json	= json_decode( (string) file_get_contents( $this->file ), TRUE );
+		self::assertSame( ['keep' => 'me', 'list' => [1, 2]], $json['custom'] );
+		self::assertSame( 'text', $json['note'] );
+	}
+
+	public function testSaveDatabaseWithoutEmptyValues(): void
+	{
+		$config	= $this->readJson( ['database' => ['driver' => 'mysql', 'name' => 'app']] );
+		Hymn_Tool_ConfigFile::save( $config, $this->file );
+		$json	= json_decode( (string) file_get_contents( $this->file ), TRUE );
+		self::assertSame( ['driver' => 'mysql', 'name' => 'app'], $json['database'] );
+	}
+
 	protected function readJson( array $data ): Hymn_Structure_Config
 	{
 		file_put_contents( $this->file, json_encode( $data ) );

@@ -123,6 +123,12 @@ file, then install, update and maintain its modules, configuration and database 
 
 Read more in [Concepts](guide/concepts.md).
 
+!!! info "New in version 1.0.5"
+    Composer packages needed by modules are checked with version constraints like in Composer,
+    `module-install` and `module-update` work on single modules, and many commands got more robust.
+    Some behaviour has changed – see [Upgrading to 1.0.5](guide/installation.md#upgrading-to-105)
+    and the [changelog](changelog.md).
+
 ## Requirements
 
 - PHP 8.1 or newer with extensions `dom`, `json`, `pdo`, `simplexml`, `xml`

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<module>
+	<title>Test: Styled</title>
+	<description><![CDATA[Fixture for integration tests of Hymn.]]></description>
+	<version>1.0.0</version>
+	<log version="1.0.0">First release.</log>
+	<category>Test</category>
+	<files>
+		<style source="common">test.css</style>
+		<image source="theme">test.png</image>
+		<script source="url">//cdn.example.com/external.js</script>
+	</files>
+	<relations></relations>
+</module>

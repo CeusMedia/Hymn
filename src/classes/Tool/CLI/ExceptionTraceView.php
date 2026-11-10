@@ -39,24 +39,24 @@ declare(strict_types=1);
  */
 class Hymn_Tool_CLI_ExceptionTraceView
 {
-	protected ?Exception $exception = NULL;
+	protected ?Throwable $exception = NULL;
 
 	/**
 	 *	Static constructor.
-	 *	@param		Exception|NULL		$e
+	 *	@param		Throwable|NULL		$e
 	 *	@return		self
 	 */
-	public static function getInstance( ?Exception $e ): self
+	public static function getInstance( ?Throwable $e ): self
 	{
 		return new self( $e );
 	}
 
 	/**
 	 *	Constructor.
-	 *	@param		Exception|NULL		$e
+	 *	@param		Throwable|NULL		$e
 	 *	@return		void
 	 */
-	public  function __construct( ?Exception $e )
+	public  function __construct( ?Throwable $e )
 	{
 		if( NULL !== $e )
 			$this->setException( $e );
@@ -99,7 +99,7 @@ class Hymn_Tool_CLI_ExceptionTraceView
 		return join( PHP_EOL, $lines );
 	}
 
-	public function setException( Exception $e ): self
+	public function setException( Throwable $e ): self
 	{
 		$this->exception	= $e;
 		return $this;

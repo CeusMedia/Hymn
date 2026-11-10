@@ -83,7 +83,7 @@ class Hymn_Module_Library
 	 *	@return		static
 	 *	@throws		InvalidArgumentException	if source already exists
 	 */
-	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, string $title = NULL ): static
+	public function addSource( string $sourceId, string $path, string $type, bool $active = TRUE, ?string $title = NULL ): static
 	{
 		$this->available->addSource( $sourceId, $path, $type, $active, $title );
 		return $this;
@@ -284,16 +284,6 @@ class Hymn_Module_Library
 	public function readInstalledModule( string $moduleId ): Hymn_Structure_Module
 	{
 		return $this->installed->get( $moduleId );
-	}
-
-	/**
-	 *	@param		int			$mode
-	 *	@return		self
-	 */
-	public function setReadMode( int $mode ): self
-	{
-		$this->available->setMode( $mode );
-		return $this;
 	}
 
 	/**

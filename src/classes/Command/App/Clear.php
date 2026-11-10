@@ -49,9 +49,8 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 
 	/**
 	 *	Execute this command.
-	 *	Implements flags:
-	 *	Missing flags: verbose
-	 *	@todo		implement missing flags
+	 *	Clears module cache, removes job locks and log files (*.log, rotated *.log.1, *.log.gz).
+	 *	Implements flags: dry, verbose
 	 *	@access		public
 	 *	@return		void
 	 */
@@ -60,47 +59,76 @@ class Hymn_Command_App_Clear extends Hymn_Command_Abstract implements Hymn_Comma
 		if( !file_exists( Hymn_Client::$fileName ) )
 			throw new RuntimeException( "Hymn project '".Hymn_Client::$fileName."' is missing. Please run 'hymn init'!" );
 
-//		$config		= $this->client->getConfig();
 		$actions	= $this->client->arguments->getArguments();
 		if( !count( $actions ) )
 			$actions	= ['all'];
+		$unknown	= array_diff( $actions, ['*', 'all', 'cache', 'locks', 'logs'] );
+		if( [] !== $unknown )
+			$this->outError( 'Unknown clear type: '.implode( ', ', $unknown ).' (use cache, locks, logs or all)', Hymn_Client::EXIT_ON_INPUT );
 
 		foreach( $actions as $action ){
-			$wildcard	= in_array( $action, ['*', 'all'] );
-			if( in_array( $action, ['cache'], TRUE ) || $wildcard ){
-				Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );						//  remove modules cache file
+			$wildcard	= in_array( $action, ['*', 'all'], TRUE );
+			if( 'cache' === $action || $wildcard ){
+				if( !$this->flags->dry )
+					Hymn_Tool_Cache_AppModules::staticInvalidate( $this->client );					//  remove modules cache file
+				$this->outVerbose( ( $this->flags->dry ? 'Would clear' : 'Cleared' ).' module cache' );
 			}
-			if( in_array( $action, ['locks'], TRUE ) || $wildcard ){
-				$this->clearLocks();
-			}
+			if( 'locks' === $action || $wildcard )
+				$this->clearFiles( 'locks', $this->client->getConfigPath().'locks/', '/\.lock$/' );
+			if( 'logs' === $action || $wildcard )
+				$this->clearFiles( 'logs', $this->getLogsPath(), '/\.log(\.[0-9]+)?(\.gz)?$/' );
 		}
 	}
 
-	protected function clearLocks(): void
+	/**
+	 *	Removes files in folder matching pattern, being older than --age minutes, if set.
+	 *	@param		string		$type			Type of files for output, eg. locks
+	 *	@param		string		$path			Folder of files
+	 *	@param		string		$pattern		Regular expression for file names
+	 *	@return		int			Number of removed files
+	 */
+	protected function clearFiles( string $type, string $path, string $pattern ): int
 	{
-		if( !is_dir( 'config/locks' ) )
-			return;
+		if( !is_dir( $path ) ){
+			$this->outVerbose( 'No '.$type.' folder found: '.$path );
+			return 0;
+		}
 		$age	= (int) $this->client->arguments->getOption( 'age' );
-		$age	= $age > 0 ? $age * 60 : 0;
-		$index	= new DirectoryIterator( 'config/locks' );
-		foreach( $index as $item ){
-			if( $item->isDir() || $item->isDot() )
+		$edge	= $age > 0 ? time() - $age * 60 : NULL;											//  files modified after this are kept
+		$count	= 0;
+		foreach( new DirectoryIterator( $path ) as $item ){
+			if( !$item->isFile() || 1 !== preg_match( $pattern, $item->getFilename() ) )
 				continue;
-			if( !preg_match( '/\.lock$/', $item->getFilename() ) )
+			if( NULL !== $edge && $item->getMTime() > $edge )
 				continue;
-			$jobId  = preg_replace( '/\.lock$/', '', $item->getFilename() );
-			$this->outVerbose( 'age: '.$age );
-			$this->outVerbose( 'edge: '.( $age + time() ) );
-			$this->outVerbose( 'file: '.filemtime( $item->getPathname() ) );
-			if( $age && time() < filemtime( $item->getPathname() ) + $age )
-				continue;
-			if( $this->flags->dry ){
-				$this->outVerbose( 'Would clear lock of job: '.$jobId );
-			}
-			else {
-				$this->outVerbose( 'Removing lock of job: '.$jobId );
+			$count++;
+			if( $this->flags->dry )
+				$this->outVerbose( '- Would remove: '.$item->getFilename() );
+			else{
+				$this->outVerbose( '- Removing: '.$item->getFilename() );
 				@unlink( $item->getPathname() );
 			}
 		}
+		$this->out( vsprintf( '%s %d %s in %s', [
+			$this->flags->dry ? 'Would remove' : 'Removed',
+			$count,
+			$type,
+			$path,
+		] ) );
+		return $count;
+	}
+
+	/**
+	 *	Returns folder of log files: path "logs" of app, relative to application folder.
+	 *	@return		string
+	 */
+	protected function getLogsPath(): string
+	{
+		$config	= $this->client->getConfig();
+		$path	= rtrim( $config->paths->logs ?? 'logs/', '/' ).'/';
+		if( str_starts_with( $path, '/' ) )
+			return $path;
+		$uri	= trim( $config->application->uri );
+		return ( '' !== $uri ? rtrim( $uri, '/' ).'/' : '' ).$path;
 	}
 }

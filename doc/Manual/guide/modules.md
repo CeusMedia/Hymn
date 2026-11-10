@@ -21,9 +21,8 @@ Modules already installed are skipped, unless `--force` is given.
 Use `--dry` to see what would happen.
 
 !!! note "`app-install` and `module-install`"
-    `app-install` works on the modules of the Hymn file and installs needed modules as well.
-    `module-install` installs exactly one module, which must not be installed yet – needed modules
-    are not installed automatically.
+    `app-install` works on the modules of the Hymn file. `module-install` installs one module, which
+    is not installed yet, without adding it to the Hymn file. Both install needed modules as well.
 
 ### Install types
 
@@ -45,6 +44,9 @@ The type is set by `application.installType` in the [Hymn file](hymn-file.md).
 | styles | `themes/<theme>/css/` – theme `common`, primer or the app theme |
 | images | path `images` or `themes/<theme>/img/` |
 | other files | relative to the app folder |
+
+File paths of modules must be relative and stay within module and app folder – paths with `..` or
+absolute paths are refused. Folders are created on installation, but not on simulation (`--dry`).
 
 ### Database changes only, or none
 
@@ -77,7 +79,8 @@ hymn module-update UI_Bootstrap        # one module
 
 On update, Hymn
 
-1. installs modules newly needed by the module,
+1. installs modules newly needed by the module and uninstalls modules not needed anymore,
+   unless other modules need them,
 2. replaces the files of the module,
 3. merges the configuration – for changed settings you can decide to keep or take over values,
 4. runs all SQL update scripts with a version newer than the installed version.

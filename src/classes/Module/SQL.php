@@ -41,7 +41,7 @@ class Hymn_Module_SQL
 {
 	protected Hymn_Client $client;
 
-	/** @var object{quiet: bool, dry: bool, verbose: bool, noDatabase: bool} $flags */
+	/** @var object{quiet: bool, dry: bool, force: bool, verbose: bool, noDatabase: bool} $flags */
 	protected object $flags;
 
 	public function __construct( Hymn_Client $client )
@@ -50,6 +50,7 @@ class Hymn_Module_SQL
 		$this->flags	= (object) [
 			'quiet'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_QUIET ),
 			'dry'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_DRY ),
+			'force'			=> (bool) ( $this->client->flags & Hymn_Client::FLAG_FORCE ),
 			'verbose'		=> (bool) ( $this->client->flags & Hymn_Client::FLAG_VERBOSE ),
 			'noDatabase'	=> (bool) ( $this->client->flags & Hymn_Client::FLAG_NO_DB ),
 		];
@@ -249,7 +250,10 @@ class Hymn_Module_SQL
 					$this->executeSql( $script->sql );												//  execute collected SQL script
 				}
 				catch( Exception $e ){
-					$this->client->out( 'Problem occurred: '.$e->getMessage() );						//  ...
+					$message	= sprintf( 'Database update of module %s to version %s failed: %s', $module->id, $script->version, $e->getMessage() );
+					if( !$this->flags->force )														//  stop update, unless forced
+						throw new RuntimeException( $message, 0, $e );
+					$this->client->out( 'Warning: '.$message.' - continuing, since forced' );
 				}
 			}
 		}
@@ -307,7 +311,7 @@ class Hymn_Module_SQL
 			}
 			catch( Exception $e ){
 				error_log( date( "Y-m-d H:i:s" ).' '.$e->getMessage()."\n", 3, 'hymn.db.error.log' );
-				throw new RuntimeException( 'SQL error - see hymn.db.error.log' );
+				throw new RuntimeException( 'SQL error: '.$e->getMessage().' (see hymn.db.error.log)', 0, $e );
 			}
 		}
 	}

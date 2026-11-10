@@ -52,7 +52,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 		$filename   = Hymn_Client::$fileName;
 //		$config		= $this->client->getConfig();
 		$config		= Hymn_Tool_ConfigFile::read( $filename );
-		$key		= $this->client->arguments->getArgument();
+		$key		= $this->client->arguments->getArgument() ?? '';
 		if( !strlen( trim( $key ) ) )
 			throw new InvalidArgumentException( 'First argument "key" is missing' );
 		$parts		= explode( ".", $key );
@@ -60,7 +60,7 @@ class Hymn_Command_Config_Module_Set extends Hymn_Command_Abstract implements Hy
 		if( !$parts )
 			throw new InvalidArgumentException( 'Invalid key - must be of syntax "Module_Name.(section.)key"' );
 		$configKey	= join( ".", $parts );
-		$value	= $this->client->arguments->getArgument( 1 );
+		$value	= $this->client->arguments->getArgument( 1 ) ?? '';
 
 		$availableModules	= $this->getAvailableModulesMap();
 

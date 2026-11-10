@@ -52,7 +52,7 @@ class Hymn_Tool_Locale
 	 *	@param		?string		$language
 	 *	@return		void
 	 */
-	public function __construct( string $language = NULL )
+	public function __construct( ?string $language = NULL )
 	{
 		$this->baseUri		= Hymn_Client::$pharPath.'locales/';
 		$this->version		= Hymn_Client::$version;

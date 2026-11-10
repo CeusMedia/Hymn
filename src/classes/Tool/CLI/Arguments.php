@@ -99,6 +99,7 @@ class Hymn_Tool_CLI_Arguments
 	public function parse( ?array $arguments = NULL ): void
 	{
 		$arguments	= is_null( $arguments ) ? $this->arguments : $arguments;
+		$arguments	= $this->expandCombinedFlags( $arguments );
 		foreach( $arguments as $nr => $argument ){
 			foreach( $this->options as $key => $option ){
 				if( preg_match( $option['pattern'], $argument ) ){
@@ -191,6 +192,50 @@ class Hymn_Tool_CLI_Arguments
 	{
 		foreach( $keys as $key )
 			$this->unregisterOption( $key );
+	}
+
+	/**
+	 *	Splits combined short flags, like -dv, into single flags, like -d -v.
+	 *	Only, if all letters are known short flags and the combination is not a flag itself, like -vv.
+	 *	@param		array		$arguments
+	 *	@return		array
+	 */
+	protected function expandCombinedFlags( array $arguments ): array
+	{
+		$shortFlags	= $this->getShortFlags();
+		$expanded	= [];
+		foreach( $arguments as $argument ){
+			$matches	= [];
+			if( is_string( $argument ) && 1 === preg_match( '/^-([a-z]{2,})$/i', $argument, $matches )
+				&& !in_array( $matches[1], $shortFlags, TRUE ) ){
+				$letters	= str_split( $matches[1] );
+				if( [] === array_diff( $letters, $shortFlags ) ){
+					foreach( $letters as $letter )
+						$expanded[]	= '-'.$letter;
+					continue;
+				}
+			}
+			$expanded[]	= $argument;
+		}
+		return $expanded;
+	}
+
+	/**
+	 *	Returns short forms of registered flags (options without value), eg. d for /^(-d|--dry)$/.
+	 *	@return		list<string>
+	 */
+	protected function getShortFlags(): array
+	{
+		$list	= [];
+		foreach( $this->options as $option ){
+			if( TRUE !== $option['resolve'] )
+				continue;
+			$pattern	= trim( trim( trim( $option['pattern'], '/' ), '^$' ), '()' );
+			foreach( explode( '|', $pattern ) as $alternative )
+				if( 1 === preg_match( '/^-([a-z]+)$/i', $alternative, $matches ) )
+					$list[]	= $matches[1];
+		}
+		return $list;
 	}
 
 	protected function getEnumerationFromArrayKeyIfSet( array $array, string $key ): array

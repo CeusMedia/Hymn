@@ -7,8 +7,6 @@ parameters:
 	level: 6
 	paths:
 		- ../src
-	excludePaths:
-		- ../src/classes/Module/Reader.php
 	editorUrl: 'phpstorm://open?file=%%relFile%%&line=%%line%%'
 	editorUrlTitle: '%%relFile%%:%%line%%'
 	treatPhpDocTypesAsCertain: false

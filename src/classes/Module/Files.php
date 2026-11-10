@@ -67,6 +67,23 @@ class Hymn_Module_Files
 	 *	@access		public
 	 *	@param		Hymn_Client		$client		Hymn client instance
 	 */
+	/**
+	 *	Checks that a path, given by module definition, stays within module and app folder.
+	 *	@param		string		$path			File path or theme name of module definition
+	 *	@param		string		$moduleId		ID of module, for exception message
+	 *	@return		void
+	 *	@throws		RuntimeException			if path is empty, absolute or contains parent folder references
+	 */
+	public static function checkRelativePath( string $path, string $moduleId ): void
+	{
+		$normalized	= str_replace( '\\', '/', $path );
+		if( '' === trim( $normalized )
+			|| str_starts_with( $normalized, '/' )
+			|| str_contains( $normalized, "\0" )
+			|| 1 === preg_match( '@(^|/)\.\.(/|$)@', $normalized ) )
+			throw new RuntimeException( sprintf( 'Invalid file path "%s" in module %s: must be relative, without ..', $path, $moduleId ) );
+	}
+
 	public function __construct( Hymn_Client $client )
 	{
 		$this->client	= $client;
@@ -97,8 +114,8 @@ class Hymn_Module_Files
 			return TRUE;
 
 		$fileMap	= $this->prepareModuleFileMap( $module );
+		$isRealRun	= !( $this->flags->dry || $tryMode );											//  not a dry or try run
 		foreach( $fileMap as $source => $target ){
-			self::createPath( dirname( $target ) );
 			$pathNameIn	= realpath( $source );
 			$pathOut	= dirname( $target );
 
@@ -106,7 +123,7 @@ class Hymn_Module_Files
 				throw new Exception( 'Source file '.$source.' is not existing' );
 			if( !is_readable( $pathNameIn ) )
 				throw new Exception( 'Source file '.$source.' is not readable' );
-			if( !is_dir( $pathOut ) && !self::createPath( $pathOut ) )
+			if( $isRealRun && !is_dir( $pathOut ) && !self::createPath( $pathOut ) )				//  create target folder on real run, only
 				throw new Exception( 'Target path '.$pathOut.' is not creatable' );
 
 			if( 'link' === $installType ){
@@ -214,6 +231,9 @@ class Hymn_Module_Files
 		$skipSources	= ['lib', 'styles-lib', 'scripts-lib', 'url'];
 		foreach( $module->files->toArray() as $fileType => $files ){
 			foreach( $files as $file ){
+				if( isset( $file->source ) && in_array( $file->source, $skipSources, TRUE ) )		//  external resource, not installed
+					continue;
+				self::checkRelativePath( $file->file, $module->id );								//  no paths outside of module or app
 				switch( $fileType ){
 					case 'files':
 						$path	= $file->file;
@@ -248,9 +268,8 @@ class Hymn_Module_Files
 							'primer'	=> $layoutPrimer,
 							default		=> !empty( $file->theme ) ? $file->theme : $layoutTheme,
 						};
+						self::checkRelativePath( $theme, $module->id );
 						$path	= $pathTarget.$this->config->paths->themes.$theme;
-						if( !file_exists( $path ) && !$this->flags->dry )
-							self::createPath( $path );
 						$source	= $pathSource.'css/'.$file->file;
 						$map[$source]	= $path.'/css/'.$file->file;
 						break;
@@ -269,6 +288,7 @@ class Hymn_Module_Files
 								break;
 							case 'theme':
 								$theme	= !empty( $file->theme ) ? $file->theme : $layoutTheme;
+								self::checkRelativePath( $theme, $module->id );
 								$path	= $this->config->paths->themes.$theme.'/img/';
 								break;
 							case 'images':
@@ -276,8 +296,6 @@ class Hymn_Module_Files
 								$path	= $this->config->paths->images;
 								break;
 						}
-						if( !file_exists( $pathTarget.$path ) && !$this->flags->dry )
-							self::createPath( $pathTarget.$path );
 						$map[$source]	= $pathTarget.$path.$file->file;
 						break;
 				}

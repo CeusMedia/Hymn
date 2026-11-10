@@ -49,7 +49,7 @@ class Hymn_Command_Test_Syntax extends Hymn_Command_Abstract implements Hymn_Com
 	 */
 	public function run(): void
 	{
-		$this->client->arguments->registerOption( 'recursive', '/^-r|--recursive$/', TRUE );
+		$this->client->arguments->registerOption( 'recursive', '/^(-r|--recursive)$/', TRUE );
 		$this->client->arguments->parse();
 
 		$path		= $this->client->arguments->getArgument();

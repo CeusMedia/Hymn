@@ -52,7 +52,7 @@ class Hymn_Command_Config_Module_Remove extends Hymn_Command_Abstract implements
 		$filename	= Hymn_Client::$fileName;
 		$config		= Hymn_Tool_ConfigFile::read( $filename );
 
-		$module	= $this->client->arguments->getArgument();
+		$module	= $this->client->arguments->getArgument() ?? '';
 		$module	= str_replace( ":", "_", $module );
 		if( !strlen( trim( $module ) ) )
 			throw new InvalidArgumentException( 'First argument "module" is missing' );

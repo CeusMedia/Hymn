@@ -68,7 +68,7 @@ class Hymn_Module_Library_Installed
 	 *	@param		string|NULL		$sourceId
 	 *	@return		array<string,Hymn_Structure_Module>
 	 */
-	public function getAll( string $sourceId = NULL ): array
+	public function getAll( ?string $sourceId = NULL ): array
 	{
 //		if( self::$useCache && self::$listModulesInstalled !== NULL )			//  @todo realize sources in cache
 //			return self::$listModulesInstalled;									//  @todo realize sources in cache
@@ -96,7 +96,7 @@ class Hymn_Module_Library_Installed
 		return $list;
 	}
 
-	public function has( string $moduleId, string $sourceId = NULL ): bool
+	public function has( string $moduleId, ?string $sourceId = NULL ): bool
 	{
 		$list	= $this->getAll( $sourceId );
 		return array_key_exists( $moduleId, $list );

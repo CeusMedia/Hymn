@@ -58,6 +58,12 @@ class Hymn_Structure_Config
 
 	public Hymn_Structure_Config_Layout $layout;
 
+	/** @var array<string,string> $pathsOfFile Paths as set in Hymn file, without defaults or config.ini values, written back on save */
+	public array $pathsOfFile	= [];
+
+	/** @var array<string,mixed> $otherSections Sections of Hymn file unknown to Hymn, kept on save */
+	public array $otherSections	= [];
+
 	public function __construct()
 	{
 		$this->application	= new Hymn_Structure_Config_Application();

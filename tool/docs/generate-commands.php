@@ -57,7 +57,7 @@ final class CommandDocGenerator
 	/** @var array<string,list<string>> Explanation blocks, keyed by title */
 	protected array $blocks			= [];
 
-	/** @var array<string,array{syntax: string, description: string}> Global options, keyed by short flag letter or option */
+	/** @var array<string,array{syntax: string, description: string, global: bool}> Options, keyed by syntax */
 	protected array $options		= [];
 
 	/** @var list<string> */
@@ -193,6 +193,7 @@ final class CommandDocGenerator
 		$groupId	= NULL;
 		$block		= NULL;
 		$inOptions	= FALSE;
+		$isGlobal	= TRUE;
 		foreach( $lines as $nr => $line ){
 			$next	= $lines[$nr + 1] ?? '';
 			$trim	= trim( $line );
@@ -214,8 +215,10 @@ final class CommandDocGenerator
 				continue;
 			}
 			if( $inOptions ){
+				if( 'Options of single commands:' === $trim )										//  following options are command specific
+					$isGlobal	= FALSE;
 				if( 1 === preg_match( '/^(-\S+(?: \| -\S+)?)\s{2,}(.+)$/', $trim, $matches ) )
-					$this->options[$matches[1]]	= ['syntax' => $matches[1], 'description' => $matches[2]];
+					$this->options[$matches[1]]	= ['syntax' => $matches[1], 'description' => $matches[2], 'global' => $isGlobal];
 				continue;
 			}
 			if( 1 === preg_match( '/^- ([a-z][a-z-]*)(.*)$/', $line, $matches ) && NULL !== $groupId && NULL !== $sectionId ){
@@ -444,13 +447,13 @@ final class CommandDocGenerator
 		}
 		$lines[]	= '## Global options';
 		$lines[]	= '';
-		$lines[]	= 'Options can be given anywhere after the command. Give short flags separately, eg. `-d -v`:';
-		$lines[]	= 'combined flags like `-dv` are not supported, only the first flag would be recognized.';
+		$lines[]	= 'Options can be given anywhere after the command. Short flags can be combined, eg. `-dv` for `-d -v`.';
 		$lines[]	= '';
 		$lines[]	= '| Option | Meaning |';
 		$lines[]	= '|--------|---------|';
 		foreach( $this->options as $option )
-			$lines[]	= '| '.$this->renderCodeCell( $option['syntax'] ).' | '.$this->escapeTable( $option['description'] ).' |';
+			if( $option['global'] )
+				$lines[]	= '| '.$this->renderCodeCell( $option['syntax'] ).' | '.$this->escapeTable( $option['description'] ).' |';
 		$lines[]	= '';
 		$extra	= trim( (string) @file_get_contents( $this->detailsPath.'index.md' ) );
 		if( '' !== $extra ){
@@ -466,6 +469,8 @@ final class CommandDocGenerator
 		$syntax	= (string) preg_replace( '/^\^|\$$/', '', $syntax );
 		$syntax	= (string) preg_replace( '/\(\\\\S[*+]\)/', strtoupper( $name ), $syntax );
 		$syntax	= str_replace( ['^', '$'], '', $syntax );
+		if( 1 === preg_match( '/^\((.+)\)$/', $syntax, $matches ) )									//  remove group around alternatives
+			$syntax	= $matches[1];
 		return '' !== $syntax ? str_replace( '|', ', ', $syntax ) : '--'.$name;
 	}
 

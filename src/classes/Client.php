@@ -83,7 +83,7 @@ class Hymn_Client
 
 	public static string $language				= 'en';
 
-	public static string $version				= '1.0.5c';
+	public static string $version				= '1.0.5';
 
 	public static string $mode					= 'prod';
 
@@ -226,11 +226,9 @@ class Hymn_Client
 		if( !count( $availableSourceIds ) )
 			throw new InvalidArgumentException( 'No available source IDs given' );
 
-		$modules	= $this->config->modules;														//  shortcut configured modules
-		if( isset( $modules->$moduleId ) )															//  module is configured in hymn file
-			if( isset( $modules->$moduleId->source ) )												//  module has configured source source
-				if( in_array( $modules->$moduleId->source, $availableSourceIds ) )					//  configured source source has requested module
-					return $modules->$moduleId->source;												//  return configured source source
+		$sourceByHymn	= $this->getConfig()->modules[$moduleId]->sourceId ?? NULL;					//  source of module set in Hymn file
+		if( NULL !== $sourceByHymn && in_array( $sourceByHymn, $availableSourceIds, TRUE ) )		//  configured source is active
+			return $sourceByHymn;																	//  return configured source
 
 		if( $defaultInstallSourceId !== NULL )														//  default source given
 			if( in_array( $defaultInstallSourceId, $availableSourceIds ) )							//  default source has requested module
@@ -345,7 +343,11 @@ class Hymn_Client
 			self::$fileName		= (string) $this->arguments->getOption( 'file' );
 			$this->dispatch();
 		}
-		catch( Exception $e ){
+		catch( Throwable $e ){
+			if( NULL === $this->output ){															//  failed before output is available, eg. on invalid options
+				fwrite( STDERR, 'Error: '.$e->getMessage().'.'.PHP_EOL );
+				exit( Hymn_Client::EXIT_ON_SETUP );
+			}
 			$this->outError( $e->getMessage().'.' );
 			$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
 			exit( Hymn_Client::EXIT_ON_SETUP );
@@ -365,28 +367,26 @@ class Hymn_Client
 		foreach( $arguments as $argument )
 			$args[]	= $argument;
 
-		foreach( $this->arguments->getOptions() as $key => $value ){
-			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
+		$options	= [];
+		foreach( $this->arguments->getOptions() as $key => $value )								//  carry options of this call ...
+			if( !in_array( $key, $ignoreOptions, TRUE ) )											//  ... except ignored ones
+				$options[$key]	= $value;
+		foreach( $addOptions as $key => $value )													//  add options, if not set already
+			if( !isset( $options[$key] ) || FALSE === $options[$key] || '' === $options[$key] )
+				$options[$key]	= $value;
+		foreach( $options as $key => $value ){
+			if( NULL === $value || FALSE === $value || '' === $value )								//  option is not set
 				continue;
-			if( in_array( $key, $ignoreOptions ) )
+			if( !array_key_exists( $key, $this->baseArgumentOptions ) )							//  not a base option
 				continue;
-			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
-				$args[]	= '--'.$key;
-			else
-				$args[]	= '--'.$key.'='.$value;
-		}
-		foreach( $addOptions as $key => $value ){
-			if( array_key_exists( $key, $args ) )
-				continue;
-			if( !strlen( $value ?? '' ) || !array_key_exists( $key, $this->baseArgumentOptions ) )
-				continue;
-			if( $this->baseArgumentOptions[$key]['resolve'] === TRUE )
+			if( TRUE === $this->baseArgumentOptions[$key]['resolve'] )								//  option is a flag
 				$args[]	= '--'.$key;
 			else
 				$args[]	= '--'.$key.'='.$value;
 		}
 		$this->outVeryVerbose( 'Running sub command: '.join( ' ', $args ) );
 		$client = new Hymn_Client( $args, FALSE );
+		$client->run();
 	}
 
 	/*  --  PROTECTED  --  */
@@ -425,7 +425,7 @@ class Hymn_Client
 				$this->applyCommandOptionsToArguments( $commandObject );							//  extend argument options by command specific options
 				$reflectedMethod->invokeArgs( $commandObject, $this->arguments->getArguments() );	//  call reflected object method
 			}
-			catch( Exception $e ){
+			catch( Throwable $e ){																//  also errors, eg. type errors, to end with message and exit code
 				$this->outError( $e->getMessage().'.' );
 				$this->outVerbose( Hymn_Tool_CLI_ExceptionTraceView::getInstance( $e )->render() );
 				exit( Hymn_Client::EXIT_ON_RUN );

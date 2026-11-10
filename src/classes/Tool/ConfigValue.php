@@ -183,7 +183,7 @@ class Hymn_Tool_ConfigValue
 	/**
 	 *	@deprecated		use setValue and setType instead
 	 */
-	public function set( int|float|bool|string $value, string $type = NULL ): static
+	public function set( int|float|bool|string $value, ?string $type = NULL ): static
 	{
 		$this->setType( $type === NULL ? $this->type : $type );
 		$value		= trim( (string) $value );

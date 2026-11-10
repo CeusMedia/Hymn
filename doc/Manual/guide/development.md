@@ -15,8 +15,9 @@ make install-link               # symlink hymn.phar to /usr/local/bin/hymn (uses
 | development | original PHP files, not compressed, full exception traces – for debugging |
 
 The build is done by `build/create.php --mode=prod|dev [--php=BINARY]`. It checks the syntax of all
-classes, packs `CHANGELOG.md` for [`changelog`](../commands/changelog.md) and downloads the module XML
-schema from `schema.ceusmedia.de` – so building needs network access.
+classes, packs `CHANGELOG.md` for [`changelog`](../commands/changelog.md) and the module XML schema:
+the latest one from `schema.ceusmedia.de`, or the local copy `src/classes/Structure/Module.xsd`,
+if the download fails.
 
 ## Tests and static analysis
 

@@ -36,7 +36,6 @@ declare(strict_types=1);
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Hymn
  *	@todo			code documentation
- *	@todo 			handle relations (new relations after update)
  */
 class Hymn_Command_Module_Update extends Hymn_Command_Abstract implements Hymn_Command_Interface
 {
@@ -70,22 +69,31 @@ class Hymn_Command_Module_Update extends Hymn_Command_Abstract implements Hymn_C
 			), Hymn_Client::EXIT_ON_RUN );
 		$installedModule	= $listInstalled[$moduleId];
 
-		//  check if outdated
-		$outdatedModules	= $library->getOutdatedModules();										//  prepare empty list of updatable modules
-		if( !array_key_exists( $moduleId, $outdatedModules ) && !$this->flags->force )				//  availableModule is not outdated, no update
+		//  check if still available in source of installation
+		$sourceId			= $installedModule->install->source ?? NULL;
+		$availableModule	= $library->getAvailableModule( $installedModule->id, $sourceId ?: NULL, FALSE );
+		if( NULL === $availableModule )
 			$this->outError( sprintf(
-				"Module '%s' is not outdated and cannot be updated",
-				$moduleId
+				"Module '%s' is not available in source '%s' anymore and cannot be updated",
+				$moduleId,
+				$sourceId ?: '-'
 			), Hymn_Client::EXIT_ON_RUN );
 
-		$availableModule	= $library->getAvailableModule( $installedModule->id, $installedModule->install->source );
+		//  check if outdated
+		$outdatedModules	= $library->getOutdatedModules();
+		if( !array_key_exists( $moduleId, $outdatedModules ) && !$this->flags->force )				//  module is not outdated, no update
+			$this->outError( sprintf(
+				"Module '%s' is not outdated and cannot be updated (use --force to reinstall)",
+				$moduleId
+			), Hymn_Client::EXIT_ON_RUN );
 
 		$updater	= new Hymn_Module_Updater( $this->client, $library );
 
 		try{
 			$this->client->getFramework()->checkModuleSupport( $availableModule );
 			$installType	= $this->client->getModuleInstallType( $availableModule->id, $this->installType );
-			$message		= vsprintf( 'Updating availableModule "%s" from %s to %s as %s ...', [
+			$message		= vsprintf( '%sUpdating module "%s" from %s to %s as %s ...', [
+				$this->flags->dry ? 'Dry: ' : '',
 				$availableModule->id,
 				$installedModule->version->current,
 				$availableModule->version->current,
@@ -95,7 +103,7 @@ class Hymn_Command_Module_Update extends Hymn_Command_Abstract implements Hymn_C
 			$updater->update( $availableModule, $installType );
 		}
 		catch( Exception $e ){
-			$this->outError( 'Error: '.$e->getMessage().'.', Hymn_Client::EXIT_ON_EXEC );					//  error, but continue, not exit
+			$this->outError( 'Error: '.$e->getMessage().'.', Hymn_Client::EXIT_ON_EXEC );
 		}
 
 	}

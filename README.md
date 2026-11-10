@@ -10,7 +10,7 @@ hymn - Hydrogen Management
 # Hymn
 
 ![Branch](https://img.shields.io/badge/Branch-1.0.x-blue?style=flat-square)
-![Release](https://img.shields.io/badge/Release-1.0.4-blue?style=flat-square)
+![Release](https://img.shields.io/badge/Release-1.0.5-blue?style=flat-square)
 ![PHP version](https://img.shields.io/badge/PHP-%5E8.1-blue?style=flat-square&color=777BB4)
 ![PHPStan level](https://img.shields.io/badge/PHPStan_level-6-darkgreen?style=flat-square)
 
@@ -27,7 +27,7 @@ sudo chmod a+x /usr/local/bin/hymn
 
 ### Checkout
 ````
-git checkout https://github.com/CeusMedia/Hymn.git
+git clone https://github.com/CeusMedia/Hymn.git
 sudo mv Hymn/hymn.phar /usr/local/bin/hymn
 rm -Rf Hymn
 ````
@@ -36,13 +36,13 @@ Afterwards, the <code>hymn</code> command is available systemwide.
 Check the installation by displaying the current version from any folder you like.
 ````
 > hymn version
-0.9.9.0 (en)
+1.0.5-prod (en)
 ````
 
 ## Upgrade
 
 Run <code>hymn self-update</code> to install the latest version.
-You can install any tagged version by providing the desired version, like <code>hymn self-update 0.9.9.0</code>.
+You can install any tagged version by providing the desired version, like <code>hymn self-update 1.0.4</code>.
 
 ## Documentation
 
@@ -58,18 +58,23 @@ A manual with guides and a reference of all commands is built by MkDocs from `do
 
 ## Commands
 
-### A. Configuration Management
+### A. Source Management
 
-For creating and extending a project Hymn config file, you execute these commands:
+For creating and extending an App's Hymn config file, you execute these commands:
 
 #### 1. Project Creation and Source Management
 
 	- init                                        Create initial Hymn file for this project
+	- init-makefile [-bnp] [FILE]                 Create Makefile for app (with backend, public, nonfree targets)
 	- source-list                                 List library sources registered in Hymn file
 	- source-add                                  Add module source of modules to Hymn file
 	- source-remove KEY                           Remove module source from Hymn file
 	- source-enable [-dfqv] SOURCE                Enable source in Hymn file
 	- source-disable [-dfqv] SOURCE               Disable source in Hymn file
+	- source-index [-v] SOURCE                    Show index of source if available
+	- source-index-clear SOURCE                   Remove source index files
+	- source-index-create SOURCE                  Generate source index files
+	- source-validate [-qv] SOURCE                Validate module XML files of all modules in source
 
 #### 2. Project Setup and Information
 
@@ -85,10 +90,11 @@ For creating and extending a project Hymn config file, you execute these command
 	- config-module-get MODULE.KEY                Get module setting from Hymn file
 	- config-module-set MODULE.KEY [VALUE]        Enter and save module setting in Hymn file
 
-
 #### 4. Project Module Information
 
 	- module-info [-v] MODULE [SOURCE]            Show information about module (in library source)
+	- module-install [-dv] MODULE [SOURCE]        Install module (and needed modules) into app
+	- module-update [-dv] MODULE                  Update module installed in app
 	- modules-available [SOURCE]                  List modules available (in library source)
 	- modules-installed [SOURCE]                  List modules installed within application (from library source)
 	- modules-required                            List modules required for application
@@ -102,18 +108,21 @@ Having a valid Hymn config file, you execute these commands:
 
 #### 1. App Base Configuration Management
 
-	- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
-	- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
+	- app-base-config-list                        Show settings from config.ini
 	- app-base-config-get KEY                     Read setting from config.ini
 	- app-base-config-set [-dqv] KEY VALUE        Save setting in config.ini
+	- app-base-config-disable [-dqv] KEY          Disable an enabled setting in config.ini
+	- app-base-config-enable [-dqv] KEY           Enable a disabled setting in config.ini
 
 #### 2. App Instance & Module Management
 
 	- app-info [-v]                               Show app setup
 	- app-status [-v]                             Show status of app and its modules
-	- app-graph                                   Render module relations graph (see config/modules.graph.png)
-	- app-sources                                 List installed library sources
-	- app-move DESTINATION [URL]                  Move app to another folder (and adjust app base URL)
+	- app-graph                                   Render module relations graph (config/modules.graph.png and .svg)
+	- app-hooks                                   List registered event hooks of installed modules
+	- app-move [-dv] DESTINATION [URL]            Move app to another folder (and adjust app base URL)
+	- app-relink [-dv] SOURCE                     Fix links after manuel app movement (if link mode)
+	- app-clear [-v] [CLEAR_TYPE+] [--age=MINS]   Clear cache, locks or logs
 
 #### 3. App Module Management
 
@@ -123,36 +132,61 @@ Having a valid Hymn config file, you execute these commands:
 	- app-module-config-get MODULE.KEY            Get config value of installed module by config key
 	- app-module-config-set MODULE.KEY VALUE      Set config value of installed module by config key
 	- app-module-config-dump [--file=.hymn]       Export current module settings into Hymn file
+	- app-module-config-uncache                   Remove app module cache
+	- app-module-config-validate                  Validate XML file of installed modules
 	- app-module-reconfigure [-dqv] MODULE        Configure installed module
 
 #### 4. App Database Management
 
 	- database-clear [-dfqv]                      Drop database tables
+	- database-console QUERY                      Run SQL query (no DROP or DELETE) and show result
 	- database-dump [PATH]                        Export database to SQL file
 	- database-load [PATH|FILE]                   Import (specific or latest) SQL file
 	- database-keep [KEEP_RULES]                  Remove database dumps not meeting the keep rules
 
 	Keep Rules:
-	--daily=[DAYS]             Number of daily dumps to keep
-	--monthly=[MONTHS]         Number of monthly dumps to keep
-	--yearly=[YEARS]           Number of yearly dumps to keep
+	--daily=[NUMBER]           Number of newest dumps to keep (required)
+	--weekly=[NUMBER]          Number of Sunday dumps to keep
+	--monthly=[NUMBER]         Number of dumps of 1st of month to keep
+	--yearly=[NUMBER]          Number of dumps of January 1st to keep
 
-#### 5. App Stamp Management
-------------------------------------------------------------------------------
-	- app-stamp-dump [SOURCE]                              Export current module settings into a stamp file
+#### 5. App Module Management: Stamps
+
+	- app-stamp-dump [PATH|FILE] [SOURCE]                  Export current module settings into a stamp file
 	- app-stamp-diff [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Show changes between installed modules and stamp
 	- app-stamp-load [PATH|FILE] [TYPE] [SOURCE] [MODULE]  Restore module settings of stamp (not implemented yet)
 	- app-stamp-prospect TYPE [SOURCE]                     Show changes when updating outdated modules
 	- app-stamp-info [PATH|FILE] [TYPE*] [SOURCE] [MODULE] Display details of stamp
 
+	Type:
+	  - * | all                All types or their changes
+	  - config                 Configuration or its changes, only
+	  - file | files           Files or their changes, only
+	  - relations              Relations, only
+	  - hooks                  Hooks, only
+	  - sql                    Database changes, only
+
+	Source:
+	  - * | all                all sources (default on empty)
+	  - SOURCE_ID              focus on specific source by its ID
+
+	Clear Types:
+	  - * | all                all types (default on empty)
+	  - cache                  clear caches
+	  - locks                  remove job locks
+	  - logs                   remove logs
+
 ### C. Additional Functions
 
 #### 1. Self Management
 
-	- help                           Show this help screen
-	- version                        Show current hymn version
-	- self-update [-dv] [VERSION]    Replace hymn binary by master or given version
-	- test-syntax [-rqv] [PATH]      Test syntax of Hymn PHP classes
+	- help                                        Show this help screen
+	- version                                     Show current hymn version
+	- changelog                                   Show changes of hymn versions
+	- self-update [-dv] [VERSION]                 Replace hymn binary by master or given version
+	- test-syntax [-rqv] [PATH]                   Test syntax of Hymn PHP classes
+	- test [-rqv] [PATH]                          Alias of test-syntax
+	- sleep SECONDS                               Wait some seconds (at most 3600), eg. in scripts
 
 #### 2. Stamp Management
 
@@ -164,10 +198,15 @@ Having a valid Hymn config file, you execute these commands:
 	-f | --force               Continue actions on error or warnings
 	-q | --quiet               Avoid any output
 	-v | --verbose             Be verbose about taken steps
-	-r | --recursive           Perform file actions recursively (used by test-syntax only)
+	-vv | --very-verbose       Be even more verbose, eg. about memory usage
+	-h | --help                Show help screen (without command)
+	--version                  Show current hymn version
 	--file=[.hymn]             Alternative path of Hymn file
-	--prefix=[<%prefix%>]      Set database table prefix in dump
 	--db=[yes,no,only]         Switch to enable changes in database (default: yes)
+	--interactive=[yes,no]     Ask for missing values (default: yes)
+
+Short flags can be combined, eg. `-dv` for `-d -v`.
+Options of single commands, like `--recursive` of `test-syntax`, are listed by `hymn help`.
 
 ## Commands of `make`
 

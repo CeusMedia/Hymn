@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<module>
+	<title>Test: With needs</title>
+	<description><![CDATA[Fixture for integration tests of Hymn.]]></description>
+	<version>1.0.0</version>
+	<log version="1.0.0">First release.</log>
+	<category>Test</category>
+	<files></files>
+	<relations>
+		<needs type="module">Test_Plain</needs>
+	</relations>
+</module>

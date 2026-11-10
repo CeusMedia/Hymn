@@ -55,8 +55,10 @@ file_put_contents( $rootPath."/build/.mode", $options['mode'] );
 file_put_contents( $rootPath."/build/.php", $options['php'] );
 Hymn_Client::$phpPath	= $options['php'];
 
-shell_exec( "test -d ".$rootPath."/build/classes && rm -rf ".$rootPath."/build/classes || true" );
-shell_exec( "cp -r ".$rootPath."/src/classes ".$rootPath."/build/" );
+$buildClassesPath	= $rootPath.'/build/classes';
+if( is_dir( $buildClassesPath ) )
+	shell_exec( 'rm -rf '.escapeshellarg( $buildClassesPath ) );
+shell_exec( 'cp -r '.escapeshellarg( $rootPath.'/src/classes' ).' '.escapeshellarg( $rootPath.'/build/' ) );
 
 $directory	= new RecursiveDirectoryIterator( $rootPath."/build/classes", RecursiveDirectoryIterator::SKIP_DOTS );
 $iterator	= new RecursiveIteratorIterator( $directory, RecursiveIteratorIterator::CHILD_FIRST );
@@ -94,18 +96,47 @@ print( "\r".str_repeat( ' ', $cols - 2 )."\r" );
 $archive->buildFromDirectory( $rootPath.'/build/classes/', '$(.*)\.php$' );
 $archive->addFile( $rootPath.'/CHANGELOG.md', '.changelog' );
 //$archive->addFile( $rootPath.'/src/classes/Structure/Module.xsd', 'Module.xsd' );
-$archive->addFromString( 'module-1.0.0.xsd', file_get_contents( 'https://schema.ceusmedia.de/hydrogen/module-1.0.0.xsd' ) );
+$archive->addFromString( 'module-1.0.0.xsd', getModuleSchema( $rootPath.'/src/classes/Structure/Module.xsd' ) );
 $archive->addFile( $rootPath.'/src/baseArgumentOptions.json', 'baseArgumentOptions.json' );
 $archive->addFile( $rootPath.'/build/.mode', '.mode' );
 $archive->addFile( $rootPath.'/build/.php', '.php' );
 if( $options['mode'] !== 'dev' )
 	$archive->compressFiles( Phar::GZ );
 $archive->stopBuffering();
-shell_exec( "rm -rf ".$rootPath."/build/classes" );
+shell_exec( 'rm -rf '.escapeshellarg( $buildClassesPath ) );
 require_once __DIR__.'/../src/classes/Client.php';
 print( vsprintf( 'Done building version %3$s-%4$s into %1$s (%2$s).'.PHP_EOL, [
 	$pharFileName,
-	round( filesize( $pharFileName ) / 1024, 1 ).'kB',
+	round( filesize( $pharFilePath ) / 1024, 1 ).'kB',
 	Hymn_Client::$version,
 	$options['mode'],
 ] ) );
+
+/**
+ *	Returns XML schema of module definitions: latest from schema server, or local copy, if download fails.
+ *	The schema is checked to be valid XML schema, so no broken or empty schema gets into the PHAR file.
+ *	@param		string		$localFile		Local copy of schema
+ *	@return		string
+ */
+function getModuleSchema( string $localFile ): string
+{
+	$url		= 'https://schema.ceusmedia.de/hydrogen/module-1.0.0.xsd';
+	$context	= stream_context_create( ['http' => ['timeout' => 10]] );
+	$schema		= @file_get_contents( $url, FALSE, $context );
+	if( FALSE !== $schema && isModuleSchema( $schema ) )
+		return $schema;
+	print( 'Warning: Download of module schema failed, using local copy '.basename( $localFile ).PHP_EOL );
+	$schema		= (string) file_get_contents( $localFile );
+	if( !isModuleSchema( $schema ) )
+		throw new RuntimeException( 'Local module schema '.$localFile.' is invalid' );
+	return $schema;
+}
+
+function isModuleSchema( string $content ): bool
+{
+	$document	= new DOMDocument();
+	if( '' === trim( $content ) || !@$document->loadXML( $content ) )
+		return FALSE;
+	return 'schema' === $document->documentElement?->localName
+		&& 'http://www.w3.org/2001/XMLSchema' === $document->documentElement->namespaceURI;
+}

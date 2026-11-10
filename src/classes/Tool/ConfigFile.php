@@ -39,6 +39,9 @@ declare(strict_types=1);
 
 class Hymn_Tool_ConfigFile
 {
+	/** @var list<string> Sections of Hymn file, known to Hymn */
+	protected const SECTIONS	= ['application', 'paths', 'sources', 'modules', 'system', 'database'];
+
 	public static function read( ?string $filePath = NULL ): Hymn_Structure_Config
 	{
 		$filePath	= $filePath ?? Hymn_Client::$fileName;
@@ -116,7 +119,8 @@ class Hymn_Tool_ConfigFile
 		}
 		if( isset( $object->paths ) ){
 			foreach( $object->paths as $pathKey => $pathValue ){
-				$config->paths->$pathKey = $pathValue;
+				$config->paths->$pathKey = (string) $pathValue;
+				$config->pathsOfFile[(string) $pathKey]	= (string) $pathValue;
 			}
 		}
 		if( isset( $object->sources ) ){
@@ -135,11 +139,15 @@ class Hymn_Tool_ConfigFile
 			}
 		}
 		if( isset( $object->modules ) ){
-			/** @var object{sourceId: ?string, config: ?array} $moduleData */
+			/** @var object{sourceId: ?string, source: ?string, installType: ?string, config: ?array} $moduleData */
 			foreach( $object->modules as $moduleKey => $moduleData ){
 				$module	= new Hymn_Structure_Config_Module();
 				if( isset( $moduleData->sourceId ) )
-					$module->sourceId	= $moduleData->sourceId;
+					$module->sourceId	= (string) $moduleData->sourceId;
+				else if( isset( $moduleData->source ) )												//  older key of source
+					$module->sourceId	= (string) $moduleData->source;
+				if( isset( $moduleData->installType ) )
+					$module->installType	= (string) $moduleData->installType;
 				if( isset( $moduleData->config ) )
 					$module->config		= (array) $moduleData->config;
 				$config->modules[$moduleKey]	= $module;
@@ -165,6 +173,9 @@ class Hymn_Tool_ConfigFile
 			$config->database->prefix	= (string) ( $database->prefix ?? '' );
 			$config->database->modules	= (string) ( $database->modules ?? '' );
 		}
+		foreach( get_object_vars( $object ) as $sectionKey => $section )							//  keep sections unknown to Hymn
+			if( !in_array( $sectionKey, self::SECTIONS, TRUE ) )
+				$config->otherSections[$sectionKey]	= $section;
 		return $config;
 	}
 
@@ -172,12 +183,14 @@ class Hymn_Tool_ConfigFile
 	{
 		$object	= (object) [
 			'application'	=> (object) array_filter( get_object_vars( $config->application ) ),
-			'sources'		=> [],
-			'modules'		=> [],
 		];
+		if( [] !== $config->pathsOfFile )															//  only paths set in file, no defaults
+			$object->paths	= (object) $config->pathsOfFile;
+		$object->sources	= [];
+		$object->modules	= [];
 
 		foreach( $config->sources as $sourceKey => $source )
-			$object->sources[$sourceKey] = self::translateDataObjectToJsonObject( $source, [NULL] );
+			$object->sources[$sourceKey] = self::translateDataObjectToJsonObject( $source, [NULL, ''] );
 
 		foreach( $config->modules as $moduleKey => $module )
 			$object->modules[$moduleKey] = self::translateDataObjectToJsonObject( $module, [NULL, '', []] );
@@ -186,8 +199,10 @@ class Hymn_Tool_ConfigFile
 			$object->system		= self::translateDataObjectToJsonObject( $config->system, [NULL] );
 
 		if( '' !== $config->database->driver )
-			$object->database	= self::translateDataObjectToJsonObject( $config->database, [NULL] );
+			$object->database	= self::translateDataObjectToJsonObject( $config->database, [NULL, ''] );
 
+		foreach( $config->otherSections as $sectionKey => $section )
+			$object->$sectionKey	= $section;
 		return $object;
 	}
 
