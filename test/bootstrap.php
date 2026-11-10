@@ -14,6 +14,10 @@ $directories	= [
 	'Tool',
 	'Tool/CLI',
 	'Tool/XML',
+	'Tool/SemVer',
+	'Tool/SemVer/Constraint',
+	'Tool/SemVer/Constraint/Range',
+	'Tool/SemVer/Version',
 ];
 
 require_once $path.'Command/Interface.php';

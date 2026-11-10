@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<module>
+	<title>Test: Plain</title>
+	<description><![CDATA[Fixture for integration tests of Hymn.]]></description>
+	<version>1.0.0</version>
+	<log version="1.0.0">First release.</log>
+	<category>Test</category>
+	<files>
+		<class>Test/Plain.php</class>
+	</files>
+	<relations></relations>
+</module>

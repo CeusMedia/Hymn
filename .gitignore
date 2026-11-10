@@ -1,4 +1,6 @@
-doc
+/doc/*
+!/doc/Manual
+/doc/Manual/commands
 vendor
 .idea
 .hymn
@@ -6,3 +8,4 @@ build/.mode
 build/.php
 tool/.phpunit.cache
 drive
+/tool/docs/.venv

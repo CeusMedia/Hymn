@@ -107,6 +107,7 @@ class Hymn_Client
 		//  APP CREATION
 		'init',
 		//  SELF MANAGEMENT
+		'changelog',
 		'help',
 		'self-update',
 		'test-syntax',

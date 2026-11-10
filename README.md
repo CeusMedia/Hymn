@@ -44,6 +44,10 @@ Check the installation by displaying the current version from any folder you lik
 Run <code>hymn self-update</code> to install the latest version.
 You can install any tagged version by providing the desired version, like <code>hymn self-update 0.9.9.0</code>.
 
+## Documentation
+
+A manual with guides and a reference of all commands is built by MkDocs from `doc/Manual/`: run `composer dev:docs`, then open `doc/Site/index.html` - or `composer dev:docs-serve` for a live preview. Changes per version are listed in the [changelog](CHANGELOG.md).
+
 # Usage
 
 ## Keywords

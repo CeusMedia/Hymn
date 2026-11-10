@@ -237,14 +237,18 @@ class Hymn_Module_Installer
 	}
 
 	/**
-	 * @param Hymn_Structure_Module $module
-	 * @return void
+	 *	Checks whether Composer packages needed by module are installed in a matching version.
+	 *	Exits with error if a package is missing or installed in a version not satisfying the constraint.
+	 *	Unstable (dev) or non-SemVer versions cannot be checked and are reported only.
+	 *	Installed packages are read from Composer in application folder (application.uri),
+	 *	or in current working directory, if application URI is not set.
+	 *	@param		Hymn_Structure_Module	$module
+	 *	@return		void
 	 */
-	protected function checkNeededPackages( Hymn_Structure_Module $module ): void
+	public function checkNeededPackages( Hymn_Structure_Module $module ): void
 	{
-		@include_once( 'vendor/composer/InstalledVersions.php' );
 		$this->client->outVerbose( 'Checking related packages...' );
-		if( !class_exists( '\\Composer\\InstalledVersions' ) )
+		if( !$this->loadComposerInstalledVersions() )
 			return;
 		foreach( $module->relations->needs as $needs ){
 			if( Hymn_Structure_Module_Relation::TYPE_PACKAGE !== $needs->type )
@@ -253,22 +257,59 @@ class Hymn_Module_Installer
 				$message	= 'Package "'.$needs->id.'" needs to be installed.';
 				$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
 			}
-			$versionInstalled	= InstalledVersions::getPrettyVersion( $needs->id );
+			$versionInstalled	= (string) InstalledVersions::getPrettyVersion( $needs->id );
 			$this->client->outVerbose( '- '.$needs->id.' | required: '.$needs->version.' | installed: '.$versionInstalled );
 			if( str_starts_with( $versionInstalled, 'dev-' ) || str_ends_with( $versionInstalled, '-dev' ) ){
-				$message	= 'Installed version of package "%s is unstable and may not meet the requirements (%s).';
+				$message	= 'Installed version of package "%s" is unstable and may not meet the requirements (%s).';
 				$this->client->out( vsprintf( $message, [$needs->id, $needs->version] ) );
 				continue;
 			}
-			$neededVersions	= $needs->version;
-			$neededVersions	= preg_replace( '@(^\|)\|(^\|)@', '\\1 || \\2', $neededVersions );
-
-			$constraint			= new Hymn_Tool_SemVer_Constraint( $neededVersions );
-			$semanticVersion	= Hymn_Tool_SemVer_Version::fromString( $versionInstalled );
-			if( $constraint->checkVersion( $semanticVersion ) )
-				return;
-			$message	= 'Package "'.$needs->id.'" needs to be installed in version '.$needs->version;
-			$this->client->outError( $message, Hymn_Client::EXIT_ON_EXEC );
+			if( !Hymn_Tool_SemVer_Version_Parser::isValid( $versionInstalled ) ){
+				$message	= 'Installed version %s of package "%s" is not a semantic version and cannot be checked against requirements (%s).';
+				$this->client->out( vsprintf( $message, [$versionInstalled, $needs->id, $needs->version] ) );
+				continue;
+			}
+			try{
+				$constraint	= new Hymn_Tool_SemVer_Constraint( $needs->version );
+				if( $constraint->checkVersion( Hymn_Tool_SemVer_Version::fromString( $versionInstalled ) ) )
+					continue;
+				$message	= 'Package "%s" needs to be installed in version %s (installed: %s)';
+				$this->client->outError( vsprintf( $message, [$needs->id, $needs->version, $versionInstalled] ), Hymn_Client::EXIT_ON_EXEC );
+			}
+			catch( InvalidArgumentException $e ){
+				$message	= 'Version constraint of needed package "%s" in module "%s" is invalid: %s';
+				$this->client->outError( vsprintf( $message, [$needs->id, $module->id, $e->getMessage()] ), Hymn_Client::EXIT_ON_EXEC );
+			}
 		}
+	}
+
+	/**
+	 *	Returns path of application folder, ending with slash.
+	 *	Falls back to current working directory, if application URI is not set in Hymn file.
+	 *	@return		string
+	 */
+	protected function getApplicationPath(): string
+	{
+		$path	= trim( $this->app->uri );
+		if( '' === $path )
+			$path	= (string) getcwd();
+		return rtrim( $path, '/' ).'/';
+	}
+
+	/**
+	 *	Loads class Composer\InstalledVersions from Composer of application, if not loaded already.
+	 *	@return		bool		TRUE if class is available
+	 */
+	protected function loadComposerInstalledVersions(): bool
+	{
+		if( class_exists( InstalledVersions::class, FALSE ) )
+			return TRUE;
+		$file	= $this->getApplicationPath().'vendor/composer/InstalledVersions.php';
+		if( !file_exists( $file ) ){
+			$this->client->outVerbose( '- Composer not installed in application ('.$file.' not found), packages not checked' );
+			return FALSE;
+		}
+		include_once $file;
+		return class_exists( InstalledVersions::class, FALSE );
 	}
 }

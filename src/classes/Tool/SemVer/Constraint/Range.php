@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 class Hymn_Tool_SemVer_Constraint_Range
 {
 	/** @var	Hymn_Tool_SemVer_Version|NULL */
@@ -13,12 +15,19 @@ class Hymn_Tool_SemVer_Constraint_Range
 	/** @var	Hymn_Tool_SemVer_Version|NULL */
 	protected ?Hymn_Tool_SemVer_Version $lowerThan	= NULL;
 
+	/** @var	Hymn_Tool_SemVer_Version|NULL */
+	protected ?Hymn_Tool_SemVer_Version $notEqualTo	= NULL;
+
 	public static function create( ?string $constraint = NULL ): self
 	{
 		return new self( $constraint );
 	}
 
-	public function __construct( string $constraint = NULL )
+	/**
+	 *	@param		string|NULL		$constraint
+	 *	@throws		InvalidArgumentException	if constraint is not supported
+	 */
+	public function __construct( ?string $constraint = NULL )
 	{
 		if( !is_null( $constraint ) ){
 			$range	= Hymn_Tool_SemVer_Constraint_Range_Parser::parse( $constraint );
@@ -26,16 +35,13 @@ class Hymn_Tool_SemVer_Constraint_Range
 			$this->setAtMost( $range->getAtMost() );
 			$this->setGreaterThan( $range->getGreaterThan() );
 			$this->setLowerThan( $range->getLowerThan() );
+			$this->setNotEqualTo( $range->getNotEqualTo() );
 		}
 	}
 
 	public function checkVersion( Hymn_Tool_SemVer_Version|string $version ): bool
 	{
 		$version	= is_string( $version ) ? new Hymn_Tool_SemVer_Version( $version ) : $version;
-		if( !is_null( $this->atLeast ) && !is_null( $this->atMost ) ){
-			if( $this->atLeast->render() === $this->atMost->render() && !$version->isEqualTo( $this->atLeast ) )
-				return FALSE;
-		}
 		if( !is_null( $this->atLeast ) && $version->isLowerThan( $this->atLeast ) )
 			return FALSE;
 		if( !is_null( $this->atMost ) && $version->isGreaterThan( $this->atMost ) )
@@ -43,6 +49,8 @@ class Hymn_Tool_SemVer_Constraint_Range
 		if( !is_null( $this->greaterThan ) && $version->isAtMost( $this->greaterThan ) )
 			return FALSE;
 		if( !is_null( $this->lowerThan ) && $version->isAtLeast( $this->lowerThan ) )
+			return FALSE;
+		if( !is_null( $this->notEqualTo ) && $version->isEqualTo( $this->notEqualTo ) )
 			return FALSE;
 		return TRUE;
 	}
@@ -67,6 +75,11 @@ class Hymn_Tool_SemVer_Constraint_Range
 		return $this->lowerThan;
 	}
 
+	public function getNotEqualTo(): ?Hymn_Tool_SemVer_Version
+	{
+		return $this->notEqualTo;
+	}
+
 	/**
 	 *	@param		string		$constraint
 	 *	@return		Hymn_Tool_SemVer_Constraint_Range
@@ -75,6 +88,11 @@ class Hymn_Tool_SemVer_Constraint_Range
 	public static function parseConstraint( string $constraint ): Hymn_Tool_SemVer_Constraint_Range
 	{
 		return Hymn_Tool_SemVer_Constraint_Range_Parser::parse( $constraint );
+	}
+
+	public function render(): string
+	{
+		return Hymn_Tool_SemVer_Constraint_Range_Renderer::render( $this );
 	}
 
 	public function setAtLeast( Hymn_Tool_SemVer_Version|string|NULL $version ): self
@@ -98,6 +116,12 @@ class Hymn_Tool_SemVer_Constraint_Range
 	public function setLowerThan( Hymn_Tool_SemVer_Version|string|NULL $version ): self
 	{
 		$this->lowerThan	= is_string( $version ) ? new Hymn_Tool_SemVer_Version( $version ) : $version;
+		return $this;
+	}
+
+	public function setNotEqualTo( Hymn_Tool_SemVer_Version|string|NULL $version ): self
+	{
+		$this->notEqualTo	= is_string( $version ) ? new Hymn_Tool_SemVer_Version( $version ) : $version;
 		return $this;
 	}
 }

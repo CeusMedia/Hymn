@@ -1,0 +1,201 @@
+site_name: CeusMedia Hymn
+site_description: Console tool for creating, installing and maintaining applications based on the Hydrogen framework.
+site_author: Christian Würker
+repo_url: https://github.com/CeusMedia/Hymn
+repo_name: CeusMedia/Hymn
+edit_uri: ""
+copyright: Copyright &copy; 2014-2026 Christian Würker &middot; GPL-3.0-or-later
+
+docs_dir: ../doc/Manual
+site_dir: ../doc/Site
+use_directory_urls: false
+
+theme:
+  name: material
+  language: en
+  icon:
+    logo: material/package-variant-closed
+    repo: fontawesome/brands/github
+  favicon: assets/favicon.svg
+  font:
+    text: Fira Sans
+    code: Fira Code
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/theme-light-dark
+        name: "Theme: system – switch to light"
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: "Theme: light – switch to dark"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: "Theme: dark – switch to system"
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.path
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+
+extra_css:
+  - assets/extra.css
+
+plugins:
+  - search
+  - offline
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+      extend_pygments_lang:
+        - name: php
+          lang: php
+          options:
+            startinline: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/CeusMedia/Hymn
+    - icon: simple/packagist
+      link: https://packagist.org/packages/ceus-media/hymn
+
+nav:
+  - Home: index.md
+  - Guide:
+      - guide/installation.md
+      - guide/quickstart.md
+      - guide/concepts.md
+      - guide/hymn-file.md
+      - guide/sources.md
+      - guide/modules.md
+      - guide/versions.md
+      - guide/app-config.md
+      - guide/database.md
+      - guide/stamps.md
+      - guide/development.md
+  - Commands:
+    # commands-nav:start
+    - commands/index.md
+    - "Project Creation and Source Management":
+      - "init": commands/init.md
+      - "source-list": commands/source-list.md
+      - "source-add": commands/source-add.md
+      - "source-remove": commands/source-remove.md
+      - "source-enable": commands/source-enable.md
+      - "source-disable": commands/source-disable.md
+      - "source-index": commands/source-index.md
+      - "source-index-clear": commands/source-index-clear.md
+      - "source-index-create": commands/source-index-create.md
+      - "source-validate": commands/source-validate.md
+    - "Project Setup and Information":
+      - "config-get": commands/config-get.md
+      - "config-set": commands/config-set.md
+      - "database-config": commands/database-config.md
+      - "database-test": commands/database-test.md
+    - "Project Module Management":
+      - "config-module-add": commands/config-module-add.md
+      - "config-module-remove": commands/config-module-remove.md
+      - "config-module-get": commands/config-module-get.md
+      - "config-module-set": commands/config-module-set.md
+    - "Project Module Information":
+      - "module-info": commands/module-info.md
+      - "module-install": commands/module-install.md
+      - "module-update": commands/module-update.md
+      - "modules-available": commands/modules-available.md
+      - "modules-installed": commands/modules-installed.md
+      - "modules-required": commands/modules-required.md
+      - "modules-search": commands/modules-search.md
+      - "modules-updatable": commands/modules-updatable.md
+      - "modules-unneeded": commands/modules-unneeded.md
+    - "App Base Configuration Management":
+      - "app-base-config-list": commands/app-base-config-list.md
+      - "app-base-config-get": commands/app-base-config-get.md
+      - "app-base-config-set": commands/app-base-config-set.md
+      - "app-base-config-disable": commands/app-base-config-disable.md
+      - "app-base-config-enable": commands/app-base-config-enable.md
+    - "App Instance & Module Management":
+      - "app-info": commands/app-info.md
+      - "app-status": commands/app-status.md
+      - "app-graph": commands/app-graph.md
+      - "app-hooks": commands/app-hooks.md
+      - "app-move": commands/app-move.md
+      - "app-relink": commands/app-relink.md
+      - "app-clear": commands/app-clear.md
+    - "App Module Management":
+      - "app-install": commands/app-install.md
+      - "app-uninstall": commands/app-uninstall.md
+      - "app-update": commands/app-update.md
+      - "app-module-config-get": commands/app-module-config-get.md
+      - "app-module-config-set": commands/app-module-config-set.md
+      - "app-module-config-dump": commands/app-module-config-dump.md
+      - "app-module-config-uncache": commands/app-module-config-uncache.md
+      - "app-module-config-validate": commands/app-module-config-validate.md
+      - "app-module-reconfigure": commands/app-module-reconfigure.md
+    - "App Database Management":
+      - "database-clear": commands/database-clear.md
+      - "database-dump": commands/database-dump.md
+      - "database-load": commands/database-load.md
+      - "database-keep": commands/database-keep.md
+    - "App Module Management: Stamps":
+      - "app-stamp-dump": commands/app-stamp-dump.md
+      - "app-stamp-diff": commands/app-stamp-diff.md
+      - "app-stamp-load": commands/app-stamp-load.md
+      - "app-stamp-prospect": commands/app-stamp-prospect.md
+      - "app-stamp-info": commands/app-stamp-info.md
+    - "Self Management":
+      - "help": commands/help.md
+      - "version": commands/version.md
+      - "self-update": commands/self-update.md
+      - "test-syntax": commands/test-syntax.md
+    - "Stamp Management":
+      - "stamp-diff": commands/stamp-diff.md
+    - "Further commands":
+      - "database-console": commands/database-console.md
+      - "init-makefile": commands/init-makefile.md
+      - "sleep": commands/sleep.md
+      - "test": commands/test.md
+      - "changelog": commands/changelog.md
+    # commands-nav:end
+  - Changelog: changelog.md

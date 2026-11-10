@@ -108,11 +108,11 @@ class Hymn_Tool_ConfigFile
 		if( isset( $object->application ) ){
 			/** @var object{title: string, url: string, uri: string, installMode: string, installType: string} $application */
 			$application	= $object->application;
-			$config->application->title			= $application->title ?? '';
-			$config->application->url			= $application->url ?? '';
-			$config->application->uri			= $application->uri ?? '';
-			$config->application->installMode	= $application->installMode ?? '';
-			$config->application->installType	= $application->installType ?? '';
+			$config->application->title			= (string) ( $application->title ?? '' );
+			$config->application->url			= (string) ( $application->url ?? '' );
+			$config->application->uri			= (string) ( $application->uri ?? '' );
+			$config->application->installMode	= (string) ( $application->installMode ?? '' );
+			$config->application->installType	= (string) ( $application->installType ?? '' );
 		}
 		if( isset( $object->paths ) ){
 			foreach( $object->paths as $pathKey => $pathValue ){
@@ -123,10 +123,10 @@ class Hymn_Tool_ConfigFile
 			/** @var object{title: string, type: string, path: string, active: bool} $sourceData */
 			foreach( $object->sources as $sourceKey => $sourceData ){
 				$source	= new Hymn_Structure_Config_Source();
-				$source->title	= $sourceData->title ?? '';
-				$source->type	= $sourceData->type ?? $source->type;
-				$source->path	= $sourceData->path ?? '';
-				$source->active	= $sourceData->active ?? TRUE;
+				$source->title	= (string) ( $sourceData->title ?? '' );
+				$source->type	= (string) ( $sourceData->type ?? $source->type );
+				$source->path	= (string) ( $sourceData->path ?? '' );
+				$source->active	= (bool) ( $sourceData->active ?? TRUE );
 				$config->sources[$sourceKey]	= $source;
 			}
 			if( 1 === count( $config->sources ) ){
@@ -156,14 +156,14 @@ class Hymn_Tool_ConfigFile
 		if( isset( $object->database ) ){
 			/** @var object{title: string} $application */
 			$database	= $object->database;
-			$config->database->driver	= $database->driver ?? '';
-			$config->database->host		= $database->host ?? '';
-			$config->database->port		= $database->port ?? '';
-			$config->database->username	= $database->username ?? '';
-			$config->database->password	= $database->password ?? '';
-			$config->database->name		= $database->name ?? '';
-			$config->database->prefix	= $database->prefix ?? '';
-			$config->database->modules	= $database->modules ?? '';
+			$config->database->driver	= (string) ( $database->driver ?? '' );
+			$config->database->host		= (string) ( $database->host ?? '' );
+			$config->database->port		= (string) ( $database->port ?? '' );
+			$config->database->username	= (string) ( $database->username ?? '' );
+			$config->database->password	= (string) ( $database->password ?? '' );
+			$config->database->name		= (string) ( $database->name ?? '' );
+			$config->database->prefix	= (string) ( $database->prefix ?? '' );
+			$config->database->modules	= (string) ( $database->modules ?? '' );
 		}
 		return $config;
 	}
